@@ -70,20 +70,19 @@ abstract class Phergie_Driver_Abstract
     /**
      * Joins a channel.
      *
-     * @param string $channel Name of the channel to join
-     * @param string $keys Channel key if needed (optional)
+     * @param string $channels Comma-delimited list of channels to join 
+     * @param string $keys Optional comma-delimited list of channel keys
      * @return void
      */
-    public abstract function doJoin($channel, $key = null);
+    public abstract function doJoin($channels, $key = null);
 
     /**
      * Leaves a channel.
      *
-     * @param string $channel Name of the channel to leave
-     * @param string $reason Reason for parting (optional)
+     * @param string $channels Comma-delimited list of channels to leave 
      * @return void
      */
-    public abstract function doPart($channel, $reason = null);
+    public abstract function doPart($channels);
 
     /**
      * Invites a user to an invite-only channel.

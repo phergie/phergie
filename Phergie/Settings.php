@@ -17,6 +17,8 @@ return array(
         'AltNick',
         'AutoJoin',
         'Invisible',
+        'Join',
+        'Part',
         'Ping',
         'Pong',
         'Prioritize',
@@ -31,6 +33,8 @@ return array(
 
     'ping.event' => 600,
 
-    'ping.ping' => 10
+    'ping.ping' => 10,
+
+    'command.prefix' => 'Phergie2: '
 
 );

@@ -207,7 +207,6 @@ class Phergie_Bot
 
                 // If an event is received...
                 if ($event) {
-                    $this->_debug($event);
 
                     // Use a central handler if the event is a response
                     if ($event instanceof Phergie_Event_Response) {

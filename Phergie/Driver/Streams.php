@@ -318,8 +318,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Joins a channel.
      *
-     * @param string $channel Name of the channel to join
-     * @param string $keys Channel key if needed (optional)
+     * @param string $channels Comma-delimited list of channels to join 
+     * @param string $keys Optional comma-delimited list of channel keys
      * @return void
      */
     public function doJoin($channel, $key = null)
@@ -336,8 +336,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Leaves a channel.
      *
-     * @param string $channel Name of the channel to leave
-     * @param string $reason Reason for parting (optional) 
+     * @param string $channels Comma-delimited list of channels to leave 
      * @return void
      */
     public function doPart($channel, $reason = null)
