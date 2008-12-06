@@ -3,7 +3,7 @@
 require_once 'Phergie/Config.php';
 require_once 'Phergie/Connection.php';
 require_once 'Phergie/Event/Interface.php';
-require_once 'Phergie/Event/Request.php';
+require_once 'Phergie/Event/Command.php';
 require_once 'Phergie/Plugin/Loader.php';
 
 /**
@@ -381,9 +381,10 @@ abstract class Phergie_Plugin_Abstract
     {
         if (substr($name, 0, 2) == 'do') {
             $type = substr($name, 2);
-            if (defined('Phergie_Event_Request::TYPE_' . strtoupper($type))) {
-                $request = new Phergie_Event_Request();
+            if (defined('Phergie_Event_Command::TYPE_' . strtoupper($type))) {
+                $request = new Phergie_Event_Command();
                 $request
+                    ->setPlugin($this)
                     ->setType($type)
                     ->setArguments($args);
                 $this->_events[] = $request;

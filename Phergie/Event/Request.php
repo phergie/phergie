@@ -148,10 +148,10 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
         ),
 
         self::TYPE_MODE => array(
-            'target'   => 0,
-            'mode'     => 1,
-            'limit'    => 2,
-            'user'     => 3,
+            'target'  => 0,
+            'mode'    => 1,
+            'limit'   => 2,
+            'user'    => 3,
             'banmask' => 4
         ),
 

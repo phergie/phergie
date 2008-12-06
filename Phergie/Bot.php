@@ -210,11 +210,11 @@ class Phergie_Bot
 
                     // Use a central handler if the event is a response
                     if ($event instanceof Phergie_Event_Response) {
-                        $eventType = 'response';
+                        $eventType = 'Response';
 
                     // Use a specific handler if the event is a request
                     } else {
-                        $eventType = $event->getType();
+                        $eventType = ucfirst($event->getType());
                     }
                 }
 
@@ -226,9 +226,9 @@ class Phergie_Bot
                         $plugin->setConnection($connection);
                         $plugin->setEvent($event);
                         $plugin->preEvent();
-                        $plugin->{'on' . ucfirst($eventType)}();
+                        $plugin->{'on' . $eventType}();
                         $plugin->postEvent();
-                        $this->_debug('on' . ucfirst($eventType) . ': ' . $plugin->getName() . ' ' . count($plugin->getEvents()));
+                        $this->_debug('on' . $eventType . ': ' . $plugin->getName() . ' ' . count($plugin->getEvents()));
                     }
 
                     // Queue any events initiated by the plugin
