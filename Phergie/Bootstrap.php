@@ -15,18 +15,19 @@ $config->read($argc > 1 ? $argv[1] : 'Settings.php');
 
 // Check to ensure a connection list is specified and properly formatted 
 if (empty($config['connections']) || !is_array($config['connections'])) {
-    trigger_error('The configuration setting \'connections\' is required and must be an array', E_USER_ERROR);
+    trigger_error('The setting \'connections\' is required and must be an array', E_USER_ERROR);
 }
 
 $required = array('hostname', 'username', 'realname', 'nick');
 foreach ($config['connections'] as $settings) {
     if (!is_array($settings)) {
-        trigger_error('Each item in configuration setting \'connections\' must be an array', E_USER_ERROR);
+        trigger_error('Each item in setting \'connections\' must be an array', E_USER_ERROR);
     }
     if (array_intersect(array_keys($settings), $required) != $required) {
-        trigger_error('Each item in configuration setting \'connections\' must have the following keys: ' . implode(', ', $required), E_USER_ERROR);
+        trigger_error('Each item in setting \'connections\' must have the following keys: ' . implode(', ', $required), E_USER_ERROR);
     }
 }
+unset($required);
 
 // Configure the plugin loader 
 $loader = new Phergie_Plugin_Loader(); 
@@ -36,11 +37,13 @@ if (isset($config['plugins.autoload'])) {
 $loader->addPath('Plugin', 'Phergie_Plugin_');
 
 // Load plugins 
-if (!empty($config['plugins'])) {
-    foreach ($config['plugins'] as $plugin) {
-        if ($plugin = $loader->addPlugin($plugin)) {
-            $plugin->setConfig($config);
-        }
+if (empty($config['plugins'])) {
+    trigger_error('The \'plugins\' setting must contain an array of one or more short plugin names', E_USER_ERROR);
+}
+
+foreach ($config['plugins'] as $plugin) {
+    if ($instance = $loader->addPlugin($plugin)) {
+        $instance->setConfig($config);
     }
 }
 
