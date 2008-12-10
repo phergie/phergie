@@ -56,7 +56,7 @@ class Phergie_Bot
      *
      * @param bool $flag TRUE to enable debugging output (default), FALSE 
      *        otherwise
-     * @return Phergie_Driver_Abstract Provides a fluent interface
+     * @return Phergie_Bot Provides a fluent interface
      */
     public function setDebug($flag = true)
     {
