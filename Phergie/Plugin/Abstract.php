@@ -49,6 +49,16 @@ abstract class Phergie_Plugin_Abstract
     protected $_events = array();
 
     /**
+     * Check if the dependencies for the plugin are met.
+     * 
+     * @return string
+     */
+    public function checkDependencies()
+    {
+        return '';
+    }
+
+    /**
      * Returns the short name for the plugin based on its class name.
      *
      * @return string

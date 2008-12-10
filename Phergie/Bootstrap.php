@@ -41,11 +41,22 @@ if (empty($config['plugins'])) {
     trigger_error('The \'plugins\' setting must contain an array of one or more short plugin names', E_USER_ERROR);
 }
 
-foreach ($config['plugins'] as $plugin) {
-    if ($instance = $loader->addPlugin($plugin)) {
-        $instance->setConfig($config);
-    }
+$remove = array();
+foreach ($config['plugins'] as $pluginName) {
+    if ($plugin = $loader->addPlugin($pluginName)) {
+        $plugin->setConfig($config);
+        if($error = $plugin->checkDependencies()) {
+            $remove[] = $plugin;
+            trigger_error(get_class($plugin) . ': ' . $error, E_USER_WARNING);
+        }
+     }
+ }
+
+// Remove plugins with missing dependencies 
+foreach($remove as $plugin) {
+    $loader->removePlugin($plugin);
 }
+unset($remove);
 
 // Configure and start the bot
 $bot = new Phergie_Bot();

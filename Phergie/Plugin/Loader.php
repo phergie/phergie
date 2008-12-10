@@ -67,6 +67,11 @@ class Phergie_Plugin_Loader implements IteratorAggregate
         // If a short plugin name is specified...
         if (is_string($plugin)) {
 
+            // Check if the plugin was already loaded
+            if(isset($this->_plugins[$plugin])) {
+                return $this->_plugins[$plugin];
+            }
+
             // Attempt to locate and load the class
             foreach (array_reverse($this->_paths) as $path) {
                 $file = $path['path'] . $plugin . '.php';
@@ -103,13 +108,16 @@ class Phergie_Plugin_Loader implements IteratorAggregate
 
             // If the class is found, instantiate it
             if (!empty($args)) {
-                $this->_plugins[$plugin] = $reflection->newInstanceArgs($args);
+                $instance = $reflection->newInstanceArgs($args);
             } else {
-                $this->_plugins[$plugin] = new $class();
+                $instance = new $class();
             }
-            
+
+            $instance->setPluginLoader($this);
+            $this->_plugins[$plugin] = $instance;
+
             // Indicate success
-            return $this->_plugins[$plugin];
+            return $instance; 
 
         // If a plugin instance is specified...
         } elseif ($plugin instanceof Phergie_Plugin_Abstract) {
