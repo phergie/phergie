@@ -31,6 +31,28 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     private $_debug = false;
 
     /**
+     * Delay between ticks in microseconds, used to prevent CPU and memory 
+     * thrashing
+     *
+     * @var int
+     */
+    private $_delay = 50000;
+
+    /**
+     * Sets a delay in microseconds between reads, used to prevent CPU and 
+     * memory thrashing.
+     *
+     * @param int $delay
+     * @return Phergie_Bot Provides a fluent interface
+     */
+    public function setDelay($delay)
+    {
+        $this->_delay = (int) $delay;
+
+        return $this;
+    }
+
+    /**
      * Handles construction of command strings and their transmission to the 
      * server.
      *
@@ -276,7 +298,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         if (!$this->_socket) {
             trigger_error('Unable to connect to server: socket error ' . $errno . ' ' . $errstr, E_USER_ERROR);
         }
-        stream_set_blocking($this->_socket, false);
+        stream_set_timeout($this->_socket, $this->_delay);
 
         // Send the password if one is specified
         if (!empty($password)) {
