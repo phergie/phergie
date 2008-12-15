@@ -1,11 +1,11 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
+require_once 'Phergie/Plugin/Command.php';
 
 /**
  * Terminates the current connection upon command.
  */
-class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
+class Phergie_Plugin_Quit extends Phergie_Plugin_Command
 {
     /**
      * Issues a quit command when a message is received requesting that the 
@@ -13,10 +13,8 @@ class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onPrivmsg()
+    public function onDoQuit()
     {
-        if ($this->_event->getText() == $this->_connection->getNick() . ': quit') {
-            $this->doQuit('Requested by ' . $this->_event->getNick());
-        }
+        $this->doQuit('Requested by ' . $this->_event->getNick());
     }
 }
