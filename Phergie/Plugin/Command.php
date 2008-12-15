@@ -57,8 +57,9 @@ abstract class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         }
 
         // Separate the command and arguments
-        $args = preg_split('/\s+/', $msg, 2);
-        $cmd = strtolower(array_shift($args));
+        $parsed = preg_split('/\s+/', $msg, 2);
+        $cmd = strtolower(array_shift($parsed));
+        $args = count($parsed) ? array_shift($parsed) : '';
         $method = 'onDo' . ucfirst($cmd); 
 
         // Check to ensure the command exists
