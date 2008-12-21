@@ -375,7 +375,8 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
      */
     public function getArgument($argument)
     {
-        if ($argument = $this->_resolveArgument($argument)) {
+        $argument = $this->_resolveArgument($argument);
+        if ($argument !== null) { 
             return $this->_arguments[$argument];
         }
         return null;
@@ -483,7 +484,8 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
      */
     public function offsetSet($offset, $value)
     {
-        if ($offset = $this->_resolveArgument($offset)) {
+        $offset = $this->_resolveArgument($offset);
+        if ($offset !== null) { 
             $this->_arguments[$offset] = $value;
         }
     }

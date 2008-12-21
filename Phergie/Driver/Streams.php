@@ -169,24 +169,21 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         // If the event is from a user...
         if (substr($buffer, 0, 1) == ':') {
 
-            // Parse the user hostmask into its individual components
-            preg_match('/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/', $buffer, $match);
+            // Parse the user hostmask, command, and arguments
+            list($prefix, $cmd, $args) = array_pad(explode(' ', $buffer, 3), 3, null);
+            preg_match('/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/', $prefix, $match);
             list(, $nick, $user, $host) = array_pad($match, 4, null);
 
         // If the event is from the server...
         } else {
 
-            // Parse the server hostname
-            $host = substr($buffer, 0, strpos($buffer, ' '));
+            // Parse the command and arguments
+            list($cmd, $args) = array_pad(explode(' ', $buffer, 2), 2, null);
         }
-
-        // Parse out the event type, and event arguments 
-        list(, $cmd, $args) = array_pad(explode(' ', $buffer, 3), 3, null);
 
         // Parse the event arguments depending on the event type
         $cmd = strtolower($cmd);
         switch ($cmd) {
-
             case 'names':
             case 'nick':
             case 'quit':
