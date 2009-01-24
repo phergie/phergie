@@ -1,0 +1,6 @@
+This directory holds any assorted tools that work with Phergie but that are
+not part of Phergie itself.  Such as tools to examine data that Phergie is
+capturing/logging.
+
+Each should live inside of it's own directory, and be completely self-contained
+with instructions inside on how to use it.

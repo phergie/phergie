@@ -1,0 +1,24 @@
+-----------------------------------------------------------------------------
+-- About LogViewer
+-----------------------------------------------------------------------------
+
+The purpose of this tool is to make an HTML display of the Logs made by the 
+Logging plugin for Phergie stored in SQLite database.
+
+-----------------------------------------------------------------------------
+-- Installation
+-----------------------------------------------------------------------------
+
+To install this, simply copy the contents of this directory into whatever
+directory you want this to run under.
+
+-----------------------------------------------------------------------------
+-- Configuration
+-----------------------------------------------------------------------------
+
+The only configuration needed at this point in time is to edit the $database
+variable in the top of the index.php to point to the appropriate Phergie
+log file.
+
+Stuff may get more complicated in the future ;)  But this is meant to be 
+simple for now.
