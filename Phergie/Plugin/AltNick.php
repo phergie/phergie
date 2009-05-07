@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Handles switching to alternate nicks in cases where the primary nick is 
  * not available for use.

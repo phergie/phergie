@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Uses a self CTCP PING to ensure that the client connection has not been 
  * dropped.

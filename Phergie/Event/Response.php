@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Event/Interface.php';
-
 /**
  * Event originating from the server in response to an event sent by the
  * current client.

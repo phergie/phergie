@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Driver/Abstract.php';
-
 /**
  * Driver that uses the sockets wrapper of the streams extension for 
  * communicating with the server and handles formatting and parsing of 

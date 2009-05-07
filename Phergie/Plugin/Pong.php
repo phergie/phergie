@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Responds to ping requests.
  */

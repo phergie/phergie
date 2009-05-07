@@ -1,16 +1,11 @@
 <?php
 
-// Add the parent directory of the current file to the include path
-set_include_path(get_include_path() . PATH_SEPARATOR . dirname(dirname(__FILE__)));
-
-// Include dependencies
-require_once 'Phergie/Bot.php';
-require_once 'Phergie/Config.php';
-require_once 'Phergie/Connection.php';
-require_once 'Phergie/Plugin/Loader.php';
+// Set up the autoloader 
+include 'Autoload.php';
+Phergie_Autoload::registerAutoloader();
 
 // Load the configuration file 
-$config = new Phergie_Config();
+$config = new Phergie_Config;
 $config->read($argc > 1 ? $argv[1] : 'Settings.php');
 
 // Check to ensure a connection list is specified and properly formatted 

@@ -1,9 +1,5 @@
 <?php
 
-require_once 'Phergie/Connection.php';
-require_once 'Phergie/Driver/Abstract.php';
-require_once 'Phergie/Plugin/Loader.php';
-
 /**
  * Composite class for other components to represent the bot.
  */
@@ -74,8 +70,7 @@ class Phergie_Bot
     public function getDriver()
     {
         if (empty($this->_driver)) {
-            require_once 'Phergie/Driver/Streams.php';
-            $this->_driver = new Phergie_Driver_Streams();
+            $this->_driver = new Phergie_Driver_Streams;
         }
 
         return $this->_driver;
@@ -103,7 +98,7 @@ class Phergie_Bot
     public function getPluginLoader()
     {
         if (empty($this->_plugin)) {
-            $this->_plugin = new Phergie_Plugin_Loader();
+            $this->_plugin = new Phergie_Plugin_Loader;
         }
 
         return $this->_plugin;

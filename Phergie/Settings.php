@@ -3,14 +3,12 @@
 return array(
 
     'connections' => array(
-
         array(
             'hostname' => 'irc.freenode.net',
             'username' => 'Elazar',
             'realname' => 'Matthew Turland',
             'nick' => 'Phergie2'
         )
-
     ),
 
     'plugins' => array(
@@ -27,7 +25,9 @@ return array(
 
     'plugins.autoload' => true,
 
-    'altnick.nicks' => array('Phergie2_'),
+    'altnick.nicks' => array(
+        'Phergie2_'
+    ),
 
     'autojoin.channels' => '#phergie',
 

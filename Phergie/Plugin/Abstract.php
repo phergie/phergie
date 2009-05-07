@@ -1,11 +1,5 @@
 <?php
 
-require_once 'Phergie/Config.php';
-require_once 'Phergie/Connection.php';
-require_once 'Phergie/Event/Interface.php';
-require_once 'Phergie/Event/Command.php';
-require_once 'Phergie/Plugin/Loader.php';
-
 /**
  * Base class for plugins to provide event handler stubs and commonly needed
  * functionality.

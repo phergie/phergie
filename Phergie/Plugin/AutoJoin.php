@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Automates the process of having the bot join one or more channels upon
  * connection to the server.

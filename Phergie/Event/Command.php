@@ -1,8 +1,5 @@
 <?php
 
-require_once 'Phergie/Event/Request.php';
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Event originating from a plugin for the bot.
  */

@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Event/Interface.php';
-
 /**
  * Autonomous event originating from a user or the server.
  *

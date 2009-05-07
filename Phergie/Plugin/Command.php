@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Handles parsing and execution of commands sent by users via messages sent 
  * to channels in which the bot is present or directly to the bot.

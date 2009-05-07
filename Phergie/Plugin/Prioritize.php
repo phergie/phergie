@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Prioritizes events such that they are executed in order from least to most 
  * destructive.

@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Abstract.php';
-
 /**
  * Handles on-demand loading of and access to plugins.
  */
@@ -91,9 +89,6 @@ class Phergie_Plugin_Loader implements IteratorAggregate
                 return false;
             }
 
-            // Analyze the class to determine if it meets requirements 
-            $reflection = new ReflectionClass($class);
-
             // Check to ensure the class is a plugin class 
             if (!is_subclass_of($class, 'Phergie_Plugin_Abstract')) {
                 trigger_error('Class ' . $class . ' does not extend Phergie_Plugin_Abstract', E_USER_ERROR);
@@ -101,6 +96,7 @@ class Phergie_Plugin_Loader implements IteratorAggregate
             }
 
             // Check to ensure the class can be instantiated
+            $reflection = new ReflectionClass($class);
             if (!$reflection->isInstantiable()) {
                 trigger_error('Class ' . $class . ' cannot be instantiated', E_USER_ERROR);
                 return false;
@@ -112,7 +108,6 @@ class Phergie_Plugin_Loader implements IteratorAggregate
             } else {
                 $instance = new $class();
             }
-
             $instance->setPluginLoader($this);
             $this->_plugins[$plugin] = $instance;
 

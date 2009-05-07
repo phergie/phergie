@@ -1,9 +1,5 @@
 <?php
 
-require_once 'Phergie/Connection.php';
-require_once 'Phergie/Event/Request.php';
-require_once 'Phergie/Event/Response.php';
-
 /**
  * Base class for drivers which handle issuing client commands to the IRC
  * server and converting responses into usable data objects.

@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Command.php';
-
 /**
  * Joins a specified channel on command from a user.
  */

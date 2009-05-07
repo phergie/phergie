@@ -1,8 +1,5 @@
 <?php
 
-/** Phergie_Plugin_Command */
-require_once 'Phergie/Plugin/Command.php';
-
 /**
  * Php plugin for Phergie.
  * This plugin searches its data source for a description of a Php function.

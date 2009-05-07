@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Phergie/Plugin/Command.php';
-
 /**
  * Terminates the current connection upon command.
  */
