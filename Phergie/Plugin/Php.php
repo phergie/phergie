@@ -35,7 +35,7 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Command
 
         // Construct a new datasource
         require_once 'Phergie/Plugin/Php/Source/Local.php';
-        $this->_source = new Php_Source_Local();
+        $this->_source = new Php_Source_Local;
     }
 
     /**

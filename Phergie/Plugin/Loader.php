@@ -106,7 +106,7 @@ class Phergie_Plugin_Loader implements IteratorAggregate
             if (!empty($args)) {
                 $instance = $reflection->newInstanceArgs($args);
             } else {
-                $instance = new $class();
+                $instance = new $class;
             }
             $instance->setPluginLoader($this);
             $this->_plugins[$plugin] = $instance;

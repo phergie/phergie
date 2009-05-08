@@ -250,12 +250,12 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Create, populate, and return an event object
         if (ctype_digit($cmd)) {
-            $event = new Phergie_Event_Response();
+            $event = new Phergie_Event_Response;
             $event->setCode($cmd);
             $event->setDescription($args);
             $event->setRawBuffer($buffer);
         } else {
-            $event = new Phergie_Event_Request();
+            $event = new Phergie_Event_Request;
             $event->setType($cmd);
             $event->setArguments($args);
             if (isset($user)) {
