@@ -168,7 +168,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         if (substr($buffer, 0, 1) == ':') {
 
             // Parse the user hostmask, command, and arguments
-            list($prefix, $cmd, $args) = array_pad(explode(' ', $buffer, 3), 3, null);
+            list($prefix, $cmd, $args) = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
             preg_match('/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/', $prefix, $match);
             list(, $nick, $user, $host) = array_pad($match, 4, null);
 
