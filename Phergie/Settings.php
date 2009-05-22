@@ -21,6 +21,9 @@ return array(
         'Pong',
         'Prioritize',
         'Quit'
+        'Php',
+        'Daddy',
+        'TerryChay',
     ),
 
     'plugins.autoload' => true,
@@ -36,5 +39,7 @@ return array(
     'ping.ping' => 10,
 
     'command.prefix' => 'Phergie2: '
+    
+    'daddy.curses' => true,
 
 );
