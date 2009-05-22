@@ -31,7 +31,9 @@ class Phergie_Config implements ArrayAccess
      */
     public function read($file)
     {
-        if (!is_executable($file)) {
+        if ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
+            && file_exists($file))
+            || !is_executable($file)) {
             trigger_error($file . ' does not reference an executable file', E_USER_ERROR);
         }
 
