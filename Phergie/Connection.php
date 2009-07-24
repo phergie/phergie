@@ -18,7 +18,7 @@ class Phergie_Connection
      *
      * @var int
      */
-    private $_port = 6667;
+    private $_port;
 
     /**
      * Nick that the client will use
@@ -134,6 +134,10 @@ class Phergie_Connection
      */
     public function getPort()
     {
+        if (empty($this->_port)) {
+            $this->_port = 6667;
+        }
+
         return $this->_port;
     }
 
