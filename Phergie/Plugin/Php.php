@@ -1,28 +1,27 @@
 <?php
 
 /**
- * Php plugin for Phergie.
- * This plugin searches its data source for a description of a Php function.
+ * Returns information on PHP functions as requested. 
  */
-class Phergie_Plugin_Php extends Phergie_Plugin_Command
+class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
 {
     /**
-     * Datasource to use.
-     * @var Php_Source
+     * Data source to use
+     *
+     * @var Phergie_Plugin_Php_Source
      */
-     private $_source;
+    protected $_source;
 
     /**
-     * Plugin depends on the pdo_sqlite extenions for data storage.
-     * @return string
+     * Check for dependencies.
+     *
+     * @return void
      */
-    public function checkDependencies()
+    public function onLoad()
     {
         if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
-            return "PDO Sqlite extension not found.";
+            $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
-
-        return '';
     }
 
     /**
@@ -33,9 +32,9 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Command
         // Call the parent to register commands
         parent::onConnect();
 
-        // Construct a new datasource
+        // Construct a new data source
         require_once 'Phergie/Plugin/Php/Source/Local.php';
-        $this->_source = new Php_Source_Local;
+        $this->_source = new Phergie_Plugin_Php_Source_Local;
     }
 
     /**
@@ -47,14 +46,13 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Command
     {
         // Search for the function
         if($function = $this->_source->findFunction($functionName)) {
-            $msg = "PHP {$function['name']}: {$function['description']}";
+            $msg = 'PHP ' . $function['name'] . ': ' . $function['description'];
         }
         else {
-            $msg = "Search for function '{$functionName}' returned no results.";
+            $msg = 'Search for function ' . $functionName . ' returned no results.';
         }
         
         // Return the result to the source
-        $this->doPrivmsg($this->_event->getSource(), $msg);
+        $this->doPrivmsg($this->getEvent()->getSource(), $msg);
     }
-    
 }

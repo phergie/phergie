@@ -1,8 +1,8 @@
 <?php
 /**
- * Datasource interface for datasource providing for the Php plugin.
+ * Data source interface for the Php plugin.
  */
-interface Php_Source
+interface Phergie_Plugin_Php_Source
 {
     public function findFunction($function);
 }

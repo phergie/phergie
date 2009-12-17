@@ -12,14 +12,14 @@ class Phergie_Config implements ArrayAccess
      *
      * @var array
      */
-    private $_files = array();
+    protected $_files = array();
 
     /**
      * Mapping of setting names to their current corresponding values
      *
      * @var array
      */
-    private $_settings = array();
+    protected $_settings = array();
 
     /**
      * Includes a specified PHP configuration file and incorporates its 
@@ -28,18 +28,23 @@ class Phergie_Config implements ArrayAccess
      *
      * @param string $file Path to the file to read
      * @return Phergie_Config Provides a fluent interface
+     * @throws Phergie_Config_Exception
      */
     public function read($file)
     {
         if (!(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
             && file_exists($file))
             && !is_executable($file)) {
-            trigger_error($file . ' does not reference an executable file', E_USER_ERROR);
+            throw new Phergie_Config_Exception(
+                'Path "' . $file . '" does not reference an executable file',
+                Phergie_Config_Exception::ERR_FILE_NOT_EXECUTABLE
+            );
         }
 
         $settings = require $file;
         $this->_files[$file] = array_keys($settings); 
         $this->_settings += $settings;
+
         return $this;
     }
 
@@ -51,7 +56,7 @@ class Phergie_Config implements ArrayAccess
      */
     public function write()
     {
-        foreach ($this->_files as $file => $settings) {
+        foreach ($this->_files as $file => &$settings) {
             $values = array();
             foreach ($settings as $setting) {
                 $values[$setting] = $this->_settings[$setting];
@@ -74,10 +79,13 @@ class Phergie_Config implements ArrayAccess
      */
     public function offsetGet($offset)
     {
-        if (!empty($this->_settings[$offset])) {
-            return $this->_settings[$offset];
+        if (isset($this->_settings[$offset])) {
+            $value = &$this->_settings[$offset];
+        } else {
+            $value = null;
         }
-        return null;
+
+        return $value;
     }
 
     /**

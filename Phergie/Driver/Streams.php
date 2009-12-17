@@ -12,43 +12,14 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @var array
      */
-    private $_sockets = array();
+    protected $_sockets = array();
 
     /**
      * Reference to the currently active socket handler
      *
      * @var resource
      */
-    private $_socket;
-
-    /**
-     * Flag to enable debugging output
-     *
-     * @var bool
-     */
-    private $_debug = false;
-
-    /**
-     * Delay between ticks in microseconds, used to prevent CPU and memory 
-     * thrashing
-     *
-     * @var int
-     */
-    private $_delay = 50000;
-
-    /**
-     * Sets a delay in microseconds between reads, used to prevent CPU and 
-     * memory thrashing.
-     *
-     * @param int $delay
-     * @return Phergie_Bot Provides a fluent interface
-     */
-    public function setDelay($delay)
-    {
-        $this->_delay = (int) $delay;
-
-        return $this;
-    }
+    protected $_socket;
 
     /**
      * Handles construction of command strings and their transmission to the 
@@ -58,12 +29,16 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * @param string|array $args Optional string or array of sequential 
      *        arguments
      * @return string Command string that was sent 
+     * @throws Phergie_Driver_Exception
      */
-    private function _send($command, $args = '')
+    protected function _send($command, $args = '')
     {
         // Require an open socket connection to continue
         if (empty($this->_socket)) {
-            trigger_error('doConnect() must be called first', E_USER_ERROR);
+            throw new Phergie_Driver_Exception(
+                'doConnect() must be called first',
+                Phergie_Driver_Exception::ERR_NO_INITIATED_CONNECTION
+            );
         }
 
         // Add the command
@@ -85,27 +60,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         // Transmit the command over the socket connection
         fwrite($this->_socket, $buffer . "\r\n");
 
-        // If debugging mode is enabled, output the transmitted command
-        if ($this->_debug) {
-            echo 'driver: > ', $buffer, PHP_EOL;
-        }
-
         // Return the command string that was transmitted
         return $buffer;
-    }
-
-    /**
-     * Sets a flag to toggle debugging output.
-     *
-     * @param bool $flag TRUE to enable debugging output (default), FALSE 
-     *        otherwise
-     * @return Phergie_Driver_Abstract Provides a fluent interface
-     */
-    public function setDebug($flag = true)
-    {
-        $this->_debug = $flag;
-
-        return $this;
     }
 
     /**
@@ -118,7 +74,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     public function setConnection(Phergie_Connection $connection)
     {
         // Set the active socket handler
-        $hostmask = $connection->getHostmask();
+        $hostmask = (string) $connection->getHostmask();
         if (!empty($this->_sockets[$hostmask])) {
             $this->_socket = $this->_sockets[$hostmask];
         }
@@ -135,7 +91,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * @param int $count Optional maximum number of arguments
      * @return array Array of argument values
      */
-    private function _parseArgs($args, $count = -1)
+    protected function _parseArguments($args, $count = -1)
     {
         return preg_split('/ :?/S', $args, $count);
     }
@@ -159,24 +115,20 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         // Strip the trailing newline from the buffer
         $buffer = rtrim($buffer);
 
-        // If debugging mode is enabled, output the received event
-        if ($this->_debug) {
-            echo 'driver: < ', $buffer, PHP_EOL;
-        }
-
-        // If the event is from a user...
-        if (substr($buffer, 0, 1) == ':') {
-
-            // Parse the user hostmask, command, and arguments
-            list($prefix, $cmd, $args) = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
-            preg_match('/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/', $prefix, $match);
-            list(, $nick, $user, $host) = array_pad($match, 4, null);
-
         // If the event is from the server...
-        } else {
+        if (substr($buffer, 0, 1) != ':') {
 
             // Parse the command and arguments
             list($cmd, $args) = array_pad(explode(' ', $buffer, 2), 2, null);
+
+        // If the event could be from the server or a user...
+        } else {
+
+            // Parse the server hostname or user hostmask, command, and arguments
+            list($prefix, $cmd, $args) = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
+            if (strpos($prefix, '@') !== false) {
+                $hostmask = Phergie_Hostmask::fromString($prefix);
+            }
         }
 
         // Parse the event arguments depending on the event type
@@ -222,24 +174,24 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                         break;
                     }
                 } else {
-                    $args = $this->_parseArgs($args, 2);
+                    $args = $this->_parseArguments($args, 2);
                 }
             break;
 
             case 'oper':
             case 'topic':
             case 'mode':
-                $args = $this->_parseArgs($args); 
+                $args = $this->_parseArguments($args); 
             break;
 
             case 'part':
             case 'kill':
             case 'invite':
-                $args = $this->_parseArgs($args, 2); 
+                $args = $this->_parseArguments($args, 2); 
             break;
 
             case 'kick':
-                $args = $this->_parseArgs($args, 3); 
+                $args = $this->_parseArguments($args, 3); 
             break;
 
             // Remove the target from responses
@@ -249,22 +201,24 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Create, populate, and return an event object
+        $connection = $this->getConnection();
         if (ctype_digit($cmd)) {
             $event = new Phergie_Event_Response;
-            $event->setCode($cmd);
-            $event->setDescription($args);
-            $event->setRawBuffer($buffer);
+            $event
+                ->setCode($cmd)
+                ->setDescription($args);
         } else {
             $event = new Phergie_Event_Request;
-            $event->setType($cmd);
-            $event->setArguments($args);
-            if (isset($user)) {
-                $event->setHost($host);
-                $event->setUsername($user);
-                $event->setNick($nick);
+            $event
+                ->setType($cmd)
+                ->setArguments($args);
+            if (isset($hostmask)) {
+                $event->setHostmask($hostmask);
             }
-            $event->setRawBuffer($buffer);
         }
+        $event
+            ->setRawData($buffer)
+            ->setConnection($connection);
         return $event;
     }
 
@@ -280,7 +234,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Get connection information
         $connection = $this->getConnection();
-        $hostname = $connection->getHostname();
+        $hostname = $connection->getHost();
         $port = $connection->getPort();
         $password = $connection->getPassword();
         $username = $connection->getUsername();
@@ -291,9 +245,11 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $remote = 'tcp://' . $hostname . ':' . $port;
         $this->_socket = @stream_socket_client($remote, $errno, $errstr);
         if (!$this->_socket) {
-            trigger_error('Unable to connect to server: socket error ' . $errno . ' ' . $errstr, E_USER_ERROR);
+            throw new Phergie_Driver_Exception(
+                'Unable to connect to server: socket error ' . $errno . ' ' . $errstr,
+                Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED
+            );
         }
-        stream_set_timeout($this->_socket, $this->_delay);
 
         // Send the password if one is specified
         if (!empty($password)) {
@@ -311,7 +267,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $this->_send('NICK', $nick); 
 
         // Add the socket handler to the internal array for socket handlers
-        $this->_sockets[$connection->getHostmask()] = $this->_socket;
+        $this->_sockets[(string) $connection->getHostmask()] = $this->_socket;
     }
 
     /**
@@ -329,7 +285,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         fclose($this->_socket);
 
         // Remove the socket from the internal socket list
-        unset($this->_sockets[$this->getConnection()->getHostmask()]);
+        unset($this->_sockets[(string) $this->getConnection()->getHostmask()]);
     }
 
     /**
@@ -516,26 +472,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Sends a CTCP response to a user.
-     *
-     * @param string $nick User nick 
-     * @param string $command Command to send
-     * @param string|array $args String or array of sequential arguments 
-     *        (optional)
-     * @return void
-     */
-    private function _doCtcpResponse($nick, $command, $args = null)
-    {
-        if (is_array($args)) {
-            $args = implode(' ', $args);
-        }
-
-        $buffer = rtrim(strtoupper($command) . ' ' . $args);
-
-        $this->doNotice($nick, chr(1) . $buffer . chr(1)); 
-    }
-
-    /**
      * Sends a CTCP ACTION (/me) command to a nick or channel.
      *
      * @param string $target Channel name or user nick
@@ -544,13 +480,29 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function doAction($target, $text)
     {
+        $buffer = rtrim('ACTION ' . $text);
+
+        $this->doPrivmsg($target, chr(1) . $buffer . chr(1));
+    }
+
+    /**
+     * Sends a CTCP response to a user.
+     *
+     * @param string $nick User nick 
+     * @param string $command Command to send
+     * @param string|array $args String or array of sequential arguments 
+     *        (optional)
+     * @return void
+     */
+    protected function _doCtcpResponse($nick, $command, $args = null)
+    {
         if (is_array($args)) {
             $args = implode(' ', $args);
         }
 
         $buffer = rtrim(strtoupper($command) . ' ' . $args);
 
-        $this->doPrivmsg($target, chr(1) . $buffer . chr(1));
+        $this->doNotice($nick, chr(1) . $buffer . chr(1)); 
     }
 
     /**

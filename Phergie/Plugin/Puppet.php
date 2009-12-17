@@ -3,8 +3,18 @@
 /**
  * Allows administrators to effectively speak and act as the bot.
  */
-class Phergie_Plugin_Puppet extends Phergie_Plugin_Command
+class Phergie_Plugin_Puppet extends Phergie_Plugin_Abstract
 {
+    /**
+     * Checks for dependencies.
+     *
+     * @return void
+     */
+    public function onLoad()
+    {
+        $this->getPluginHandler()->getPlugin('Command');
+    }
+
     /**
      * Handles a request for the bot to repeat a given message in a specified
      * channel.
@@ -15,7 +25,7 @@ class Phergie_Plugin_Puppet extends Phergie_Plugin_Command
      * @param string $message Message to repeat
      * @return void
      */
-    public function onDoSay($chan, $message)
+    public function onCommandSay($chan, $message)
     {
         $this->doPrivmsg($chan, $message);
     }
@@ -30,7 +40,7 @@ class Phergie_Plugin_Puppet extends Phergie_Plugin_Command
      * @param string $action Action to perform
      * @return void
      */
-    public function onDoAct($chan, $action)
+    public function onCommandAct($chan, $action)
     {
         $this->doAction($chan, $action);
     }
@@ -43,9 +53,9 @@ class Phergie_Plugin_Puppet extends Phergie_Plugin_Command
      * @param string $message Message to send
      * @return void
      */
-    public function onDoRaw($message)
+    public function onCommandRaw($message)
     {
-        $user = $this->_event->getNick();
+        $user = $this->getEvent()->getNick();
          
         $this->doRaw($message);
     }

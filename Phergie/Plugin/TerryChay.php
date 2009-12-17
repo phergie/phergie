@@ -8,32 +8,33 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
 {
 
     /**
-     * URL to the Chayism service
+     * URL to the web service
      *
      * @var string
      */
-    protected $chayismURL = 'http://phpdoc.info/chayism/';
+    protected $_url = 'http://phpdoc.info/chayism/';
 
     /**
-     * Fetches a chayism
+     * Fetches a chayism.
      *
-     * @return bool True is successful, else false
+     * @return bool TRUE if successful, FALSE otherwise 
      */
-    private function getChayism()
+    public function getChayism()
     {
-        return file_get_contents($this->chayismURL);
+        return file_get_contents($this->_url);
     }
 
     /**
      * Parses incoming messages for "Terry Chay"|tychay and respond with a
-     * chayism
+     * chayism.
      *
      * @return void
      */
     public function onPrivmsg()
     {
-        $source = $this->_event->getSource();
-        $message = $this->_event->getArgument(1);
+        $event = $this->getEvent();
+        $source = $event->getSource();
+        $message = $event->getText();
 
         // Check to see if the message includes Terry Chay.
         if (preg_match('{^(' . 
@@ -45,21 +46,21 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
                 if ($source[0] == '#') {
                     $this->floodCache[$source] = time();
                 }
-                unset($m, $fact);
             }
         }
     }
 
     /**
      * Parses incoming CTCP request for "Terry Chay"|tychay and respond with a
-     * chayism
+     * chayism.
      *
      * @return void
      */
     public function onCtcp()
     {
-        $source = $this->_event->getSource();
-        $ctcp = $this->_event->getArgument(1);
+        $event = $this->getEvent();
+        $source = $event->getSource();
+        $ctcp = $event->getArgument(1);
 
         if (preg_match('({terry[\s_+-]*chay}|tychay)ix', $ctcp, $m)) {
             $fact = $this->getChayism();

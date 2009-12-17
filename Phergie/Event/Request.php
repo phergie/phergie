@@ -5,115 +5,117 @@
  *
  * @see http://www.irchelp.org/irchelp/rfc/chapter4.html
  */
-class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
+class Phergie_Event_Request 
+    extends Phergie_Event_Abstract 
+    implements ArrayAccess
 {
     /**
-     * Nick message
+     * Nick message event type
      *
      * @const string
      */
     const TYPE_NICK = 'nick';
 
     /**
-     * Whois message
+     * Whois message event type
      *
      * @const string
      */
     const TYPE_WHOIS = 'whois';
 
     /**
-     * Quit command
+     * Quit command event type
      *
      * @const string
      */
     const TYPE_QUIT = 'quit';
 
     /**
-     * Join message
+     * Join message event type
      *
      * @const string
      */
     const TYPE_JOIN = 'join';
 
     /**
-     * Kick message
+     * Kick message event type
      *
      * @const string
      */
     const TYPE_KICK = 'kick';
 
     /**
-     * Part message
+     * Part message event type
      *
      * @const string
      */
     const TYPE_PART = 'part';
 
     /**
-     * Mode message
+     * Mode message event type
      *
      * @const string
      */
     const TYPE_MODE = 'mode';
 
     /**
-     * Topic message
+     * Topic message event type
      *
      * @const string
      */
     const TYPE_TOPIC = 'topic';
 
     /**
-     * Private message command
+     * Private message command event type
      *
      * @const string
      */
     const TYPE_PRIVMSG = 'privmsg';
 
     /**
-     * Notice message
+     * Notice message event type
      *
      * @const string
      */
     const TYPE_NOTICE = 'notice';
 
     /**
-     * Pong message
+     * Pong message event type
      *
      * @const string
      */
     const TYPE_PONG = 'pong';
 
     /**
-     * CTCP ACTION command
+     * CTCP ACTION command event type
      *
      * @const string
      */
     const TYPE_ACTION = 'action';
 
     /**
-     * CTCP PING command
+     * CTCP PING command event type
      *
      * @const string
      */
     const TYPE_PING = 'ping';
 
     /**
-     * CTCP TIME command
+     * CTCP TIME command event type
      *
      * @const string
      */
     const TYPE_TIME = 'time';
 
     /**
-     * CTCP VERSION command
+     * CTCP VERSION command event type
      *
      * @const string
      */
     const TYPE_VERSION = 'version';
 
     /**
-     * RAW message
+     * RAW message event type
      *
      * @const string
      */
@@ -180,32 +182,11 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
     );
 
     /**
-     * Host name for the originating server or user
+     * Hostmask representing the originating user, if applicable
      *
-     * @var string
+     * @var Phergie_Hostmask
      */
-    protected $_host;
-
-    /**
-     * Username of the user from which the event originates
-     *
-     * @var string
-     */
-    protected $_username;
-
-    /**
-     * Nick of the user from which the event originates
-     *
-     * @var string
-     */
-    protected $_nick;
-
-    /**
-     * Request type, which can be compared to the TYPE_* class constants
-     *
-     * @var string
-     */
-    protected $_type;
+    protected $_hostmask;
 
     /**
      * Arguments included with the message
@@ -215,113 +196,36 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
     protected $_arguments;
 
     /**
-     * The raw buffer that was sent by the server
+     * Raw data sent by the server
      *
      * @var string
      */
-    protected $_rawBuffer;
+    protected $_rawData;
 
     /**
-     * Returns the hostmask for the originating server or user.
+     * Sets the hostmask representing the originating user.
      *
-     * @return string
+     * @param Phergie_Hostmask $hostmask
+     * @return Phergie_Event_Request Provides a fluent interface
+     */
+    public function setHostmask(Phergie_Hostmask $hostmask)
+    {
+        $this->_hostmask = $hostmask;
+        return $this;
+    }
+
+    /**
+     * Returns the hostmask representing the originating user.
+     *
+     * @return Phergie_Event_Request|null Hostmask or NULL if none was set
      */
     public function getHostmask()
     {
-        return $this->_nick . '!' . $this->_username . '@' . $this->_host;
+        return $this->_hostmask;
     }
 
     /**
-     * Sets the host name for the originating server or user.
-     *
-     * @param string $host
-     * @return Phergie_Event_Request Provides a fluent interface
-     */
-    public function setHost($host)
-    {
-        $this->_host = $host;
-        return $this;
-    }
-
-    /**
-     * Returns the host name for the originating server or user.
-     *
-     * @return string
-     */
-    public function getHost()
-    {
-        return $this->_host;
-    }
-
-    /**
-     * Sets the username of the user from which the event originates.
-     *
-     * @param string $username
-     * @return Phergie_Event_Request Provides a fluent interface
-     */
-    public function setUsername($username)
-    {
-        $this->_username = $username;
-        return $this;
-    }
-
-    /**
-     * Returns the username of the user from which the event originates.
-     *
-     * @return string
-     */
-    public function getUsername()
-    {
-        return $this->_username;
-    }
-
-    /**
-     * Sets the nick of the user from which the event originates.
-     *
-     * @param string $nick
-     * @return Phergie_Event_Request Provides a fluent interface
-     */
-    public function setNick($nick)
-    {
-        $this->_nick = $nick;
-        return $this;
-    }
-
-    /**
-     * Returns the nick of the user from which the event originates.
-     *
-     * @return string
-     */
-    public function getNick()
-    {
-        return $this->_nick;
-    }
-
-    /**
-     * Sets the request type.
-     *
-     * @param string $type
-     * @return Phergie_Event_Request Provides a fluent interface
-     */
-    public function setType($type)
-    {
-        $this->_type = strtolower($type);
-        return $this;
-    }
-
-    /**
-     * Returns the request type, which can be compared to the TYPE_*
-     * class constants.
-     *
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->_type;
-    }
-
-    /**
-     * Sets the arguments for the request in the order they are to be sent.
+     * Sets the arguments for the request.
      *
      * @param array $arguments
      * @return Phergie_Event_Request Provides a fluent interface
@@ -333,7 +237,7 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
     }
 
     /**
-     * Returns the arguments for the request in the order they are to be sent.
+     * Returns the arguments for the request.
      *
      * @return array
      */
@@ -350,7 +254,7 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
      * @return int|null Integer position of the argument or NULL if no 
      *         corresponding argument was found
      */
-    private function _resolveArgument($argument)
+    protected function _resolveArgument($argument)
     {
         if (isset($this->_arguments[$argument])) {
             return $argument; 
@@ -386,9 +290,9 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
      * @param string $buffer
      * @return Phergie_Event_Request Provides a fluent interface
      */
-    public function setRawBuffer($buffer)
+    public function setRawData($buffer)
     {
-        $this->_rawBuffer = $buffer;
+        $this->_rawData = $buffer;
         return $this;
     }
 
@@ -397,14 +301,25 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
      *
      * @return string
      */
-    public function getRawBuffer()
+    public function getRawData()
     {
-        return $this->_rawBuffer;
+        return $this->_rawData;
     }
 
     /**
-     * Returns the channel name or user nick representing the source of the
-     * event.
+     * Returns the nick of the user who originated the event.
+     *
+     * @return string
+     */
+    public function getNick()
+    {
+        return $this->_hostmask->getNick();
+    }
+
+    /**
+     * Returns the channel name if the event occurred in a channel or the 
+     * user nick if the event was a private message directed at the bot by a 
+     * user. 
      *
      * @return string
      */
@@ -413,7 +328,7 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
         if (substr($this->_arguments[0], 0, 1) == '#') {
             return $this->_arguments[0];
         }
-        return $this->_nick;
+        return $this->_hostmask->getNick();
     }
 
     /**
@@ -433,7 +348,8 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
      */
     public function isFromUser()
     {
-        return !empty($this->_username);
+        $username = $this->_hostmask->getUsername();
+        return !empty($username);
     }
 
     /**
@@ -443,7 +359,8 @@ class Phergie_Event_Request implements ArrayAccess, Phergie_Event_Interface
      */
     public function isFromServer()
     {
-        return empty($this->_username);
+        $username = $this->_hostmask->getUsername();
+        return empty($username);
     }
 
     /**

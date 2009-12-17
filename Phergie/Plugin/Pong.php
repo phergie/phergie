@@ -12,6 +12,6 @@ class Phergie_Plugin_Pong extends Phergie_Plugin_Abstract
      */
     public function onPing()
     {
-        $this->doPong($this->_event[0]);
+        $this->doPong($this->getEvent()->getArgument(0));
     }
 }

@@ -11,14 +11,14 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
      *
      * @var int
      */
-    private $_lastEvent;
+    protected $_lastEvent;
 
     /**
      * Timestamp for the last instance in which a PING was sent
      *
      * @var int
      */
-    private $_lastPing;
+    protected $_lastPing;
 
     /**
      * Initialize event timestamps upon connecting to the server.
@@ -67,7 +67,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
             $this->doQuit();
         } elseif ($time - $this->_lastEvent > $this->_config['ping.event']) {
             $this->_lastPing = time();
-            $this->doPing($this->_connection->getNick());
+            $this->doPing($this->_lastPing);
         }
     }
 }

@@ -32,6 +32,7 @@ class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
         'whowas',
         'mode',
         'privmsg',
+        'action',
         'nick',
         'topic',
         'invite',
@@ -43,11 +44,12 @@ class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
     /**
      * Prioritizes events from least to most destructive. 
      *
-     * @param array $events Events to prioritize
      * @return void 
      */
-    public function preDispatch(array &$events)
+    public function preDispatch()
     {
+        $events = $this->getEventHandler();
+
         // Categorize events by type
         $categorized = array();
         foreach ($events as $event) {
@@ -66,6 +68,6 @@ class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
         }
 
         // Replace the original events array with the prioritized one
-        $events = $prioritized;
+        $events->replaceEvents($prioritized);
     }
 }

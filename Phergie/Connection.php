@@ -6,11 +6,11 @@
 class Phergie_Connection
 {
     /**
-     * Hostname to which the client will connect
+     * Host to which the client will connect
      *
      * @var string
      */
-    private $_hostname;
+    protected $_host;
 
     /**
      * Port on which the client will connect, defaults to the standard IRC 
@@ -18,35 +18,49 @@ class Phergie_Connection
      *
      * @var int
      */
-    private $_port;
+    protected $_port;
+
+    /**
+     * Flag where TRUE indicates that the connection should use SSL 
+     *
+     * @var bool
+     */
+    protected $_ssl;
 
     /**
      * Nick that the client will use
      *
      * @var string
      */
-    private $_nick;
+    protected $_nick;
 
     /**
      * Username that the client will use
      *
      * @var string
      */
-    private $_username;
+    protected $_username;
 
     /**
      * Realname that the client will use
      *
      * @var string
      */
-    private $_realname;
+    protected $_realname;
 
     /**
      * Password that the client will use
      *
      * @var string
      */
-    private $_password;
+    protected $_password;
+
+    /**
+     * Hostmask for the connection
+     *
+     * @var Phergie_Hostmask
+     */
+    protected $_hostmask;
 
     /**
      * Constructor to initialize instance properties.
@@ -57,32 +71,9 @@ class Phergie_Connection
      */
     public function __construct(array $options = array())
     {
+        $this->_ssl = false;
+
         $this->setOptions($options);
-    }
-
-    /**
-     * Returns a hostmask that uniquely identifies the connection.
-     *
-     * @return string
-     */
-    public function getHostmask()
-    {
-        return ($this->_nick . '!' . $this->_username . '@' . $this->_hostname);
-    }
-
-    /**
-     * Sets the hostname to which the client will connect.
-     *
-     * @param string $hostname
-     * @return Phergie_Connection Provides a fluent interface 
-     */
-    public function setHostname($hostname)
-    {
-        if (empty($this->_hostname)) {
-            $this->_hostname = (string) $hostname;
-        }
-
-        return $this;
     }
 
     /**
@@ -92,24 +83,60 @@ class Phergie_Connection
      * @param string $setting Name of the setting
      * @return void
      */
-    private function _checkSetting($setting)
+    protected function _checkSetting($setting)
     {
         if (empty($this->{'_' . $setting})) {
-            trigger_error('Required connection setting missing: ' . $setting, E_USER_ERROR);
+            throw new Phergie_Connection_Exception(
+                'Required connection setting "' . $setting . '" missing',
+                Phergie_Connection_Exception::ERR_REQUIRED_SETTING_MISSING
+            );
         }
     }
-    
+ 
     /**
-     * Returns the hostname to which the client will connect if it is set or 
+     * Returns a hostmask that uniquely identifies the connection.
+     *
+     * @return string
+     */
+    public function getHostmask()
+    {
+        if (empty($this->_hostmask)) {
+            $this->_hostmask = new Phergie_Hostmask(
+                $this->_nick,
+                $this->_username,
+                $this->_host
+            );
+        }
+
+        return $this->_hostmask; 
+    }
+
+    /**
+     * Sets the host to which the client will connect.
+     *
+     * @param string $host
+     * @return Phergie_Connection Provides a fluent interface 
+     */
+    public function setHost($host)
+    {
+        if (empty($this->_host)) {
+            $this->_host = (string) $host;
+        }
+
+        return $this;
+    }
+   
+    /**
+     * Returns the host to which the client will connect if it is set or 
      * emits an error if it is not set.
      *
      * @return string
      */
-    public function getHostname()
+    public function getHost()
     {
-        $this->_checkSetting('hostname');
+        $this->_checkSetting('host');
 
-        return $this->_hostname;
+        return $this->_host;
     }
 
     /**
@@ -139,6 +166,29 @@ class Phergie_Connection
         }
 
         return $this->_port;
+    }
+
+    /**
+     * Sets whether the connection should use SSL.
+     *
+     * @param bool $ssl TRUE to use SSL, FALSE otherwise
+     * @return Phergie_Connection Provides a fluent interface
+     */
+    public function setSsl($ssl)
+    {
+        $this->_ssl = (bool) $ssl;
+
+        return $this;
+    }
+
+    /**
+     * Returns whether the connection uses SSL.
+     *
+     * @return bool TRUE if the connection uses SSL, FALSE otherwise
+     */
+    public function getSsl()
+    {
+        return $this->_ssl;
     }
 
     /**

@@ -11,7 +11,7 @@ abstract class Phergie_Driver_Abstract
      *
      * @var Phergie_Connection
      */
-    private $_connection;
+    protected $_connection;
 
     /**
      * Sets the currently active connection.
@@ -30,11 +30,15 @@ abstract class Phergie_Driver_Abstract
      * Returns the currently active connection.
      *
      * @return Phergie_Connection
+     * @throws Phergie_Driver_Exception
      */
     public function getConnection()
     {
         if (empty($this->_connection)) {
-            trigger_error('Operation requires an active connection, but none is set', E_USER_ERROR);
+            throw new Phergie_Driver_Exception(
+                'Operation requires an active connection, but none is set',
+                Phergie_Driver_Exception::ERR_NO_ACTIVE_CONNECTION
+            );
         }
 
         return $this->_connection;

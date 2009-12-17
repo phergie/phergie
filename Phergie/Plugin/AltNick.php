@@ -41,7 +41,7 @@ class Phergie_Plugin_AltNick extends Phergie_Plugin_Abstract
         }
 
         // If the response event indicates that the nick set is in use...
-        if ($this->_event->getCode() == Phergie_Event_Response::ERR_NICKNAMEINUSE) {
+        if ($this->getEvent()->getCode() == Phergie_Event_Response::ERR_NICKNAMEINUSE) {
 
             // Attempt to move to the next nick in the alternate nick list
             $this->_iterator->next();
@@ -54,7 +54,7 @@ class Phergie_Plugin_AltNick extends Phergie_Plugin_Abstract
                 $this->doNick($altNick);
 
                 // Update the connection to reflect the nick change
-                $this->_connection->setNick($altNick);
+                $this->getConnection()->setNick($altNick);
 
             // If no other nicks are available...
             } else {

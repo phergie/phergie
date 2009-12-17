@@ -6,10 +6,10 @@
  *
  * @see http://www.irchelp.org/irchelp/rfc/chapter6.html
  */
-class Phergie_Event_Response implements Phergie_Event_Interface
+class Phergie_Event_Response extends Phergie_Event_Abstract 
 {
     /**
-     * <nickname> :No such nick/channel
+     * <nickname> No such nick/channel
      *
      * Used to indicate the nickname parameter supplied to a command is currently
      * unused.
@@ -17,21 +17,21 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOSUCHNICK = '401';
 
     /**
-     * <server name> :No such server
+     * <server name> No such server
      *
      * Used to indicate the server name given currently doesn't exist.
      */
     const ERR_NOSUCHSERVER = '402';
 
     /**
-     * <channel name> :No such channel
+     * <channel name> No such channel
      *
      * Used to indicate the given channel name is invalid.
      */
     const ERR_NOSUCHCHANNEL = '403';
 
     /**
-     * <channel name> :Cannot send to channel
+     * <channel name> Cannot send to channel
      *
      * Sent to a user who is either (a) not on a channel which is mode +n or (b) not
      * a chanop (or mode +v) on a channel which has mode +m set and is trying to send
@@ -40,7 +40,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_CANNOTSENDTOCHAN = '404';
 
     /**
-     * <channel name> :You have joined too many channels
+     * <channel name> You have joined too many channels
      *
      * Sent to a user when they have joined the maximum number of allowed channels
      * and they try to join another channel.
@@ -48,7 +48,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_TOOMANYCHANNELS = '405';
 
     /**
-     * <nickname> :There was no such nickname
+     * <nickname> There was no such nickname
      *
      * Returned by WHOWAS to indicate there is no history information for that
      * nickname.
@@ -56,7 +56,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_WASNOSUCHNICK = '406';
 
     /**
-     * <target> :Duplicate recipients. No message delivered
+     * <target> Duplicate recipients. No message delivered
      *
      * Returned to a client which is attempting to send PRIVMSG/NOTICE using the
      * user@host destination format and for a user@host which has several
@@ -65,7 +65,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_TOOMANYTARGETS = '407';
 
     /**
-     * :No origin specified
+     * No origin specified
      *
      * PING or PONG message missing the originator parameter which is required since
      * these commands must work without valid prefixes.
@@ -73,22 +73,22 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOORIGIN = '409';
 
     /**
-     * :No recipient given (<command>)
+     * No recipient given (<command>)
      */
     const ERR_NORECIPIENT = '411';
 
     /**
-     * :No text to send
+     * No text to send
      */
     const ERR_NOTEXTTOSEND = '412';
 
     /**
-     * <mask> :No toplevel domain specified
+     * <mask> No toplevel domain specified
      */
     const ERR_NOTOPLEVEL = '413';
 
     /**
-     * <mask> :Wildcard in toplevel domain
+     * <mask> Wildcard in toplevel domain
      *
      * 412 - 414 are returned by PRIVMSG to indicate that the message wasn't
      * delivered for some reason. ERR_NOTOPLEVEL and ERR_WILDTOPLEVEL are errors that
@@ -98,7 +98,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_WILDTOPLEVEL = '414';
 
     /**
-     * <command> :Unknown command
+     * <command> Unknown command
      *
      * Returned to a registered client to indicate that the command sent is unknown
      * by the server.
@@ -106,14 +106,14 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_UNKNOWNCOMMAND = '421';
 
     /**
-     * :MOTD File is missing
+     * MOTD File is missing
      *
      * Server's MOTD file could not be opened by the server.
      */
     const ERR_NOMOTD = '422';
 
     /**
-     * <server> :No administrative info available
+     * <server> No administrative info available
      *
      * Returned by a server in response to an ADMIN message when there is an error in
      * finding the appropriate information.
@@ -121,7 +121,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOADMININFO = '423';
 
     /**
-     * :File error doing <file op> on <file>
+     * File error doing <file op> on <file>
      *
      * Generic error message used to report a failed file operation during the
      * processing of a message.
@@ -129,14 +129,14 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_FILEERROR = '424';
 
     /**
-     * :No nickname given
+     * No nickname given
      *
      * Returned when a nickname parameter expected for a command and isn't found.
      */
     const ERR_NONICKNAMEGIVEN = '431';
 
     /**
-     * <nick> :Erroneus nickname
+     * <nick> Erroneus nickname
      *
      * Returned after receiving a NICK message which contains characters which do not
      * fall in the defined set. See section x.x.x for details on valid nicknames.
@@ -144,7 +144,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_ERRONEUSNICKNAME = '432';
 
     /**
-     * <nick> :Nickname is already in use
+     * <nick> Nickname is already in use
      *
      * Returned when a NICK message is processed that results in an attempt to change
      * to a currently existing nickname.
@@ -152,7 +152,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NICKNAMEINUSE = '433';
 
     /**
-     * <nick> :Nickname collision KILL
+     * <nick> Nickname collision KILL
      *
      * Returned by a server to a client when it detects a nickname collision
      * (registered of a NICK that already exists by another server).
@@ -160,7 +160,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NICKCOLLISION = '436';
 
     /**
-     * <nick> <channel> :They aren't on that channel
+     * <nick> <channel> They aren't on that channel
      *
      * Returned by the server to indicate that the target user of the command is not
      * on the given channel.
@@ -168,7 +168,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_USERNOTINCHANNEL = '441';
 
     /**
-     * <channel> :You're not on that channel
+     * <channel> You're not on that channel
      *
      * Returned by the server whenever a client tries to perform a channel effecting
      * command for which the client isn't a member.
@@ -176,7 +176,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOTONCHANNEL = '442';
 
     /**
-     * <user> <channel> :is already on channel
+     * <user> <channel> is already on channel
      *
      * Returned when a client tries to invite a user to a channel they are already
      * on.
@@ -184,7 +184,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_USERONCHANNEL = '443';
 
     /**
-     * <user> :User not logged in
+     * <user> User not logged in
      *
      * Returned by the summon after a SUMMON command for a user was unable to be
      * performed since they were not logged in.
@@ -192,7 +192,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOLOGIN = '444';
 
     /**
-     * :SUMMON has been disabled
+     * SUMMON has been disabled
      *
      * Returned as a response to the SUMMON command. Must be returned by any server
      * which does not implement it.
@@ -200,7 +200,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_SUMMONDISABLED = '445';
 
     /**
-     * :USERS has been disabled
+     * USERS has been disabled
      *
      * Returned as a response to the USERS command. Must be returned by any server
      * which does not implement it.
@@ -208,7 +208,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_USERSDISABLED = '446';
 
     /**
-     * :You have not registered
+     * You have not registered
      *
      * Returned by the server to indicate that the client must be registered before
      * the server will allow it to be parsed in detail.
@@ -216,7 +216,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOTREGISTERED = '451';
 
     /**
-     * <command> :Not enough parameters
+     * <command> Not enough parameters
      *
      * Returned by the server by numerous commands to indicate to the client that it
      * didn't supply enough parameters.
@@ -224,7 +224,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NEEDMOREPARAMS = '461';
 
     /**
-     * :You may not reregister
+     * You may not reregister
      *
      * Returned by the server to any link which tries to change part of the
      * registered details (such as password or user details from second USER
@@ -233,7 +233,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_ALREADYREGISTRED = '462';
 
     /**
-     * :Your host isn't among the privileged
+     * Your host isn't among the privileged
      *
      * Returned to a client which attempts to register with a server which does not
      * been setup to allow connections from the host the attempted connection is
@@ -242,7 +242,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOPERMFORHOST = '463';
 
     /**
-     * :Password incorrect
+     * Password incorrect
      *
      * Returned to indicate a failed attempt at registering a connection for which a
      * password was required and was either not given or incorrect.
@@ -250,7 +250,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_PASSWDMISMATCH = '464';
 
     /**
-     * :You are banned from this server
+     * You are banned from this server
      *
      * Returned after an attempt to connect and register yourself with a server which
      * has been setup to explicitly deny connections to you.
@@ -258,37 +258,37 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_YOUREBANNEDCREEP = '465';
 
     /**
-     * <channel> :Channel key already set
+     * <channel> Channel key already set
      */
     const ERR_KEYSET = '467';
 
     /**
-     * <channel> :Cannot join channel (+l)
+     * <channel> Cannot join channel (+l)
      */
     const ERR_CHANNELISFULL = '471';
 
     /**
-     * <char> :is unknown mode char to me
+     * <char> is unknown mode char to me
      */
     const ERR_UNKNOWNMODE = '472';
 
     /**
-     * <channel> :Cannot join channel (+i)
+     * <channel> Cannot join channel (+i)
      */
     const ERR_INVITEONLYCHAN = '473';
 
     /**
-     * <channel> :Cannot join channel (+b)
+     * <channel> Cannot join channel (+b)
      */
     const ERR_BANNEDFROMCHAN = '474';
 
     /**
-     * <channel> :Cannot join channel (+k)
+     * <channel> Cannot join channel (+k)
      */
     const ERR_BADCHANNELKEY = '475';
 
     /**
-     * :Permission Denied- You're not an IRC operator
+     * Permission Denied- You're not an IRC operator
      *
      * Any command requiring operator privileges to operate must return this error to
      * indicate the attempt was unsuccessful.
@@ -296,7 +296,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOPRIVILEGES = '481';
 
     /**
-     * <channel> :You're not channel operator
+     * <channel> You're not channel operator
      *
      * Any command requiring 'chanop' privileges (such as MODE messages) must return
      * this error if the client making the attempt is not a chanop on the specified
@@ -305,7 +305,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_CHANOPRIVSNEEDED = '482';
 
     /**
-     * :You cant kill a server!
+     * You cant kill a server!
      *
      * Any attempts to use the KILL command on a server are to be refused and this
      * error returned directly to the client.
@@ -313,7 +313,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_CANTKILLSERVER = '483';
 
     /**
-     * :No O-lines for your host
+     * No O-lines for your host
      *
      * If a client sends an OPER message and the server has not been configured to
      * allow connections from the client's host as an operator, this error must be
@@ -322,7 +322,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_NOOPERHOST = '491';
 
     /**
-     * :Unknown MODE flag
+     * Unknown MODE flag
      *
      * Returned by the server to indicate that a MODE message was sent with a
      * nickname parameter and that the a mode flag sent was not recognized.
@@ -330,7 +330,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const ERR_UMODEUNKNOWNFLAG = '501';
 
     /**
-     * :Cant change mode for other users
+     * Cant change mode for other users
      *
      * Error sent to any user trying to view or change the user mode for a user other
      * than themselves.
@@ -343,10 +343,10 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_NONE = '300';
 
     /**
-     * :[<reply>{<space><reply>}]
+     * [<reply>{<space><reply>}]
      *
      * Reply format used by USERHOST to list replies to the query list. The reply
-     * string is composed as follows: <reply> ::= <nick>['*'] '=' <'+'|'-'><hostname>
+     * string is composed as follows <reply> = <nick>['*'] '=' <'+'|'-'><hostname>
      * The '*' indicates whether the client has registered as an Operator. The '-' or
      * '+' characters represent whether the client has set an AWAY message or not
      * respectively.
@@ -354,24 +354,24 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_USERHOST = '302';
 
     /**
-     * :[<nick> {<space><nick>}]
+     * [<nick> {<space><nick>}]
      *
      * Reply format used by ISON to list replies to the query list.
      */
     const RPL_ISON = '303';
 
     /**
-     * <nick> :<away message>
+     * <nick> <away message>
      */
     const RPL_AWAY = '301';
 
     /**
-     * :You are no longer marked as being away
+     * You are no longer marked as being away
      */
     const RPL_UNAWAY = '305';
 
     /**
-     * :You have been marked as being away
+     * You have been marked as being away
      *
      * These replies are used with the AWAY command (if allowed). RPL_AWAY is sent to
      * any client sending a PRIVMSG to a client which is away. RPL_AWAY is only sent
@@ -381,32 +381,32 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_NOWAWAY = '306';
 
     /**
-     * <nick> <user> <host> * :<real name>
+     * <nick> <user> <host> * <real name>
      */
     const RPL_WHOISUSER = '311';
 
     /**
-     * <nick> <server> :<server info>
+     * <nick> <server> <server info>
      */
     const RPL_WHOISSERVER = '312';
 
     /**
-     * <nick> :is an IRC operator
+     * <nick> is an IRC operator
      */
     const RPL_WHOISOPERATOR = '313';
 
     /**
-     * <nick> <integer> :seconds idle
+     * <nick> <integer> seconds idle
      */
     const RPL_WHOISIDLE = '317';
 
     /**
-     * <nick> :End of /WHOIS list
+     * <nick> End of /WHOIS list
      */
     const RPL_ENDOFWHOIS = '318';
 
     /**
-     * <nick> :{[@|+]<channel><space>}
+     * <nick> {[@|+]<channel><space>}
      *
      * Replies 311 - 313, 317 - 319 are all replies generated in response to a WHOIS
      * message. Given that there are enough parameters present, the answering server
@@ -422,12 +422,12 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_WHOISCHANNELS = '319';
 
     /**
-     * <nick> <user> <host> * :<real name>
+     * <nick> <user> <host> * <real name>
      */
     const RPL_WHOWASUSER = '314';
 
     /**
-     * <nick> :End of WHOWAS
+     * <nick> End of WHOWAS
      *
      * When replying to a WHOWAS message, a server must use the replies
      * RPL_WHOWASUSER, RPL_WHOISSERVER or ERR_WASNOSUCHNICK for each nickname in the
@@ -437,17 +437,17 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_ENDOFWHOWAS = '369';
 
     /**
-     * Channel :Users Name
+     * Channel Users Name
      */
     const RPL_LISTSTART = '321';
 
     /**
-     * <channel> <# visible> :<topic>
+     * <channel> <# visible> <topic>
      */
     const RPL_LIST = '322';
 
     /**
-     * :End of /LIST
+     * End of /LIST
      *
      * Replies RPL_LISTSTART, RPL_LIST, RPL_LISTEND mark the start, actual replies
      * with data and end of the server's response to a LIST command. If there are no
@@ -461,12 +461,12 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_CHANNELMODEIS = '324';
 
     /**
-     * <channel> :No topic is set
+     * <channel> No topic is set
      */
     const RPL_NOTOPIC = '331';
 
     /**
-     * <channel> :<topic>
+     * <channel> <topic>
      *
      * When sending a TOPIC message to determine the channel topic, one of two
      * replies is sent. If the topic is set, RPL_TOPIC is sent back else RPL_NOTOPIC.
@@ -482,7 +482,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_INVITING = '341';
 
     /**
-     * <user> :Summoning user to IRC
+     * <user> Summoning user to IRC
      *
      * Returned by a server answering a SUMMON message to indicate that it is
      * summoning that user.
@@ -490,7 +490,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_SUMMONING = '342';
 
     /**
-     * <version>.<debuglevel> <server> :<comments>
+     * <version>.<debuglevel> <server> <comments>
      *
      * Reply by the server showing its version details. The <version> is the version
      * of the software being used (including any patchlevel revisions) and the
@@ -501,12 +501,12 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_VERSION = '351';
 
     /**
-     * <channel> <user> <host> <server> <nick> <H|G>[*][@|+] :<hopcount> <real name>
+     * <channel> <user> <host> <server> <nick> <H|G>[*][@|+] <hopcount> <real name>
      */
     const RPL_WHOREPLY = '352';
 
     /**
-     * <name> :End of /WHO list
+     * <name> End of /WHO list
      *
      * The RPL_WHOREPLY and RPL_ENDOFWHO pair are used to answer a WHO message. The
      * RPL_WHOREPLY is only sent if there is an appropriate match to the WHO query.
@@ -516,12 +516,12 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_ENDOFWHO = '315';
 
     /**
-     * <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]
+     * <channel> [[@|+]<nick> [[@|+]<nick> [...]]]
      */
     const RPL_NAMREPLY = '353';
 
     /**
-     * <channel> :End of /NAMES list
+     * <channel> End of /NAMES list
      *
      * To reply to a NAMES message, a reply pair consisting of RPL_NAMREPLY and
      * RPL_ENDOFNAMES is sent by the server back to the client. If there is no
@@ -533,12 +533,12 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_ENDOFNAMES = '366';
 
     /**
-     * <mask> <server> :<hopcount> <server info>
+     * <mask> <server> <hopcount> <server info>
      */
     const RPL_LINKS = '364';
 
     /**
-     * <mask> :End of /LINKS list
+     * <mask> End of /LINKS list
      *
      * In replying to the LINKS message, a server must send replies back using the
      * RPL_LINKS numeric and mark the end of the list using an RPL_ENDOFLINKS reply.v
@@ -551,7 +551,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_BANLIST = '367';
 
     /**
-     * <channel> :End of channel ban list
+     * <channel> End of channel ban list
      *
      * When listing the active 'bans' for a given channel, a server is required to
      * send the list back using the RPL_BANLIST and RPL_ENDOFBANLIST messages. A
@@ -561,12 +561,12 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_ENDOFBANLIST = '368';
 
     /**
-     * :<string>
+     * <string>
      */
     const RPL_INFO = '371';
 
     /**
-     * :End of /INFO list
+     * End of /INFO list
      *
      * A server responding to an INFO message is required to send all its 'info' in a
      * series of RPL_INFO messages with a RPL_ENDOFINFO reply to indicate the end of
@@ -575,17 +575,17 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_ENDOFINFO = '374';
 
     /**
-     * :- <server> Message of the day -
+     * - <server> Message of the day -
      */
     const RPL_MOTDSTART = '375';
 
     /**
-     * :- <text>
+     * - <text>
      */
     const RPL_MOTD = '372';
 
     /**
-     * :End of /MOTD command
+     * End of /MOTD command
      *
      * When responding to the MOTD message and the MOTD file is found, the file is
      * displayed line by line, with each line no longer than 80 characters, using
@@ -595,7 +595,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_ENDOFMOTD = '376';
 
     /**
-     * :You are now an IRC operator
+     * You are now an IRC operator
      *
      * RPL_YOUREOPER is sent back to a client which has just successfully issued an
      * OPER message and gained operator status.
@@ -603,7 +603,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_YOUREOPER = '381';
 
     /**
-     * <config file> :Rehashing
+     * <config file> Rehashing
      *
      * If the REHASH option is used and an operator sends a REHASH message, an
      * RPL_REHASHING is sent back to the operator.
@@ -611,7 +611,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_REHASHING = '382';
 
     /**
-     * <server> :<string showing server's local time>
+     * <server> <string showing server's local time>
      *
      * When replying to the TIME message, a server must send the reply using the
      * RPL_TIME format above. The string showing the time need only contain the
@@ -621,22 +621,22 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_TIME = '391';
 
     /**
-     * :UserID Terminal Host
+     * UserID Terminal Host
      */
     const RPL_USERSSTART = '392';
 
     /**
-     * :%-8s %-9s %-8s
+     * %-8s %-9s %-8s
      */
     const RPL_USERS = '393';
 
     /**
-     * :End of users
+     * End of users
      */
     const RPL_ENDOFUSERS = '394';
 
     /**
-     * :Nobody logged in
+     * Nobody logged in
      *
      * If the USERS message is handled by a server, the replies RPL_USERSTART,
      * RPL_USERS, RPL_ENDOFUSERS and RPL_NOUSERS are used. RPL_USERSSTART must be
@@ -740,7 +740,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_STATSYLINE = '218';
 
     /**
-     * <stats letter> :End of /STATS report
+     * <stats letter> End of /STATS report
      */
     const RPL_ENDOFSTATS = '219';
 
@@ -750,7 +750,7 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_STATSLLINE = '241';
 
     /**
-     * :Server Up %d days %d:%02d:%02d
+     * Server Up %d days %d%02d%02d
      */
     const RPL_STATSUPTIME = '242';
 
@@ -772,27 +772,27 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_UMODEIS = '221';
 
     /**
-     * :There are <integer> users and <integer> invisible on <integer> servers
+     * There are <integer> users and <integer> invisible on <integer> servers
      */
     const RPL_LUSERCLIENT = '251';
 
     /**
-     * <integer> :operator(s) online
+     * <integer> operator(s) online
      */
     const RPL_LUSEROP = '252';
 
     /**
-     * <integer> :unknown connection(s)
+     * <integer> unknown connection(s)
      */
     const RPL_LUSERUNKNOWN = '253';
 
     /**
-     * <integer> :channels formed
+     * <integer> channels formed
      */
     const RPL_LUSERCHANNELS = '254';
 
     /**
-     * :I have <integer> clients and <integer> servers
+     * I have <integer> clients and <integer> servers
      *
      * In processing an LUSERS message, the server sends a set of replies from
      * RPL_LUSERCLIENT, RPL_LUSEROP, RPL_USERUNKNOWN, RPL_LUSERCHANNELS and
@@ -803,22 +803,22 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     const RPL_LUSERME = '255';
 
     /**
-     * <server> :Administrative info
+     * <server> Administrative info
      */
     const RPL_ADMINME = '256';
 
     /**
-     * :<admin info>
+     * <admin info>
      */
     const RPL_ADMINLOC1 = '257';
 
     /**
-     * :<admin info>
+     * <admin info>
      */
     const RPL_ADMINLOC2 = '258';
 
     /**
-     * :<admin info>
+     * <admin info>
      *
      * When replying to an ADMIN message, a server is expected to use replies
      * RLP_ADMINME through to RPL_ADMINEMAIL and provide a text message with each.
@@ -845,11 +845,18 @@ class Phergie_Event_Response implements Phergie_Event_Interface
     protected $_description;
 
     /**
-     * The raw buffer that was sent by the server
+     * Raw data sent by the server
      *
      * @var string
      */
-    protected $_rawBuffer;
+    protected $_rawData;
+
+    /**
+     * Event type
+     *
+     * @var string
+     */
+    protected $_type = 'response';
 
     /**
      * Sets the reply code sent by the server.
@@ -901,9 +908,9 @@ class Phergie_Event_Response implements Phergie_Event_Interface
      * @param string $buffer
      * @return Phergie_Event_Response Provides a fluent interface
      */
-    public function setRawBuffer($buffer)
+    public function setRawData($buffer)
     {
-        $this->_rawBuffer = $buffer;
+        $this->_rawData = $buffer;
         return $this;
     }
 
@@ -912,8 +919,8 @@ class Phergie_Event_Response implements Phergie_Event_Interface
      *
      * @return string
      */
-    public function getRawBuffer()
+    public function getRawData()
     {
-        return $this->_rawBuffer;
+        return $this->_rawData;
     }
 }

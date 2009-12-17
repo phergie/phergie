@@ -1,44 +1,42 @@
 <?php
 
-/** Php_Source */
 require_once 'Phergie/Plugin/Php/Source.php';
 
 /**
  * Data source for {@see Phergie_Plugin_Php}.
- * This source reads function descriptions from a file and stores them in
- * a sqlite database. When a function description is requested the function is
+ * This source reads function descriptions from a file and stores them in a 
+ * SQLite database. When a function description is requested the function is
  * retrieved from the local database.
  */
-class Php_Source_Local implements Php_Source
+class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
 {
     /**
-     * Local database for storage.
+     * Local database for storage
+     *
      * @var resource
      */
-    private $_database;
+    protected $_database;
 
     /**
-     * Source of the Php function summary.
+     * Source of the PHP function summary
+     *
      * @var string
      */
-    private $_funcSummary = 'http://cvs.php.net/viewvc.cgi/phpdoc/funcsummary.txt?revision=HEAD';
+    protected $_url = 'http://cvs.php.net/viewvc.cgi/phpdoc/funcsummary.txt?revision=HEAD';
 
     /**
-     * Local datasource constructor.
+     * Constructor to initialize the data source.
+     *
+     * @return void
      */
     public function __construct()
     {
-        // path for the database
         $path = dirname(__FILE__);
 
         try {
-            // Initialize the database connection
             $this->_database = new PDO('sqlite:' . $path . '/functions.db');
-
-            // build the database
             $this->_buildDatabase();
         } catch (PDOException $e) { }
-
     }
 
     /**
@@ -75,9 +73,10 @@ class Php_Source_Local implements Php_Source
 
     /**
      * Build the database and parses the function summary file into it.
-     * @param boolean $rebuild
+     *
+     * @param bool $rebuild
      */
-    private function _buildDatabase($rebuild = false)
+    protected function _buildDatabase($rebuild = false)
     {
         // Check to see if the functions table exists
         $table = $this->_database->exec("SELECT COUNT(*) FROM `sqlite_master` WHERE `name` = 'functions'");
@@ -91,7 +90,7 @@ class Php_Source_Local implements Php_Source
         // If we created a new table, fill it with data
         if(!$table || $rebuild) {
             // Get the contents of the source file
-            $contents = @file($this->_funcSummary, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
+            $contents = @file($this->_url, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
 
             if(!$contents) {
                 return;

@@ -10,60 +10,39 @@ class Phergie_Bot
      *
      * @var Phergie_Driver_Abstract
      */
-    private $_driver;
+    protected $_driver;
 
     /**
-     * List of open connections
+     * Current configuration instance
      *
-     * @var array
+     * @var Phergie_Config
      */
-    private $_connections = array();
+    protected $_config;
 
     /**
-     * Current plugin loader instance
+     * Current connection handler instance 
      *
-     * @var Phergie_Plugin_Loader
+     * @var Phergie_Connection_Handler 
      */
-    private $_plugin;
+    protected $_connections;
 
     /**
-     * Flag to enable debugging output
+     * Current plugin handler instance
      *
-     * @var bool
+     * @var Phergie_Plugin_Handler
      */
-    private $_debug = false;
+    protected $_plugins;
 
     /**
-     * Supporting method to handle debugging output based on whether or not 
-     * the debugging flag is enabled.
+     * Current event handler instance
      *
-     * @param string $message Debugging message to output
-     * @return void
+     * @var Phergie_Event_Handler
      */
-    private function _debug($message)
-    {
-        if ($this->_debug) {
-            echo 'bot: ', $message, PHP_EOL;
-        }
-    }
+    protected $_events;
 
     /**
-     * Sets a flag to toggle debugging output.
-     *
-     * @param bool $flag TRUE to enable debugging output (default), FALSE 
-     *        otherwise
-     * @return Phergie_Bot Provides a fluent interface
-     */
-    public function setDebug($flag = true)
-    {
-        $this->_debug = $flag;
-
-        return $this;
-    }
-
-    /**
-     * Returns a driver instance, creating it if it does not already exist
-     * and using a default class if none has been set.
+     * Returns a driver instance, creating one of the default class if 
+     * none has been set.
      *
      * @return Phergie_Driver_Abstract
      */
@@ -72,7 +51,6 @@ class Phergie_Bot
         if (empty($this->_driver)) {
             $this->_driver = new Phergie_Driver_Streams;
         }
-
         return $this->_driver;
     }
 
@@ -85,201 +63,235 @@ class Phergie_Bot
     public function setDriver(Phergie_Driver_Abstract $driver)
     {
         $this->_driver = $driver;
-
         return $this;
     }
 
     /**
-     * Returns a plugin loader instance, creating it if it does not already
+     * Sets the configuration to use.
+     *
+     * @param Phergie_Config $config
+     * @return Phergie_Runner_Abstract Provides a fluent interface
+     */
+    public function setConfig(Phergie_Config $config)
+    {
+        $this->_config = $config;
+        return $this;
+    }
+
+    /**
+     * Returns the configuration in use.
+     *
+     * @return Phergie_Config
+     */
+    public function getConfig()
+    {
+        if (empty($this->_config)) {
+            $this->_config = new Phergie_Config;
+            $this->_config->read('Settings.php');
+        }
+        return $this->_config;
+    }
+
+    /**
+     * Returns a plugin handler instance, creating it if it does not already
      * exist and using a default class if none has been set.
      *
-     * @return Phergie_Plugin_Loader
+     * @return Phergie_Plugin_Handler
      */
-    public function getPluginLoader()
+    public function getPluginHandler()
     {
-        if (empty($this->_plugin)) {
-            $this->_plugin = new Phergie_Plugin_Loader;
+        if (empty($this->_plugins)) {
+            $this->_plugins = new Phergie_Plugin_Handler;
         }
-
-        return $this->_plugin;
+        return $this->_plugins;
     }
 
     /**
-     * Sets the plugin loader instance to use.
+     * Sets the plugin handler instance to use.
      *
-     * @param Phergie_Plugin_Loader $loader
+     * @param Phergie_Plugin_Handler $handler
      * @return Phergie_Bot Provides a fluent interface
      */
-    public function setPluginLoader(Phergie_Plugin_Loader $loader)
+    public function setPluginHandler(Phergie_Plugin_Handler $handler)
     {
-        $this->_plugin = $loader;
-
+        $this->_plugins = $handler;
         return $this;
     }
 
     /**
-     * Adds a connection to the connection list.
+     * Returns an event handler instance, creating it if it does not already
+     * exist and using a default class if none has been set.
      *
-     * @param Phergie_Connection $connection
+     * @return Phergie_Event_Handler
+     */
+    public function getEventHandler()
+    {
+        if (empty($this->_events)) {
+            $this->_events = new Phergie_Event_Handler;
+        }
+        return $this->_events;
+    }
+
+    /**
+     * Sets the event handler instance to use.
+     *
+     * @param Phergie_Event_Handler $handler
      * @return Phergie_Bot Provides a fluent interface
      */
-    public function addConnection(Phergie_Connection $connection)
+    public function setEventHandler(Phergie_Event_Handler $handler)
     {
-        $this->_connections[$connection->getHostmask()] = $connection;
-
+        $this->_events = $handler;
         return $this;
     }
 
     /**
-     * Removes a connection from the connection list.
+     * Returns a connection handler instance, creating it if it does not 
+     * already exist and using a default class if none has been set.
      *
-     * @param Phergie_Connection|string $connection Instance or hostmask for
-     *        the connection to remove
+     * @return Phergie_Connection_Handler
+     */
+    public function getConnectionHandler()
+    {
+        if (empty($this->_connections)) {
+            $this->_connections = new Phergie_Connection_Handler;
+        }
+        return $this->_connections;
+    }
+
+    /**
+     * Sets the connection handler instance to use.
+     *
+     * @param Phergie_Connection_Handler $handler
      * @return Phergie_Bot Provides a fluent interface
      */
-    public function removeConnection($connection)
+    public function setConnectionHandler(Phergie_Connection_Handler $handler)
     {
-        if ($connection instanceof Phergie_Connection) {
-            $hostmask = array_search($connection, $this->_connections);
-        } elseif (is_string($connection)) {
-            $hostmask = $connection;
-        } else {
-            trigger_error('A connection instance or hostmask string must be specified when removing a connection', E_USER_ERROR);
-        }
+        $this->_connections = $handler;
+        return $this;
+    }
 
-        unset($this->_connections[$hostmask]);
+    /**
+     * Sends output to the console.
+     *
+     * @param string $output
+     * @return void
+     */
+    protected function _console($output)
+    {
+        $config = $this->getConfig();
+        if ($config['console']) {
+            echo date('H:i:s'), ' ', $output, PHP_EOL;
+        }
+    }
+
+    /**
+     * Loads plugins into the plugin handler.
+     *
+     * @return void
+     */
+    protected function _loadPlugins()
+    {
+        $config = $this->getConfig();
+        $plugins = $this->getPluginHandler();
+        $events = $this->getEventHandler();
+        
+        $plugins->setAutoload($config['plugins.autoload']);
+        foreach ($config['plugins'] as $name) {
+            try {
+                $this->_console('Loading plugin ' . $name);
+                $plugin = $plugins->addPlugin($name);
+                $plugin->onLoad();
+            } catch (Phergie_Plugin_Exception $e) {
+                $this->_console('Unable to load plugin "' . $name . '" - ' . $e->getMessage());
+                if (!empty($plugin)) {
+                    $plugins->removePlugin($plugin);
+                }
+            }
+        }
+        $plugins->setConfig($config);
+        $plugins->setEventHandler($events);
+    }
+
+    /**
+     * Configures and establishes connections to IRC servers.
+     *
+     * @return void
+     */
+    protected function _loadConnections()
+    {
+        $config = $this->getConfig();
+        $driver = $this->getDriver();
+        $connections = $this->getConnectionHandler();
+        $plugins = $this->getPluginHandler();
+
+        set_time_limit(0);
+
+        foreach ($config['connections'] as $data) {
+            $connection = new Phergie_Connection($data);
+            $connections->addConnection($connection);
+
+            $this->_console('Connecting to ' . $data['host']);
+            $driver->setConnection($connection)->doConnect();
+            $plugins->setConnection($connection)->onConnect();
+        }
+    }
+
+    /**
+     * Obtains and processes incoming events, then sends resulting outgoing 
+     * events.
+     *
+     * @return void
+     */
+    protected function _handleEvents()
+    {
+        $driver = $this->getDriver();
+        $plugins = $this->getPluginHandler();
+        $events = $this->getEventHandler();
+        $connections = $this->getConnectionHandler();
+
+        $plugins->onTick();
+        
+        foreach ($connections as $connection) {
+            $driver->setConnection($connection);
+            if (!($event = $driver->getEvent())) {
+                continue;
+            }
+
+            $plugins
+                ->setEvent($event)
+                ->setConnection($connection)
+                ->preEvent()
+                ->{'on' . ucfirst($event->getType())}()
+                ->postEvent()
+                ->preDispatch();
+            foreach ($events as $event) {
+                $method = 'do' . ucfirst(strtolower($event->getType())); 
+                call_user_func_array(array($driver, $method), $event->getArguments());
+            }
+            $plugins->postDispatch();
+
+            if ($events->hasEventOfType(Phergie_Event_Request::TYPE_QUIT)) {
+                $connections->removeConnection($connection);
+            }
+            $events->clearEvents();
+        }
     }
 
     /**
      * Establishes a connection to the server and initiates an execution
      * loop to continuously receive and process events.
      *
-     * @return void
+     * @return Phergie_Bot Provides a fluent interface 
      */
     public function run()
     {
-        // Allow the bot to run indefinitely
-        set_time_limit(0);
+        $this->_loadPlugins();
+        $this->_loadConnections();
 
-        // Get the current driver instance
-        $driver = $this->getDriver();
-
-        // Connection to each server and call the appropriate plugin callback
-        foreach ($this->_connections as $connection) {
-            $this->_debug('doConnect: ' . $connection->getHostmask());
-
-            $driver
-                ->setConnection($connection)
-                ->doConnect();
-
-            foreach ($this->_plugin as $plugin) {
-                $this->_debug('onConnect: ' . $connection->getHostmask() . ' ' . $plugin->getName());
-
-                $plugin
-                    ->setConnection($connection)
-                    ->onConnect();
-            }
+        while (count($this->_connections)) {
+            $this->_handleEvents();
         }
 
-        // Loop until a plugin dispatches an event resulting in termination
-        while (true) {
-
-            // Before checking for events, run the tick handler for each plugin
-            foreach ($this->_plugin as $plugin) {
-                $plugin->onTick();
-            }
-
-            // For each connection...
-            foreach ($this->_connections as $connection) {
-
-                // Initialize a queue for events initiated by plugins
-                $events = array();
-
-                // Check for a new event from the server
-                $event = $driver
-                    ->setConnection($connection)
-                    ->getEvent();
-
-                // If an event is received...
-                if ($event) {
-
-                    // Use a central handler if the event is a response
-                    if ($event instanceof Phergie_Event_Response) {
-                        $eventType = 'Response';
-
-                    // Use a specific handler if the event is a request
-                    } else {
-                        $eventType = ucfirst($event->getType());
-                    }
-                }
-
-                // For each plugin... 
-                foreach ($this->_plugin as $plugin) {
-
-                    // Execute callbacks and handlers if an event was received
-                    if ($event) {
-                        $plugin->setConnection($connection);
-                        $plugin->setEvent($event);
-                        $plugin->preEvent();
-                        $plugin->{'on' . $eventType}();
-                        $plugin->postEvent();
-                        $this->_debug('on' . $eventType . ': ' . $plugin->getName() . ' ' . count($plugin->getEvents()));
-                    }
-
-                    // Queue any events initiated by the plugin
-                    $events = array_merge($events, $plugin->getEvents());
-                    $plugin->clearEvents();
-                }
-
-                // If no events were queued, move on to the next connection
-                if (!$events) {
-                    continue;
-                }
-
-                // Execute pre-dispatch callback for plugin events 
-                foreach ($this->_plugin as $plugin) {
-                    $plugin->preDispatch($events);
-                    $this->_debug('preDispatch: ' . $plugin->getName() . ' ' . count($events));
-                }
-
-                // Dispatch plugin events
-                $quit = null;
-                foreach ($events as $event) {
-                    $this->_debug($event->getType());
-                    if (strcasecmp($event->getType(), 'quit') != 0) {
-                        call_user_func_array(
-                            array($driver, 'do' . $event->getType()),
-                            $event->getArguments()
-                        );
-                    } elseif (empty($quit)) {
-                        $quit = $event;
-                    }
-                }
-
-                // Execute post-dispatch callback for plugin events
-                foreach ($this->_plugin as $plugin) {
-                    $this->_debug('postDispatch: ' . $plugin->getName());
-                    $plugin->postDispatch($events);
-                }
-
-                // Terminate the connection if a QUIT request was dispatched
-                if ($quit) {
-                    call_user_func_array(
-                        array($driver, 'doQuit'), 
-                        $quit->getArguments()
-                    );
-                    foreach ($this->_plugin as $plugin) {
-                        $this->_debug('onDisconnect: ' . $plugin->getName());
-                        $plugin->onDisconnect();
-                    }
-                    $this->removeConnection($connection);
-                }
-            }
-
-            // If all connections have been terminated, break out of the loop
-            if (!count($this->_connections)) {
-                break;
-            }
-        }
+        return $this;
     }
 }

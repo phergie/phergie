@@ -14,7 +14,7 @@ class Phergie_Plugin_AutoJoin extends Phergie_Plugin_Abstract
      */
     public function onResponse()
     {
-        switch ($this->_event->getCode()) {
+        switch ($this->getEvent()->getCode()) {
             case Phergie_Event_Response::RPL_ENDOFMOTD:
             case Phergie_Event_Response::ERR_NOMOTD:
                 $channels = $this->_config['autojoin.channels'];

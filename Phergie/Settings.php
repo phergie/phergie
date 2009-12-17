@@ -4,10 +4,12 @@ return array(
 
     'connections' => array(
         array(
-            'hostname' => 'irc.freenode.net',
+            'host' => 'irc.freenode.net',
+            'port' => 6667,
             'username' => 'Elazar',
             'realname' => 'Matthew Turland',
-            'nick' => 'Phergie2'
+            'nick' => 'Phergie2',
+            'ssl' => false
         )
     ),
 
@@ -21,10 +23,9 @@ return array(
         'Pong',
         'Prioritize',
         'Quit'
-        'Php',
-        'Daddy',
-        'TerryChay',
     ),
+
+    'console' => true,
 
     'plugins.autoload' => true,
 
@@ -39,7 +40,5 @@ return array(
     'ping.ping' => 10,
 
     'command.prefix' => 'Phergie2: '
-    
-    'daddy.curses' => true,
 
 );

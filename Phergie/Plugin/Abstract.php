@@ -14,43 +14,32 @@ abstract class Phergie_Plugin_Abstract
     protected $_config;
 
     /**
-     * Currently active connection
+     * Plugin handler used to provide access to other plugins
+     *
+     * @var Phergie_Plugin_Handler
+     */
+    protected $_plugins;
+
+    /**
+     * Current event handler instance for outgoing events
+     *
+     * @var Phergie_Event_Handler
+     */
+    protected $_events;
+
+    /**
+     * Current connection instance
      *
      * @var Phergie_Connection
      */
     protected $_connection;
 
     /**
-     * Current event instance being processed
+     * Current incoming event being handled
      *
-     * @var Phergie_Event_Interface
+     * @var Phergie_Event_Request|Phergie_Event_Response
      */
     protected $_event;
-
-    /**
-     * Plugin loader used to provide access to other plugins
-     *
-     * @var Phergie_Loader
-     */
-    protected $_plugin;
-
-    /**
-     * Queue of events initiated by the plugin in response to the current
-     * event being processed
-     *
-     * @var array
-     */
-    protected $_events = array();
-
-    /**
-     * Check if the dependencies for the plugin are met.
-     * 
-     * @return string
-     */
-    public function checkDependencies()
-    {
-        return '';
-    }
 
     /**
      * Returns the short name for the plugin based on its class name.
@@ -63,6 +52,23 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
+     * Indicates that the plugin failed to load due to an unsatisfied 
+     * runtime requirement, such as a missing dependency.
+     *
+     * @param string $message Error message to provide more information 
+     *        about the reason for the failure
+     * @throws Phergie_Plugin_Exception Always
+     * @return Phergie_Plugin_Abstract Provides a fluent interface
+     */
+    public function fail($message)
+    {
+        throw new Phergie_Plugin_Exception(
+            $message,
+            Phergie_Plugin_Exception::ERR_REQUIREMENT_UNSATISFIED
+        );
+    }
+
+    /**
      * Sets the current configuration handler.
      *
      * @param Phergie_Config $config
@@ -71,13 +77,86 @@ abstract class Phergie_Plugin_Abstract
     public function setConfig(Phergie_Config $config)
     {
         $this->_config = $config;
-
         return $this;
     }
 
     /**
-     * Sets the currently active connection for which events are being 
-     * processed before any callbacks are issued.
+     * Returns the current configuration handler.
+     *
+     * @throws Phergie_Plugin_Exception No configuration handler has been set 
+     * @return Phergie_Config Configuration handler
+     */
+    public function getConfig()
+    {
+        if (empty($this->_config)) {
+            throw new Phergie_Plugin_Exception(
+                'Configuration handler cannot be accessed before one is set',
+                Phergie_Plugin_Exception::ERR_NO_CONFIG_HANDLER
+            );
+        }
+        return $this->_config;
+    }
+
+    /**
+     * Sets the current plugin handler.
+     *
+     * @param Phergie_Plugin_Handler $handler
+     * @return Phergie_Plugin_Abstract Provides a fluent interface
+     */
+    public function setPluginHandler(Phergie_Plugin_Handler $handler)
+    {
+        $this->_plugins = $handler;
+        return $this;
+    }
+
+    /**
+     * Returns the current plugin handler.
+     *
+     * @throws Phergie_Plugin_Exception No plugin handler has been set 
+     * @return Phergie_Plugin_Handler
+     */
+    public function getPluginHandler()
+    {
+        if (empty($this->_plugins)) {
+            throw new Phergie_Plugin_Exception(
+                'Plugin handler cannot be accessed before one is set',
+                Phergie_Plugin_Exception::ERR_NO_PLUGIN_HANDLER
+            );
+        }
+        return $this->_plugins;
+    }
+
+    /**
+     * Sets the current event handler.
+     *
+     * @param Phergie_Event_Handler $handler
+     * @return Phergie_Plugin_Abstract Provides a fluent interface
+     */
+    public function setEventHandler(Phergie_Event_Handler $handler)
+    {
+        $this->_events = $handler;
+        return $this;
+    }
+
+    /**
+     * Returns the current event handler.
+     *
+     * @throws Phergie_Plugin_Exception No event handler has been set 
+     * @return Phergie_Event_Handler
+     */
+    public function getEventHandler()
+    {
+        if (empty($this->_events)) {
+            throw new Phergie_Plugin_Exception(
+                'Event handler cannot be accessed before one is set',
+                Phergie_Plugin_Exception::ERR_NO_EVENT_HANDLER
+            );
+        }
+        return $this->_events;
+    }
+
+    /**
+     * Sets the current connection.
      *
      * @param Phergie_Connection $connection
      * @return Phergie_Plugin_Abstract Provides a fluent interface
@@ -85,292 +164,53 @@ abstract class Phergie_Plugin_Abstract
     public function setConnection(Phergie_Connection $connection)
     {
         $this->_connection = $connection;
-
         return $this;
     }
 
     /**
-     * Returns the currently active connection for which events are being 
-     * processed.
+     * Returns the current event connection.
      *
+     * @throws Phergie_Plugin_Exception No connection has been set 
      * @return Phergie_Connection
      */
     public function getConnection()
     {
+        if (empty($this->_connection)) {
+            throw new Phergie_Plugin_Exception(
+                'Connection cannot be accessed before one is set',
+                Phergie_Plugin_Exception::ERR_NO_CONNECTION
+            );
+        }
         return $this->_connection;
     }
 
     /**
-     * Sets the current event instance being processed before any callbacks
-     * are issued.
+     * Sets the current incoming event to be handled.
      *
-     * @param Phergie_Event_Interface $event
+     * @param Phergie_Event_Request|Phergie_Event_Response $event
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
-    public function setEvent(Phergie_Event_Interface $event)
+    public function setEvent($event)
     {
         $this->_event = $event;
-
         return $this;
     }
 
     /**
-     * Returns events initialized by the plugin in response to the current
-     * event being processed and clears the internal queue reserved to
-     * contain those events.
+     * Returns the current incoming event to be handled.
      *
-     * @return array
+     * @return Phergie_Event_Request|Phergie_Event_Response
      */
-    public function getEvents()
+    public function getEvent()
     {
-        return $this->_events;
+        if (empty($this->_connection)) {
+            throw new Phergie_Plugin_Exception(
+                'Event cannot be accessed before one is set',
+                Phergie_Plugin_Exception::ERR_NO_EVENT
+            );
+        }
+        return $this->_event;
     }
-
-    /**
-     * Clears the internal queue reserved for events being initiated by the 
-     * plugin.
-     *
-     * @return Phergie_Plugin_Abstract Provides a fluent interface 
-     */
-    public function clearEvents()
-    {
-        $this->_events = array();
-
-        return $this;
-    }
-
-    /**
-     * Sets the current plugin loader.
-     *
-     * @param Phergie_Loader $loader
-     * @return Phergie_Plugin_Abstract Provides a fluent interface
-     */
-    public function setPluginLoader(Phergie_Plugin_Loader $loader)
-    {
-        $this->_plugin = $loader;
-
-        return $this;
-    }
-
-    /**
-     * Callback dispatched before connections are checked for new events, 
-     * allowing for the execution of logic that does not require an event 
-     * to occur.
-     *
-     * @return void
-     */
-    public function onTick() { }
-
-    /**
-     * Callback dispatched right before commands are to be dispatched to the
-     * server, allowing plugins to mutate, remove, or reorder events.
-     *
-     * @param array $events Events to be dispatched
-     * @return void
-     */
-    public function preDispatch(array &$events) { }
-
-    /**
-     * Callback dispatched right after commands are dispatched to the server,
-     * informing plugins of what events were sent in and in what order.
-     *
-     * @param array $events Events that were dispatched
-     * @return void
-     */
-    public function postDispatch(array $events) { }
-
-    /**
-     * Callback dispatched before a handler is called for the current event
-     * based on its type.
-     *
-     * @return void
-     */
-    public function preEvent() { }
-
-    /**
-     * Callback dispatched after a handle is called for the current event 
-     * based on its type.
-     *
-     * @return void
-     */
-    public function postEvent() { }
-
-    /**
-     * Handler for when the bot connects to the current server.
-     *
-     * @return void
-     */
-    public function onConnect() { }
-
-    /**
-     * Handler for when the bot disconnects from the current server.
-     *
-     * @return void
-     */
-    public function onDisconnect() { }
-
-    /**
-     * Handler for when the client session is about to be terminated.
-     *
-     * @return void
-     */
-    public function onQuit() { }
-
-    /**
-     * Handler for when a user joins a channel.
-     *
-     * @return void
-     */
-    public function onJoin() { }
-
-    /**
-     * Handler for when a user leaves a channel.
-     *
-     * @return void
-     */
-    public function onPart() { }
-
-    /**
-     * Handler for when a user sends an invite request.
-     *
-     * @return void
-     */
-    public function onInvite() { }
-
-    /**
-     * Handler for when a user obtains operator privileges.
-     *
-     * @return void
-     */
-    public function onOper() { }
-
-    /**
-     * Handler for when a channel topic is viewed or changed.
-     *
-     * @return void
-     */
-    public function onTopic() { }
-
-    /**
-     * Handler for when a user or channel mode is changed.
-     *
-     * @return void
-     */
-    public function onMode() { }
-
-    /**
-     * Handler for when the server prompts the client for a nick.
-     *
-     * @return void
-     */
-    public function onNick() { }
-
-    /**
-     * Handler for when a message is received from a channel or user.
-     *
-     * @return void
-     */
-    public function onPrivmsg() { }
-
-    /**
-     * Handler for when an action is received from a channel or user
-     *
-     * @return void
-     */
-    public function onAction() { }
-
-    /**
-     * Handler for when a notice is received.
-     *
-     * @return void
-     */
-    public function onNotice() { }
-
-    /**
-     * Handler for when a user is kicked from a channel.
-     *
-     * @return void
-     */
-    public function onKick() { }
-
-    /**
-     * Handler for when the server or a user checks the client connection to
-     * ensure activity.
-     *
-     * @return void
-     */
-    public function onPing() { }
-
-    /**
-     * Handler for when the server sends a CTCP TIME request.
-     *
-     * @return void
-     */
-    public function onTime() { }
-
-    /**
-     * Handler for when the server sends a CTCP VERSION request.
-     *
-     * @return void
-     */
-    public function onVersion() { }
-
-    /**
-     * Handler for the reply to a CTCP PING request.
-     *
-     * @return void
-     */
-    public function onPingReply() { }
-
-    /**
-     * Handler for the reply to a CTCP TIME request.
-     *
-     * @return void
-     */
-    public function onTimeReply() { }
-
-    /**
-     * Handler for the reply to a CTCP VERSION request. 
-     *
-     * @return void
-     */
-    public function onVersionReply() { }
-
-    /**
-     * Handler for unrecognized CTCP requests.
-     *
-     * @return void
-     */
-    public function onCtcp() { }
-
-    /**
-     * Handler for unrecognized CTCP responses.
-     *
-     * @return void
-     */
-    public function onCtcpReply() { }
-
-    /**
-     * Handler for raw requests from the server.
-     *
-     * @return void
-     */
-    public function onRaw() { }
-
-    /**
-     * Handler for when the server sends a kill request.
-     *
-     * @return void
-     */
-    public function onKill() { }
-
-    /**
-     * Handler for when a server response is received to a client-issued
-     * command.
-     *
-     * @return void
-     */
-    public function onResponse() { }
 
     /**
      * Provides do* methods with signatures identical to those of
@@ -384,15 +224,8 @@ abstract class Phergie_Plugin_Abstract
     public function __call($name, array $args)
     {
         if (substr($name, 0, 2) == 'do') {
-            $type = substr($name, 2);
-            if (defined('Phergie_Event_Command::TYPE_' . strtoupper($type))) {
-                $request = new Phergie_Event_Command();
-                $request
-                    ->setPlugin($this)
-                    ->setType($type)
-                    ->setArguments($args);
-                $this->_events[] = $request;
-            }
-        }
+            $type = strtolower(substr($name, 2));
+            $this->getEventHandler()->addEvent($this, $type, $args);
+       }
     }
 }
