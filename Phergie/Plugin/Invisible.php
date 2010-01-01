@@ -15,5 +15,6 @@ class Phergie_Plugin_Invisible extends Phergie_Plugin_Abstract
     public function onConnect()
     {
         $this->doMode($this->getConnection()->getNick(), '+i');
+        $this->getPluginHandler()->removePlugin($this);
     }
 }

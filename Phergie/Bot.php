@@ -198,9 +198,9 @@ class Phergie_Bot
         $plugins->setAutoload($config['plugins.autoload']);
         foreach ($config['plugins'] as $name) {
             try {
-                $this->_console('Loading plugin ' . $name);
                 $plugin = $plugins->addPlugin($name);
                 $plugin->onLoad();
+                $this->_console('Loaded plugin ' . $name);
             } catch (Phergie_Plugin_Exception $e) {
                 $this->_console('Unable to load plugin "' . $name . '" - ' . $e->getMessage());
                 if (!empty($plugin)) {
@@ -223,8 +223,6 @@ class Phergie_Bot
         $driver = $this->getDriver();
         $connections = $this->getConnectionHandler();
         $plugins = $this->getPluginHandler();
-
-        set_time_limit(0);
 
         foreach ($config['connections'] as $data) {
             $connection = new Phergie_Connection($data);
@@ -258,8 +256,8 @@ class Phergie_Bot
             }
 
             $plugins
-                ->setEvent($event)
                 ->setConnection($connection)
+                ->setEvent($event)
                 ->preEvent()
                 ->{'on' . ucfirst($event->getType())}()
                 ->postEvent()
@@ -278,17 +276,20 @@ class Phergie_Bot
     }
 
     /**
-     * Establishes a connection to the server and initiates an execution
-     * loop to continuously receive and process events.
+     * Establishes server connections and initiates an execution loop to 
+     * continuously receive and process events.
      *
      * @return Phergie_Bot Provides a fluent interface 
      */
     public function run()
     {
+        set_time_limit(0);
+
         $this->_loadPlugins();
         $this->_loadConnections();
 
-        while (count($this->_connections)) {
+        $connections = $this->getConnectionHandler();
+        while (count($connections)) {
             $this->_handleEvents();
         }
 

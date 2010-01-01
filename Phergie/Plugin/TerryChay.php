@@ -6,6 +6,13 @@
  */
 class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
 {
+    /**
+     * Mapping of plugin request source names to previous request times, 
+     * used to prevent a user from flooding the plugin with requests
+     *
+     * @var array
+     */
+    protected $_floodCache = array();
 
     /**
      * URL to the web service
@@ -44,7 +51,7 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
             if (!empty($fact)) {
                 $this->doPrivmsg($source, 'Fact: ' . $fact);
                 if ($source[0] == '#') {
-                    $this->floodCache[$source] = time();
+                    $this->_floodCache[$source] = time();
                 }
             }
         }

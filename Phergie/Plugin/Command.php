@@ -19,7 +19,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
      *
      * @var string
      */
-    protected $_prefix = 'onCommand';
+    protected $_methodPrefix = 'onCommand';
 
     /**
      * Populates the methods cache.
@@ -32,7 +32,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             $reflector = new ReflectionClass($plugin);
             foreach ($reflector->getMethods() as $method) {
                 $name = $method->getName();
-                if (strpos($name, $this->_prefix) === 0 
+                if (strpos($name, $this->_methodPrefix) === 0 
                     && !isset($this->_methods[$name])) {
                     $this->_methods[$name] = array(
                         'total' => $method->getNumberOfParameters(),
@@ -72,7 +72,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
 
         // Separate the command and arguments
         $parsed = preg_split('/\s+/', $msg, 2);
-        $method = $this->_prefix . ucfirst(strtolower(array_shift($parsed))); 
+        $method = $this->_methodPrefix . ucfirst(strtolower(array_shift($parsed))); 
         $args = count($parsed) ? array_shift($parsed) : '';
 
         // Check to ensure the command exists

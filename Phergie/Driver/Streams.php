@@ -201,7 +201,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Create, populate, and return an event object
-        $connection = $this->getConnection();
         if (ctype_digit($cmd)) {
             $event = new Phergie_Event_Response;
             $event
@@ -216,9 +215,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 $event->setHostmask($hostmask);
             }
         }
-        $event
-            ->setRawData($buffer)
-            ->setConnection($connection);
+        $event->setRawData($buffer);
         return $event;
     }
 

@@ -212,6 +212,24 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     }
 
     /**
+     * Returns the corresponding instances for multiple specified plugins, 
+     * loading them if they are not already loaded and autoloading is 
+     * enabled.
+     *
+     * @param array $names List of short names of the plugin classes
+     * @return array Associative array mapping plugin class short names to 
+     *         corresponding plugin instances
+     */
+    public function getPlugins(array $names)
+    {
+        $plugins = array();
+        foreach ($names as $name) {
+            $plugins[$name] = $this->getPlugin($name);
+        }
+        return $plugins;
+    }
+
+    /**
      * Returns whether or not at least one instance of a specified plugin 
      * class is loaded.
      *
@@ -271,7 +289,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     }
 
     /**
-     * Proxies method calls to all plugins with the called method declared.
+     * Proxies method calls to all plugins containing the called method.
      *
      * @param string $name Name of the method called
      * @param array $args Arguments passed in the method call

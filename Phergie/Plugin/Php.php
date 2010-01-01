@@ -20,7 +20,7 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
-            $this->fail('PDO and pdo_sqlite extensions must be installed');
+            $this->_fail('PDO and pdo_sqlite extensions must be installed');
         }
     }
 

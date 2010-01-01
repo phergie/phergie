@@ -27,6 +27,13 @@ class Phergie_Hostmask
     protected $_username;
 
     /**
+     * Regular expression used to parse a hostmask
+     *
+     * @var string
+     */
+    protected static $_regex = '/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/';
+
+    /**
      * Constructor to initialize components of the hostmask.
      *
      * @param string $nick Nick component
@@ -41,6 +48,18 @@ class Phergie_Hostmask
     }
 
     /**
+     * Returns whether a given string appears to be a valid hostmask.
+     *
+     * @param string $string Alleged hostmask string
+     * @return bool TRUE if the string appears to be a valid hostmask, FALSE 
+     *         otherwise
+     */
+    public static function isValid($string)
+    {
+        return (preg_match(self::$_regex, $string) > 0);
+    }
+
+    /**
      * Parses a string containing the entire hostmask into a new instance of 
      * this class.
      *
@@ -52,7 +71,7 @@ class Phergie_Hostmask
      */
     public static function fromString($hostmask)
     {
-        if (preg_match('/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/', $hostmask, $match)) {
+        if (preg_match(self::$_regex, $hostmask, $match)) {
             list(, $nick, $username, $host) = $match; 
             return new self($nick, $username, $host);
         }

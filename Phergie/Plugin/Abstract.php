@@ -60,7 +60,7 @@ abstract class Phergie_Plugin_Abstract
      * @throws Phergie_Plugin_Exception Always
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
-    public function fail($message)
+    protected function _fail($message)
     {
         throw new Phergie_Plugin_Exception(
             $message,

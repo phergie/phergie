@@ -24,6 +24,7 @@ class Phergie_Plugin_AutoJoin extends Phergie_Plugin_Abstract
                     }
                     $this->doJoin($channels);
                 }
+                $this->getPluginHandler()->removePlugin($this);
         }
     }
 }
