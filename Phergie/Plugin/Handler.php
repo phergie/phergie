@@ -289,7 +289,9 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     }
 
     /**
-     * Proxies method calls to all plugins containing the called method.
+     * Proxies method calls to all plugins containing the called method. An  
+     * individual plugin may short-circuit this process by explicitly 
+     * returning false.
      *
      * @param string $name Name of the method called
      * @param array $args Arguments passed in the method call
@@ -299,7 +301,10 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     {
         foreach ($this->_plugins as $plugin) {
             if (method_exists($plugin, $name)) {
-                call_user_func_array(array($plugin, $name), $args);
+                $result = call_user_func_array(array($plugin, $name), $args);
+                if ($result === false) {
+                    break;
+                }
             }
         }
         return $this;
