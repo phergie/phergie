@@ -41,6 +41,13 @@ class Phergie_Bot
     protected $_events;
 
     /**
+     * Current end-user interface instance
+     *
+     * @var Phergie_Ui_Abstract
+     */
+    protected $_ui;
+
+    /**
      * Returns a driver instance, creating one of the default class if 
      * none has been set.
      *
@@ -79,15 +86,22 @@ class Phergie_Bot
     }
 
     /**
-     * Returns the configuration in use.
+     * Returns the entire configuration in use or the value of a specific 
+     * configuration setting.
      *
-     * @return Phergie_Config
+     * @param string $index Optional index of a specific configuration 
+     *        setting for which the corresponding value should be returned
+     * @return mixed Value corresponding to $index or the entire 
+     *         configuration if $index is not specified
      */
-    public function getConfig()
+    public function getConfig($index = null)
     {
         if (empty($this->_config)) {
             $this->_config = new Phergie_Config;
             $this->_config->read('Settings.php');
+        }
+        if ($index !== null) {
+            return $this->_config[$index];
         }
         return $this->_config;
     }
@@ -171,17 +185,29 @@ class Phergie_Bot
     }
 
     /**
-     * Sends output to the console.
+     * Returns an end-user interface instance, creating it if it does not 
+     * already exist and using a default class if none has been set.
      *
-     * @param string $output
-     * @return void
+     * @return Phergie_Ui_Abstract
      */
-    protected function _console($output)
+    public function getUi()
     {
-        $config = $this->getConfig();
-        if ($config['console']) {
-            echo date('H:i:s'), ' ', $output, PHP_EOL;
+        if (empty($this->_ui)) {
+            $this->_ui = new Phergie_Ui_Console;
         }
+        return $this->_ui;
+    }
+
+    /**
+     * Sets the end-user interface instance to use.
+     *
+     * @param Phergie_Ui_Abstract $ui
+     * @return Phergie_Bot Provides a fluent interface
+     */
+    public function setUi(Phergie_Ui_Abstract $ui)
+    {
+        $this->_ui = $ui;
+        return $this;
     }
 
     /**
@@ -194,15 +220,16 @@ class Phergie_Bot
         $config = $this->getConfig();
         $plugins = $this->getPluginHandler();
         $events = $this->getEventHandler();
+        $ui = $this->getUi();
         
         $plugins->setAutoload($config['plugins.autoload']);
         foreach ($config['plugins'] as $name) {
             try {
                 $plugin = $plugins->addPlugin($name);
                 $plugin->onLoad();
-                $this->_console('Loaded plugin ' . $name);
+                $ui->onPluginLoad($name);
             } catch (Phergie_Plugin_Exception $e) {
-                $this->_console('Unable to load plugin "' . $name . '" - ' . $e->getMessage());
+                $ui->onPluginFailure($name, $e->getMessage());
                 if (!empty($plugin)) {
                     $plugins->removePlugin($plugin);
                 }
@@ -223,12 +250,13 @@ class Phergie_Bot
         $driver = $this->getDriver();
         $connections = $this->getConnectionHandler();
         $plugins = $this->getPluginHandler();
+        $ui = $this->getUi();
 
         foreach ($config['connections'] as $data) {
             $connection = new Phergie_Connection($data);
             $connections->addConnection($connection);
 
-            $this->_console('Connecting to ' . $data['host']);
+            $ui->onConnect($data['host']);
             $driver->setConnection($connection)->doConnect();
             $plugins->setConnection($connection)->onConnect();
         }
@@ -284,6 +312,9 @@ class Phergie_Bot
     public function run()
     {
         set_time_limit(0);
+
+        $ui = $this->getUi();
+        $ui->setEnabled($this->getConfig('console'));
 
         $this->_loadPlugins();
         $this->_loadConnections();
