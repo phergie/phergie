@@ -1,10 +1,8 @@
 <?php
+
 /**
- * Php plugin for Phergie.
- *
  * Simply responds to messages addressed to the bot that contain the phrase
- * "Who's your daddy?"
- *
+ * "Who's your daddy?" and related variations.
  */
 class Phergie_Plugin_Daddy extends Phergie_Plugin_Abstract
 {
@@ -30,5 +28,4 @@ class Phergie_Plugin_Daddy extends Phergie_Plugin_Abstract
             }
         }
     }
-
 }
