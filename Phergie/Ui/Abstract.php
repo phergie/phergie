@@ -6,33 +6,64 @@
 abstract class Phergie_Ui_Abstract
 {
     /**
-     * Event fired when a server connection is attempted.
+     * Handler for when a server connection is attempted.
      *
      * @param string $host Server hostname
      * @return void 
      */
-    public function onConnect($host)
-    {
-    }
+    public function onConnect($host) { }
 
     /**
-     * Event fired when an attempt is made to load a plugin.
+     * Handler for when an attempt is made to load a plugin.
      *
      * @param string $plugin Short name of the plugin
      * @return void 
      */
-    public function onPluginLoad($plugin)
-    {
-    }
+    public function onPluginLoad($plugin) { }
 
     /**
-     * Event fired when a plugin fails to load.
+     * Handler for when a plugin fails to load.
      *
      * @param string $plugin Short name of the plugin
      * @param string $message Message describing the reason for the failure
      * @return void 
      */
-    public function onPluginFailure($plugin, $message)
-    {
-    }
+    public function onPluginFailure($plugin, $message) { }
+
+    /**
+     * Handler for when the bot receives an IRC event. 
+     *
+     * @param Phergie_Event_Abstract $event Received event
+     * @param Phergie_Connection $connection Connection on which the event 
+     *        was received
+     * @return void
+     */
+    public function onEvent(Phergie_Event_Abstract $event, Phergie_Connection $connection) { }
+
+    /**
+     * Handler for when the bot sends a command to a server.
+     *
+     * @param Phergie_Event_Command $event Event representing the command 
+     *        being sent
+     * @param Phergie_Connection $connection Connection on which the command  
+     *        is being sent 
+     * @return void
+     */
+    public function onCommand(Phergie_Event_Command $event, Phergie_Connection $connection) { }
+
+    /**
+     * Handler for when the bot terminates a connection to a server.
+     *
+     * @param Phergie_Connection $connection Terminated connection 
+     * @return void
+     */
+    public function onQuit(Phergie_Connection $connection) { }
+
+    /**
+     * Handler for when the bot shuts down after terminating all server 
+     * connections.
+     *
+     * @return void
+     */
+    public function onShutdown() { }
 }

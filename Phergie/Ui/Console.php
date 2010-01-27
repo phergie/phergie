@@ -126,4 +126,58 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     {
         $this->_console('Unable to load plugin ' . $plugin . ' - ' . $message);
     }
+
+    /**
+     * Outputs a prompt when the bot receives an IRC event. 
+     *
+     * @param Phergie_Event_Abstract $event Received event
+     * @param Phergie_Connection $connection Connection on which the event 
+     *        was received
+     * @return void
+     */
+    public function onEvent(Phergie_Event_Abstract $event, Phergie_Connection $connection)
+    {
+        $host = $connection->getHostmask()->getHost();
+        $this->_console($host . ' <- ' . $event->getRawData());
+    }
+
+    /**
+     * Outputs a prompt when the bot sends a command to a server.
+     *
+     * @param Phergie_Event_Command $event Event representing the command 
+     *        being sent
+     * @param Phergie_Connection $connection Connection on which the command  
+     *        is being sent 
+     * @return void
+     */
+    public function onCommand(Phergie_Event_Command $event, Phergie_Connection $connection)
+    {
+        $host = $connection->getHostmask()->getHost();
+        $type = strtoupper($event->getType());
+        $args = implode(' ', $event->getArguments());
+        $this->_console($host . ' -> ' . $type . ' ' . $args); 
+    }
+
+    /**
+     * Outputs a prompt when the bot terminates a connection to a server.
+     *
+     * @param Phergie_Connection $connection Terminated connection 
+     * @return void
+     */
+    public function onQuit(Phergie_Connection $connection)
+    {
+        $host = $connection->getHostmask()->getHost();
+        $this->_console('Disconnecting from ' . $host);
+    }
+
+    /**
+     * Outputs a prompt when the bot shuts down after terminating all server 
+     * connections.
+     *
+     * @return void
+     */
+    public function onShutdown()
+    {
+        $this->_console('Shutting down');
+    }
 }

@@ -274,6 +274,7 @@ class Phergie_Bot
         $plugins = $this->getPluginHandler();
         $events = $this->getEventHandler();
         $connections = $this->getConnectionHandler();
+        $ui = $this->getUi();
 
         $plugins->onTick();
         
@@ -282,6 +283,7 @@ class Phergie_Bot
             if (!($event = $driver->getEvent())) {
                 continue;
             }
+            $ui->onEvent($event, $connection);
 
             $plugins
                 ->setConnection($connection)
@@ -291,12 +293,14 @@ class Phergie_Bot
                 ->postEvent()
                 ->preDispatch();
             foreach ($events as $event) {
+                $ui->onCommand($event, $connection);
                 $method = 'do' . ucfirst(strtolower($event->getType())); 
                 call_user_func_array(array($driver, $method), $event->getArguments());
             }
             $plugins->postDispatch();
 
             if ($events->hasEventOfType(Phergie_Event_Request::TYPE_QUIT)) {
+                $ui->onQuit($connection);
                 $connections->removeConnection($connection);
             }
             $events->clearEvents();
@@ -323,6 +327,8 @@ class Phergie_Bot
         while (count($connections)) {
             $this->_handleEvents();
         }
+
+        $ui->onShutdown();
 
         return $this;
     }
