@@ -300,11 +300,8 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     public function __call($name, array $args)
     {
         foreach ($this->_plugins as $plugin) {
-            if (method_exists($plugin, $name)) {
-                $result = call_user_func_array(array($plugin, $name), $args);
-                if ($result === false) {
-                    break;
-                }
+            if (call_user_func_array(array($plugin, $name), $args) === false) {
+                break;
             }
         }
         return $this;
