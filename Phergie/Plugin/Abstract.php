@@ -223,10 +223,11 @@ abstract class Phergie_Plugin_Abstract
      */
     public function __call($name, array $args)
     {
-        if (substr($name, 0, 2) == 'do') {
+        $subcmd = substr($name, 0, 2);
+        if ($subcmd == 'do') {
             $type = strtolower(substr($name, 2));
             $this->getEventHandler()->addEvent($this, $type, $args);
-        } else {
+        } else if ($subcmd != 'on') {
             throw new Phergie_Plugin_Exception("Called invalid method {$name} in " . get_class($this), Phergie_Plugin_Exception::ERR_INVALID_CALL);
         }
     }
