@@ -6,9 +6,9 @@ return array(
         array(
             'host' => 'irc.freenode.net',
             'port' => 6667,
-            'username' => 'Elazar',
-            'realname' => 'Matthew Turland',
-            'nick' => 'Phergie2',
+            'username' => 'brewbot2',
+            'realname' => 'brewbot2',
+            'nick' => 'brewbot2',
             'ssl' => false
         )
     ),
@@ -30,15 +30,15 @@ return array(
     'plugins.autoload' => true,
 
     'altnick.nicks' => array(
-        'Phergie2_'
+        'brewbot2_'
     ),
 
-    'autojoin.channels' => '#phergie',
+    'autojoin.channels' => '#seantest',
 
     'ping.event' => 600,
 
     'ping.ping' => 10,
 
-    'command.prefix' => 'Phergie2: '
+    'command.prefix' => '!'
 
 );
