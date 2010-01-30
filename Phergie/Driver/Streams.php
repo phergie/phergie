@@ -162,7 +162,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                                 $cmd .= 'Reply';
                             }
                         case 'action':
-                            $args = array($nick, $args);
+                            $args = array($this->getConnection()->getNick(), $args);
                         break;
 
                         default:
@@ -170,7 +170,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                             if ($reply) {
                                 $cmd .= 'Reply';
                             }
-                            $args = array($nick, $ctcp);
+                            $args = array($this->getConnection()->getNick(), $ctcp);
                         break;
                     }
                 } else {
