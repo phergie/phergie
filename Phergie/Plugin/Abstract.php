@@ -226,7 +226,9 @@ abstract class Phergie_Plugin_Abstract
         if (substr($name, 0, 2) == 'do') {
             $type = strtolower(substr($name, 2));
             $this->getEventHandler()->addEvent($this, $type, $args);
-       }
+        } else {
+            throw new Phergie_Plugin_Exception("Called invalid method {$name} in " . get_class($this), Phergie_Plugin_Exception::ERR_INVALID_CALL);
+        }
     }
 
     /**
@@ -436,4 +438,25 @@ abstract class Phergie_Plugin_Abstract
      * @return void
      */
     public function onResponse() { }
+
+    /**
+     * Hook for pre-Event actions
+     */
+    public function preEvent() { }
+
+    /**
+     * Hook for post-Event actions
+     */
+    public function postEvent() { }
+
+    /**
+     * Hook for pre-Dispatch actions
+     */
+    public function preDispatch() { }
+
+    /**
+     * Hook for post-Dispatch actions
+     */
+    public function postDispatch() { }
+
 }

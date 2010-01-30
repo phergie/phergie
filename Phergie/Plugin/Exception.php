@@ -71,4 +71,11 @@ class Phergie_Plugin_Exception extends Phergie_Exception
      * the time that an attempt was made to load it
      */
     const ERR_REQUIREMENT_UNSATISFIED = 11;
+
+	/**
+	 * Error indicating that a local __call was made to a non-do*() method
+	 *
+	 * This is almost always accidental
+	 */
+	const ERR_INVALID_CALL = 12;
 }
