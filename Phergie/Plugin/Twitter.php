@@ -29,6 +29,16 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     static public $TWEET_REQUIRE_ADMIN = true;
 
+	/**
+	 * Register with the URL plugin, if possible
+	 */
+	public function onConnect()
+	{
+		if ($url = $this->getPluginHandler()->getPlugin('Url')) {
+			$url->registerRenderer($this);
+		}
+	}
+
     /**
      * Initialize (set up configuration vars)
      *
@@ -119,9 +129,73 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      * @param object $tweet
      * @return string
      */
-    protected function formatTweet(StdClass $tweet) {
-        return '<@' . $tweet->user->screen_name .'> '. $tweet->text
-            . ' - ' . $this->getCountdown(time() - strtotime($tweet->created_at)) . ' ago'
-            . ' (' . $this->_twitter->getUrlOutputStatus($tweet) . ')';
+    protected function formatTweet(StdClass $tweet, $includeUrl = true) {
+        $out =  '<@' . $tweet->user->screen_name .'> '. $tweet->text
+            . ' - ' . $this->getCountdown(time() - strtotime($tweet->created_at)) . ' ago';
+        if ($includeUrl) {
+            $out .= ' (' . $this->_twitter->getUrlOutputStatus($tweet) . ')';
+        }
+        return $out;
+    }
+
+    /**
+     * Converts a given integer/timestamp into days, minutes and seconds
+     *
+     * Borrowed from Phergie 1.x
+     *
+     * @param int $time The time/integer to calulate the values from
+     * @return string
+     */
+    public function getCountdown($time)
+    {
+        $return = array();
+
+        $days = floor($time / 86400);
+        if ($days > 0) {
+            $return[] = $days . 'd';
+            $time %= 86400;
+        }
+
+        $hours = floor($time / 3600);
+        if ($hours > 0) {
+            $return[] = $hours . 'h';
+            $time %= 3600;
+        }
+
+        $minutes = floor($time / 60);
+        if ($minutes > 0) {
+            $return[] = $minutes . 'm';
+            $time %= 60;
+        }
+
+        if ($time > 0 || count($return) <= 0) {
+            $return[] = ($time > 0 ? $time : '0') . 's';
+        }
+
+        return implode(' ', $return);
+    }
+
+    /**
+     * Renders a URL
+     */
+    public function renderUrl(array $parsed) {
+        if ($parsed['host'] != 'twitter.com' && $parsed['host'] != 'www.twitter.com') {
+            // unable to render non-twitter URLs
+            return false;
+        }
+
+        $source = $this->getEvent()->getSource();
+
+        if (preg_match('#^/(.*?)/status(es)?/([0-9]+)$#', $parsed['path'], $matches)) {
+            $tweet = $this->_twitter->getTweetByNum($matches[3]);
+            if ($tweet) {
+                $this->doPrivmsg($source, $this->formatTweet($tweet, false));
+            }
+            return true;
+        }
+
+        // if we get this far, we haven't satisfied the URL, so bail:
+        return false;
+
     }
 }

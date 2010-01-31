@@ -127,9 +127,14 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $_tldList = array();
 
     /**
-     * Name of the shortener object
+     * Shortener object
      */
     protected $_shortener;
+
+    /**
+     * Array of renderers
+     */
+    protected $_renderers = array();
 
     /**
      * Initializes settings, checks dependencies
@@ -215,6 +220,17 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 if (!$parsed = $this->parseUrl($url)) {
                     $this->debug('Invalid Url: Could not parse the URL. (' . $url . ')');
                     continue;
+                }
+
+                // allow out-of-class renderers to handle this URL
+                foreach ($this->_renderers as $renderer) {
+                    if ($renderer->renderUrl($parsed) === true) {
+                        // renderers should return true if they've fully
+                        // rendered the passed URL (they're responsible
+                        // for their own output)
+                        $this->debug('Handled by renderer: ' . get_class($renderer));
+                        continue 2;
+                    }
                 }
 
                 // Check to see if the given IP/Host is valid
@@ -615,6 +631,12 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     {
         // placeholder/porting helper
         return $str;
+    }
+
+    public function registerRenderer($obj, $priority = 10) {
+        // ignores priority for now
+        $this->_renderers[] = $obj;
+        array_unique($this->_renderers);
     }
 
 }
