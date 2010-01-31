@@ -24,6 +24,7 @@ class Phergie_Autoload
      * Autoload callback for loading class files.
      *
      * @param string $class Class to load
+     *
      * @return void
      */
     public function load($class)

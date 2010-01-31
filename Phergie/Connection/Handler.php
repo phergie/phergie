@@ -10,7 +10,7 @@ class Phergie_Connection_Handler implements Countable, IteratorAggregate
      *
      * @var array
      */
-    protected $_connections;
+    protected $connections;
 
     /**
      * Constructor to initialize storage for connections. 
@@ -19,18 +19,19 @@ class Phergie_Connection_Handler implements Countable, IteratorAggregate
      */
     public function __construct()
     {
-        $this->_connections = array();
+        $this->connections = array();
     }
 
     /**
      * Adds a connection to the connection list.
      *
-     * @param Phergie_Connection $connection
+     * @param Phergie_Connection $connection Connection to add
+     *
      * @return Phergie_Connection_Handler Provides a fluent interface
      */
     public function addConnection(Phergie_Connection $connection)
     {
-        $this->_connections[(string) $connection->getHostmask()] = $connection;
+        $this->connections[(string) $connection->getHostmask()] = $connection;
         return $this;
     }
 
@@ -39,6 +40,7 @@ class Phergie_Connection_Handler implements Countable, IteratorAggregate
      *
      * @param Phergie_Connection|string $connection Instance or hostmask for
      *        the connection to remove
+     *
      * @return Phergie_Connection_Handler Provides a fluent interface
      */
     public function removeConnection($connection)
@@ -46,12 +48,12 @@ class Phergie_Connection_Handler implements Countable, IteratorAggregate
         if ($connection instanceof Phergie_Connection) {
             $hostmask = (string) $connection->getHostmask(); 
         } elseif (is_string($connection) 
-            && isset($this->_connections[$connection])) {
+            && isset($this->connections[$connection])) {
             $hostmask = $connection;
         } else {
             return $this;
         }
-        unset($this->_connections[$hostmask]);
+        unset($this->connections[$hostmask]);
         return $this;
     }
 
@@ -62,7 +64,7 @@ class Phergie_Connection_Handler implements Countable, IteratorAggregate
      */
     public function count()
     {
-        return count($this->_connections);
+        return count($this->connections);
     }
 
     /**
@@ -72,6 +74,6 @@ class Phergie_Connection_Handler implements Countable, IteratorAggregate
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->_connections);
+        return new ArrayIterator($this->connections);
     }
 }

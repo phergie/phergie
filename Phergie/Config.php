@@ -12,14 +12,14 @@ class Phergie_Config implements ArrayAccess
      *
      * @var array
      */
-    protected $_files = array();
+    protected $files = array();
 
     /**
      * Mapping of setting names to their current corresponding values
      *
      * @var array
      */
-    protected $_settings = array();
+    protected $settings = array();
 
     /**
      * Includes a specified PHP configuration file and incorporates its 
@@ -27,6 +27,7 @@ class Phergie_Config implements ArrayAccess
      * configuration settings.
      *
      * @param string $file Path to the file to read
+     *
      * @return Phergie_Config Provides a fluent interface
      * @throws Phergie_Config_Exception
      */
@@ -34,16 +35,17 @@ class Phergie_Config implements ArrayAccess
     {
         if (!(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
             && file_exists($file))
-            && !is_executable($file)) {
+            && !is_executable($file)
+        ) {
             throw new Phergie_Config_Exception(
                 'Path "' . $file . '" does not reference an executable file',
                 Phergie_Config_Exception::ERR_FILE_NOT_EXECUTABLE
             );
         }
 
-        $settings = require $file;
-        $this->_files[$file] = array_keys($settings); 
-        $this->_settings += $settings;
+        $settings = include $file;
+        $this->files[$file] = array_keys($settings); 
+        $this->settings += $settings;
 
         return $this;
     }
@@ -56,31 +58,43 @@ class Phergie_Config implements ArrayAccess
      */
     public function write()
     {
-        foreach ($this->_files as $file => &$settings) {
+        foreach ($this->files as $file => &$settings) {
             $values = array();
             foreach ($settings as $setting) {
-                $values[$setting] = $this->_settings[$setting];
+                $values[$setting] = $this->settings[$setting];
             }
-            $source = '<?php' . PHP_EOL . PHP_EOL . 'return ' . var_export($value, true) . ';';
+            $source = '<?php' . PHP_EOL . PHP_EOL . 
+                'return ' . var_export($value, true) . ';';
             file_put_contents($file, $source); 
         }
     }
 
     /**
+     * Checks to see if a configuration setting is assigned a value.
+     *
+     * @param string $offset Configuration setting name 
+     *
+     * @return bool TRUE if the setting has a value, FALSE otherwise
      * @see ArrayAccess::offsetExists()
      */
     public function offsetExists($offset)
     {
-        return isset($this->_settings[$offset]);
+        return isset($this->settings[$offset]);
     }
 
     /**
+     * Returns the value of a configuration setting.
+     *
+     * @param string $offset Configuration setting name
+     *
+     * @return mixed Configuration setting value or NULL if it is not 
+     *         assigned a value
      * @see ArrayAccess::offsetGet()
      */
     public function offsetGet($offset)
     {
-        if (isset($this->_settings[$offset])) {
-            $value = &$this->_settings[$offset];
+        if (isset($this->settings[$offset])) {
+            $value = &$this->settings[$offset];
         } else {
             $value = null;
         }
@@ -89,24 +103,35 @@ class Phergie_Config implements ArrayAccess
     }
 
     /**
+     * Sets the value of a configuration setting.
+     *
+     * @param string $offset Configuration setting name
+     * @param mixed  $value  New setting value
+     *
+     * @return void
      * @see ArrayAccess::offsetSet()
      */
     public function offsetSet($offset, $value)
     {
-        $this->_setting[$offset] = $value;
+        $this->settings[$offset] = $value;
     }
 
     /**
+     * Removes the value set for a configuration setting.
+     *
+     * @param string $offset Configuration setting name
+     *
+     * @return void
      * @see ArrayAccess::offsetUnset()
      */
     public function offsetUnset($offset)
     {
-        unset($this->_settings[$offset]);
+        unset($this->settings[$offset]);
 
-        foreach ($this->_files as $file => $settings) {
+        foreach ($this->files as $file => $settings) {
             $key = array_search($offset, $settings);
             if ($key !== false) {
-                unset($this->_files[$file][$key]);
+                unset($this->files[$file][$key]);
             }
         }
     }

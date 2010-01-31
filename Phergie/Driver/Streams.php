@@ -12,29 +12,30 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @var array
      */
-    protected $_sockets = array();
+    protected $sockets = array();
 
     /**
      * Reference to the currently active socket handler
      *
      * @var resource
      */
-    protected $_socket;
+    protected $socket;
 
     /**
      * Handles construction of command strings and their transmission to the 
      * server.
      *
-     * @param string $command Command to send
-     * @param string|array $args Optional string or array of sequential 
+     * @param string       $command Command to send
+     * @param string|array $args    Optional string or array of sequential 
      *        arguments
+     *
      * @return string Command string that was sent 
      * @throws Phergie_Driver_Exception
      */
-    protected function _send($command, $args = '')
+    protected function send($command, $args = '')
     {
         // Require an open socket connection to continue
-        if (empty($this->_socket)) {
+        if (empty($this->socket)) {
             throw new Phergie_Driver_Exception(
                 'doConnect() must be called first',
                 Phergie_Driver_Exception::ERR_NO_INITIATED_CONNECTION
@@ -58,7 +59,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Transmit the command over the socket connection
-        fwrite($this->_socket, $buffer . "\r\n");
+        fwrite($this->socket, $buffer . "\r\n");
 
         // Return the command string that was transmitted
         return $buffer;
@@ -68,15 +69,16 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * Overrides the parent class to set the currently active socket handler 
      * when the active connection is changed.
      *
-     * @param Phergie_Connection $connection
+     * @param Phergie_Connection $connection Active connection
+     *
      * @return Phergie_Driver_Abstract Provides a fluent interface
      */
     public function setConnection(Phergie_Connection $connection)
     {
         // Set the active socket handler
         $hostmask = (string) $connection->getHostmask();
-        if (!empty($this->_sockets[$hostmask])) {
-            $this->_socket = $this->_sockets[$hostmask];
+        if (!empty($this->sockets[$hostmask])) {
+            $this->socket = $this->sockets[$hostmask];
         }
 
         // Set the active connection
@@ -87,11 +89,12 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * Supporting method to parse event argument strings where the last 
      * argument may contain a colon.
      *
-     * @param string $args Argument string to parse
-     * @param int $count Optional maximum number of arguments
+     * @param string $args  Argument string to parse
+     * @param int    $count Optional maximum number of arguments
+     *
      * @return array Array of argument values
      */
-    protected function _parseArguments($args, $count = -1)
+    protected function parseArguments($args, $count = -1)
     {
         return preg_split('/ :?/S', $args, $count);
     }
@@ -105,7 +108,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     public function getEvent()
     {
         // Check for a new event on the current connection
-        $buffer = fgets($this->_socket, 512);
+        $buffer = fgets($this->socket, 512);
 
         // If no new event was found, return NULL
         if (empty($buffer)) {
@@ -174,24 +177,24 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                         break;
                     }
                 } else {
-                    $args = $this->_parseArguments($args, 2);
+                    $args = $this->parseArguments($args, 2);
                 }
             break;
 
             case 'oper':
             case 'topic':
             case 'mode':
-                $args = $this->_parseArguments($args); 
+                $args = $this->parseArguments($args); 
             break;
 
             case 'part':
             case 'kill':
             case 'invite':
-                $args = $this->_parseArguments($args, 2); 
+                $args = $this->parseArguments($args, 2); 
             break;
 
             case 'kick':
-                $args = $this->_parseArguments($args, 3); 
+                $args = $this->parseArguments($args, 3); 
             break;
 
             // Remove the target from responses
@@ -240,8 +243,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Establish and configure the socket connection
         $remote = 'tcp://' . $hostname . ':' . $port;
-        $this->_socket = @stream_socket_client($remote, $errno, $errstr);
-        if (!$this->_socket) {
+        $this->socket = @streamsocket_client($remote, $errno, $errstr);
+        if (!$this->socket) {
             throw new Phergie_Driver_Exception(
                 'Unable to connect to server: socket error ' . $errno . ' ' . $errstr,
                 Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED
@@ -250,63 +253,66 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Send the password if one is specified
         if (!empty($password)) {
-            $this->_send('PASS', $password);
+            $this->send('PASS', $password);
         }
 
         // Send user information
-        $this->_send('USER', array(
+        $this->send('USER', array(
             $username, 
             $hostname, 
             $hostname, 
             $realname
         ));
 
-        $this->_send('NICK', $nick); 
+        $this->send('NICK', $nick); 
 
         // Add the socket handler to the internal array for socket handlers
-        $this->_sockets[(string) $connection->getHostmask()] = $this->_socket;
+        $this->sockets[(string) $connection->getHostmask()] = $this->socket;
     }
 
     /**
      * Terminates the connection with the server.
      *
      * @param string $reason Reason for connection termination (optional)
+     *
      * @return void
      */
     public function doQuit($reason = null)
     {
         // Send a QUIT command to the server
-        $this->_send('QUIT', $reason);
+        $this->send('QUIT', $reason);
 
         // Terminate the socket connection
-        fclose($this->_socket);
+        fclose($this->socket);
 
         // Remove the socket from the internal socket list
-        unset($this->_sockets[(string) $this->getConnection()->getHostmask()]);
+        unset($this->sockets[(string) $this->getConnection()->getHostmask()]);
     }
 
     /**
      * Joins a channel.
      *
      * @param string $channels Comma-delimited list of channels to join 
-     * @param string $keys Optional comma-delimited list of channel keys
+     * @param string $keys     Optional comma-delimited list of channel keys
+     *
      * @return void
      */
-    public function doJoin($channel, $key = null)
+    public function doJoin($channels, $keys = null)
     {
-        $args = array($channel);
+        $args = array($channels);
 
-        if (!empty($key)) {
-            $args[] = $key;
+        if (!empty($keys)) {
+            $args[] = $keys;
         }
 
-        $this->_send('JOIN', $args);
+        $this->send('JOIN', $args);
     }
 
     /**
      * Leaves a channel.
      *
      * @param string $channels Comma-delimited list of channels to leave 
+     *
      * @return void
      */
     public function doPart($channel, $reason = null)
@@ -317,30 +323,32 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             $args[] = $reason;
         }
 
-        $this->_send('PART', $args);
+        $this->send('PART', $args);
     }
 
     /**
      * Invites a user to an invite-only channel.
      *
-     * @param string $nick Nick of the user to invite
+     * @param string $nick    Nick of the user to invite
      * @param string $channel Name of the channel
+     *
      * @return void
      */
     public function doInvite($nick, $channel)
     {
-        $this->_send('INVITE', array($nick, $channel));
+        $this->send('INVITE', array($nick, $channel));
     }
 
     /**
      * Obtains a list of nicks of usrs in currently joined channels.
      *
      * @param string $channels Comma-delimited list of one or more channels
+     *
      * @return void
      */
     public function doNames($channels)
     {
-        $this->_send('NAMES', $channels);
+        $this->send('NAMES', $channels);
     }
 
     /**
@@ -349,18 +357,20 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * @param string $channels Comma-delimited list of one or more channels
      *                         to which the response should be restricted
      *                         (optional)
+     *
      * @return void
      */
     public function doList($channels = null)
     {
-        $this->_send('LIST', $channels);
+        $this->send('LIST', $channels);
     }
 
     /**
      * Retrieves or changes a channel topic.
      *
      * @param string $channel Name of the channel
-     * @param string $topic New topic to assign (optional)
+     * @param string $topic   New topic to assign (optional)
+     *
      * @return void
      */
     public function doTopic($channel, $topic = null)
@@ -371,14 +381,15 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             $args[] = $topic;
         }
 
-        $this->_send('TOPIC', $args);
+        $this->send('TOPIC', $args);
     }
 
     /**
      * Retrieves or changes a channel or user mode.
      *
      * @param string $target Channel name or user nick
-     * @param string $mode New mode to assign (optional)
+     * @param string $mode   New mode to assign (optional)
+     *
      * @return void
      */
     public function doMode($target, $mode = null)
@@ -389,61 +400,66 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             $args[] = $mode;
         }
 
-        $this->_send('MODE', $args);
+        $this->send('MODE', $args);
     }
 
     /**
      * Changes the client nick.
      *
      * @param string $nick New nick to assign
+     *
      * @return void
      */
     public function doNick($nick)
     {
-        $this->_send('NICK', $nick);
+        $this->send('NICK', $nick);
     }
 
     /**
      * Retrieves information about a nick.
      *
      * @param string $nick
+     *
      * @return void
      */
     public function doWhois($nick)
     {
-        $this->_send('WHOIS', $nick);
+        $this->send('WHOIS', $nick);
     }
 
     /**
      * Sends a message to a nick or channel.
      *
      * @param string $target Channel name or user nick
-     * @param string $text Text of the message to send
+     * @param string $text   Text of the message to send
+     *
      * @return void
      */
     public function doPrivmsg($target, $text)
     {
-        $this->_send('PRIVMSG', array($target, $text));
+        $this->send('PRIVMSG', array($target, $text));
     }
 
     /**
      * Sends a notice to a nick or channel.
      *
      * @param string $target Channel name or user nick
-     * @param string $text Text of the notice to send
+     * @param string $text   Text of the notice to send
+     *
      * @return void
      */
     public function doNotice($target, $text)
     {
-        $this->_send('NOTICE', array($target, $text));
+        $this->send('NOTICE', array($target, $text));
     }
 
     /**
      * Kicks a user from a channel.
      *
-     * @param string $nick Nick of the user
+     * @param string $nick    Nick of the user
      * @param string $channel Channel name
-     * @param string $reason Reason for the kick (optional)
+     * @param string $reason  Reason for the kick (optional)
+     *
      * @return void
      */
     public function doKick($nick, $channel, $reason = null)
@@ -454,25 +470,27 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             $args[] = $response;
         }
 
-        $this->_send('KICK', $args);
+        $this->send('KICK', $args);
     }
 
     /**
      * Responds to a server test of client responsiveness.
      *
      * @param string $daemon Daemon from which the original request originates
+     *
      * @return void
      */
     public function doPong($daemon)
     {
-        $this->_send('PONG', $daemon);
+        $this->send('PONG', $daemon);
     }
 
     /**
      * Sends a CTCP ACTION (/me) command to a nick or channel.
      *
      * @param string $target Channel name or user nick
-     * @param string $text Text of the action to perform
+     * @param string $text   Text of the action to perform
+     *
      * @return void
      */
     public function doAction($target, $text)
@@ -485,13 +503,14 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Sends a CTCP response to a user.
      *
-     * @param string $nick User nick 
-     * @param string $command Command to send
-     * @param string|array $args String or array of sequential arguments 
+     * @param string       $nick    User nick 
+     * @param string       $command Command to send
+     * @param string|array $args    String or array of sequential arguments 
      *        (optional)
+     *
      * @return void
      */
-    protected function _doCtcpResponse($nick, $command, $args = null)
+    protected function doCtcpResponse($nick, $command, $args = null)
     {
         if (is_array($args)) {
             $args = implode(' ', $args);
@@ -507,45 +526,49 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @param string $nick User nick
      * @param string $hash PING hash to use in the handshake
+     *
      * @return void
      */
     public function doPing($nick, $hash)
     {
-        $this->_doCtcpResponse($nick, 'PING', $hash);
+        $this->doCtcpResponse($nick, 'PING', $hash);
     }
 
     /**
      * Sends a CTCP VERSION response to a user.
      *
-     * @param string $nick User nick
+     * @param string $nick    User nick
      * @param string $version Version string to send
+     *
      * @return void
      */
     public function doVersion($nick, $version)
     {
-        $this->_doCtcpResponse($nick, 'VERSION', $version);
+        $this->doCtcpResponse($nick, 'VERSION', $version);
     }
 
     /**
      * Sends a CTCP TIME response to a user.
      *
-     * @param string $user User nick
+     * @param string $nick User nick
      * @param string $time Time string to send
+     *
      * @return void
      */
     public function doTime($nick, $time)
     {
-        $this->_doCtcpResponse($nick, 'TIME', $time);
+        $this->doCtcpResponse($nick, 'TIME', $time);
     }
 
     /**
      * Sends a raw command to the server.
      *
      * @param string $command Command string to send
+     *
      * @return void
      */
     public function doRaw($command)
     {
-        $this->_send('RAW', $command);
+        $this->send('RAW', $command);
     }
 }

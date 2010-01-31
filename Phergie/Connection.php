@@ -10,7 +10,7 @@ class Phergie_Connection
      *
      * @var string
      */
-    protected $_host;
+    protected $host;
 
     /**
      * Port on which the client will connect, defaults to the standard IRC 
@@ -18,60 +18,61 @@ class Phergie_Connection
      *
      * @var int
      */
-    protected $_port;
+    protected $port;
 
     /**
      * Flag where TRUE indicates that the connection should use SSL 
      *
      * @var bool
      */
-    protected $_ssl;
+    protected $ssl;
 
     /**
      * Nick that the client will use
      *
      * @var string
      */
-    protected $_nick;
+    protected $nick;
 
     /**
      * Username that the client will use
      *
      * @var string
      */
-    protected $_username;
+    protected $username;
 
     /**
      * Realname that the client will use
      *
      * @var string
      */
-    protected $_realname;
+    protected $realname;
 
     /**
      * Password that the client will use
      *
      * @var string
      */
-    protected $_password;
+    protected $password;
 
     /**
      * Hostmask for the connection
      *
      * @var Phergie_Hostmask
      */
-    protected $_hostmask;
+    protected $hostmask;
 
     /**
      * Constructor to initialize instance properties.
      *
      * @param array $options Optional associative array of property values 
      *        to initialize
+     *
      * @return void
      */
     public function __construct(array $options = array())
     {
-        $this->_ssl = false;
+        $this->ssl = false;
 
         $this->setOptions($options);
     }
@@ -81,9 +82,10 @@ class Phergie_Connection
      * value set for it.
      *
      * @param string $setting Name of the setting
+     *
      * @return void
      */
-    protected function _checkSetting($setting)
+    protected function checkSetting($setting)
     {
         if (empty($this->{'_' . $setting})) {
             throw new Phergie_Connection_Exception(
@@ -100,27 +102,28 @@ class Phergie_Connection
      */
     public function getHostmask()
     {
-        if (empty($this->_hostmask)) {
-            $this->_hostmask = new Phergie_Hostmask(
-                $this->_nick,
-                $this->_username,
-                $this->_host
+        if (empty($this->hostmask)) {
+            $this->hostmask = new Phergie_Hostmask(
+                $this->nick,
+                $this->username,
+                $this->host
             );
         }
 
-        return $this->_hostmask; 
+        return $this->hostmask; 
     }
 
     /**
      * Sets the host to which the client will connect.
      *
-     * @param string $host
+     * @param string $host Hostname
+     *
      * @return Phergie_Connection Provides a fluent interface 
      */
     public function setHost($host)
     {
-        if (empty($this->_host)) {
-            $this->_host = (string) $host;
+        if (empty($this->host)) {
+            $this->host = (string) $host;
         }
 
         return $this;
@@ -134,21 +137,22 @@ class Phergie_Connection
      */
     public function getHost()
     {
-        $this->_checkSetting('host');
+        $this->checkSetting('host');
 
-        return $this->_host;
+        return $this->host;
     }
 
     /**
      * Sets the port on which the client will connect.
      *
-     * @param int $port
+     * @param int $port Port
+     *
      * @return Phergie_Connection Provides a fluent interface 
      */
     public function setPort($port)
     {
-        if (empty($this->_port)) {
-            $this->_port = (int) $port;
+        if (empty($this->port)) {
+            $this->port = (int) $port;
         }
 
         return $this;
@@ -161,22 +165,23 @@ class Phergie_Connection
      */
     public function getPort()
     {
-        if (empty($this->_port)) {
-            $this->_port = 6667;
+        if (empty($this->port)) {
+            $this->port = 6667;
         }
 
-        return $this->_port;
+        return $this->port;
     }
 
     /**
      * Sets whether the connection should use SSL.
      *
      * @param bool $ssl TRUE to use SSL, FALSE otherwise
+     *
      * @return Phergie_Connection Provides a fluent interface
      */
     public function setSsl($ssl)
     {
-        $this->_ssl = (bool) $ssl;
+        $this->ssl = (bool) $ssl;
 
         return $this;
     }
@@ -188,19 +193,20 @@ class Phergie_Connection
      */
     public function getSsl()
     {
-        return $this->_ssl;
+        return $this->ssl;
     }
 
     /**
      * Sets the nick that the client will use.
      *
-     * @param string $nick
+     * @param string $nick Nickname
+     *
      * @return Phergie_Connection Provides a fluent interface 
      */
     public function setNick($nick)
     {
-        if (empty($this->_nick)) {
-            $this->_nick = (string) $nick;
+        if (empty($this->nick)) {
+            $this->nick = (string) $nick;
         }
 
         return $this;
@@ -213,21 +219,22 @@ class Phergie_Connection
      */
     public function getNick()
     {
-        $this->_checkSetting('nick');
+        $this->checkSetting('nick');
 
-        return $this->_nick;
+        return $this->nick;
     }
 
     /**
      * Sets the username that the client will use.
      *
-     * @param string $username
+     * @param string $username Username
+     *
      * @return Phergie_Connection Provides a fluent interface 
      */
     public function setUsername($username)
     {
-        if (empty($this->_username)) {
-            $this->_username = (string) $username;
+        if (empty($this->username)) {
+            $this->username = (string) $username;
         }
 
         return $this;
@@ -240,21 +247,22 @@ class Phergie_Connection
      */
     public function getUsername()
     {
-        $this->_checkSetting('username');
+        $this->checkSetting('username');
 
-        return $this->_username;
+        return $this->username;
     }
 
     /**
      * Sets the realname that the client will use.
      *
-     * @param string $realname
+     * @param string $realname Real name
+     *
      * @return Phergie_Connection Provides a fluent interface 
      */
     public function setRealname($realname)
     {
-        if (empty($this->_realname)) {
-            $this->_realname = (string) $realname;
+        if (empty($this->realname)) {
+            $this->realname = (string) $realname;
         }
 
         return $this;
@@ -267,21 +275,22 @@ class Phergie_Connection
      */
     public function getRealname()
     {
-        $this->_checkSetting('realname');
+        $this->checkSetting('realname');
 
-        return $this->_realname;
+        return $this->realname;
     }
 
     /**
      * Sets the password that the client will use.
      *
-     * @param string $password
+     * @param string $password Password
+     *
      * @return Phergie_Connection Provides a fluent interface 
      */
     public function setPassword($password)
     {
-        if (empty($this->_password)) {
-            $this->_password = (string) $password;
+        if (empty($this->password)) {
+            $this->password = (string) $password;
         }
 
         return $this;
@@ -294,7 +303,7 @@ class Phergie_Connection
      */
     public function getPassword()
     {
-        return $this->_password;
+        return $this->password;
     }
 
     /**
@@ -302,6 +311,7 @@ class Phergie_Connection
      *
      * @param array $options Associative array of setting names mapped to 
      *        corresponding values
+     *
      * @return Phergie_Connection Provides a fluent interface 
      */
     public function setOptions(array $options)
