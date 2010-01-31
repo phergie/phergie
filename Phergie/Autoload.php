@@ -28,12 +28,8 @@ class Phergie_Autoload
      */
     public function load($class)
     {
-        static $preflen = null;
-        if (null === $preflen) {
-            $preflen = strlen('Phergie_');
-        }
-        if (substr($class, 0, $preflen)) {
-            $class = substr($class, $preflen);
+        if (substr($class, 0, 8) == 'Phergie_') {
+            $class = substr($class, 8);
         }
         include str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
     }
