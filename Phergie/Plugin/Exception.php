@@ -73,9 +73,10 @@ class Phergie_Plugin_Exception extends Phergie_Exception
     const ERR_REQUIREMENT_UNSATISFIED = 11;
 
 	/**
-	 * Error indicating that a local __call was made to a non-do*() method
-	 *
-	 * This is almost always accidental
+	 * Error indicating that a call was made to a nonexistent plugin method 
+     * and that its __call() implementation did not process that call as an 
+     * attempt to trigger an event - this is intended to aid in debugging of 
+     * such situations
 	 */
 	const ERR_INVALID_CALL = 12;
 }
