@@ -258,6 +258,39 @@ abstract class Phergie_Plugin_Abstract
     public function onTick() { }
 
     /**
+     * Handler for when any event is received but has not yet been dispatched 
+     * to the plugin handler method specific to its event type.
+     *
+     * @return void
+     */
+    public function preEvent() { }
+
+    /**
+     * Handler for after any event has been dispatched to the plugin handler 
+     * method specific to its event type.
+     *
+     * @return void
+     */
+    public function postEvent() { }
+
+    /**
+     * Handler for after plugin processing of an event has concluded but 
+     * before any events triggered in response by plugins are sent to the 
+     * server - useful for modifying outgoing events before they are sent.
+     *
+     * @return void
+     */
+    public function preDispatch() { }
+
+    /**
+     * Handler for after any events triggered by plugins in response to a 
+     * received event are sent to the server. 
+     *
+     * @return void
+     */
+    public function postDispatch() { }
+
+    /**
      * Handler for when the server prompts the client for a nick.
      *
      * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_2
@@ -439,25 +472,4 @@ abstract class Phergie_Plugin_Abstract
      * @return void
      */
     public function onResponse() { }
-
-    /**
-     * Hook for pre-Event actions
-     */
-    public function preEvent() { }
-
-    /**
-     * Hook for post-Event actions
-     */
-    public function postEvent() { }
-
-    /**
-     * Hook for pre-Dispatch actions
-     */
-    public function preDispatch() { }
-
-    /**
-     * Hook for post-Dispatch actions
-     */
-    public function postDispatch() { }
-
 }
