@@ -633,8 +633,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         return $str;
     }
 
-    public function registerRenderer($obj, $priority = 10) {
-        // ignores priority for now
+    public function registerRenderer($obj) {
         $this->_renderers[] = $obj;
         array_unique($this->_renderers);
     }
