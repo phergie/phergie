@@ -1,8 +1,33 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Prioritizes events such that they are executed in order from least to most 
  * destructive.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
 {
@@ -11,7 +36,7 @@ class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
      *
      * @var array
      */
-    protected $_priority = array(
+    protected $priority = array(
         'raw',
         'pass',
         'user',
@@ -61,7 +86,7 @@ class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
         }
 
         // Order events by type from least to most destructive
-        $types = array_intersect($this->_priority, array_keys($categorized));
+        $types = array_intersect($this->priority, array_keys($categorized));
         $prioritized = array();
         foreach ($types as $type) {
             $prioritized = array_merge($prioritized, $categorized[$type]);

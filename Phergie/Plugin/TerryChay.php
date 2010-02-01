@@ -1,39 +1,56 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Plugin_TerryChay
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_TerryChay
+ */
 
 /**
  * Parses incoming messages for the words "Terry Chay" or tychay and responds
- *  with a random Terry fact retrieved from Sean's Chayism service. 
+ * with a random Terry fact retrieved from the Chayism web service. 
+ *
+ * @category Phergie 
+ * @package  Phergie_Plugin_TerryChay
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_TerryChay
  */
 class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
 {
     /**
-     * Mapping of plugin request source names to previous request times, 
-     * used to prevent a user from flooding the plugin with requests
-     *
-     * @var array
-     */
-    protected $_floodCache = array();
-
-    /**
      * URL to the web service
      *
-     * @var string
+     * @const string
      */
-    protected $_url = 'http://phpdoc.info/chayism/';
+    const URL = 'http://phpdoc.info/chayism/';
 
     /**
      * Fetches a chayism.
      *
-     * @return bool TRUE if successful, FALSE otherwise 
+     * @return string|bool Fetched chayism or FALSE if the operation failed 
      */
     public function getChayism()
     {
-        return file_get_contents($this->_url);
+        return file_get_contents(self::URL);
     }
 
     /**
-     * Parses incoming messages for "Terry Chay"|tychay and respond with a
-     * chayism.
+     * Parses incoming messages for "Terry Chay" and related variations and 
+     * responds with a chayism.
      *
      * @return void
      */
@@ -42,24 +59,20 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
         $event = $this->getEvent();
         $source = $event->getSource();
         $message = $event->getText();
+        $pattern 
+            = '{^(' . preg_quote($this->getConfig('command.prefix')) . 
+            '\s*)?.*(terry\s+chay|tychay)}ix';
 
-        // Check to see if the message includes Terry Chay.
-        if (preg_match('{^(' . 
-                preg_quote($this->_config['command.prefix']) . 
-                '\s*)?.*(terry\s+chay|tychay)}ix', $message, $m)) {
-            $fact = $this->getChayism();
-            if (!empty($fact)) {
-                $this->doPrivmsg($source, 'Fact: ' . $fact);
-                if ($source[0] == '#') {
-                    $this->_floodCache[$source] = time();
-                }
-            }
+        if (preg_match($pattern, $message, $m)
+            && $fact = $this->getChayism()
+        ) {
+            $this->doPrivmsg($source, 'Fact: ' . $fact);
         }
     }
 
     /**
-     * Parses incoming CTCP request for "Terry Chay"|tychay and respond with a
-     * chayism.
+     * Parses incoming CTCP request for "Terry Chay" and related variations 
+     * and responds with a chayism.
      *
      * @return void
      */
@@ -69,11 +82,10 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
         $source = $event->getSource();
         $ctcp = $event->getArgument(1);
 
-        if (preg_match('({terry[\s_+-]*chay}|tychay)ix', $ctcp, $m)) {
-            $fact = $this->getChayism();
-            if (!empty($fact)) {
-                $this->doCtcpReply($source, 'TERRYCHAY', $fact);
-            }
+        if (preg_match('({terry[\s_+-]*chay}|tychay)ix', $ctcp, $m)
+            && $fact = $this->getChayism()
+        ) {
+            $this->doCtcpReply($source, 'TERRYCHAY', $fact);
         }
     }
 }

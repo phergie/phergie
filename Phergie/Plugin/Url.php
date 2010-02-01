@@ -1,90 +1,128 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Monitors incoming messages for instances of URLs and responds with messages
  * containing relevant information about detected URLs.
  *
- * Has an utility method accessible through $this->getPlugin('Url')->getTitle('http://foo..')
+ * Has an utility method accessible via 
+ * $this->getPlugin('Url')->getTitle('http://foo..').
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 {
     /**
      * Links output format
      *
-     * Can use the variables %nick%, %title% and %link% in it to display page titles
-     * and links
+     * Can use the variables %nick%, %title% and %link% in it to display 
+     * page titles and links
      *
      * @var string
      */
-    protected $_baseFormat = '%nick%: %message%';
-    protected $_messageFormat = '[ %link% ] %title%';
+    protected $baseFormat = '%nick%: %message%';
+    protected $messageFormat = '[ %link% ] %title%';
 
     /**
-     * Merged link output
-     *
-     * If true, then multiple posted links will be merged into one line
+     * Flag indicating whether a single response should be sent for a single 
+     * message containing multiple links
      *
      * @var bool
      */
-    protected $_mergeLinks = true;
+    protected $mergeLinks = true;
 
     /**
      * Max length of the fetched URL title
      *
      * @var int
      */
-    protected $_titleLength = 40;
+    protected $titleLength = 40;
 
     /**
-     * Url cache to prevent spamming, especially with multiple bots on the same channel
+     * Url cache to prevent spamming, especially with multiple bots on the 
+     * same channel
+     *
+     * @var array
      */
-    protected $_urlCache = array();
-    protected $_shortCache = array();
+    protected $urlCache = array();
+    protected $shortCache = array();
 
     /**
-     * The time in seconds to store the cached entries
+     * Time in seconds to store the cached entries
+     *
      * Setting it to 0 or below disables the cache expiration
+     *
+     * @var int
      */
-    protected $_expire = 1800;
+    protected $expire = 1800;
 
     /**
-     * The number of entries to keep in the cache at one time per channel
+     * Number of entries to keep in the cache at one time per channel
+     *
      * Setting it to 0 or below disables the cache limit
+     *
+     * @var int
      */
-    protected $_limit = 10;
+    protected $limit = 10;
 
     /**
-     * This setting determines if URL will use a fallback when trying to open
-     * a https stream when OpenSSL isn't available, instead it will try opening
-     * a http stream instead.
+     * Flag that determines if the plugin will fall back to using an HTTP 
+     * stream when a URL using SSL is detected and OpenSSL support isn't 
+     * available in the PHP installation in use 
+     *
+     * @var bool
      */
-    protected $_sslFallback = true;
+    protected $sslFallback = true;
 
     /**
-     * Set to true by the custom error handler if an HTTP error code has been received
+     * Flag that is set to true by the custom error handler if an HTTP error 
+     * code has been received
      *
      * @var boolean
      */
-    protected $_errorStatus = false;
-    protected $_errorMessage = null;
+    protected $errorStatus = false;
+    protected $errorMessage = null;
 
     /**
-     * Whether or not to display error messages as the title if a link posted
-     * encounters an error.
+     * Flag indicating whether or not to display error messages as the title 
+     * if a link posted encounters an error
      *
      * @var boolean
      */
-    protected $_showErrors = true;
+    protected $showErrors = true;
 
     /**
-     * Whether or not to detect schemeless urls (i.e. "example.com")
+     * Flag indicating whether to detect schemeless URLS (i.e. "example.com")
      *
      * @var boolean
      */
-    protected $_detectSchemeless = false;
+    protected $detectSchemeless = false;
 
     /**
-     * List of HTTP errors to return when the requested URL returns an HTTP error
+     * List of error messages to return when the requested URL returns an 
+     * HTTP error
      *
      * @var array
      */
@@ -124,50 +162,48 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      *
      * @var array
      */
-    protected $_tldList = array();
+    protected $tldList = array();
 
     /**
      * Shortener object
      */
-    protected $_shortener;
+    protected $shortener;
 
     /**
      * Array of renderers
      */
-    protected $_renderers = array();
+    protected $renderers = array();
 
     /**
-     * Initializes settings, checks dependencies
+     * Initializes settings, checks dependencies.
      *
      * @return void
      */
     public function onConnect()
     {
         // make the shortener configurable
-        $shortener = isset($this->_config['url.shortener']) ?
-            $this->_config['url.shortener'] :
-            'Trim';
+        $shortener = $this->getConfig('url.shortener', 'Trim');
         $shortener = "Phergie_Plugin_Url_Shorten_{$shortener}";
-        $this->_shortener = new $shortener;
+        $this->shortener = new $shortener;
 
-        if (!$this->_shortener instanceof Phergie_Plugin_Url_Shorten_Abstract) {
-            $this->_fail("Declared shortener class {$shortener} is not of proper ancestry");
+        if (!$this->shortener instanceof Phergie_Plugin_Url_Shorten_Abstract) {
+            $this->fail("Declared shortener class {$shortener} is not of proper ancestry");
         }
 
         // Get a list of valid TLDs
-        if (!is_array($this->_tldList) || count($this->_tldList) <= 6) {
+        if (!is_array($this->tldList) || count($this->tldList) <= 6) {
             /* Omitted for port
             if ($this->pluginLoaded('Tld')) {
-                $this->_tldList = Phergie_Plugin_Tld::getTlds();
-                if (is_array($this->_tldList)) {
-                    $this->_tldList = array_keys($this->_tldList);
+                $this->tldList = Phergie_Plugin_Tld::getTlds();
+                if (is_array($this->tldList)) {
+                    $this->tldList = array_keys($this->tldList);
                 }
             }
             */
-            if (!is_array($this->_tldList) || count($this->_tldList) <= 0) {
-                $this->_tldList = array('ac', 'ad', 'ae', 'aero', 'af', 'ag', 'ai', 'al', 'am', 'an', 'ao', 'aq', 'ar', 'arpa', 'as', 'asia', 'at', 'au', 'aw', 'ax', 'az', 'ba', 'bb', 'bd', 'be', 'bf', 'bg', 'bh', 'bi', 'biz', 'bj', 'bl', 'bm', 'bn', 'bo', 'br', 'bs', 'bt', 'bv', 'bw', 'by', 'bz', 'ca', 'cat', 'cc', 'cd', 'cf', 'cg', 'ch', 'ci', 'ck', 'cl', 'cm', 'cn', 'co', 'com', 'coop', 'cr', 'cu', 'cv', 'cx', 'cy', 'cz', 'de', 'dj', 'dk', 'dm', 'do', 'dz', 'ec', 'edu', 'ee', 'eg', 'eh', 'er', 'es', 'et', 'eu', 'fi', 'fj', 'fk', 'fm', 'fo', 'fr', 'ga', 'gb', 'gd', 'ge', 'gf', 'gg', 'gh', 'gi', 'gl', 'gm', 'gn', 'gov', 'gp', 'gq', 'gr', 'gs', 'gt', 'gu', 'gw', 'gy', 'hk', 'hm', 'hn', 'hr', 'ht', 'hu', 'id', 'ie', 'il', 'im', 'in', 'info', 'int', 'io', 'iq', 'ir', 'is', 'it', 'je', 'jm', 'jo', 'jobs', 'jp', 'ke', 'kg', 'kh', 'ki', 'km', 'kn', 'kp', 'kr', 'kw', 'ky', 'kz', 'la', 'lb', 'lc', 'li', 'lk', 'lr', 'ls', 'lt', 'lu', 'lv', 'ly', 'ma', 'mc', 'md', 'me', 'mf', 'mg', 'mh', 'mil', 'mk', 'ml', 'mm', 'mn', 'mo', 'mobi', 'mp', 'mq', 'mr', 'ms', 'mt', 'mu', 'museum', 'mv', 'mw', 'mx', 'my', 'mz', 'na', 'name', 'nc', 'ne', 'net', 'nf', 'ng', 'ni', 'nl', 'no', 'np', 'nr', 'nu', 'nz', 'om', 'org', 'pa', 'pe', 'pf', 'pg', 'ph', 'pk', 'pl', 'pm', 'pn', 'pr', 'pro', 'ps', 'pt', 'pw', 'py', 'qa', 're', 'ro', 'rs', 'ru', 'rw', 'sa', 'sb', 'sc', 'sd', 'se', 'sg', 'sh', 'si', 'sj', 'sk', 'sl', 'sm', 'sn', 'so', 'sr', 'st', 'su', 'sv', 'sy', 'sz', 'tc', 'td', 'tel', 'tf', 'tg', 'th', 'tj', 'tk', 'tl', 'tm', 'tn', 'to', 'tp', 'tr', 'travel', 'tt', 'tv', 'tw', 'tz', 'ua', 'ug', 'uk', 'um', 'us', 'uy', 'uz', 'va', 'vc', 've', 'vg', 'vi', 'vn', 'vu', 'wf', 'ws', 'ye', 'yt', 'yu', 'za', 'zm', 'zw');
+            if (!is_array($this->tldList) || count($this->tldList) <= 0) {
+                $this->tldList = array('ac', 'ad', 'ae', 'aero', 'af', 'ag', 'ai', 'al', 'am', 'an', 'ao', 'aq', 'ar', 'arpa', 'as', 'asia', 'at', 'au', 'aw', 'ax', 'az', 'ba', 'bb', 'bd', 'be', 'bf', 'bg', 'bh', 'bi', 'biz', 'bj', 'bl', 'bm', 'bn', 'bo', 'br', 'bs', 'bt', 'bv', 'bw', 'by', 'bz', 'ca', 'cat', 'cc', 'cd', 'cf', 'cg', 'ch', 'ci', 'ck', 'cl', 'cm', 'cn', 'co', 'com', 'coop', 'cr', 'cu', 'cv', 'cx', 'cy', 'cz', 'de', 'dj', 'dk', 'dm', 'do', 'dz', 'ec', 'edu', 'ee', 'eg', 'eh', 'er', 'es', 'et', 'eu', 'fi', 'fj', 'fk', 'fm', 'fo', 'fr', 'ga', 'gb', 'gd', 'ge', 'gf', 'gg', 'gh', 'gi', 'gl', 'gm', 'gn', 'gov', 'gp', 'gq', 'gr', 'gs', 'gt', 'gu', 'gw', 'gy', 'hk', 'hm', 'hn', 'hr', 'ht', 'hu', 'id', 'ie', 'il', 'im', 'in', 'info', 'int', 'io', 'iq', 'ir', 'is', 'it', 'je', 'jm', 'jo', 'jobs', 'jp', 'ke', 'kg', 'kh', 'ki', 'km', 'kn', 'kp', 'kr', 'kw', 'ky', 'kz', 'la', 'lb', 'lc', 'li', 'lk', 'lr', 'ls', 'lt', 'lu', 'lv', 'ly', 'ma', 'mc', 'md', 'me', 'mf', 'mg', 'mh', 'mil', 'mk', 'ml', 'mm', 'mn', 'mo', 'mobi', 'mp', 'mq', 'mr', 'ms', 'mt', 'mu', 'museum', 'mv', 'mw', 'mx', 'my', 'mz', 'na', 'name', 'nc', 'ne', 'net', 'nf', 'ng', 'ni', 'nl', 'no', 'np', 'nr', 'nu', 'nz', 'om', 'org', 'pa', 'pe', 'pf', 'pg', 'ph', 'pk', 'pl', 'pm', 'pn', 'pr', 'pro', 'ps', 'pt', 'pw', 'py', 'qa', 're', 'ro', 'rs', 'ru', 'rw', 'sa', 'sb', 'sc', 'sd', 'se', 'sg', 'sh', 'si', 'sj', 'sk', 'sl', 'sm', 'sn', 'so', 'sr', 'st', 'su', 'sv', 'sy', 'sz', 'tc', 'td', 'tel', 'tf', 'tg', 'th', 'tj', 'tk', 'tl', 'tm', 'tn', 'to', 'tp', 'tr', 'travel', 'tt', 'tv', 'tw', 'tz', 'ua', 'ug', 'uk', 'um', 'us', 'uy', 'uz', 'va', 'vc', 've', 'vg', 'vi', 'vn', 'vu', 'wf', 'ws', 'ye', 'yt', 'yu', 'za', 'zm', 'zw');
             }
-            rsort($this->_tldList);
+            rsort($this->tldList);
         }
 
         // load config (a bit ugly, but focusing on porting):
@@ -180,8 +216,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 'title_length' => 'titleLength',
                 'show_errors' => 'showErrors',
             ) as $config => $local) {
-            if (isset($this->_config["url.{$config}"])) {
-                $this->$local = $this->_config["uri.{$config}"];
+            if (isset($this->config["url.{$config}"])) {
+                $this->$local = $this->config["uri.{$config}"];
             }
         }
     }
@@ -199,8 +235,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $user = $this->getEvent()->getNick();
 
         // URL Match
-        if (preg_match_all('#'.($this->_detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) |
-                            ('.($this->_detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis',
+        if (preg_match_all('#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) |
+                            ('.($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis',
                             $this->getEvent()->getArgument(1), $matches, PREG_SET_ORDER)) {
 
             // Update the settings on the fly to take into account any ini changes while the bot is running
@@ -223,7 +259,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 }
 
                 // allow out-of-class renderers to handle this URL
-                foreach ($this->_renderers as $renderer) {
+                foreach ($this->renderers as $renderer) {
                     if ($renderer->renderUrl($parsed) === true) {
                         // renderers should return true if they've fully
                         // rendered the passed URL (they're responsible
@@ -246,7 +282,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 	                $parsed['tld'] = ($pos !== false ? substr($parsed['host'], ($pos+1)) : '');
 
 	                // Check to see if the URL has a valid TLD
-	                if (is_array($this->_tldList) && !in_array(strtolower($parsed['tld']), $this->_tldList)) {
+	                if (is_array($this->tldList) && !in_array(strtolower($parsed['tld']), $this->tldList)) {
 	                    $this->debug('Invalid Url: ' . $parsed['tld'] . ' is not a supported TLD. (' . $url . ')');
 	                    continue;
 	                }
@@ -254,7 +290,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
                 // Check to see if the URL is to a secured site or not and handle it accordingly
                 if ($parsed['scheme'] == 'https' && !extension_loaded('openssl')) {
-                    if (!$this->_sslFallback) {
+                    if (!$this->sslFallback) {
                         $this->debug('Invalid Url: HTTPS is an invalid scheme, OpenSSL isn\'t available. (' . $url . ')');
                         continue;
                     } else {
@@ -270,7 +306,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 unset($parsed);
 
                 // Convert url
-                $shortenedUrl = $this->_shortener->shorten($url);
+                $shortenedUrl = $this->shortener->shorten($url);
 
                 // Prevent spamfest
                 if ($this->checkUrlCache($url, $shortenedUrl)) {
@@ -288,7 +324,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                         $title,
                         $shortenedUrl,
                         $user
-                    ), $this->_messageFormat);
+                    ), $this->messageFormat);
                 }
 
                 // Update cache
@@ -300,14 +336,14 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
              * get merged into one message or not
              */
             if (count($responses) > 0) {
-                if ($this->_mergeLinks) {
+                if ($this->mergeLinks) {
                     $this->doPrivmsg($source, str_replace(array(
                         '%message%',
                         '%nick%'
                     ), array(
                         implode('; ', $responses),
                         $user
-                    ), $this->_baseFormat));
+                    ), $this->baseFormat));
                 } else {
                     foreach($responses as $response) {
                         $this->doPrivmsg($source, str_replace(array(
@@ -316,7 +352,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                         ), array(
                             $response,
                             $user
-                        ), $this->_baseFormat));
+                        ), $this->baseFormat));
                     }
                 }
             }
@@ -343,11 +379,11 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $shortenedUrl = $this->getUrlChecksum($shortenedUrl);
 
         $cache = array(
-            'url' => isset($this->_urlCache[$source][$url]) ? $this->_urlCache[$source][$url] : null,
-            'shortened' => isset($this->_shortCache[$source][$shortenedUrl]) ? $this->_shortCache[$source][$shortenedUrl] : null
+            'url' => isset($this->urlCache[$source][$url]) ? $this->urlCache[$source][$url] : null,
+            'shortened' => isset($this->shortCache[$source][$shortenedUrl]) ? $this->shortCache[$source][$shortenedUrl] : null
         );
 
-        $expire = $this->_expire;
+        $expire = $this->expire;
         $this->debug("Cache expire: {$expire}");
         /**
          * If cache expiration is enabled, check to see if the given url has expired in the cache
@@ -383,17 +419,17 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $time = time();
 
         // Handle the URL cache and remove old entries that surpass the limit if enabled
-        $this->_urlCache[$source][$url] = $time;
-        if ($this->_limit > 0 && count($this->_urlCache[$source]) > $this->_limit) {
-            asort($this->_urlCache[$source], SORT_NUMERIC);
-            array_shift($this->_urlCache[$source]);
+        $this->urlCache[$source][$url] = $time;
+        if ($this->limit > 0 && count($this->urlCache[$source]) > $this->limit) {
+            asort($this->urlCache[$source], SORT_NUMERIC);
+            array_shift($this->urlCache[$source]);
         }
 
         // Handle the shortened cache and remove old entries that surpass the limit if enabled
-        $this->_shortCache[$source][$shortenedUrl] = $time;
-        if ($this->_limit > 0 && count($this->_shortCache[$source]) > $this->_limit) {
-            asort($this->_shortCache[$source], SORT_NUMERIC);
-            array_shift($this->_shortCache[$source]);
+        $this->shortCache[$source][$shortenedUrl] = $time;
+        if ($this->limit > 0 && count($this->shortCache[$source]) > $this->limit) {
+            asort($this->shortCache[$source], SORT_NUMERIC);
+            array_shift($this->shortCache[$source]);
         }
         unset($url, $shortenedUrl, $time);
     }
@@ -424,8 +460,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         if ($errno === E_WARNING) {
             // Check to see if there was HTTP warning while connecting to the site
             if (preg_match('{HTTP/1\.[01] ([0-9]{3})}i', $errstr, $m)) {
-                $this->_errorStatus = $m[1];
-                $this->_errorMessage = (isset($this->httpErrors[$m[1]]) ? $this->httpErrors[$m[1]] : $m[1]);
+                $this->errorStatus = $m[1];
+                $this->errorMessage = (isset($this->httpErrors[$m[1]]) ? $this->httpErrors[$m[1]] : $m[1]);
                 $this->debug('PHP Warning:  ' . $errstr . 'in ' . $errfile . ' on line ' . $errline);
                 return true;
             // Safely ignore these SSL warnings so they don't appear in the log
@@ -437,7 +473,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                        stripos($errstr, 'SSL: An established connection was aborted by the software in your host machine') !== false ||
                        stripos($errstr, 'SSL operation failed with code') !== false ||
                        stripos($errstr, 'unable to connect to') !== false) {
-                $this->_errorStatus = true;
+                $this->errorStatus = true;
                 $this->debug('PHP Warning:  ' . $errstr . 'in ' . $errfile . ' on line ' . $errline);
                 return true;
             }
@@ -574,7 +610,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 					$data = stream_get_meta_data($page);
 					if ($data['timed_out']) {
 						$this->debug('Url Timed Out: ' . $url);
-						$this->_errorStatus = true;
+						$this->errorStatus = true;
 						break;
 					}
 					$content .= $chunk;
@@ -592,7 +628,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 						}
 						preg_match('#^([^<]*)#is', $content, $m);
 						$title = preg_replace('#\s+#', ' ', $m[1]);
-						$title = trim($this->decode($title, $this->_titleLength));
+						$title = trim($this->decode($title, $this->titleLength));
 						break;
 					}
 					// Title won't appear beyond that point so stop parsing
@@ -602,18 +638,18 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 				}
 			}
 			fclose($page);
-		} else if (!$this->_errorStatus) {
+		} else if (!$this->errorStatus) {
 			$this->debug('Couldn\t Open Url: ' . $url);
 		}
 
 		if (empty($title)) {
-			if ($this->_errorStatus) {
-				if (!$this->_showErrors || empty($this->_errorMessage)) {
+			if ($this->errorStatus) {
+				if (!$this->showErrors || empty($this->errorMessage)) {
 					return;
 				}
-				$title = $this->_errorMessage;
-				$this->_errorStatus = false;
-				$this->_errorMessage = null;
+				$title = $this->errorMessage;
+				$this->errorStatus = false;
+				$this->errorMessage = null;
 			} else {
 				$title = 'No Title';
 			}
@@ -634,8 +670,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     }
 
     public function registerRenderer($obj) {
-        $this->_renderers[] = $obj;
-        array_unique($this->_renderers);
+        $this->renderers[] = $obj;
+        array_unique($this->renderers);
     }
 
 }

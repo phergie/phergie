@@ -1,7 +1,32 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Data structure for a hostmask.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Hostmask
 {
@@ -10,53 +35,56 @@ class Phergie_Hostmask
      *
      * @var string
      */
-    protected $_host;
+    protected $host;
 
     /**
      * Nick
      *
      * @var string
      */
-    protected $_nick;
+    protected $nick;
 
     /**
      * Username
      *
      * @var string
      */
-    protected $_username;
+    protected $username;
 
     /**
      * Regular expression used to parse a hostmask
      *
      * @var string
      */
-    protected static $_regex = '/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/';
+    protected static $regex = '/^([^!@]+)!(?:[ni]=)?([^@]+)@([^ ]+)/';
 
     /**
      * Constructor to initialize components of the hostmask.
      *
-     * @param string $nick Nick component
+     * @param string $nick     Nick component
      * @param string $username Username component
-     * @param string $host Host component
+     * @param string $host     Host component
+     *
+     * @return void
      */
     public function __construct($nick, $username, $host)
     {
-        $this->_nick = $nick;
-        $this->_username = $username;
-        $this->_host = $host;
+        $this->nick = $nick;
+        $this->username = $username;
+        $this->host = $host;
     }
 
     /**
      * Returns whether a given string appears to be a valid hostmask.
      *
      * @param string $string Alleged hostmask string
+     *
      * @return bool TRUE if the string appears to be a valid hostmask, FALSE 
      *         otherwise
      */
     public static function isValid($string)
     {
-        return (preg_match(self::$_regex, $string) > 0);
+        return (preg_match(self::$regex, $string) > 0);
     }
 
     /**
@@ -65,13 +93,14 @@ class Phergie_Hostmask
      *
      * @param string $hostmask Entire hostmask including the nick, username, 
      *        and host components
+     *
      * @return Phergie_Hostmask New instance populated with data parsed from 
      *         the provided hostmask string
      * @throws Phergie_Hostmask_Exception
      */
     public static function fromString($hostmask)
     {
-        if (preg_match(self::$_regex, $hostmask, $match)) {
+        if (preg_match(self::$regex, $hostmask, $match)) {
             list(, $nick, $username, $host) = $match; 
             return new self($nick, $username, $host);
         }
@@ -83,37 +112,39 @@ class Phergie_Hostmask
     }
 
     /**
-     * Sets the host name.
+     * Sets the hostname.
      *
-     * @param string $host
+     * @param string $host Hostname
+     *
      * @return Phergie_Hostmask Provides a fluent interface
      */
     public function setHost($host)
     {
-        $this->_host = $host;
+        $this->host = $host;
 
         return $this;
     }
 
     /**
-     * Returns the host name.
+     * Returns the hostname.
      *
      * @return string
      */
     public function getHost()
     {
-        return $this->_host;
+        return $this->host;
     }
 
     /**
      * Sets the username of the user.
      *
-     * @param string $username
+     * @param string $username Username
+     *
      * @return Phergie_Hostmask Provides a fluent interface
      */
     public function setUsername($username)
     {
-        $this->_username = $username;
+        $this->username = $username;
 
         return $this;
     }
@@ -125,18 +156,19 @@ class Phergie_Hostmask
      */
     public function getUsername()
     {
-        return $this->_username;
+        return $this->username;
     }
 
     /**
      * Sets the nick of the user.
      *
-     * @param string $nick
+     * @param string $nick User nick
+     *
      * @return Phergie_Hostmask Provides a fluent interface
      */
     public function setNick($nick)
     {
-        $this->_nick = $nick;
+        $this->nick = $nick;
 
         return $this;
     }
@@ -148,7 +180,7 @@ class Phergie_Hostmask
      */
     public function getNick()
     {
-        return $this->_nick;
+        return $this->nick;
     }
 
     /**
@@ -158,6 +190,6 @@ class Phergie_Hostmask
      */
     public function __toString()
     {
-        return $this->_nick . '!' . $this->_username . '@' . $this->_host;
+        return $this->nick . '!' . $this->username . '@' . $this->host;
     }
 }

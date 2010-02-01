@@ -1,8 +1,33 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * End-user interface that produces console output when running the bot from 
  * a shell.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Ui_Console extends Phergie_Ui_Abstract
 {
@@ -11,15 +36,15 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      *
      * @var bool
      */
-    protected $_enabled;
+    protected $enabled;
 
     /**
      * Format for timestamps included in console output
      *
-     * @see http://php.net/date
      * @var string
+     * @see http://php.net/date
      */
-     protected $_format;
+     protected $format;
 
     /**
      * Constructor to initialize object properties.
@@ -28,20 +53,21 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      */
     public function __construct()
     {
-        $this->_enabled = true;
-        $this->_format = 'H:i:s';
+        $this->enabled = true;
+        $this->format = 'H:i:s';
     }
 
     /** 
      * Outputs a timestamped line to the console if console output is enabled.
      *
      * @param string $line Line to output
+     *
      * @return void
      */
-    protected function _console($line)
+    protected function console($line)
     {
-        if ($this->_enabled) {
-            echo date($this->_format), ' ', $line, PHP_EOL;
+        if ($this->enabled) {
+            echo date($this->format), ' ', $line, PHP_EOL;
         }
     }
 
@@ -52,7 +78,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      */
     public function isEnabled()
     {
-        return $this->_enabled;
+        return $this->enabled;
     }
 
     /**
@@ -60,36 +86,38 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      *
      * @param bool $enabled TRUE to enable console output, FALSE otherwise, 
      *        defaults to TRUE
+     *
      * @return Phergie_Ui_Console Provides a fluent interface
      */
     public function setEnabled($enabled = true)
     {
-        $this->_enabled = (bool) $enabled;
+        $this->enabled = (bool) $enabled;
         return $this;
     }
 
     /**
      * Returns the format used for timestamps in console output.
      *
-     * @see http://php.net/date
      * @return string
+     * @see http://php.net/date
      */
     public function getFormat()
     {
-        return $this->_format;
+        return $this->format;
     }
 
     /**
      * Sets the format used for timestamps in console output, overwriting 
      * any previous format used.
      *
-     * @see http://php.net/date
      * @param string $format Timestamp format
+     *
      * @return Phergie_Ui_Console Provides a fluent interface
+     * @see http://php.net/date
      */
     public function setFormat($format)
     {
-        $this->_format = (string) $format;
+        $this->format = (string) $format;
         return $this;
     }
 
@@ -97,78 +125,89 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      * Outputs a prompt when a server connection is attempted.
      *
      * @param string $host Server hostname
+     *
      * @return void 
      */
     public function onConnect($host)
     {
-        $this->_console('Connecting to ' . $host);
+        $this->console('Connecting to ' . $host);
     }
 
     /**
      * Outputs a prompt when a plugin is loaded successfully. 
      *
      * @param string $plugin Short name of the plugin
+     *
      * @return void 
      */
     public function onPluginLoad($plugin)
     {
-        $this->_console('Loaded plugin ' . $plugin);
+        $this->console('Loaded plugin ' . $plugin);
     }
 
     /**
      * Outputs a prompt when a plugin fails to load.
      *
-     * @param string $plugin Short name of the plugin
+     * @param string $plugin  Short name of the plugin
      * @param string $message Message describing the reason for the failure
+     *
      * @return void 
      */
     public function onPluginFailure($plugin, $message)
     {
-        $this->_console('Unable to load plugin ' . $plugin . ' - ' . $message);
+        $this->console('Unable to load plugin ' . $plugin . ' - ' . $message);
     }
 
     /**
      * Outputs a prompt when the bot receives an IRC event. 
      *
-     * @param Phergie_Event_Abstract $event Received event
-     * @param Phergie_Connection $connection Connection on which the event 
-     *        was received
+     * @param Phergie_Event_Abstract $event      Received event
+     * @param Phergie_Connection     $connection Connection on which the 
+     *        event was received
+     *
      * @return void
      */
-    public function onEvent(Phergie_Event_Abstract $event, Phergie_Connection $connection)
-    {
+    public function onEvent(Phergie_Event_Abstract $event, 
+        Phergie_Connection $connection
+    ) {
         $host = $connection->getHostmask()->getHost();
-        $this->_console($host . ' <- ' . $event->getRawData());
+        $this->console($host . ' <- ' . $event->getRawData());
     }
 
     /**
      * Outputs a prompt when the bot sends a command to a server.
      *
-     * @param Phergie_Event_Command $event Event representing the command 
-     *        being sent
-     * @param Phergie_Connection $connection Connection on which the command  
-     *        is being sent 
+     * @param Phergie_Event_Command $event      Event representing the 
+     *        command being sent
+     * @param Phergie_Connection    $connection Connection on which the 
+     *        command is being sent 
+     *
      * @return void
      */
-    public function onCommand(Phergie_Event_Command $event, Phergie_Connection $connection)
-    {
+    public function onCommand(Phergie_Event_Command $event, 
+        Phergie_Connection $connection
+    ) {
         $plugin = $event->getPlugin()->getName();
         $host = $connection->getHostmask()->getHost();
         $type = strtoupper($event->getType());
         $args = implode(' ', $event->getArguments());
-        $this->_console($plugin . ' plugin: ' . $host . ' -> ' . $type . ' ' . $args); 
+        $this->console(
+            $plugin . ' plugin: ' . 
+            $host . ' -> ' . $type . ' ' . $args
+        ); 
     }
 
     /**
      * Outputs a prompt when the bot terminates a connection to a server.
      *
      * @param Phergie_Connection $connection Terminated connection 
+     *
      * @return void
      */
     public function onQuit(Phergie_Connection $connection)
     {
         $host = $connection->getHostmask()->getHost();
-        $this->_console('Disconnecting from ' . $host);
+        $this->console('Disconnecting from ' . $host);
     }
 
     /**
@@ -179,6 +218,6 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      */
     public function onShutdown()
     {
-        $this->_console('Shutting down');
+        $this->console('Shutting down');
     }
 }

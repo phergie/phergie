@@ -1,7 +1,32 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Event originating from a plugin for the bot.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Event_Command extends Phergie_Event_Request
 {
@@ -10,17 +35,18 @@ class Phergie_Event_Command extends Phergie_Event_Request
      *
      * @var Phergie_Plugin_Abstract
      */
-    protected $_plugin;
+    protected $plugin;
 
     /**
      * Stores a reference to the plugin instance that created the event.
      *
-     * @param Phergie_Plugin_Abstract $plugin
+     * @param Phergie_Plugin_Abstract $plugin Plugin instance
+     *
      * @return Phergie_Event_Command Provides a fluent interface
      */
     public function setPlugin(Phergie_Plugin_Abstract $plugin)
     {
-        $this->_plugin = $plugin;
+        $this->plugin = $plugin;
         return $this;
     }
 
@@ -31,6 +57,6 @@ class Phergie_Event_Command extends Phergie_Event_Request
      */
     public function getPlugin()
     {
-        return $this->_plugin;
+        return $this->plugin;
     }
 }

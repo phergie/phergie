@@ -1,7 +1,32 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Handles on-demand loading of, iteration over, and access to plugins.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Plugin_Handler implements IteratorAggregate
 {
@@ -10,14 +35,14 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      *
      * @var array
      */
-    protected $_plugins;
+    protected $plugins;
 
     /**
      * Paths in which to search for plugin class files
      *
      * @var array
      */
-    protected $_paths;
+    protected $paths;
 
     /**
      * Flag indicating whether plugin classes should be instantiated on 
@@ -25,7 +50,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      *
      * @var bool
      */
-    protected $_autoload;
+    protected $autoload;
 
     /**
      * Constructor to initialize class properties and add the path for core 
@@ -35,9 +60,9 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      */
     public function __construct()
     {
-        $this->_plugins = array();
-        $this->_paths = array();
-        $this->_autoload = false;
+        $this->plugins = array();
+        $this->paths = array();
+        $this->autoload = false;
 
         $this->addPath(dirname(__FILE__), 'Phergie_Plugin_');
     }
@@ -46,9 +71,10 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      * Adds a path to search for plugin class files. Paths are searched in
      * the reverse order in which they are added.
      *
-     * @param string $path Filesystem directory path
+     * @param string $path   Filesystem directory path
      * @param string $prefix Optional class name prefix corresponding to the 
      *        path
+     *
      * @return Phergie_Plugin_Handler Provides a fluent interface
      * @throws Phergie_Plugin_Exception
      */
@@ -61,7 +87,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
             );
         }
 
-        $this->_paths[] = array(
+        $this->paths[] = array(
             'path' => rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
             'prefix' => $prefix
         );
@@ -74,20 +100,22 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      *
      * @param string|Phergie_Plugin_Abstract $plugin Short name of the 
      *        plugin class or a plugin object
-     * @param array $args Optional array of arguments to pass to the plugin 
-     *        constructor if a short name is passed for $plugin
+     * @param array                          $args   Optional array of 
+     *        arguments to pass to the plugin constructor if a short name is 
+     *        passed for $plugin
+     *
      * @return Phergie_Plugin_Abstract New plugin instance
      */
     public function addPlugin($plugin, array $args = null)
     {
         // If a short plugin name is specified...
-        if (is_string($plugin) && !isset($this->_plugins[$plugin])) {
+        if (is_string($plugin) && !isset($this->plugins[$plugin])) {
 
             // Attempt to locate and load the class
-            foreach (array_reverse($this->_paths) as $path) {
+            foreach (array_reverse($this->paths) as $path) {
                 $file = $path['path'] . $plugin . '.php';
                 if (file_exists($file)) {
-                    require $file;
+                    include $file;
                     $class = $path['prefix'] . $plugin;
                     if (class_exists($class)) {
                         break;
@@ -106,8 +134,11 @@ class Phergie_Plugin_Handler implements IteratorAggregate
 
             // Check to ensure the class is a plugin class 
             if (!is_subclass_of($class, 'Phergie_Plugin_Abstract')) {
+                $msg
+                    = 'Class for plugin "' . $plugin . 
+                    '" does not extend Phergie_Plugin_Abstract';
                 throw new Phergie_Plugin_Exception(
-                    'Class for plugin "' . $plugin . '" does not extend Phergie_Plugin_Abstract',
+                    $msg,
                     Phergie_Plugin_Exception::ERR_INCORRECT_BASE_CLASS
                 );
             }
@@ -130,14 +161,14 @@ class Phergie_Plugin_Handler implements IteratorAggregate
 
             // Configure and add the instance 
             $instance->setPluginHandler($this);
-            $this->_plugins[$plugin] = $instance;
+            $this->plugins[$plugin] = $instance;
             $plugin = $instance;
 
-        // If a plugin instance is specified...
         } elseif ($plugin instanceof Phergie_Plugin_Abstract) {
+            // If a plugin instance is specified...
 
             // Add the plugin instance to the list of plugins
-            $this->_plugins[$plugin->getName()] = $plugin;
+            $this->plugins[$plugin->getName()] = $plugin;
         }
 
         return $plugin;
@@ -149,6 +180,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      * @param array $plugins List of elements where each is of the form 
      *        'ShortPluginName' or array('ShortPluginName', array($arg1, 
      *        ..., $argN))
+     *
      * @return Phergie_Plugin_Handler Provides a fluent interface
      */
     public function addPlugins(array $plugins)
@@ -169,6 +201,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      *
      * @param string|Phergie_Plugin_Abstract $plugin Short name of the 
      *        plugin class or a plugin object
+     *
      * @return Phergie_Plugin_Handler Provides a fluent interface
      */
     public function removePlugin($plugin)
@@ -177,7 +210,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
             $plugin = $plugin->getName();
         }
 
-        unset($this->_plugins[$plugin]);
+        unset($this->plugins[$plugin]);
 
         return $this;
     }
@@ -187,19 +220,23 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      * if it is not already loaded and autoloading is enabled.
      *
      * @param string $name Short name of the plugin class
+     *
      * @return Phergie_Plugin_Abstract Plugin instance
      */
     public function getPlugin($name)
     {
         // If the plugin is loaded, return the instance
-        if (isset($this->_plugins[$name])) {
-            return $this->_plugins[$name];
+        if (isset($this->plugins[$name])) {
+            return $this->plugins[$name];
         }
 
         // If autoloading is disabled, display an error
-        if (!$this->_autoload) {
+        if (!$this->autoload) {
+            $msg 
+                = 'Plugin "' . $name . '" has been requested, ' . 
+                'is not loaded, and autoload is disabled';
             throw new Phergie_Plugin_Exception(
-                'Plugin "' . $name . '" has been requested, is not loaded, and autoload is disabled',
+                $msg,
                 Phergie_Plugin_Exception::ERR_PLUGIN_NOT_LOADED
             );
         }
@@ -208,7 +245,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
         $this->addPlugin($name);
 
         // Return the added plugin
-        return $this->_plugins[$name];
+        return $this->plugins[$name];
     }
 
     /**
@@ -217,6 +254,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      * enabled.
      *
      * @param array $names List of short names of the plugin classes
+     *
      * @return array Associative array mapping plugin class short names to 
      *         corresponding plugin instances
      */
@@ -234,11 +272,12 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      * class is loaded.
      *
      * @param string $name Short name of the plugin class
+     *
      * @return bool TRUE if an instance exists, FALSE otherwise
      */
     public function hasPlugin($name)
     {
-        return isset($this->_plugins[$name]);
+        return isset($this->plugins[$name]);
     }
 
     /**
@@ -247,11 +286,12 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      *
      * @param bool $flag TRUE to have plugins autoload (default), FALSE 
      *        otherwise
+     *
      * @return Phergie_Plugin_Handler Provides a fluent interface.
      */
     public function setAutoload($flag = true)
     {
-        $this->_autoload = $flag;
+        $this->autoload = $flag;
 
         return $this;
     }
@@ -264,13 +304,14 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      */
     public function getAutoload()
     {
-        return $this->_autoload;
+        return $this->autoload;
     }
 
     /**
      * Allows plugin instances to be accessed as properties of the handler. 
      *
      * @param string $name Short name of the plugin
+     *
      * @return Phergie_Plugin_Abstract Requested plugin instance
      */
     public function __get($name)
@@ -285,7 +326,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->_plugins);
+        return new ArrayIterator($this->plugins);
     }
 
     /**
@@ -294,12 +335,13 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      * returning false.
      *
      * @param string $name Name of the method called
-     * @param array $args Arguments passed in the method call
+     * @param array  $args Arguments passed in the method call
+     *
      * @return Phergie_Plugin_Handler Provides a fluent interface 
      */
     public function __call($name, array $args)
     {
-        foreach ($this->_plugins as $plugin) {
+        foreach ($this->plugins as $plugin) {
             if (call_user_func_array(array($plugin, $name), $args) === false) {
                 break;
             }

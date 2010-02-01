@@ -1,7 +1,32 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Handles events initiated by plugins. 
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Event_Handler implements IteratorAggregate
 {
@@ -10,7 +35,7 @@ class Phergie_Event_Handler implements IteratorAggregate
      *
      * @var array
      */
-    protected $_events;
+    protected $events;
 
     /**
      * Constructor to initialize the event queue.
@@ -19,19 +44,22 @@ class Phergie_Event_Handler implements IteratorAggregate
      */
     public function __construct()
     {
-        $this->_events = array();
+        $this->events = array();
     }
 
     /**
      * Adds an event to the queue.
      *
      * @param Phergie_Plugin_Abstract $plugin Plugin originating the event
-     * @param string $type Event type, corresponding to a Phergie_Event_Command::TYPE_* constant
-     * @param array $args Optional event arguments
+     * @param string                  $type   Event type, corresponding to a 
+     *        Phergie_Event_Command::TYPE_* constant
+     * @param array                   $args   Optional event arguments
+     *
      * @return Phergie_Event_Handler Provides a fluent interface
      */
-    public function addEvent(Phergie_Plugin_Abstract $plugin, $type, array $args = array())
-    {
+    public function addEvent(Phergie_Plugin_Abstract $plugin, $type, 
+        array $args = array()
+    ) {
         if (!defined('Phergie_Event_Command::TYPE_' . strtoupper($type))) {
             throw new Phergie_Event_Exception(
                 'Unknown event type "' . $type . '"',
@@ -45,7 +73,7 @@ class Phergie_Event_Handler implements IteratorAggregate
             ->setType($type)
             ->setArguments($args);
 
-        $this->_events[] = $event;
+        $this->events[] = $event;
 
         return $this;
     }
@@ -57,7 +85,7 @@ class Phergie_Event_Handler implements IteratorAggregate
      */
     public function clearEvents()
     {
-        $this->_events = array();
+        $this->events = array();
         return $this;
     }
 
@@ -66,11 +94,12 @@ class Phergie_Event_Handler implements IteratorAggregate
      *
      * @param array $events Ordered list of objects of the class 
      *        Phergie_Event_Command
+     *
      * @return Phergie_Event_Handler Provides a fluent interface
      */
     public function replaceEvents(array $events)
     {
-        $this->_events = $events;
+        $this->events = $events;
         return $this;
     }
 
@@ -79,12 +108,13 @@ class Phergie_Event_Handler implements IteratorAggregate
      *
      * @param string $type Event type from Phergie_Event_Request::TYPE_* 
      *        constants
+     *
      * @return bool TRUE if an event of the specified type exists in the 
      *         queue, FALSE otherwise
      */
     public function hasEventOfType($type)
     {
-        foreach ($this->_events as $event) {
+        foreach ($this->events as $event) {
             if ($event->getType() == $type) {
                 return true;
             }
@@ -99,6 +129,6 @@ class Phergie_Event_Handler implements IteratorAggregate
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->_events);
+        return new ArrayIterator($this->events);
     }
 }

@@ -1,8 +1,33 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Base class for plugins to provide event handler stubs and commonly needed
  * functionality.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 abstract class Phergie_Plugin_Abstract
 {
@@ -11,35 +36,35 @@ abstract class Phergie_Plugin_Abstract
      *
      * @var Phergie_Config
      */
-    protected $_config;
+    protected $config;
 
     /**
      * Plugin handler used to provide access to other plugins
      *
      * @var Phergie_Plugin_Handler
      */
-    protected $_plugins;
+    protected $plugins;
 
     /**
      * Current event handler instance for outgoing events
      *
      * @var Phergie_Event_Handler
      */
-    protected $_events;
+    protected $events;
 
     /**
      * Current connection instance
      *
      * @var Phergie_Connection
      */
-    protected $_connection;
+    protected $connection;
 
     /**
      * Current incoming event being handled
      *
      * @var Phergie_Event_Request|Phergie_Event_Response
      */
-    protected $_event;
+    protected $event;
 
     /**
      * Returns the short name for the plugin based on its class name.
@@ -57,10 +82,11 @@ abstract class Phergie_Plugin_Abstract
      *
      * @param string $message Error message to provide more information 
      *        about the reason for the failure
-     * @throws Phergie_Plugin_Exception Always
+     *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
+     * @throws Phergie_Plugin_Exception Always
      */
-    protected function _fail($message)
+    protected function fail($message)
     {
         throw new Phergie_Plugin_Exception(
             $message,
@@ -71,128 +97,146 @@ abstract class Phergie_Plugin_Abstract
     /**
      * Sets the current configuration handler.
      *
-     * @param Phergie_Config $config
+     * @param Phergie_Config $config Configuration handler
+     *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
     public function setConfig(Phergie_Config $config)
     {
-        $this->_config = $config;
+        $this->config = $config;
         return $this;
     }
 
     /**
-     * Returns the current configuration handler.
+     * Returns the current configuration handler or the value of a single 
+     * setting from it.
      *
+     * @param string $name    Optional name of a setting for which the value 
+     *        should be returned instead of the entire configuration handler
+     * @param mixed  $default Optional default value to return if no value 
+     *        is set for the setting indicated by $name
+     *
+     * @return Phergie_Config|mixed Configuration handler or value of the 
+     *         setting specified by $name
      * @throws Phergie_Plugin_Exception No configuration handler has been set 
-     * @return Phergie_Config Configuration handler
      */
-    public function getConfig()
+    public function getConfig($name = null, $default = null)
     {
-        if (empty($this->_config)) {
+        if (empty($this->config)) {
             throw new Phergie_Plugin_Exception(
                 'Configuration handler cannot be accessed before one is set',
                 Phergie_Plugin_Exception::ERR_NO_CONFIG_HANDLER
             );
         }
-        return $this->_config;
+        if (!is_null($name)) {
+            if (!isset($this->config[$name])) {
+                return $default;
+            }
+            return $this->config[$name];
+        }
+        return $this->config;
     }
 
     /**
      * Sets the current plugin handler.
      *
-     * @param Phergie_Plugin_Handler $handler
+     * @param Phergie_Plugin_Handler $handler Plugin handler
+     *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
     public function setPluginHandler(Phergie_Plugin_Handler $handler)
     {
-        $this->_plugins = $handler;
+        $this->plugins = $handler;
         return $this;
     }
 
     /**
      * Returns the current plugin handler.
      *
-     * @throws Phergie_Plugin_Exception No plugin handler has been set 
      * @return Phergie_Plugin_Handler
+     * @throws Phergie_Plugin_Exception No plugin handler has been set 
      */
     public function getPluginHandler()
     {
-        if (empty($this->_plugins)) {
+        if (empty($this->plugins)) {
             throw new Phergie_Plugin_Exception(
                 'Plugin handler cannot be accessed before one is set',
                 Phergie_Plugin_Exception::ERR_NO_PLUGIN_HANDLER
             );
         }
-        return $this->_plugins;
+        return $this->plugins;
     }
 
     /**
      * Sets the current event handler.
      *
-     * @param Phergie_Event_Handler $handler
+     * @param Phergie_Event_Handler $handler Event handler
+     *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
     public function setEventHandler(Phergie_Event_Handler $handler)
     {
-        $this->_events = $handler;
+        $this->events = $handler;
         return $this;
     }
 
     /**
      * Returns the current event handler.
      *
-     * @throws Phergie_Plugin_Exception No event handler has been set 
      * @return Phergie_Event_Handler
+     * @throws Phergie_Plugin_Exception No event handler has been set 
      */
     public function getEventHandler()
     {
-        if (empty($this->_events)) {
+        if (empty($this->events)) {
             throw new Phergie_Plugin_Exception(
                 'Event handler cannot be accessed before one is set',
                 Phergie_Plugin_Exception::ERR_NO_EVENT_HANDLER
             );
         }
-        return $this->_events;
+        return $this->events;
     }
 
     /**
      * Sets the current connection.
      *
-     * @param Phergie_Connection $connection
+     * @param Phergie_Connection $connection Connection
+     *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
     public function setConnection(Phergie_Connection $connection)
     {
-        $this->_connection = $connection;
+        $this->connection = $connection;
         return $this;
     }
 
     /**
      * Returns the current event connection.
      *
-     * @throws Phergie_Plugin_Exception No connection has been set 
      * @return Phergie_Connection
+     * @throws Phergie_Plugin_Exception No connection has been set 
      */
     public function getConnection()
     {
-        if (empty($this->_connection)) {
+        if (empty($this->connection)) {
             throw new Phergie_Plugin_Exception(
                 'Connection cannot be accessed before one is set',
                 Phergie_Plugin_Exception::ERR_NO_CONNECTION
             );
         }
-        return $this->_connection;
+        return $this->connection;
     }
 
     /**
      * Sets the current incoming event to be handled.
      *
-     * @param Phergie_Event_Request|Phergie_Event_Response $event
+     * @param Phergie_Event_Request|Phergie_Event_Response $event Event
+     *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
     public function setEvent($event)
     {
-        $this->_event = $event;
+        $this->event = $event;
         return $this;
     }
 
@@ -203,13 +247,13 @@ abstract class Phergie_Plugin_Abstract
      */
     public function getEvent()
     {
-        if (empty($this->_connection)) {
+        if (empty($this->connection)) {
             throw new Phergie_Plugin_Exception(
                 'Event cannot be accessed before one is set',
                 Phergie_Plugin_Exception::ERR_NO_EVENT
             );
         }
-        return $this->_event;
+        return $this->event;
     }
 
     /**
@@ -218,7 +262,8 @@ abstract class Phergie_Plugin_Abstract
      * later.
      *
      * @param string $name Name of the method called
-     * @param array $args Arguments passed in the call
+     * @param array  $args Arguments passed in the call
+     *
      * @return mixed
      */
     public function __call($name, array $args)
@@ -228,7 +273,10 @@ abstract class Phergie_Plugin_Abstract
             $type = strtolower(substr($name, 2));
             $this->getEventHandler()->addEvent($this, $type, $args);
         } else if ($subcmd != 'on') {
-            throw new Phergie_Plugin_Exception("Called invalid method {$name} in " . get_class($this), Phergie_Plugin_Exception::ERR_INVALID_CALL);
+            throw new Phergie_Plugin_Exception(
+                'Called invalid method ' . $name . ' in ' . get_class($this),
+                Phergie_Plugin_Exception::ERR_INVALID_CALL
+            );
         }
     }
 
@@ -239,14 +287,18 @@ abstract class Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onLoad() { }
+    public function onLoad()
+    {
+    }
 
     /**
      * Handler for when the bot initially connects to a server.
      *
      * @return void
      */
-    public function onConnect() { }
+    public function onConnect()
+    {
+    }
 
     /**
      * Handler for each tick, a single iteration of the continuous loop 
@@ -255,7 +307,9 @@ abstract class Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onTick() { }
+    public function onTick()
+    {
+    }
 
     /**
      * Handler for when any event is received but has not yet been dispatched 
@@ -263,7 +317,9 @@ abstract class Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function preEvent() { }
+    public function preEvent()
+    {
+    }
 
     /**
      * Handler for after any event has been dispatched to the plugin handler 
@@ -271,7 +327,9 @@ abstract class Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function postEvent() { }
+    public function postEvent()
+    {
+    }
 
     /**
      * Handler for after plugin processing of an event has concluded but 
@@ -280,7 +338,9 @@ abstract class Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function preDispatch() { }
+    public function preDispatch()
+    {
+    }
 
     /**
      * Handler for after any events triggered by plugins in response to a 
@@ -288,188 +348,234 @@ abstract class Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function postDispatch() { }
+    public function postDispatch()
+    {
+    }
 
     /**
      * Handler for when the server prompts the client for a nick.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_2
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_2
      */
-    public function onNick() { }
+    public function onNick()
+    {
+    }
 
     /**
      * Handler for when a user obtains operator privileges.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_5
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_5
      */
-    public function onOper() { }
+    public function onOper()
+    {
+    }
 
     /**
      * Handler for when the client session is about to be terminated.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_6
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_6
      */
-    public function onQuit() { }
+    public function onQuit()
+    {
+    }
 
     /**
      * Handler for when a user joins a channel.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_1
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_1
      */
-    public function onJoin() { }
+    public function onJoin()
+    {
+    }
 
     /**
      * Handler for when a user leaves a channel.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_2
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_2
      */
-    public function onPart() { }
+    public function onPart()
+    {
+    }
 
     /**
      * Handler for when a user or channel mode is changed.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_3
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_3
      */
-    public function onMode() { }
+    public function onMode()
+    {
+    }
 
     /**
      * Handler for when a channel topic is viewed or changed.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_4
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_4
      */
-    public function onTopic() { }
+    public function onTopic()
+    {
+    }
 
     /**
      * Handler for when a message is received from a channel or user.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_1
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_1
      */
-    public function onPrivmsg() { }
+    public function onPrivmsg()
+    {
+    }
 
     /**
      * Handler for when the bot receives a CTCP ACTION request.
      *
-     * @see http://www.invlogic.com/irc/ctcp.html#4.4
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.4
      */
-    public function onAction() { }
+    public function onAction()
+    {
+    }
 
     /**
      * Handler for when a notice is received.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_2
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_2
      */
-    public function onNotice() { }
+    public function onNotice()
+    {
+    }
 
     /**
      * Handler for when a user is kicked from a channel.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_8
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_8
      */
-    public function onKick() { }
+    public function onKick()
+    {
+    }
 
     /**
      * Handler for when the bot receives a ping event from a server, at 
      * which point it is expected to respond with a pong request within 
      * a short period else the server may terminate its connection.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2 
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2 
      */
-    public function onPing() { }
+    public function onPing()
+    {
+    }
 
     /**
      * Handler for when the bot receives a CTCP TIME request.
      *
-     * @see http://www.invlogic.com/irc/ctcp.html#4.6
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.6
      */
-    public function onTime() { }
+    public function onTime()
+    {
+    }
 
     /**
      * Handler for when the bot receives a CTCP VERSION request.
      *
-     * @see http://www.invlogic.com/irc/ctcp.html#4.1
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.1
      */
-    public function onVersion() { }
+    public function onVersion()
+    {
+    }
 
     /**
      * Handler for when the bot receives a CTCP request of an unknown type. 
      *
-     * @see http://www.invlogic.com/irc/ctcp.html
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html
      */
-    public function onCtcp() { }
+    public function onCtcp()
+    {
+    }
 
     /**
      * Handler for when a reply is received for a CTCP PING request sent by 
      * the bot.
      *
-     * @see http://www.invlogic.com/irc/ctcp.html#4.2
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.2
      */
-    public function onPingReply() { }
+    public function onPingReply()
+    {
+    }
 
     /**
      * Handler for when a reply is received for a CTCP TIME request sent by 
      * the bot.
      *
-     * @see http://www.invlogic.com/irc/ctcp.html#4.6
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.6
      */
-    public function onTimeReply() { }
+    public function onTimeReply()
+    {
+    }
 
     /**
      * Handler for when a reply is received for a CTCP VERSION request sent 
      * by the bot.
      *
-     * @see http://www.invlogic.com/irc/ctcp.html#4.1
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.1
      */
-    public function onVersionReply() { }
+    public function onVersionReply()
+    {
+    }
 
     /**
      * Handler for when a reply received for a CTCP request of an unknown 
      * type.
      *
-     * @see http://www.invlogic.com/irc/ctcp.html
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html
      */
-    public function onCtcpReply() { }
+    public function onCtcpReply()
+    {
+    }
 
     /**
      * Handler for when the bot receives a kill request from a server.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_1
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_1
      */
-    public function onKill() { }
+    public function onKill()
+    {
+    }
 
     /**
      * Handler for when the bot receives an invitation to join a channel. 
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_7
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_7
      */
-    public function onInvite() { }
+    public function onInvite()
+    {
+    }
 
     /**
      * Handler for when a server response is received to a command issued by 
      * the bot.
      *
-     * @see http://irchelp.org/irchelp/rfc/chapter6.html
      * @return void
+     * @see http://irchelp.org/irchelp/rfc/chapter6.html
      */
-    public function onResponse() { }
+    public function onResponse()
+    {
+    }
 }

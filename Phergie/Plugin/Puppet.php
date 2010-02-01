@@ -1,7 +1,32 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Plugin_Puppet
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Puppet
+ */
 
 /**
- * Allows administrators to effectively speak and act as the bot.
+ * Allows a user to effectively speak and act as the bot.
+ *
+ * @category Phergie 
+ * @package  Phergie_Plugin_Puppet
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Puppet
  */
 class Phergie_Plugin_Puppet extends Phergie_Plugin_Abstract
 {
@@ -21,13 +46,14 @@ class Phergie_Plugin_Puppet extends Phergie_Plugin_Abstract
      *
      * <code>say #chan message</code>
      *
-     * @param string $chan Name of the channel
+     * @param string $channel Name of the channel
      * @param string $message Message to repeat
+     *
      * @return void
      */
-    public function onCommandSay($chan, $message)
+    public function onCommandSay($channel, $message)
     {
-        $this->doPrivmsg($chan, $message);
+        $this->doPrivmsg($channel, $message);
     }
 
     /**
@@ -36,13 +62,14 @@ class Phergie_Plugin_Puppet extends Phergie_Plugin_Abstract
      *
      * <code>act #chan action</code>
      *
-     * @param string $chan Name of the channel
-     * @param string $action Action to perform
+     * @param string $channel Name of the channel
+     * @param string $action  Action to perform
+     *
      * @return void
      */
-    public function onCommandAct($chan, $action)
+    public function onCommandAct($channel, $action)
     {
-        $this->doAction($chan, $action);
+        $this->doAction($channel, $action);
     }
 
     /**
@@ -51,12 +78,11 @@ class Phergie_Plugin_Puppet extends Phergie_Plugin_Abstract
      * <code>raw message</code>
      *
      * @param string $message Message to send
+     *
      * @return void
      */
     public function onCommandRaw($message)
     {
-        $user = $this->getEvent()->getNick();
-         
         $this->doRaw($message);
     }
 }

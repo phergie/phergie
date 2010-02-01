@@ -1,8 +1,33 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Uses a self CTCP PING to ensure that the client connection has not been 
  * dropped.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
 {
@@ -11,14 +36,14 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
      *
      * @var int
      */
-    protected $_lastEvent;
+    protected $lastEvent;
 
     /**
      * Timestamp for the last instance in which a PING was sent
      *
      * @var int
      */
-    protected $_lastPing;
+    protected $lastPing;
 
     /**
      * Initialize event timestamps upon connecting to the server.
@@ -27,8 +52,8 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
      */
     public function onConnect()
     {
-        $this->_lastEvent = time();
-        $this->_lastPing = null;
+        $this->lastEvent = time();
+        $this->lastPing = null;
     }
 
     /**
@@ -39,7 +64,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
      */
     public function preEvent()
     {
-        $this->_lastEvent = time();
+        $this->lastEvent = time();
     }
 
     /**
@@ -49,7 +74,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
      */
     public function onPingReply()
     {
-        $this->_lastPing = null;
+        $this->lastPing = null;
     }
 
     /**
@@ -62,12 +87,13 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
     {
         $time = time();
         
-        if (!empty($this->_lastPing) 
-            && $time - $this->_lastPing > $this->_config['ping.ping']) {
+        if (!empty($this->lastPing) 
+            && $time - $this->lastPing > $this->getConfig('ping.ping')
+        ) {
             $this->doQuit();
-        } elseif ($time - $this->_lastEvent > $this->_config['ping.event']) {
-            $this->_lastPing = time();
-            $this->doPing($this->_lastPing);
+        } elseif ($time - $this->lastEvent > $this->getConfig('ping.event')) {
+            $this->lastPing = time();
+            $this->doPing($this->lastPing);
         }
     }
 }

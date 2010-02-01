@@ -1,12 +1,36 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Event originating from the server in response to an event sent by the
  * current client.
  *
- * @see http://www.irchelp.org/irchelp/rfc/chapter6.html
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
+ * @see      http://www.irchelp.org/irchelp/rfc/chapter6.html
  */
-class Phergie_Event_Response extends Phergie_Event_Abstract 
+class Phergie_Event_Response extends Phergie_Event_Abstract
 {
     /**
      * <nickname> No such nick/channel
@@ -1071,38 +1095,39 @@ class Phergie_Event_Response extends Phergie_Event_Abstract
      *
      * @var string
      */
-    protected $_code;
+    protected $code;
 
     /**
      * Reply code description sent by the server.
      *
      * @var string
      */
-    protected $_description;
+    protected $description;
 
     /**
      * Raw data sent by the server
      *
      * @var string
      */
-    protected $_rawData;
+    protected $rawData;
 
     /**
      * Event type
      *
      * @var string
      */
-    protected $_type = 'response';
+    protected $type = 'response';
 
     /**
      * Sets the reply code sent by the server.
      *
-     * @param string $code
+     * @param string $code Reply code
+     *
      * @return Phergie_Event_Response Provides a fluent interface
      */
     public function setCode($code)
     {
-        $this->_code = $code;
+        $this->code = $code;
         return $this;
     }
 
@@ -1113,18 +1138,19 @@ class Phergie_Event_Response extends Phergie_Event_Abstract
      */
     public function getCode()
     {
-        return $this->_code;
+        return $this->code;
     }
 
     /**
      * Sets the reply code description sent by the server.
      *
-     * @param string $description
+     * @param string $description Reply code description
+     *
      * @return Phergie_Event_Response Provides a fluent interface
      */
     public function setDescription($description)
     {
-        $this->_description = $description;
+        $this->description = $description;
         return $this;
     }
 
@@ -1135,18 +1161,19 @@ class Phergie_Event_Response extends Phergie_Event_Abstract
      */
     public function getDescription()
     {
-        return $this->_description;
+        return $this->description;
     }
 
     /**
      * Sets the raw buffer for the given event
      *
-     * @param string $buffer
+     * @param string $buffer Raw event buffer
+     *
      * @return Phergie_Event_Response Provides a fluent interface
      */
     public function setRawData($buffer)
     {
-        $this->_rawData = $buffer;
+        $this->rawData = $buffer;
         return $this;
     }
 
@@ -1157,6 +1184,6 @@ class Phergie_Event_Response extends Phergie_Event_Abstract
      */
     public function getRawData()
     {
-        return $this->_rawData;
+        return $this->rawData;
     }
 }

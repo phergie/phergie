@@ -1,9 +1,33 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Autonomous event originating from a user or the server.
  *
- * @see http://www.irchelp.org/irchelp/rfc/chapter4.html
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
+ * @see      http://www.irchelp.org/irchelp/rfc/chapter4.html
  */
 class Phergie_Event_Request 
     extends Phergie_Event_Abstract 
@@ -126,7 +150,7 @@ class Phergie_Event_Request
      *
      * @var array
      */
-    protected static $_map = array(
+    protected static $map = array(
 
         self::TYPE_QUIT => array(
             'message' => 0
@@ -186,31 +210,32 @@ class Phergie_Event_Request
      *
      * @var Phergie_Hostmask
      */
-    protected $_hostmask;
+    protected $hostmask;
 
     /**
      * Arguments included with the message
      *
      * @var array
      */
-    protected $_arguments;
+    protected $arguments;
 
     /**
      * Raw data sent by the server
      *
      * @var string
      */
-    protected $_rawData;
+    protected $rawData;
 
     /**
      * Sets the hostmask representing the originating user.
      *
-     * @param Phergie_Hostmask $hostmask
+     * @param Phergie_Hostmask $hostmask User hostmask
+     *
      * @return Phergie_Event_Request Provides a fluent interface
      */
     public function setHostmask(Phergie_Hostmask $hostmask)
     {
-        $this->_hostmask = $hostmask;
+        $this->hostmask = $hostmask;
         return $this;
     }
 
@@ -221,18 +246,19 @@ class Phergie_Event_Request
      */
     public function getHostmask()
     {
-        return $this->_hostmask;
+        return $this->hostmask;
     }
 
     /**
      * Sets the arguments for the request.
      *
-     * @param array $arguments
+     * @param array $arguments Request arguments
+     *
      * @return Phergie_Event_Request Provides a fluent interface
      */
     public function setArguments($arguments)
     {
-        $this->_arguments = $arguments;
+        $this->arguments = $arguments;
         return $this;
     }
 
@@ -243,26 +269,28 @@ class Phergie_Event_Request
      */
     public function getArguments()
     {
-        return $this->_arguments;
+        return $this->arguments;
     }
 
     /**
      * Resolves an argument specification to an integer position.
      *
      * @param mixed $argument Integer position (starting from 0) or the
-     *        equivalent string name of the argument from self::$_map
+     *        equivalent string name of the argument from self::$map
+     *
      * @return int|null Integer position of the argument or NULL if no 
      *         corresponding argument was found
      */
-    protected function _resolveArgument($argument)
+    protected function resolveArgument($argument)
     {
-        if (isset($this->_arguments[$argument])) {
+        if (isset($this->arguments[$argument])) {
             return $argument; 
         } else {
             $argument = strtolower($argument);
-            if (isset(self::$_map[$this->_type][$argument]) &&
-                isset($this->_arguments[self::$_map[$this->_type][$argument]])) {
-                return self::$_map[$this->_type][$argument];
+            if (isset(self::$map[$this->_type][$argument])
+                && isset($this->arguments[self::$map[$this->_type][$argument]])
+            ) {
+                return self::$map[$this->_type][$argument];
             }
         }
         return null;
@@ -272,14 +300,15 @@ class Phergie_Event_Request
      * Returns a single specified argument for the request.
      *
      * @param mixed $argument Integer position (starting from 0) or the
-     *        equivalent string name of the argument from self::$_map
-     * @return string
+     *        equivalent string name of the argument from self::$map
+     *
+     * @return string|null Argument value or NULL if none is set
      */
     public function getArgument($argument)
     {
-        $argument = $this->_resolveArgument($argument);
+        $argument = $this->resolveArgument($argument);
         if ($argument !== null) { 
-            return $this->_arguments[$argument];
+            return $this->arguments[$argument];
         }
         return null;
     }
@@ -287,12 +316,13 @@ class Phergie_Event_Request
     /**
      * Sets the raw buffer for the event.
      *
-     * @param string $buffer
+     * @param string $buffer Raw event buffer
+     *
      * @return Phergie_Event_Request Provides a fluent interface
      */
     public function setRawData($buffer)
     {
-        $this->_rawData = $buffer;
+        $this->rawData = $buffer;
         return $this;
     }
 
@@ -303,7 +333,7 @@ class Phergie_Event_Request
      */
     public function getRawData()
     {
-        return $this->_rawData;
+        return $this->rawData;
     }
 
     /**
@@ -313,7 +343,7 @@ class Phergie_Event_Request
      */
     public function getNick()
     {
-        return $this->_hostmask->getNick();
+        return $this->hostmask->getNick();
     }
 
     /**
@@ -325,10 +355,10 @@ class Phergie_Event_Request
      */
     public function getSource()
     {
-        if (substr($this->_arguments[0], 0, 1) == '#') {
-            return $this->_arguments[0];
+        if (substr($this->arguments[0], 0, 1) == '#') {
+            return $this->arguments[0];
         }
-        return $this->_hostmask->getNick();
+        return $this->hostmask->getNick();
     }
 
     /**
@@ -348,7 +378,7 @@ class Phergie_Event_Request
      */
     public function isFromUser()
     {
-        $username = $this->_hostmask->getUsername();
+        $username = $this->hostmask->getUsername();
         return !empty($username);
     }
 
@@ -359,16 +389,17 @@ class Phergie_Event_Request
      */
     public function isFromServer()
     {
-        $username = $this->_hostmask->getUsername();
+        $username = $this->hostmask->getUsername();
         return empty($username);
     }
 
     /**
      * Provides access to named parameters via virtual "getter" methods.
      *
-     * @param string $name Name of the method called
-     * @param array $arguments Arguments passed to the method (should always
-     *                         be empty)
+     * @param string $name      Name of the method called
+     * @param array  $arguments Arguments passed to the method (should always
+     *        be empty)
+     *
      * @return mixed Method return value
      */
     public function __call($name, array $arguments)
@@ -379,14 +410,24 @@ class Phergie_Event_Request
     }
 
     /**
+     * Checks to see if an event argument is assigned a value.
+     *
+     * @param string|int $offset Argument name or position beginning from 0
+     *
+     * @return bool TRUE if the argument has a value, FALSE otherwise 
      * @see ArrayAccess::offsetExists()
      */
     public function offsetExists($offset)
     {
-        return ($this->_resolveArgument($offset) !== null);
+        return ($this->resolveArgument($offset) !== null);
     }
 
     /**
+     * Returns the value of an event argument.
+     *
+     * @param string|int $offset Argument name or position beginning from 0
+     *
+     * @return string|null Argument value or NULL if none is set
      * @see ArrayAccess::offsetGet()
      */
     public function offsetGet($offset)
@@ -395,23 +436,34 @@ class Phergie_Event_Request
     }
 
     /**
+     * Sets the value of an event argument.
+     *
+     * @param string|int $offset Argument name or position beginning from 0
+     * @param string     $value  New argument value
+     *
+     * @return void
      * @see ArrayAccess::offsetSet()
      */
     public function offsetSet($offset, $value)
     {
-        $offset = $this->_resolveArgument($offset);
+        $offset = $this->resolveArgument($offset);
         if ($offset !== null) { 
-            $this->_arguments[$offset] = $value;
+            $this->arguments[$offset] = $value;
         }
     }
 
     /**
+     * Removes the value set for an event argument.
+     *
+     * @param string|int $offset Argument name or position beginning from 0
+     *
+     * @return void
      * @see ArrayAccess::offsetUnset()
      */
     public function offsetUnset($offset)
     {
-        if ($offset = $this->_resolveArgument($offset)) {
-            unset($this->_arguments[$offset]);
+        if ($offset = $this->resolveArgument($offset)) {
+            unset($this->arguments[$offset]);
         }
     }
 }

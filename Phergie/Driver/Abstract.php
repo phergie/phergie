@@ -1,8 +1,33 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Base class for drivers which handle issuing client commands to the IRC
  * server and converting responses into usable data objects.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 abstract class Phergie_Driver_Abstract
 {
@@ -66,6 +91,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $reason Reason for connection termination (optional)
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_1_6
      */
     public abstract function doQuit($reason = null);
 
@@ -76,6 +102,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $keys     Optional comma-delimited list of channel keys
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_1
      */
     public abstract function doJoin($channels, $keys = null);
 
@@ -85,6 +112,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $channels Comma-delimited list of channels to leave 
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_2
      */
     public abstract function doPart($channels);
 
@@ -95,6 +123,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $channel Name of the channel
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_7
      */
     public abstract function doInvite($nick, $channel);
 
@@ -104,6 +133,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $channels Comma-delimited list of one or more channels
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_5
      */
     public abstract function doNames($channels);
 
@@ -115,6 +145,7 @@ abstract class Phergie_Driver_Abstract
      *                         (optional)
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_6
      */
     public abstract function doList($channels = null);
 
@@ -125,6 +156,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $topic   New topic to assign (optional)
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_4
      */
     public abstract function doTopic($channel, $topic = null);
 
@@ -135,6 +167,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $mode   New mode to assign (optional)
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_3
      */
     public abstract function doMode($target, $mode = null);
 
@@ -144,6 +177,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $nick New nick to assign
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_1_2
      */
     public abstract function doNick($nick);
 
@@ -153,6 +187,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $nick Nick
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_5_2
      */
     public abstract function doWhois($nick);
 
@@ -163,6 +198,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $text   Text of the message to send
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_4_1
      */
     public abstract function doPrivmsg($target, $text);
 
@@ -173,6 +209,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $text   Text of the notice to send
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_4_2
      */
     public abstract function doNotice($target, $text);
 
@@ -184,6 +221,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $reason  Reason for the kick (optional)
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_8
      */
     public abstract function doKick($nick, $channel, $reason = null);
 
@@ -193,6 +231,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $daemon Daemon from which the original request originates
      *
      * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_6_3
      */
     public abstract function doPong($daemon);
 
@@ -203,18 +242,30 @@ abstract class Phergie_Driver_Abstract
      * @param string $text   Text of the action to perform
      *
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.4
      */
     public abstract function doAction($target, $text);
 
     /**
-     * Sends a CTCP PING response to a user.
+     * Sends a CTCP PING request to a user.
      *
      * @param string $nick User nick
-     * @param string $hash PING hash to use in the handshake
+     * @param string $hash Hash to use in the handshake
      *
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.2
      */
     public abstract function doPing($nick, $hash);
+
+    /**
+     * Sends a CTCP VERSION request to a user.
+     *
+     * @param string $nick User nick
+     *
+     * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.1
+     */
+    public abstract function doVersion($nick);
 
     /**
      * Sends a CTCP VERSION response to a user.
@@ -223,8 +274,19 @@ abstract class Phergie_Driver_Abstract
      * @param string $version Version string to send
      *
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.1
      */
-    public abstract function doVersion($nick, $version);
+    public abstract function doVersionResponse($nick, $version);
+
+    /**
+     * Sends a CTCP TIME request to a user.
+     *
+     * @param string $nick User nick
+     *
+     * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.6
+     */
+    public abstract function doTime($nick);
 
     /**
      * Sends a CTCP TIME response to a user.
@@ -233,8 +295,30 @@ abstract class Phergie_Driver_Abstract
      * @param string $time Time string to send
      *
      * @return void
+     * @see http://www.invlogic.com/irc/ctcp.html#4.6
      */
-    public abstract function doTime($nick, $time);
+    public abstract function doTimeResponse($nick, $time);
+
+    /**
+     * Sends a CTCP FINGER request to a user.
+     *
+     * @param string $nick User nick
+     *
+     * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/ctcpspec.html 
+     */
+    public abstract function doFinger($nick);
+
+    /**
+     * Sends a CTCP FINGER response to a user.
+     *
+     * @param string $nick User nick
+     * @param string $finger Finger string to send
+     *
+     * @return void
+     * @see http://www.irchelp.org/irchelp/rfc/ctcpspec.html
+     */
+    public abstract function doFingerResponse($nick, $finger);
 
     /**
      * Sends a raw command to the server.

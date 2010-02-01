@@ -1,8 +1,33 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Plugin_Daddy
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Daddy
+ */
 
 /**
  * Simply responds to messages addressed to the bot that contain the phrase
  * "Who's your daddy?" and related variations.
+ *
+ * @category Phergie 
+ * @package  Phergie_Plugin_Daddy
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Daddy
  */
 class Phergie_Plugin_Daddy extends Phergie_Plugin_Abstract
 {
@@ -14,18 +39,22 @@ class Phergie_Plugin_Daddy extends Phergie_Plugin_Abstract
      */
     public function onPrivmsg()
     {
-        $bot = $this->_config['command.prefix'];
-        $text = $this->_event->getArgument(1);
-        $target = $this->_event->getNick();
-        if (preg_match('/' . preg_quote($bot) . 
-                    '\s*?who\'?s y(?:our|a) ([^?]+)\??/iAD', $text, $m)) {
-            if ($this->_config['daddy.curses'] && mt_rand(0, 5) === 5) {
-                $this->doPrivmsg($this->_event->getSource(), $target . 
-                    ': I am your ' . $m[1] . ', bitch!');
+        $config = $this->getConfig();
+        $prefix = $config['command.prefix'];
+        $event = $this->getEvent();
+        $text = $event->getArgument(1);
+        $target = $event->getNick();
+        $source = $event->getSource();
+        $pattern 
+            = '/' . preg_quote($prefix) . 
+            '\s*?who\'?s y(?:our|a) ([^?]+)\??/iAD';
+        if (preg_match($pattern, $text, $m)) {
+            if ($config['daddy.curses'] && mt_rand(0, 5) === 5) {
+                $msg = $target . ': I am your ' . $m[1] . ', bitch!';
             } else {
-                $this->doPrivmsg($this->_event->getSource(), 'You\'re my ' . $m[1] . 
-                    ', ' . $target . '!');
+                $msg = 'You\'re my ' . $m[1] . ', ' . $target . '!';
             }
+            $this->doPrivmsg($source, $msg);
         }
     }
 }

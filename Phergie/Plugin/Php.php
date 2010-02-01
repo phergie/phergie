@@ -1,7 +1,32 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Plugin_Php
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Php
+ */
 
 /**
  * Returns information on PHP functions as requested. 
+ *
+ * @category Phergie 
+ * @package  Phergie_Plugin_Php
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Php
  */
 class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
 {
@@ -10,7 +35,7 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
      *
      * @var Phergie_Plugin_Php_Source
      */
-    protected $_source;
+    protected $source;
 
     /**
      * Check for dependencies.
@@ -20,35 +45,36 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
-            $this->_fail('PDO and pdo_sqlite extensions must be installed');
+            $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
+
+        $this->getPluginHandler()->getPlugin('Command');
     }
 
     /**
-     * Instantiate the database
+     * Initializes the data source. 
+     *
+     * @return void
      */
     public function onConnect()
     {
-        // Call the parent to register commands
-        parent::onConnect();
-
         // Construct a new data source
-        require_once 'Phergie/Plugin/Php/Source/Local.php';
-        $this->_source = new Phergie_Plugin_Php_Source_Local;
+        $this->source = new Phergie_Plugin_Php_Source_Local;
     }
 
     /**
-     * Search the database for the function
+     * Searches the data source for the requested function.
      * 
-     * @param string $functionName
+     * @param string $functionName Name of the function to search for
+     *
+     * @return void
      */
-    public function onDoPhp($functionName)
+    public function onCommandPhp($functionName)
     {
         // Search for the function
-        if($function = $this->_source->findFunction($functionName)) {
+        if ($function = $this->source->findFunction($functionName)) {
             $msg = 'PHP ' . $function['name'] . ': ' . $function['description'];
-        }
-        else {
+        } else {
             $msg = 'Search for function ' . $functionName . ' returned no results.';
         }
         

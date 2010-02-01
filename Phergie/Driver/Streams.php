@@ -1,9 +1,34 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Core
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Core
+ */
 
 /**
  * Driver that uses the sockets wrapper of the streams extension for 
  * communicating with the server and handles formatting and parsing of 
  * events using PHP.
+ *
+ * @category Phergie 
+ * @package  Phergie_Core
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Core
  */
 class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 {
@@ -124,11 +149,12 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             // Parse the command and arguments
             list($cmd, $args) = array_pad(explode(' ', $buffer, 2), 2, null);
 
-        // If the event could be from the server or a user...
         } else {
+            // If the event could be from the server or a user...
 
             // Parse the server hostname or user hostmask, command, and arguments
-            list($prefix, $cmd, $args) = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
+            list($prefix, $cmd, $args) 
+                = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
             if (strpos($prefix, '@') !== false) {
                 $hostmask = Phergie_Hostmask::fromString($prefix);
             }
@@ -137,69 +163,70 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         // Parse the event arguments depending on the event type
         $cmd = strtolower($cmd);
         switch ($cmd) {
-            case 'names':
-            case 'nick':
-            case 'quit':
-            case 'ping':
-            case 'join':
-            case 'error':
-                $args = array(ltrim($args, ':'));
+        case 'names':
+        case 'nick':
+        case 'quit':
+        case 'ping':
+        case 'join':
+        case 'error':
+            $args = array(ltrim($args, ':'));
             break;
 
-            case 'privmsg':
-            case 'notice':
-                $ctcp = substr(strstr($args, ':'), 1);
-                if (substr($ctcp, 0, 1) === "\x01" && substr($ctcp, -1) === "\x01") {
-                    $ctcp = substr($ctcp, 1, -1);
-                    $reply = ($cmd == 'notice');
-                    list($cmd, $args) = array_pad(explode(' ', $ctcp, 2), 2, null);
-                    $cmd = strtolower($cmd);
-                    switch ($cmd) {
-                        case 'version':
-                        case 'time':
-                            if ($reply) {
-                                $args = $ctcp;
-                            }
-                        case 'ping':
-                            if ($reply) {
-                                $cmd .= 'Reply';
-                            }
-                        case 'action':
-                            $args = array($this->getConnection()->getNick(), $args);
-                        break;
-
-                        default:
-                            $cmd = 'ctcp';
-                            if ($reply) {
-                                $cmd .= 'Reply';
-                            }
-                            $args = array($this->getConnection()->getNick(), $ctcp);
-                        break;
+        case 'privmsg':
+        case 'notice':
+            $ctcp = substr(strstr($args, ':'), 1);
+            if (substr($ctcp, 0, 1) === "\x01" && substr($ctcp, -1) === "\x01") {
+                $ctcp = substr($ctcp, 1, -1);
+                $reply = ($cmd == 'notice');
+                list($cmd, $args) = array_pad(explode(' ', $ctcp, 2), 2, null);
+                $cmd = strtolower($cmd);
+                switch ($cmd) {
+                case 'version':
+                case 'time':
+                case 'finger':
+                    if ($reply) {
+                        $args = $ctcp;
                     }
-                } else {
-                    $args = $this->parseArguments($args, 2);
+                case 'ping':
+                    if ($reply) {
+                        $cmd .= 'Response';
+                    }
+                case 'action':
+                    $args = array($this->getConnection()->getNick(), $args);
+                    break;
+
+                default:
+                    $cmd = 'ctcp';
+                    if ($reply) {
+                        $cmd .= 'Response';
+                    }
+                    $args = array($this->getConnection()->getNick(), $ctcp);
+                    break;
                 }
+            } else {
+                $args = $this->parseArguments($args, 2);
+            }
             break;
 
-            case 'oper':
-            case 'topic':
-            case 'mode':
-                $args = $this->parseArguments($args); 
+        case 'oper':
+        case 'topic':
+        case 'mode':
+            $args = $this->parseArguments($args); 
             break;
 
-            case 'part':
-            case 'kill':
-            case 'invite':
-                $args = $this->parseArguments($args, 2); 
+        case 'part':
+        case 'kill':
+        case 'invite':
+            $args = $this->parseArguments($args, 2); 
             break;
 
-            case 'kick':
-                $args = $this->parseArguments($args, 3); 
+        case 'kick':
+            $args = $this->parseArguments($args, 3); 
             break;
 
-            // Remove the target from responses
-            default:
-                $args = substr($args, strpos($args, ' ') + 1);
+        // Remove the target from responses
+        default:
+            $args = substr($args, strpos($args, ' ') + 1);
             break;
         }
 
@@ -246,7 +273,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $this->socket = @streamsocket_client($remote, $errno, $errstr);
         if (!$this->socket) {
             throw new Phergie_Driver_Exception(
-                'Unable to connect to server: socket error ' . $errno . ' ' . $errstr,
+                'Unable to connect: socket error ' . $errno . ' ' . $errstr,
                 Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED
             );
         }
@@ -257,12 +284,15 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Send user information
-        $this->send('USER', array(
-            $username, 
-            $hostname, 
-            $hostname, 
-            $realname
-        ));
+        $this->send(
+            'USER',
+            array(
+                $username, 
+                $hostname, 
+                $hostname, 
+                $realname
+            )
+        );
 
         $this->send('NICK', $nick); 
 
@@ -315,15 +345,9 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @return void
      */
-    public function doPart($channel, $reason = null)
+    public function doPart($channels)
     {
-        $args = array($channel);
-
-        if (!empty($reason)) {
-            $args[] = $reason;
-        }
-
-        $this->send('PART', $args);
+        $this->send('PART', $channels);
     }
 
     /**
@@ -418,7 +442,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Retrieves information about a nick.
      *
-     * @param string $nick
+     * @param string $nick Nick
      *
      * @return void
      */
@@ -510,7 +534,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @return void
      */
-    protected function doCtcpResponse($nick, $command, $args = null)
+    protected function doCtcp($nick, $command, $args = null)
     {
         if (is_array($args)) {
             $args = implode(' ', $args);
@@ -522,16 +546,28 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Sends a CTCP PING response to a user.
+     * Sends a CTCP PING request or response (they are identical) to a user.
      *
      * @param string $nick User nick
-     * @param string $hash PING hash to use in the handshake
+     * @param string $hash Hash to use in the handshake
      *
      * @return void
      */
     public function doPing($nick, $hash)
     {
-        $this->doCtcpResponse($nick, 'PING', $hash);
+        $this->doCtcp($nick, 'PING', $hash);
+    }
+
+    /**
+     * Sends a CTCP VERSION request to a user.
+     *
+     * @param string $nick User nick
+     *
+     * @return void
+     */
+    public function doVersion($nick)
+    {
+        $this->doCtcp($nick, 'VERSION');
     }
 
     /**
@@ -542,9 +578,21 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @return void
      */
-    public function doVersion($nick, $version)
+    public function doVersionResponse($nick, $version)
     {
-        $this->doCtcpResponse($nick, 'VERSION', $version);
+        $this->doCtcp($nick, 'VERSION', $version);
+    }
+
+    /**
+     * Sends a CTCP TIME request to a user.
+     *
+     * @param string $nick User nick
+     *
+     * @return void
+     */
+    public function doTime($nick)
+    {
+        $this->doCtcp($nick, 'TIME');
     }
 
     /**
@@ -555,9 +603,34 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @return void
      */
-    public function doTime($nick, $time)
+    public function doTimeResponse($nick, $time)
     {
-        $this->doCtcpResponse($nick, 'TIME', $time);
+        $this->doCtcp($nick, 'TIME', $time);
+    }
+
+    /**
+     * Sends a CTCP FINGER request to a user.
+     *
+     * @param string $nick User nick
+     *
+     * @return void
+     */
+    public function doFinger($nick)
+    {
+        $this->doCtcp($nick, 'FINGER');
+    }
+
+    /**
+     * Sends a CTCP FINGER response to a user.
+     *
+     * @param string $nick User nick
+     * @param string $finger Finger string to send
+     *
+     * @return void
+     */
+    public function doFingerResponse($nick, $finger)
+    {
+        $this->doCtcp($nick, 'FINGER', $finer);
     }
 
     /**

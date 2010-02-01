@@ -12,17 +12,17 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     /**
      * Twitter object
      */
-    protected $_twitter;
+    protected $twitter;
 
     /**
      * Twitter user
      */
-    protected $_twitteruser = null;
+    protected $twitteruser = null;
 
     /**
      * Password
      */
-    protected $_twitterpassword = null;
+    protected $twitterpassword = null;
 
     /**
      * Allow only admins to tweet
@@ -48,32 +48,26 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     {
         // see if tweetrequireadmin defined in config
         if (
-            isset($this->_config['twitter.tweetrequireadmin']) &&
-            $req = $this->_config['twitter.tweetrequireadmin']
+            isset($this->config['twitter.tweetrequireadmin']) &&
+            $req = $this->config['twitter.tweetrequireadmin']
         ) {
             // if so, override default
             self::$TWEET_REQUIRE_ADMIN = $req;
         }
         if (
-            !isset($this->_config['twitter.class']) ||
-            !$twitterClass = $this->_config['twitter.class']
+            !isset($this->config['twitter.class']) ||
+            !$twitterClass = $this->config['twitter.class']
         ) {
             $twitterClass = 'Twitter';
         }
 
-        $this->_twitteruser = isset($this->_config['twitter.user']) ?
-                    $this->_config['twitter.user'] :
-                    null;
-        $this->_twitterpassword = isset($this->_config['twitter.password']) ?
-            $this->_config['twitter.password'] :
-            null;
-        $url = isset($this->_config['twitter.url']) ?
-            $this->_config['twitter.url'] :
-            null;
+        $this->twitteruser = $this->config['twitter.user'];
+        $this->twitterpassword = $this->config['twitter.password'];
+        $url = $this->config['twitter.url'];
 
-        $this->_twitter = new $twitterClass(
-            $this->_twitteruser,
-            $this->_twitterpassword,
+        $this->twitter = new $twitterClass(
+            $this->twitteruser,
+            $this->twitterpassword,
             $url
         );
 
@@ -90,11 +84,11 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     {
         $source = $this->getEvent()->getSource();
         if (is_numeric($tweeter)) {
-            $tweet = $this->_twitter->getTweetByNum($tweeter);
-        } else if (is_null($tweeter) && $this->_twitteruser) {
-            $tweet = $this->_twitter->getLastTweet($this->_twitteruser, 1);
+            $tweet = $this->twitter->getTweetByNum($tweeter);
+        } else if (is_null($tweeter) && $this->twitteruser) {
+            $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
         } else {
-            $tweet = $this->_twitter->getLastTweet(ltrim($tweeter, '@'), $num);
+            $tweet = $this->twitter->getLastTweet(ltrim($tweeter, '@'), $num);
         }
         if ($tweet) {
             $this->doPrivmsg($source, $this->formatTweet($tweet));
@@ -109,15 +103,15 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onCommandTweet($txt) {
         $nick = $this->getEvent()->getNick();
-        if (!$this->_twitteruser) {
+        if (!$this->twitteruser) {
             return;
         }
         if (self::$TWEET_REQUIRE_ADMIN && !$this->fromAdmin(true)) {
             return;
         }
         $source = $this->getEvent()->getSource();
-        if ($tweet = $this->_twitter->sendTweet($txt)) {
-            $this->doPrivmsg($source, 'Tweeted: '. $this->_twitter->getUrlOutputStatus($tweet));
+        if ($tweet = $this->twitter->sendTweet($txt)) {
+            $this->doPrivmsg($source, 'Tweeted: '. $this->twitter->getUrlOutputStatus($tweet));
         } else {
             $this->doNotice($nick, 'Tweet failed');
         }
@@ -133,7 +127,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         $out =  '<@' . $tweet->user->screen_name .'> '. $tweet->text
             . ' - ' . $this->getCountdown(time() - strtotime($tweet->created_at)) . ' ago';
         if ($includeUrl) {
-            $out .= ' (' . $this->_twitter->getUrlOutputStatus($tweet) . ')';
+            $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
         }
         return $out;
     }
@@ -187,7 +181,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         $source = $this->getEvent()->getSource();
 
         if (preg_match('#^/(.*?)/status(es)?/([0-9]+)$#', $parsed['path'], $matches)) {
-            $tweet = $this->_twitter->getTweetByNum($matches[3]);
+            $tweet = $this->twitter->getTweetByNum($matches[3]);
             if ($tweet) {
                 $this->doPrivmsg($source, $this->formatTweet($tweet, false));
             }
