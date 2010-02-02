@@ -41,7 +41,7 @@ class Phergie_Autoload
         $includePath = get_include_path();
         $includePathList = explode(PATH_SEPARATOR, $includePath); 
         if (!in_array($path, $includePathList)) {
-            set_include_path($includePath . PATH_SEPARATOR . $path);
+            self::addPath($path);
         }
     }
 
@@ -68,5 +68,17 @@ class Phergie_Autoload
     public static function registerAutoloader()
     {
         spl_autoload_register(array(new self, 'load'));
+    }
+
+    /**
+     * Add a path to the include path.
+     *
+     * @param string $path Path to add
+     *
+     * @return void
+     */
+    public static function addPath($path)
+    {
+        set_include_path(get_include_path() . PATH_SEPARATOR . $path);
     }
 }
