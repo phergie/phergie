@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Phergie" default="dist">
+
+    <property name="build.basedir" value="../Phergie_Core" />
+    <property name="build.baseinstalldir" value="Phergie" />
+    <property name="build.packagedirectory" value="${build.basedir}/${build.baseinstalldir}" />
+    <property name="build.relnotes" value="Initial release" />
+    <property name="build.stability" value="beta" />
+    <property name="build.version" value="2.0.0" />
+    <property name="build.packagefile" value="${build.basedir}/Phergie_Core-${build.version}.tgz" />
+
+    <fileset dir="./" id="Phergie_Core">
+        <include name="Autoload.php" />
+        <include name="Bootstrap.php" />
+        <include name="Bot.php" />
+        <include name="Config/Exception.php" />
+        <include name="Config.php" />
+        <include name="Connection/Exception.php" />
+        <include name="Connection/Handler.php" />
+        <include name="Connection.php" />
+        <include name="Driver/Abstract.php" />
+        <include name="Driver/Exception.php" />
+        <include name="Driver/Streams.php" />
+        <include name="Event/Abstract.php" />
+        <include name="Event/Command.php" />
+        <include name="Event/Exception.php" />
+        <include name="Event/Handler.php" />
+        <include name="Event/Request.php" />
+        <include name="Event/Response.php" />
+        <include name="Exception.php" />
+        <include name="Hostmask/Exception.php" />
+        <include name="Hostmask.php" />
+        <include name="LICENSE" />
+        <include name="${build.file}" />
+        <include name="Plugin/Abstract.php" />
+        <include name="Plugin/AltNick.php" />
+        <include name="Plugin/AutoJoin.php" />
+        <include name="Plugin/Command.php" />
+        <include name="Plugin/Ctcp.php" />
+        <include name="Plugin/Exception.php" />
+        <include name="Plugin/Handler.php" />
+        <include name="Plugin/Invisible.php" />
+        <include name="Plugin/Ping.php" />
+        <include name="Plugin/Pong.php" />
+        <include name="Plugin/Prioritize.php" />
+        <include name="Plugin/Quit.php" />
+        <include name="Plugin/Url.php" />
+        <include name="Settings.php.dist" />
+        <include name="Ui/Abstract.php" />
+        <include name="Ui/Console.php" />
+    </fileset>
+
+    <target name="dist">
+        <mkdir dir="${build.basedir}" />
+        <mkdir dir="${build.packagedirectory}" />
+        <copy todir="${build.packagedirectory}">
+            <fileset refid="Phergie_Core" />
+        </copy>
+        <pearpkg2 name="Phergie_Core" dir="./">
+            <fileset refid="Phergie_Core" />
+            <option name="packagefile" value="package2.xml" />
+            <option name="baseinstalldir" value="${build.baseinstalldir}"/>
+            <option name="packagedirectory" value="${build.packagedirectory}"/>
+            <option name="channel" value="pear.phergie.org"/>
+            <option name="summary" value="Phergie core libraries"/>
+            <option name="description" value="The Phergie_Core package provides all files necessary to run a basic IRC bot."/>
+            <option name="apiversion" value="${build.version}"/>
+            <option name="apistability" value="${build.stability}"/>
+            <option name="releaseversion" value="${build.version}"/>
+            <option name="releasestability" value="${build.stability}"/>
+            <option name="license" value="http://phergie.org/license New BSD License"/>
+            <option name="phpdep" value="5.2.0"/>
+            <option name="pearinstallerdep" value="1.9.0"/>
+            <option name="packagetype" value="php"/>
+            <option name="notes" value="${build.relnotes}"/>
+            <mapping name="maintainers">
+                <element>
+                    <element key="handle" value="team"/>
+                    <element key="name" value="Phergie Development Team"/>
+                    <element key="email" value="team@phergie.org"/>
+                    <element key="role" value="lead"/>
+                </element>
+            </mapping>
+        </pearpkg2>
+        <delete file="${build.packagefile}" quiet="true" />
+        <tar destfile="${build.packagefile}" compression="gzip">
+            <fileset refid="Phergie_Core" />
+        </tar>
+    </target>
+
+</project>
