@@ -12,29 +12,29 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
      *
      * @var array
      */
-    protected $_methods = array();
+    protected $methods = array();
 
     /**
      * Prefix for command method names
      *
      * @var string
      */
-    protected $_methodPrefix = 'onCommand';
+    protected $methodPrefix = 'onCommand';
 
     /**
      * Populates the methods cache.
      *
      * @return void
      */
-    protected function _populateMethodCache()
+    protected function populateMethodCache()
     {
         foreach ($this->getPluginHandler() as $plugin) {
             $reflector = new ReflectionClass($plugin);
             foreach ($reflector->getMethods() as $method) {
                 $name = $method->getName();
-                if (strpos($name, $this->_methodPrefix) === 0 
-                    && !isset($this->_methods[$name])) {
-                    $this->_methods[$name] = array(
+                if (strpos($name, $this->methodPrefix) === 0 
+                    && !isset($this->methods[$name])) {
+                    $this->methods[$name] = array(
                         'total' => $method->getNumberOfParameters(),
                         'required' => $method->getNumberOfRequiredParameters()
                     );
@@ -53,8 +53,8 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
     public function onPrivmsg()
     {
         // Populate the methods cache if needed
-        if (empty($this->_methods)) {
-            $this->_populateMethodCache();
+        if (empty($this->methods)) {
+            $this->populateMethodCache();
         }
 
         // Get the content of the message
@@ -62,21 +62,21 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         $msg = trim($event->getText());
 
         // Check for the command prefix if one is set and needed
-        if (!empty($this->_config['command.prefix']) && $event->isInChannel()) {
-            if (strpos($msg, $this->_config['command.prefix']) !== 0) {
+        if ($this->config['command.prefix'] && $event->isInChannel()) {
+            if (strpos($msg, $this->config['command.prefix']) !== 0) {
                 return;
             } else {
-                $msg = substr($msg, strlen($this->_config['command.prefix']));
+                $msg = substr($msg, strlen($this->config['command.prefix']));
             }
         }
 
         // Separate the command and arguments
         $parsed = preg_split('/\s+/', $msg, 2);
-        $method = $this->_methodPrefix . ucfirst(strtolower(array_shift($parsed))); 
+        $method = $this->methodPrefix . ucfirst(strtolower(array_shift($parsed))); 
         $args = count($parsed) ? array_shift($parsed) : '';
 
         // Check to ensure the command exists
-        if (empty($this->_methods[$method])) {
+        if (empty($this->methods[$method])) {
             return;
         }
 
@@ -84,7 +84,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         if (empty($args)) {
 
             // If the method requires no arguments, call it
-            if (empty($this->_methods[$method]['required'])) {
+            if (empty($this->methods[$method]['required'])) {
                 $this->getPluginHandler()->$method();
             }
 
@@ -92,10 +92,10 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         } else {
 
             // Parse the arguments
-            $args = preg_split('/\s+/', $args, $this->_methods[$method]['total']);
+            $args = preg_split('/\s+/', $args, $this->methods[$method]['total']);
 
             // If the minimum arguments are passed, call the method 
-            if ($this->_methods[$method]['required'] <= count($args)) {
+            if ($this->methods[$method]['required'] <= count($args)) {
                 call_user_func_array(array($this->getPluginHandler(), $method), $args);
             }
         }

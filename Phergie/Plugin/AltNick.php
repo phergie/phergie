@@ -45,12 +45,12 @@ class Phergie_Plugin_AltNick extends Phergie_Plugin_Abstract
      */
     public function onConnect()
     {
-        if (!empty($this->_config['altnick.nicks'])) {
-            if (is_string($this->_config['altnick.nicks'])) {
-                $this->_config['altnick.nicks'] 
-                    = array($this->_config['altnick.nicks']);
+        if ($this->config['altnick.nicks']) {
+            if (is_string($this->config['altnick.nicks'])) {
+                $this->config['altnick.nicks'] 
+                    = array($this->config['altnick.nicks']);
             }
-            $this->iterator = new ArrayIterator($this->_config['altnick.nicks']);
+            $this->iterator = new ArrayIterator($this->config['altnick.nicks']);
         }
     }
 
