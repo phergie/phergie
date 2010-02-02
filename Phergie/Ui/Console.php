@@ -44,7 +44,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      * @var string
      * @see http://php.net/date
      */
-     protected $format;
+    protected $format;
 
     /**
      * Constructor to initialize object properties.
