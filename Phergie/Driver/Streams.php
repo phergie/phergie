@@ -270,7 +270,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Establish and configure the socket connection
         $remote = 'tcp://' . $hostname . ':' . $port;
-        $this->socket = @streamsocket_client($remote, $errno, $errstr);
+        $this->socket = @stream_socket_client($remote, $errno, $errstr);
         if (!$this->socket) {
             throw new Phergie_Driver_Exception(
                 'Unable to connect: socket error ' . $errno . ' ' . $errstr,
