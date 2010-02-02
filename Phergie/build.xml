@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="Phergie" default="dist">
+<project name="Phergie" default="core">
 
-    <property name="build.basedir" value="../Phergie_Core" />
-    <property name="build.baseinstalldir" value="Phergie" />
-    <property name="build.packagedirectory" value="${build.basedir}/${build.baseinstalldir}" />
+    <property name="build.basedir" value="./" />
     <property name="build.relnotes" value="Initial release" />
     <property name="build.stability" value="beta" />
     <property name="build.version" value="2.0.0" />
-    <property name="build.packagefile" value="${build.basedir}/Phergie_Core-${build.version}.tgz" />
+    <property name="build.package.xml" value="package2.xml" />
+    <property name="build.package.tarball" value="Phergie_Core-${build.version}.tgz" />
 
     <fileset dir="./" id="Phergie_Core">
         <include name="Autoload.php" />
@@ -32,7 +31,7 @@
         <include name="Hostmask/Exception.php" />
         <include name="Hostmask.php" />
         <include name="LICENSE" />
-        <include name="${build.file}" />
+        <include name="${build.package.xml}" />
         <include name="Plugin/Abstract.php" />
         <include name="Plugin/AltNick.php" />
         <include name="Plugin/AutoJoin.php" />
@@ -51,17 +50,11 @@
         <include name="Ui/Console.php" />
     </fileset>
 
-    <target name="dist">
-        <mkdir dir="${build.basedir}" />
-        <mkdir dir="${build.packagedirectory}" />
-        <copy todir="${build.packagedirectory}">
+    <target name="core">
+        <pearpkg2 name="Phergie_Core" dir="${build.basedir}">
             <fileset refid="Phergie_Core" />
-        </copy>
-        <pearpkg2 name="Phergie_Core" dir="./">
-            <fileset refid="Phergie_Core" />
-            <option name="packagefile" value="package2.xml" />
-            <option name="baseinstalldir" value="${build.baseinstalldir}"/>
-            <option name="packagedirectory" value="${build.packagedirectory}"/>
+            <option name="packagefile" value="${build.package.xml}" />
+            <option name="baseinstalldir" value="${build.basedir}"/>
             <option name="channel" value="pear.phergie.org"/>
             <option name="summary" value="Phergie core libraries"/>
             <option name="description" value="The Phergie_Core package provides all files necessary to run a basic IRC bot."/>
@@ -83,10 +76,11 @@
                 </element>
             </mapping>
         </pearpkg2>
-        <delete file="${build.packagefile}" quiet="true" />
-        <tar destfile="${build.packagefile}" compression="gzip">
+        <delete file="${build.package.tarball}" quiet="true" />
+        <tar destfile="${build.package.tarball}" compression="gzip">
             <fileset refid="Phergie_Core" />
         </tar>
+        <delete file="${build.package.xml}" />
     </target>
 
 </project>
