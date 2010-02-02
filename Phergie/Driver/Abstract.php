@@ -312,7 +312,7 @@ abstract class Phergie_Driver_Abstract
     /**
      * Sends a CTCP FINGER response to a user.
      *
-     * @param string $nick User nick
+     * @param string $nick   User nick
      * @param string $finger Finger string to send
      *
      * @return void
