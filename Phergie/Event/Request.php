@@ -287,10 +287,10 @@ class Phergie_Event_Request
             return $argument; 
         } else {
             $argument = strtolower($argument);
-            if (isset(self::$map[$this->_type][$argument])
-                && isset($this->arguments[self::$map[$this->_type][$argument]])
+            if (isset(self::$map[$this->type][$argument])
+                && isset($this->arguments[self::$map[$this->type][$argument]])
             ) {
-                return self::$map[$this->_type][$argument];
+                return self::$map[$this->type][$argument];
             }
         }
         return null;
