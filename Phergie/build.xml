@@ -17,7 +17,7 @@ http://pear.php.net/bugs/bug.php?id=16535
     <property name="build.relnotes" value="Initial release" />
     <property name="build.stability" value="beta" />
     <property name="build.version" value="2.0.0" />
-    <property name="build.package.xml" value="package2.xml" />
+    <property name="build.package.xml" value="package.xml" />
     <property name="build.package.tarball" value="Phergie_Core-${build.version}.tgz" />
 
     <fileset dir="./" id="Phergie_Core">
