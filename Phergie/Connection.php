@@ -112,7 +112,7 @@ class Phergie_Connection
      */
     protected function checkSetting($setting)
     {
-        if (empty($this->{'_' . $setting})) {
+        if (empty($this->$setting)) {
             throw new Phergie_Connection_Exception(
                 'Required connection setting "' . $setting . '" missing',
                 Phergie_Connection_Exception::ERR_REQUIRED_SETTING_MISSING
