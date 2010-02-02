@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+NOTE: At the time that this file was created, the latest stable version of  
+PEAR_PackageFileManager2 was 1.0.0 which was released on 2009-04-15. A bug 
+was later filed for that package at the URL below on 2009-08-18. The 
+included patch for this bug must be applied manually to the locally 
+installed copy of the package source code in order for this build file to 
+work correctly.
+
+http://pear.php.net/bugs/bug.php?id=16535
+-->
+
 <project name="Phergie" default="core">
 
     <property name="build.basedir" value="./" />
