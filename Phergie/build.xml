@@ -13,62 +13,76 @@ http://pear.php.net/bugs/bug.php?id=16535
 
 <project name="Phergie" default="core">
 
-    <property name="build.basedir" value="./" />
+    <property name="build.srcdir" value="../" />
     <property name="build.relnotes" value="Initial release" />
-    <property name="build.stability" value="beta" />
-    <property name="build.version" value="2.0.0" />
-    <property name="build.package.xml" value="package.xml" />
-    <property name="build.package.tarball" value="Phergie_Core-${build.version}.tgz" />
-
-    <fileset dir="./" id="Phergie_Core">
-        <include name="Autoload.php" />
-        <include name="Bootstrap.php" />
-        <include name="Bot.php" />
-        <include name="Config/Exception.php" />
-        <include name="Config.php" />
-        <include name="Connection/Exception.php" />
-        <include name="Connection/Handler.php" />
-        <include name="Connection.php" />
-        <include name="Driver/Abstract.php" />
-        <include name="Driver/Exception.php" />
-        <include name="Driver/Streams.php" />
-        <include name="Event/Abstract.php" />
-        <include name="Event/Command.php" />
-        <include name="Event/Exception.php" />
-        <include name="Event/Handler.php" />
-        <include name="Event/Request.php" />
-        <include name="Event/Response.php" />
-        <include name="Exception.php" />
-        <include name="Hostmask/Exception.php" />
-        <include name="Hostmask.php" />
-        <include name="LICENSE" />
-        <include name="${build.package.xml}" />
-        <include name="Plugin/Abstract.php" />
-        <include name="Plugin/AltNick.php" />
-        <include name="Plugin/AutoJoin.php" />
-        <include name="Plugin/Command.php" />
-        <include name="Plugin/Ctcp.php" />
-        <include name="Plugin/Exception.php" />
-        <include name="Plugin/Handler.php" />
-        <include name="Plugin/Invisible.php" />
-        <include name="Plugin/Ping.php" />
-        <include name="Plugin/Pong.php" />
-        <include name="Plugin/Prioritize.php" />
-        <include name="Plugin/Quit.php" />
-        <include name="Plugin/Url.php" />
-        <include name="Settings.php.dist" />
-        <include name="Ui/Abstract.php" />
-        <include name="Ui/Console.php" />
-    </fileset>
 
     <target name="core">
-        <pearpkg2 name="Phergie_Core" dir="${build.basedir}">
-            <fileset refid="Phergie_Core" />
-            <option name="packagefile" value="${build.package.xml}" />
-            <option name="baseinstalldir" value="${build.basedir}"/>
+        <property name="build.version" value="2.0.0" />
+        <property name="build.stability" value="beta" />
+        <property name="build.name" value="Phergie-${build.version}" />
+        <property name="build.tarball" value="${build.name}.tgz" />
+        <property name="build.relnotes" value="Initial release" />
+
+        <fileset dir="${build.srcdir}" id="core">
+            <include name="Phergie/Autoload.php" />
+            <include name="Phergie/Bootstrap.php" />
+            <include name="Phergie/Bot.php" />
+            <include name="Phergie/Config/Exception.php" />
+            <include name="Phergie/Config.php" />
+            <include name="Phergie/Connection/Exception.php" />
+            <include name="Phergie/Connection/Handler.php" />
+            <include name="Phergie/Connection.php" />
+            <include name="Phergie/Driver/Abstract.php" />
+            <include name="Phergie/Driver/Exception.php" />
+            <include name="Phergie/Driver/Streams.php" />
+            <include name="Phergie/Event/Abstract.php" />
+            <include name="Phergie/Event/Command.php" />
+            <include name="Phergie/Event/Exception.php" />
+            <include name="Phergie/Event/Handler.php" />
+            <include name="Phergie/Event/Request.php" />
+            <include name="Phergie/Event/Response.php" />
+            <include name="Phergie/Exception.php" />
+            <include name="Phergie/Hostmask/Exception.php" />
+            <include name="Phergie/Hostmask.php" />
+            <include name="Phergie/Plugin/Abstract.php" />
+            <include name="Phergie/Plugin/AltNick.php" />
+            <include name="Phergie/Plugin/AutoJoin.php" />
+            <include name="Phergie/Plugin/Command.php" />
+            <include name="Phergie/Plugin/Ctcp.php" />
+            <include name="Phergie/Plugin/Exception.php" />
+            <include name="Phergie/Plugin/Handler.php" />
+            <include name="Phergie/Plugin/Invisible.php" />
+            <include name="Phergie/Plugin/Ping.php" />
+            <include name="Phergie/Plugin/Pong.php" />
+            <include name="Phergie/Plugin/Prioritize.php" />
+            <include name="Phergie/Plugin/Quit.php" />
+            <include name="Phergie/Plugin/Url.php" />
+            <include name="Phergie/Ui/Abstract.php" />
+            <include name="Phergie/Ui/Console.php" />
+        </fileset>
+
+        <fileset dir="${build.srcdir}/Phergie" id="data">
+            <include name="LICENSE" />
+            <include name="Settings.php.dist" />
+        </fileset>
+
+        <delete file="${build.tarball}" quiet="true" />
+
+        <mkdir dir="${build.name}" />
+
+        <copy todir="${build.name}">
+            <fileset refid="core" />
+            <fileset refid="data" />
+        </copy>
+
+        <pearpkg2 name="Phergie" dir="${build.name}">
+            <fileset refid="core" />
+            <fileset refid="data" />
+            <option name="baseinstalldir" value="/" />
+            <option name="outputdirectory" value="./" />
             <option name="channel" value="pear.phergie.org"/>
             <option name="summary" value="Phergie core libraries"/>
-            <option name="description" value="The Phergie_Core package provides all files necessary to run a basic IRC bot."/>
+            <option name="description" value="The Phergie package provides all files necessary to run a basic IRC bot."/>
             <option name="apiversion" value="${build.version}"/>
             <option name="apistability" value="${build.stability}"/>
             <option name="releaseversion" value="${build.version}"/>
@@ -87,11 +101,17 @@ http://pear.php.net/bugs/bug.php?id=16535
                 </element>
             </mapping>
         </pearpkg2>
-        <delete file="${build.package.tarball}" quiet="true" />
-        <tar destfile="${build.package.tarball}" compression="gzip">
-            <fileset refid="Phergie_Core" />
+
+        <tar destfile="${build.tarball}" compression="gzip">
+            <fileset dir="./">
+                <include name="${build.name}**" />
+                <include name="package.xml" />
+            </fileset>
         </tar>
-        <delete file="${build.package.xml}" />
+
+        <delete dir="${build.name}" />
+
+        <delete file="package.xml" />
     </target>
 
 </project>
