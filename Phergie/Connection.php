@@ -208,6 +208,13 @@ class Phergie_Connection
     {
         $this->ssl = (bool) $ssl;
 
+        if ($this->ssl && !in_array('ssl', stream_get_transports())) {
+            throw new Phergie_Connection_Exception(
+                'SSL is not supported by the PHP installation in use',
+                Phergie_Connection_Exception::SSL_NOT_SUPPORTED
+            );
+        }
+
         return $this;
     }
 
