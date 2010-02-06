@@ -13,6 +13,32 @@ class PhergiePackageTask extends PearPackage2Task
             $contents = file_get_contents($path);
             preg_match_all('#/\*\*(.*)\*/#Ums', $contents, $matches, PREG_SET_ORDER);
             $doc = $matches[1][1];
+
+            $have_summary = false;
+            $have_description = false;
+            foreach ($this->options as $option) {
+                switch ($option->getName()) {
+                    case 'summary':
+                        $have_summary = true;
+                        break;
+                    case 'description':
+                        $have_descripion = true;
+                        break;
+                }
+            }
+
+            if (!$have_summary || !$have_description) {
+                $summary = substr($doc, 0, strpos($doc, '@'));
+                $summary = preg_replace(array('#/\*\*|\s+\*|\*\s+/#m', '#[\s]+#m'), array('', ' '), $summary);
+                $summary = trim($summary);
+                if (!$have_summary) {
+                    $this->pkg->setSummary($summary);
+                }
+                if (!$have_description) {
+                    $this->pkg->setDescription($summary);
+                }
+            }
+
             $doc = preg_split('/\v+/', $doc);
             $doc = preg_grep('/@uses/', $doc);
             $doc = preg_replace('/\s*\* @uses\s+|\s+$/', '', $doc);
