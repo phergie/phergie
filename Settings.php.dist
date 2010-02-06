@@ -1,0 +1,33 @@
+<?php
+
+return array(
+
+    // One array per connection, pretty self-explanatory
+    'connections' => array(
+        // Ex: All connection info for the Freenode network
+        array(
+            'host' => 'irc.freenode.net',
+            'port' => 6667,
+            'username' => 'Elazar',
+            'realname' => 'Matthew Turland',
+            'nick' => 'Phergie2',
+            // 'password' => 'password goes here if needed',
+            // 'ssl' => false // change to true to connect using SSL
+        )
+    ),
+
+    // Whitelist of plugins to load
+    'plugins' => array(
+        // 'ShortPluginName'
+        // ex: 'AutoJoin' for 'Phergie_Plugin_AutoJoin'
+    ),
+
+    // If set to true, this allows any plugin dependencies for plugins 
+    // listed in the 'plugins' option to be loaded even if they are not 
+    // explicitly included in that list
+    'plugins.autoload' => true,
+
+    // Enables shell output describing bot events via Phergie_Ui_Console
+    'console' => true,
+
+);

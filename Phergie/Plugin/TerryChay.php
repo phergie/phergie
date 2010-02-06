@@ -28,6 +28,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_TerryChay
+ * @uses     Phergie_Plugin_Command pear.phergie.org optional
  */
 class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
 {

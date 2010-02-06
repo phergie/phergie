@@ -12,11 +12,11 @@
  * http://phergie.org/license
  *
  * @category  Phergie 
- * @package   Phergie_Core
+ * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Core
+ * @link      http://pear.phergie.org/package/Phergie
  */
 
 /**
@@ -24,10 +24,11 @@
  * to channels in which the bot is present or directly to the bot.
  *
  * @category Phergie 
- * @package  Phergie_Core
+ * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie_Core
+ * @link     http://pear.phergie.org/package/Phergie
+ * @uses     extension reflection
  */
 class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
 {

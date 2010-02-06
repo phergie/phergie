@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Phergie" default="core">
+
+    <tstamp>
+        <format property="DSTAMP" pattern="%Y-%m-%d" />
+    </tstamp>
+
+    <taskdef name="phergiepkg" classname="PhergiePackageTask" />
+
+    <available file="./build.properties" property="have_properties_file" />
+
+    <property name="clean" value="true" />
+
+    <target name="input">
+
+        <if>
+            <equals arg1="${have_properties_file}" arg2="true" />
+            <then>
+                <property file="./build.properties" />
+            </then>
+            <else>
+                <input propertyname="build.srcdir" defaultvalue="./" message="Source directory" /> 
+                <input propertyname="build.dstdir" defaultvalue="./" message="Destination directory" /> 
+                <input propertyname="build.version.release" message="Release version" />
+                <input propertyname="build.version.api" message="API version" />
+                <input propertyname="build.stability.release" defaultvalue="stable" message="Release stability" validArgs="snapshot,devel,alpha,beta,stable" />
+                <input propertyname="build.stability.api" defaultvalue="stable"  message="API stability" validArgs="snapshot,devel,alpha,beta,stable" />
+                <input propertyname="build.notes" message="Release notes" />
+                <input propertyname="build.phpdep" defaultvalue="5.2.0" message="PHP version required" />
+                <input propertyname="build.pearinstallerdep" defaultvalue="1.9.0" message="PEAR installer version required" />
+            </else>
+        </if>
+
+    </target>
+
+    <target name="core" depends="input">
+
+        <property name="build.tmpdir" value="Phergie-${build.version.release}" />
+        <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
+
+        <fileset dir="${build.srcdir}" id="core">
+            <include name="phergie.php" />
+            <include name="phergie.bat" />
+            <include name="LICENSE" />
+            <include name="Settings.php.dist" />
+            <include name="Phergie/Autoload.php" />
+            <include name="Phergie/Bot.php" />
+            <include name="Phergie/Config/Exception.php" />
+            <include name="Phergie/Config.php" />
+            <include name="Phergie/Connection/Exception.php" />
+            <include name="Phergie/Connection/Handler.php" />
+            <include name="Phergie/Connection.php" />
+            <include name="Phergie/Driver/Abstract.php" />
+            <include name="Phergie/Driver/Exception.php" />
+            <include name="Phergie/Driver/Streams.php" />
+            <include name="Phergie/Event/Abstract.php" />
+            <include name="Phergie/Event/Command.php" />
+            <include name="Phergie/Event/Exception.php" />
+            <include name="Phergie/Event/Handler.php" />
+            <include name="Phergie/Event/Request.php" />
+            <include name="Phergie/Event/Response.php" />
+            <include name="Phergie/Exception.php" />
+            <include name="Phergie/Hostmask/Exception.php" />
+            <include name="Phergie/Hostmask.php" />
+            <include name="Phergie/Plugin/Abstract.php" />
+            <include name="Phergie/Plugin/Exception.php" />
+            <include name="Phergie/Plugin/Handler.php" />
+            <include name="Phergie/Ui/Abstract.php" />
+            <include name="Phergie/Ui/Console.php" />
+        </fileset>
+
+        <delete file="${build.tarball}" quiet="true" />
+
+        <mkdir dir="${build.tmpdir}" />
+
+        <copy todir="${build.tmpdir}">
+            <fileset refid="core" />
+        </copy>
+
+        <phergiepkg name="Phergie" dir="${build.tmpdir}">
+            <fileset refid="core" />
+            <option name="baseinstalldir" value="/" />
+            <option name="outputdirectory" value="${build.dstdir}" />
+            <option name="channel" value="pear.phergie.org"/>
+            <option name="summary" value="Phergie core library"/>
+            <option name="description" value="The Phergie package provides all files necessary to run a basic IRC bot."/>
+            <option name="apiversion" value="${build.version.api}"/>
+            <option name="apistability" value="${build.stability.api}"/>
+            <option name="releaseversion" value="${build.version.release}"/>
+            <option name="releasestability" value="${build.stability.release}"/>
+            <option name="phpdep" value="${build.phpdep}" />
+            <option name="pearinstallerdep" value="${build.pearinstallerdep}" />
+            <option name="license" value="http://phergie.org/license New BSD License"/>
+            <option name="packagetype" value="php"/>
+            <option name="notes" value="${build.notes}"/>
+            <mapping name="replacements">
+                <element>
+                    <element key="path" value="phergie.php" />
+                    <element key="type" value="pear-config" />
+                    <element key="from" value="/usr/bin/env php" />
+                    <element key="to" value="php_bin" />
+                </element>
+                <element>
+                    <element key="path" value="phergie.bat" />
+                    <element key="type" value="pear-config" />
+                    <element key="from" value="@php_bin@" />
+                    <element key="to" value="php_bin" />
+                </element>
+                <element>
+                    <element key="path" value="phergie.bat" />
+                    <element key="type" value="pear-config" />
+                    <element key="from" value="@bin_dir@" />
+                    <element key="to" value="bin_dir" />
+                </element>
+            </mapping>
+            <mapping name="exceptions">
+                <element key="phergie.php" value="script" />
+                <element key="phergie.bat" value="script" />
+            </mapping>
+            <mapping name="releases">
+                <element>
+                    <element key="installconditions">
+                        <element key="os" value="windows" />
+                    </element>
+                    <element key="filelist">
+                        <element key="install">
+                            <element key="phergie.php" value="phergie" />
+                        </element>
+                    </element>
+                </element>
+                <element>
+                    <element key="filelist">
+                        <element key="install">
+                            <element key="phergie.php" value="phergie" />
+                        </element>
+                        <element key="ignore">
+                            <element value="phergie.bat" />
+                        </element>
+                    </element>
+                </element>
+            </mapping>
+            <mapping name="deps">
+                <element>
+                    <element key="type" value="ext" />
+                    <element key="name" value="pcre" />
+                </element>
+                <element>
+                    <element key="type" value="ext" />
+                    <element key="name" value="reflection" />
+                </element>
+            </mapping>
+        </phergiepkg>
+
+        <tar destfile="${build.tarball}" compression="gzip">
+            <fileset dir="${build.dstdir}">
+                <include name="${build.tmpdir}**" />
+                <include name="package.xml" />
+            </fileset>
+        </tar>
+
+        <if>
+            <istrue value="${clean}" />
+            <then>
+                <delete dir="${build.tmpdir}" />
+                <delete file="${build.dstdir}package.xml" />
+            </then>
+        </if>
+
+    </target>
+
+    <target name="plugin" depends="input">
+        
+        <if>
+            <equals arg1="${have_properties_file}" arg2="true" />
+            <then>
+                <property file="./build.properties" />
+            </then>
+            <else>
+                <input propertyname="build.plugin" message="Short plugin name" />
+                <input propertyname="build.summary" message="Plugin summary" />
+                <input propertyname="build.description" message="Plugin description" />
+            </else>
+        </if>
+
+        <property name="build.class" value="Phergie_Plugin_${build.plugin}" />
+        <property name="build.tmpdir" value="${build.class}-${build.version.release}" />
+        <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
+
+        <fileset dir="${build.srcdir}Phergie/Plugin" id="plugin">
+            <include name="${build.plugin}.php" />
+            <include name="${build.plugin}/**" />
+        </fileset>
+
+        <delete file="${build.tarball}" quiet="true" />
+
+        <mkdir dir="${build.tmpdir}" />
+
+        <copy todir="${build.tmpdir}">
+            <fileset refid="plugin" />
+        </copy>
+
+        <phergiepkg name="${build.class}" dir="${build.tmpdir}">
+            <fileset refid="plugin" />
+            <option name="baseinstalldir" value="/" />
+            <option name="outputdirectory" value="${build.dstdir}" />
+            <option name="channel" value="pear.phergie.org"/>
+            <option name="summary" value="${build.summary}"/>
+            <option name="description" value="${build.description}"/>
+            <option name="apiversion" value="${build.version.api}"/>
+            <option name="apistability" value="${build.stability.api}"/>
+            <option name="releaseversion" value="${build.version.release}"/>
+            <option name="releasestability" value="${build.stability.release}"/>
+            <option name="phpdep" value="${build.phpdep}" />
+            <option name="pearinstallerdep" value="${build.pearinstallerdep}" />
+            <option name="license" value="http://phergie.org/license New BSD License"/>
+            <option name="packagetype" value="php"/>
+            <option name="notes" value="${build.notes}"/>
+        </phergiepkg>
+
+        <tar destfile="${build.tarball}" compression="gzip">
+            <fileset dir="${build.dstdir}">
+                <include name="${build.tmpdir}**" />
+                <include name="package.xml" />
+            </fileset>
+        </tar>
+
+        <if>
+            <istrue value="${clean}" />
+            <then>
+                <delete dir="${build.tmpdir}" />
+                <delete file="${build.dstdir}package.xml" />
+            </then>
+        </if>
+
+    </target>
+
+</project>

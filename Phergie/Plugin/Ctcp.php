@@ -12,21 +12,21 @@
  * http://phergie.org/license
  *
  * @category  Phergie 
- * @package   Phergie_Core
+ * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Core
+ * @link      http://pear.phergie.org/package/Phergie
  */
 
 /**
  * Responds to various CTCP requests sent by the server and users.
  *
  * @category Phergie 
- * @package  Phergie_Core
+ * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie_Core
+ * @link     http://pear.phergie.org/package/Phergie
  * @see      http://www.irchelp.org/irchelp/rfc/ctcpspec.html 
  */
 class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract

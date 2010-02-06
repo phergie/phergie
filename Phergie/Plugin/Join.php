@@ -27,6 +27,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Join
+ * @uses     Phergie_Plugin_Command pear.phergie.org
  */
 class Phergie_Plugin_Join extends Phergie_Plugin_Abstract
 {
