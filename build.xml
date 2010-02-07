@@ -187,9 +187,9 @@
         <property name="build.tmpdir" value="${build.class}-${build.version.release}" />
         <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
 
-        <fileset dir="${build.srcdir}Phergie/Plugin" id="plugin">
-            <include name="${build.plugin}.php" />
-            <include name="${build.plugin}/**" />
+        <fileset dir="${build.srcdir}" id="plugin">
+            <include name="Phergie/Plugin/${build.plugin}.php" />
+            <include name="Phergie/Plugin/${build.plugin}/**" />
         </fileset>
 
         <delete file="${build.tarball}" quiet="true" />
