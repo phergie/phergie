@@ -322,7 +322,31 @@ class Phergie_Plugin_Handler implements IteratorAggregate
      */
     public function __get($name)
     {
-        return $this->getPlugin(ucfirst($name)); 
+        return $this->getPlugin($name); 
+    }
+
+    /**
+     * Allows plugin instances to be detected as properties of the handler.
+     *
+     * @param string $name Short name of the plugin
+     *
+     * @return bool TRUE if the plugin is loaded, FALSE otherwise
+     */
+    public function __isset($name)
+    {
+        return $this->hasPlugin($name);
+    }
+
+    /**
+     * Allows plugin instances to be removed as properties of handler.
+     *
+     * @param string $name Short name of the plugin
+     *
+     * @return void
+     */
+    public function __unset($name)
+    {
+        $this->removePlugin($name);
     }
 
     /**
