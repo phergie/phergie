@@ -20,7 +20,7 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
-require 'Autoload.php';
+require 'Phergie/Autoload.php';
 Phergie_Autoload::registerAutoloader();
 
 $bot = new Phergie_Bot;
