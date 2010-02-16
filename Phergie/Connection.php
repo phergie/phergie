@@ -46,11 +46,12 @@ class Phergie_Connection
     protected $port;
 
     /**
-     * Flag where TRUE indicates that the connection should use SSL 
+     * Transport for the connection, defaults to tcp but can be set to ssl 
+     * or variations thereof to connect over SSL
      *
-     * @var bool
+     * @var string 
      */
-    protected $ssl;
+    protected $transport;
 
     /**
      * Nick that the client will use
@@ -97,7 +98,7 @@ class Phergie_Connection
      */
     public function __construct(array $options = array())
     {
-        $this->ssl = false;
+        $this->transport = 'tcp';
 
         $this->setOptions($options);
     }
@@ -198,20 +199,20 @@ class Phergie_Connection
     }
 
     /**
-     * Sets whether the connection should use SSL.
+     * Sets the transport for the connection to use. 
      *
-     * @param bool $ssl TRUE to use SSL, FALSE otherwise
+     * @param string $transport Transport (ex: tcp, ssl, etc.) 
      *
      * @return Phergie_Connection Provides a fluent interface
      */
-    public function setSsl($ssl)
+    public function setTransport($transport)
     {
-        $this->ssl = (bool) $ssl;
+        $this->transport = (string) $transport;
 
-        if ($this->ssl && !in_array('ssl', stream_get_transports())) {
+        if (!in_array($this->transport, stream_get_transports())) {
             throw new Phergie_Connection_Exception(
-                'SSL is not supported by the PHP installation in use',
-                Phergie_Connection_Exception::SSL_NOT_SUPPORTED
+                'Transport ' . $this->transport . ' is not supported',
+                Phergie_Connection_Exception::TRANSPORT_NOT_SUPPORTED
             );
         }
 
@@ -219,13 +220,13 @@ class Phergie_Connection
     }
 
     /**
-     * Returns whether the connection uses SSL.
+     * Returns the transport in use by the connection. 
      *
-     * @return bool TRUE if the connection uses SSL, FALSE otherwise
+     * @return string Transport (ex: tcp, ssl, etc.) 
      */
-    public function getSsl()
+    public function getTransport()
     {
-        return $this->ssl;
+        return $this->transport;
     }
 
     /**

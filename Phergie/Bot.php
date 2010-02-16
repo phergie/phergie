@@ -353,7 +353,7 @@ class Phergie_Bot
         set_time_limit(0);
 
         $ui = $this->getUi();
-        $ui->setEnabled($this->getConfig('console'));
+        $ui->setEnabled($this->getConfig('ui.enabled'));
 
         $this->loadPlugins();
         $this->loadConnections();

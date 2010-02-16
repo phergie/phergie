@@ -12,7 +12,7 @@ return array(
             'realname' => 'Matthew Turland',
             'nick' => 'Phergie2',
             // 'password' => 'password goes here if needed',
-            // 'ssl' => false // change to true to connect using SSL
+            // 'transport' => 'ssl' // uncomment connect using SSL
         )
     ),
 
@@ -28,6 +28,6 @@ return array(
     'plugins.autoload' => true,
 
     // Enables shell output describing bot events via Phergie_Ui_Console
-    'console' => true,
+    'ui.enabled' => true,
 
 );

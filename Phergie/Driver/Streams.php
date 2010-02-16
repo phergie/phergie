@@ -267,11 +267,10 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $username = $connection->getUsername();
         $nick = $connection->getNick();
         $realname = $connection->getRealname();
-        $ssl = $connection->getSsl();
+        $transport = $connection->getTransport();
 
         // Establish and configure the socket connection
-        $scheme = $ssl ? 'ssl' : 'tcp';
-        $remote = $scheme . '://' . $hostname . ':' . $port;
+        $remote = $transport . '://' . $hostname . ':' . $port;
         $this->socket = @stream_socket_client($remote, $errno, $errstr);
         if (!$this->socket) {
             throw new Phergie_Driver_Exception(

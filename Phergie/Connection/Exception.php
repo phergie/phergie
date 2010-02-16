@@ -39,10 +39,10 @@ class Phergie_Connection_Exception extends Phergie_Exception
     const ERR_REQUIRED_SETTING_MISSING = 1;
 
     /**
-     * Error indicating that a connection is configured to use SSL, but SSL 
-     * is not supported by the current PHP installation
+     * Error indicating that a connection is configured to use a transport, 
+     * but that transport is not supported by the current PHP installation
      *
      * @const int
      */
-    const ERR_SSL_NOT_SUPPORTED = 2;
+    const ERR_TRANSPORT_NOT_SUPPORTED = 2;
 }
