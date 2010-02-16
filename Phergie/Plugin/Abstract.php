@@ -322,16 +322,6 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for after any event has been dispatched to the plugin handler 
-     * method specific to its event type.
-     *
-     * @return void
-     */
-    public function postEvent()
-    {
-    }
-
-    /**
      * Handler for after plugin processing of an event has concluded but 
      * before any events triggered in response by plugins are sent to the 
      * server - useful for modifying outgoing events before they are sent.

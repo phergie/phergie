@@ -322,7 +322,6 @@ class Phergie_Bot
                 ->setEvent($event)
                 ->preEvent()
                 ->{'on' . ucfirst($event->getType())}()
-                ->postEvent()
                 ->preDispatch();
             foreach ($events as $event) {
                 $ui->onCommand($event, $connection);
