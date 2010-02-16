@@ -79,6 +79,16 @@ class Phergie_Event_Handler implements IteratorAggregate
     }
 
     /**
+     * Returns the current event queue.
+     *
+     * @return array Enumerated array of Phergie_Event_Command objects
+     */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    /**
      * Clears the event queue.
      *
      * @return Phergie_Event_Handler Provides a fluent interface
