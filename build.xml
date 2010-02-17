@@ -80,7 +80,7 @@
         </copy>
 
         <phpdocumentor title="API Documentation"
-            destdir="${build.tmpdir}/doc"
+            destdir="${build.tmpdir}/api"
             output="HTML:Smarty:PHP">
             <fileset refid="core" />
             <projdocfileset dir=".">
@@ -91,7 +91,7 @@
         <phergiepkg name="Phergie" dir="${build.tmpdir}">
             <fileset refid="core" />
             <fileset dir="${build.tmpdir}">
-                <include name="doc**" />
+                <include name="api**" />
             </fileset>
             <option name="baseinstalldir" value="/" />
             <option name="outputdirectory" value="${build.dstdir}" />
@@ -130,7 +130,7 @@
             <mapping name="exceptions">
                 <element key="phergie.php" value="script" />
                 <element key="phergie.bat" value="script" />
-                <element key="doc" value="doc" />
+                <element key="api" value="doc" />
             </mapping>
             <mapping name="releases">
                 <element>
