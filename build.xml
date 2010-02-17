@@ -7,6 +7,7 @@
     </tstamp>
 
     <taskdef name="phergiepkg" classname="PhergiePackageTask" />
+    <taskdef name="phpdocumentor" classname="phing.tasks.ext.phpdoc.PhpDocumentorTask" />
 
     <available file="./build.properties" property="have_properties_file" />
 
@@ -78,8 +79,20 @@
             <fileset refid="core" />
         </copy>
 
+        <phpdocumentor title="API Documentation"
+            destdir="${build.tmpdir}/doc"
+            output="HTML:Smarty:PHP">
+            <fileset refid="core" />
+            <projdocfileset dir=".">
+                <include name="LICENSE" />
+            </projdocfileset>
+        </phpdocumentor>
+
         <phergiepkg name="Phergie" dir="${build.tmpdir}">
             <fileset refid="core" />
+            <fileset dir="${build.tmpdir}">
+                <include name="doc**" />
+            </fileset>
             <option name="baseinstalldir" value="/" />
             <option name="outputdirectory" value="${build.dstdir}" />
             <option name="channel" value="pear.phergie.org"/>
@@ -117,6 +130,7 @@
             <mapping name="exceptions">
                 <element key="phergie.php" value="script" />
                 <element key="phergie.bat" value="script" />
+                <element key="doc" value="doc" />
             </mapping>
             <mapping name="releases">
                 <element>

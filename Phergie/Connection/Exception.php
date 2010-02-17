@@ -33,16 +33,12 @@ class Phergie_Connection_Exception extends Phergie_Exception
     /**
      * Error indicating that an operation was attempted requiring a value 
      * for a specific configuration setting, but none was set
-     *
-     * @const int
      */
     const ERR_REQUIRED_SETTING_MISSING = 1;
 
     /**
      * Error indicating that a connection is configured to use a transport, 
      * but that transport is not supported by the current PHP installation
-     *
-     * @const int
      */
     const ERR_TRANSPORT_NOT_SUPPORTED = 2;
 }

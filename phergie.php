@@ -12,7 +12,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,6 +20,9 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
+/**
+ * @see Phergie_Autoload
+ */
 require 'Phergie/Autoload.php';
 Phergie_Autoload::registerAutoloader();
 

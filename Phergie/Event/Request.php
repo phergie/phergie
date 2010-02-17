@@ -35,113 +35,81 @@ class Phergie_Event_Request
 {
     /**
      * Nick message event type
-     *
-     * @const string
      */
     const TYPE_NICK = 'nick';
 
     /**
      * Whois message event type
-     *
-     * @const string
      */
     const TYPE_WHOIS = 'whois';
 
     /**
      * Quit command event type
-     *
-     * @const string
      */
     const TYPE_QUIT = 'quit';
 
     /**
      * Join message event type
-     *
-     * @const string
      */
     const TYPE_JOIN = 'join';
 
     /**
      * Kick message event type
-     *
-     * @const string
      */
     const TYPE_KICK = 'kick';
 
     /**
      * Part message event type
-     *
-     * @const string
      */
     const TYPE_PART = 'part';
 
     /**
      * Mode message event type
-     *
-     * @const string
      */
     const TYPE_MODE = 'mode';
 
     /**
      * Topic message event type
-     *
-     * @const string
      */
     const TYPE_TOPIC = 'topic';
 
     /**
      * Private message command event type
-     *
-     * @const string
      */
     const TYPE_PRIVMSG = 'privmsg';
 
     /**
      * Notice message event type
-     *
-     * @const string
      */
     const TYPE_NOTICE = 'notice';
 
     /**
      * Pong message event type
-     *
-     * @const string
      */
     const TYPE_PONG = 'pong';
 
     /**
      * CTCP ACTION command event type
-     *
-     * @const string
      */
     const TYPE_ACTION = 'action';
 
     /**
      * CTCP PING command event type
-     *
-     * @const string
      */
     const TYPE_PING = 'ping';
 
     /**
      * CTCP TIME command event type
-     *
-     * @const string
      */
     const TYPE_TIME = 'time';
 
     /**
      * CTCP VERSION command event type
-     *
-     * @const string
      */
     const TYPE_VERSION = 'version';
 
     /**
      * RAW message event type
-     *
-     * @const string
      */
     const TYPE_RAW = 'raw';
 
