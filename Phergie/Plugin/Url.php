@@ -227,6 +227,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      * found, responds with its title if it is an HTML document and the
      * shortened equivalent of its original URL if it meets length requirements.
      *
+     * @todo Update this to pull configuration settings from $this->config 
+     *       rather than caching them as class properties
      * @return void
      */
     public function onPrivmsg()
@@ -238,10 +240,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         if (preg_match_all('#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) |
                             ('.($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis',
                             $this->getEvent()->getArgument(1), $matches, PREG_SET_ORDER)) {
-
-            // Update the settings on the fly to take into account any ini changes while the bot is running
-			// TODO: removed in 2.x ; might want to add it back?
-
             $responses = array();
             foreach($matches as $m) {
                 $url = trim(rtrim($m[0], ', ].?!;'));
@@ -673,5 +671,4 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $this->renderers[] = $obj;
         array_unique($this->renderers);
     }
-
 }
