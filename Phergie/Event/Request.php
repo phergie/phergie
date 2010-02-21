@@ -64,6 +64,11 @@ class Phergie_Event_Request
     const TYPE_PART = 'part';
 
     /**
+     * Invite message event type
+     */
+    const TYPE_INVITE = 'invite';
+
+    /**
      * Mode message event type
      */
     const TYPE_MODE = 'mode';
@@ -137,6 +142,11 @@ class Phergie_Event_Request
         self::TYPE_PART => array(
             'channel' => 0,
             'message' => 1
+        ),
+
+        self::TYPE_INVITE => array(
+            'nickname' => 0,
+            'channel'  => 1
         ),
 
         self::TYPE_MODE => array(
