@@ -1,9 +1,11 @@
-[Phergie](http://phergie.org "Phergie") is an IRC bot written for PHP 5.2.
+Phergie is an IRC bot written for PHP 5.2.
 
-[Issues](http://github.com/elazar/phergie/issues "Issues - elazar/phergie - Github") can be filed here on Github.
+Main project web site: http://phergie.org
 
-To run your own instance of Phergie, see the [Users](http://phergie.org/users/ "Users - Phergie") page on the main web site for instructions.
+Instructions for running your own instance of Phergie: http://phergie.org/users/
 
-To develop plugins or new core features for Phergie, see the [Developers](http://phergie.org/developers/ "Developers - Phergie") page on the main web site for more information about her internals.
+Architectural overview for plugin developers: http://phergie.org/developers/
 
-For support, see the [Support](http://phergie.org/support/ "Support - Phergie") page on the main web site.
+Support: http://phergie.org/support/
+
+Bug reports/feature requests: http://github.com/elazar/phergie/issues
