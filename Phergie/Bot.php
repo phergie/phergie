@@ -81,7 +81,18 @@ class Phergie_Bot
     public function getDriver()
     {
         if (empty($this->driver)) {
-            $this->driver = new Phergie_Driver_Streams;
+
+			// Check if a driver has been defined in the configuration to use
+			// as the default
+			$config = $this->getConfig();
+			if (isset($config['driver'])) {
+				$class = 'Phergie_Driver_' . ucfirst($config['driver']);
+			} else {
+				// Otherwise default to the Streams driver.
+				$class = 'Phergie_Driver_Streams';
+			}
+
+            $this->driver = new $class;
         }
         return $this->driver;
     }
