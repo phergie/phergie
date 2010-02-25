@@ -79,6 +79,6 @@ class Phergie_Autoload
      */
     public static function addPath($path)
     {
-        set_include_path(get_include_path() . PATH_SEPARATOR . $path);
+        set_include_path($path . PATH_SEPARATOR . get_include_path());
     }
 }
