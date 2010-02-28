@@ -29,6 +29,12 @@ Phergie_Autoload::registerAutoloader();
 $bot = new Phergie_Bot;
 
 if ($argc > 0) {
+    // Skip the current file for manual installations
+    // ex: php phergie.php Settings.php
+    if (realpath($argv[0]) == __FILE__) {
+        array_shift($argv);
+    }
+
     $config = new Phergie_Config;
     foreach ($argv as $file) {
         $config->read($file);
