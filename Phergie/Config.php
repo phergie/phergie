@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,10 +20,10 @@
  */
 
 /**
- * Reads from and writes to PHP configuration files and provides access to 
+ * Reads from and writes to PHP configuration files and provides access to
  * the settings they contain.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -32,7 +32,7 @@
 class Phergie_Config implements ArrayAccess
 {
     /**
-     * Mapping of configuration file paths to an array of names of settings 
+     * Mapping of configuration file paths to an array of names of settings
      * they contain
      *
      * @var array
@@ -47,8 +47,8 @@ class Phergie_Config implements ArrayAccess
     protected $settings = array();
 
     /**
-     * Includes a specified PHP configuration file and incorporates its 
-     * return value (which should be an associative array) into the current 
+     * Includes a specified PHP configuration file and incorporates its
+     * return value (which should be an associative array) into the current
      * configuration settings.
      *
      * @param string $file Path to the file to read
@@ -69,14 +69,21 @@ class Phergie_Config implements ArrayAccess
         }
 
         $settings = include $file;
-        $this->files[$file] = array_keys($settings); 
+        if (!is_array($settings)) {
+            throw new Phergie_Config_Exception(
+                'File "' . $file . '" does not return an array',
+                Phergie_Config_Exception::ERR_ARRAY_NOT_RETURNED
+            );
+        }
+
+        $this->files[$file] = array_keys($settings);
         $this->settings += $settings;
 
         return $this;
     }
 
     /**
-     * Writes the values of the current configuration settings back to their 
+     * Writes the values of the current configuration settings back to their
      * originating files.
      *
      * @return Phergie_Config Provides a fluent interface
@@ -88,16 +95,16 @@ class Phergie_Config implements ArrayAccess
             foreach ($settings as $setting) {
                 $values[$setting] = $this->settings[$setting];
             }
-            $source = '<?php' . PHP_EOL . PHP_EOL . 
+            $source = '<?php' . PHP_EOL . PHP_EOL .
                 'return ' . var_export($value, true) . ';';
-            file_put_contents($file, $source); 
+            file_put_contents($file, $source);
         }
     }
 
     /**
      * Checks to see if a configuration setting is assigned a value.
      *
-     * @param string $offset Configuration setting name 
+     * @param string $offset Configuration setting name
      *
      * @return bool TRUE if the setting has a value, FALSE otherwise
      * @see ArrayAccess::offsetExists()
@@ -112,7 +119,7 @@ class Phergie_Config implements ArrayAccess
      *
      * @param string $offset Configuration setting name
      *
-     * @return mixed Configuration setting value or NULL if it is not 
+     * @return mixed Configuration setting value or NULL if it is not
      *         assigned a value
      * @see ArrayAccess::offsetGet()
      */

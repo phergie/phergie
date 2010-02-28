@@ -35,4 +35,10 @@ class Phergie_Config_Exception extends Phergie_Exception
      * file that could not be executed
      */
     const ERR_FILE_NOT_EXECUTABLE = 1;
+
+    /**
+     * Error indicating that a read configuration file does not return an 
+     * array
+     */
+    const ERR_ARRAY_NOT_RETURNED = 2; 
 }
