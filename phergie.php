@@ -28,7 +28,13 @@ Phergie_Autoload::registerAutoloader();
 
 $bot = new Phergie_Bot;
 
-if ($argc > 0) {
+if (!isset($argc)) {
+    echo
+        'The PHP setting register_argc_argv must be enabled for Phergie ', 
+        'configuration files to be specified using command line arguments; ',
+        'defaulting to Settings.php in the current working directory',
+        PHP_EOL;
+} else if ($argc > 0) {
     // Skip the current file for manual installations
     // ex: php phergie.php Settings.php
     if (realpath($argv[0]) == __FILE__) {
