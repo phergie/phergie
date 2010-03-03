@@ -631,7 +631,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function doFingerResponse($nick, $finger)
     {
-        $this->doCtcp($nick, 'FINGER', $finer);
+        $this->doCtcp($nick, 'FINGER', $finger);
     }
 
     /**
