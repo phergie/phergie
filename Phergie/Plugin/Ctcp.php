@@ -40,7 +40,7 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
     public function onTime()
     {
         $source = $this->getEvent()->getSource();
-        $this->doTimeResponse($source, strftime('%c %z'));
+        $this->doTime($source, strftime('%c %z'));
     }
 
     /**
@@ -53,7 +53,7 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
     {
         $source = $this->getEvent()->getSource();
         $msg = 'Phergie ' . Phergie_Bot::VERSION . ' (http://phergie.org)';
-        $this->doVersionResponse($source, $msg);
+        $this->doVersion($source, $msg);
     }
 
     /**
@@ -61,12 +61,12 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onPing()
+    public function onCtcpPing()
     {
         $event = $this->getEvent();
         $source = $event->getSource();
         $handshake = $event->getArgument(1);
-        $this->doPingResponse($source, $handshake);
+        $this->doPing($source, $handshake);
     }
 
     /**
@@ -85,7 +85,7 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
             = (empty($realname) ? $realname : $name) . 
             ' (' . (!empty($username) ? $username : $name) . ')';
 
-        $this->doFingerResponse($source, $finger);
+        $this->doFinger($source, $finger);
     }
 }
 ?>

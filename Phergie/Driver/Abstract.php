@@ -258,67 +258,37 @@ abstract class Phergie_Driver_Abstract
     public abstract function doPing($nick, $hash);
 
     /**
-     * Sends a CTCP VERSION request to a user.
+     * Sends a CTCP VERSION request or response to a user.
      *
      * @param string $nick User nick
+     * @param string $version Version string to send for a response
      *
      * @return void
      * @see http://www.invlogic.com/irc/ctcp.html#4.1
      */
-    public abstract function doVersion($nick);
-
-    /**
-     * Sends a CTCP VERSION response to a user.
-     *
-     * @param string $nick    User nick
-     * @param string $version Version string to send
-     *
-     * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.1
-     */
-    public abstract function doVersionResponse($nick, $version);
+    public abstract function doVersion($nick, $version = null);
 
     /**
      * Sends a CTCP TIME request to a user.
      *
      * @param string $nick User nick
+     * @param string $time Time string to send for a response
      *
      * @return void
      * @see http://www.invlogic.com/irc/ctcp.html#4.6
      */
-    public abstract function doTime($nick);
-
-    /**
-     * Sends a CTCP TIME response to a user.
-     *
-     * @param string $nick User nick
-     * @param string $time Time string to send
-     *
-     * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.6
-     */
-    public abstract function doTimeResponse($nick, $time);
+    public abstract function doTime($nick, $time = null);
 
     /**
      * Sends a CTCP FINGER request to a user.
      *
      * @param string $nick User nick
+     * @param string $finger Finger string to send for a response
      *
      * @return void
      * @see http://www.irchelp.org/irchelp/rfc/ctcpspec.html 
      */
-    public abstract function doFinger($nick);
-
-    /**
-     * Sends a CTCP FINGER response to a user.
-     *
-     * @param string $nick   User nick
-     * @param string $finger Finger string to send
-     *
-     * @return void
-     * @see http://www.irchelp.org/irchelp/rfc/ctcpspec.html
-     */
-    public abstract function doFingerResponse($nick, $finger);
+    public abstract function doFinger($nick, $finger = null);
 
     /**
      * Sends a raw command to the server.

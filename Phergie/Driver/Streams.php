@@ -187,10 +187,14 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                     if ($reply) {
                         $args = $ctcp;
                     }
+                    break;
                 case 'ping':
                     if ($reply) {
                         $cmd .= 'Response';
+                    } else {
+                        $cmd = 'ctcpPing';
                     }
+                    break;
                 case 'action':
                     $args = array($this->getConnection()->getNick(), $args);
                     break;
@@ -560,78 +564,54 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Sends a CTCP VERSION request to a user.
+     * Sends a CTCP VERSION request or response to a user.
      *
      * @param string $nick User nick
+     * @param string $version Version string to send for a response
      *
      * @return void
      */
-    public function doVersion($nick)
+    public function doVersion($nick, $version = null)
     {
-        $this->doCtcp($nick, 'VERSION');
-    }
-
-    /**
-     * Sends a CTCP VERSION response to a user.
-     *
-     * @param string $nick    User nick
-     * @param string $version Version string to send
-     *
-     * @return void
-     */
-    public function doVersionResponse($nick, $version)
-    {
-        $this->doCtcp($nick, 'VERSION', $version);
+        if ($version) {
+            $this->doCtcp($nick, 'VERSION', $version);
+        } else {
+            $this->doCtcp($nick, 'VERSION');
+        }
     }
 
     /**
      * Sends a CTCP TIME request to a user.
      *
      * @param string $nick User nick
+     * @param string $time Time string to send for a response 
      *
      * @return void
      */
-    public function doTime($nick)
+    public function doTime($nick, $time = null)
     {
-        $this->doCtcp($nick, 'TIME');
-    }
-
-    /**
-     * Sends a CTCP TIME response to a user.
-     *
-     * @param string $nick User nick
-     * @param string $time Time string to send
-     *
-     * @return void
-     */
-    public function doTimeResponse($nick, $time)
-    {
-        $this->doCtcp($nick, 'TIME', $time);
+        if ($time) {
+            $this->doCtcp($nick, 'TIME', $time);
+        } else {
+            $this->doCtcp($nick, 'TIME');
+        }
     }
 
     /**
      * Sends a CTCP FINGER request to a user.
      *
      * @param string $nick User nick
+     * @param string $finger Finger string to send for a response
      *
      * @return void
      */
-    public function doFinger($nick)
+    public function doFinger($nick, $finger = null)
     {
-        $this->doCtcp($nick, 'FINGER');
-    }
-
-    /**
-     * Sends a CTCP FINGER response to a user.
-     *
-     * @param string $nick   User nick
-     * @param string $finger Finger string to send
-     *
-     * @return void
-     */
-    public function doFingerResponse($nick, $finger)
-    {
-        $this->doCtcp($nick, 'FINGER', $finger);
+        if ($finger) {
+            $this->doCtcp($nick, 'FINGER', $finger);
+        } else {
+            $this->doCtcp($nick, 'FINGER');
+        }
     }
 
     /**
