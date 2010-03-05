@@ -41,11 +41,16 @@ if (!isset($argc)) {
         array_shift($argv);
     }
 
-    $config = new Phergie_Config;
-    foreach ($argv as $file) {
-        $config->read($file);
+    // we may have popped everything off $argv
+    // in that case, don't do anything here; Phergie_Bot will handle
+    // the default configuration.
+    if (count($argv) > 0) {
+        $config = new Phergie_Config;
+        foreach ($argv as $file) {
+            $config->read($file);
+        }
+        $bot->setConfig($config);
     }
-    $bot->setConfig($config);
 }
 
 $bot->run();
