@@ -79,7 +79,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
 
     /**
      * Performs a self ping if the event threshold has been exceeded or 
-     * issues a termination command if the ping theshold has been exceeded. 
+     * issues a termination command if the ping threshold has been exceeded. 
      *
      * @return void
      */
@@ -88,10 +88,10 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
         $time = time();
         
         if (!empty($this->lastPing) 
-            && $time - $this->lastPing > $this->getConfig('ping.ping')
+            && $time - $this->lastPing > $this->getConfig('ping.ping', 10)
         ) {
             $this->doQuit();
-        } elseif ($time - $this->lastEvent > $this->getConfig('ping.event')) {
+        } elseif ($time - $this->lastEvent > $this->getConfig('ping.event', 300)) {
             $this->lastPing = time();
             $this->doPing($this->lastPing);
         }
