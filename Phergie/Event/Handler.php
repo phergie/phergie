@@ -28,7 +28,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie
  */
-class Phergie_Event_Handler implements IteratorAggregate
+class Phergie_Event_Handler implements IteratorAggregate, Countable
 {
     /**
      * Current queue of events
@@ -140,5 +140,15 @@ class Phergie_Event_Handler implements IteratorAggregate
     public function getIterator()
     {
         return new ArrayIterator($this->events);
+    }
+
+    /**
+     * Returns the number of events in the event queue
+     *
+     * @return int number of queued events
+     */
+    public function count()
+    {
+        return count($this->events);
     }
 }
