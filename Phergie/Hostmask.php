@@ -192,4 +192,26 @@ class Phergie_Hostmask
     {
         return $this->nick . '!' . $this->username . '@' . $this->host;
     }
+
+    /**
+     * Returns whether a given hostmask matches a given pattern.
+     *
+     * @param string $pattern Pattern using conventions of a ban mask where 
+     *        * represents a wildcard
+     * @param string $hostmask Optional hostmask to match against, if not 
+     *        the current hostmask instance
+     *
+     * @return bool TRUE if the hostmask matches the pattern, FALSE otherwise
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_3 Examples
+     */
+    public function matches($pattern, $hostmask = null)
+    {
+        if (!$hostmask) {
+            $hostmask = (string) $this;
+        }
+
+        $pattern = str_replace('*', '.*', $pattern);
+
+        return (preg_match('#^' . $pattern . '$#', $hostmask) > 0);
+    }
 }
