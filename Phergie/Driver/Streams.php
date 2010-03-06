@@ -282,6 +282,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED
             );
         }
+        stream_set_timeout($this->socket, 1);
 
         // Send the password if one is specified
         if (!empty($password)) {
