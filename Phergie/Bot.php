@@ -31,6 +31,11 @@
 class Phergie_Bot
 {
     /**
+     * Current version of Phergie
+     */
+    const VERSION = '2.0.1';
+
+    /**
      * Current driver instance
      *
      * @var Phergie_Driver_Abstract
