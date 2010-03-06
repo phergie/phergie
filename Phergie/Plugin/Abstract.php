@@ -346,7 +346,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the server prompts the client for a nick.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_2
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_2
      */
     public function onNick()
     {
@@ -356,7 +356,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a user obtains operator privileges.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_5
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_5
      */
     public function onOper()
     {
@@ -366,7 +366,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the client session is about to be terminated.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_6
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_1_6
      */
     public function onQuit()
     {
@@ -376,7 +376,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a user joins a channel.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_1
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_1
      */
     public function onJoin()
     {
@@ -386,7 +386,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a user leaves a channel.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_2
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_2
      */
     public function onPart()
     {
@@ -396,7 +396,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a user or channel mode is changed.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_3
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_3
      */
     public function onMode()
     {
@@ -406,7 +406,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a channel topic is viewed or changed.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_4
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_4
      */
     public function onTopic()
     {
@@ -416,7 +416,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a message is received from a channel or user.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_1
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_1
      */
     public function onPrivmsg()
     {
@@ -426,7 +426,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the bot receives a CTCP ACTION request.
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.4
+     * @link http://www.invlogic.com/irc/ctcp.html#4.4
      */
     public function onAction()
     {
@@ -436,7 +436,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a notice is received.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_2
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_4_2
      */
     public function onNotice()
     {
@@ -446,7 +446,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when a user is kicked from a channel.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_8
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_8
      */
     public function onKick()
     {
@@ -458,7 +458,7 @@ abstract class Phergie_Plugin_Abstract
      * a short period else the server may terminate its connection.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2 
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2 
      */
     public function onPing()
     {
@@ -468,7 +468,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the bot receives a CTCP TIME request.
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.6
+     * @link http://www.invlogic.com/irc/ctcp.html#4.6
      */
     public function onTime()
     {
@@ -478,7 +478,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the bot receives a CTCP VERSION request.
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.1
+     * @link http://www.invlogic.com/irc/ctcp.html#4.1
      */
     public function onVersion()
     {
@@ -488,7 +488,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the bot receives a CTCP request of an unknown type. 
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html
+     * @link http://www.invlogic.com/irc/ctcp.html
      */
     public function onCtcp()
     {
@@ -499,7 +499,7 @@ abstract class Phergie_Plugin_Abstract
      * the bot.
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.2
+     * @link http://www.invlogic.com/irc/ctcp.html#4.2
      */
     public function onPingReply()
     {
@@ -510,7 +510,7 @@ abstract class Phergie_Plugin_Abstract
      * the bot.
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.6
+     * @link http://www.invlogic.com/irc/ctcp.html#4.6
      */
     public function onTimeReply()
     {
@@ -521,7 +521,7 @@ abstract class Phergie_Plugin_Abstract
      * by the bot.
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html#4.1
+     * @link http://www.invlogic.com/irc/ctcp.html#4.1
      */
     public function onVersionReply()
     {
@@ -532,7 +532,7 @@ abstract class Phergie_Plugin_Abstract
      * type.
      *
      * @return void
-     * @see http://www.invlogic.com/irc/ctcp.html
+     * @link http://www.invlogic.com/irc/ctcp.html
      */
     public function onCtcpReply()
     {
@@ -542,7 +542,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the bot receives a kill request from a server.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_1
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_1
      */
     public function onKill()
     {
@@ -552,7 +552,7 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when the bot receives an invitation to join a channel. 
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_7
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_7
      */
     public function onInvite()
     {
@@ -563,7 +563,7 @@ abstract class Phergie_Plugin_Abstract
      * the bot.
      *
      * @return void
-     * @see http://irchelp.org/irchelp/rfc/chapter6.html
+     * @link http://irchelp.org/irchelp/rfc/chapter6.html
      */
     public function onResponse()
     {

@@ -27,8 +27,8 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie
- * @see      http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2
- * @see      http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_3
+ * @link      http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2
+ * @link      http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_3
  */
 class Phergie_Plugin_Pong extends Phergie_Plugin_Abstract
 {

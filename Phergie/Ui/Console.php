@@ -42,7 +42,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      * Format for timestamps included in console output
      *
      * @var string
-     * @see http://php.net/date
+     * @link http://php.net/date
      */
     protected $format;
 
@@ -99,7 +99,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      * Returns the format used for timestamps in console output.
      *
      * @return string
-     * @see http://php.net/date
+     * @link http://php.net/date
      */
     public function getFormat()
     {
@@ -113,7 +113,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      * @param string $format Timestamp format
      *
      * @return Phergie_Ui_Console Provides a fluent interface
-     * @see http://php.net/date
+     * @link http://php.net/date
      */
     public function setFormat($format)
     {

@@ -23,7 +23,7 @@
  * These requires are for library code, so they don't fit Autoload's normal 
  * conventions.
  *
- * @see http://github.com/scoates/simpletweet
+ * @link http://github.com/scoates/simpletweet
  */
 require dirname(__FILE__) . '/Twitter/twitter.class.php';
 require dirname(__FILE__) . '/Twitter/laconica.class.php';

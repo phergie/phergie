@@ -27,7 +27,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Invisible
- * @see      http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_3_2
+ * @link      http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_3_2
  */
 class Phergie_Plugin_Invisible extends Phergie_Plugin_Abstract
 {

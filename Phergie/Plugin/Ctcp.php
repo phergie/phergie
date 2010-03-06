@@ -27,7 +27,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie
- * @see      http://www.irchelp.org/irchelp/rfc/ctcpspec.html 
+ * @link      http://www.irchelp.org/irchelp/rfc/ctcpspec.html 
  */
 class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
 {
