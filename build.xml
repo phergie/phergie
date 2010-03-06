@@ -33,13 +33,6 @@
             </else>
         </if>
 
-    </target>
-
-    <target name="core" depends="input">
-
-        <property name="build.tmpdir" value="Phergie-${build.version.release}" />
-        <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
-
         <fileset dir="${build.srcdir}" id="core">
             <include name="phergie.php" />
             <include name="phergie.bat" />
@@ -71,6 +64,13 @@
             <include name="Phergie/Ui/Console.php" />
         </fileset>
 
+    </target>
+
+    <target name="core" depends="input">
+
+        <property name="build.tmpdir" value="Phergie-${build.version.release}" />
+        <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
+
         <delete file="${build.tarball}" quiet="true" />
 
         <mkdir dir="${build.tmpdir}" />
@@ -79,34 +79,33 @@
             <fileset refid="core" />
         </copy>
 
-        <phpdocumentor title="API Documentation"
-            destdir="${build.tmpdir}/api"
-            output="HTML:Smarty:PHP">
-            <fileset refid="core" />
-            <projdocfileset dir=".">
-                <include name="LICENSE" />
-            </projdocfileset>
-        </phpdocumentor>
+        <reflexive file="${build.tmpdir}/Phergie/Bot.php">
+            <filterchain>
+                <replaceregexp>
+                    <regexp
+                        pattern="const VERSION = '[^']+';"
+                        replace="const VERSION = '${build.version.release}';"
+                    />
+                </replaceregexp>
+            </filterchain>
+        </reflexive>
 
         <phergiepkg name="Phergie" dir="${build.tmpdir}">
             <fileset refid="core" />
-            <fileset dir="${build.tmpdir}">
-                <include name="api**" />
-            </fileset>
             <option name="baseinstalldir" value="/" />
             <option name="outputdirectory" value="${build.dstdir}" />
-            <option name="channel" value="pear.phergie.org"/>
-            <option name="summary" value="Phergie core library"/>
-            <option name="description" value="The Phergie package provides all files necessary to run a basic IRC bot."/>
-            <option name="apiversion" value="${build.version.api}"/>
-            <option name="apistability" value="${build.stability.api}"/>
-            <option name="releaseversion" value="${build.version.release}"/>
-            <option name="releasestability" value="${build.stability.release}"/>
+            <option name="channel" value="pear.phergie.org" />
+            <option name="summary" value="Phergie core library" />
+            <option name="description" value="The Phergie package provides all files necessary to run a basic IRC bot." />
+            <option name="apiversion" value="${build.version.api}" />
+            <option name="apistability" value="${build.stability.api}" />
+            <option name="releaseversion" value="${build.version.release}" />
+            <option name="releasestability" value="${build.stability.release}" />
             <option name="phpdep" value="${build.phpdep}" />
             <option name="pearinstallerdep" value="${build.pearinstallerdep}" />
-            <option name="license" value="http://phergie.org/license New BSD License"/>
-            <option name="packagetype" value="php"/>
-            <option name="notes" value="${build.notes}"/>
+            <option name="license" value="http://phergie.org/license New BSD License" />
+            <option name="packagetype" value="php" />
+            <option name="notes" value="${build.notes}" />
             <mapping name="replacements">
                 <element>
                     <element key="path" value="phergie.php" />
@@ -130,7 +129,6 @@
             <mapping name="exceptions">
                 <element key="phergie.php" value="script" />
                 <element key="phergie.bat" value="script" />
-                <element key="api" value="doc" />
             </mapping>
             <mapping name="releases">
                 <element>
@@ -166,20 +164,9 @@
             </mapping>
         </phergiepkg>
 
-        <tar destfile="${build.tarball}" compression="gzip">
-            <fileset dir="${build.dstdir}">
-                <include name="${build.tmpdir}**" />
-                <include name="package.xml" />
-            </fileset>
-        </tar>
+        <phingcall target="build" />
 
-        <if>
-            <istrue value="${clean}" />
-            <then>
-                <delete dir="${build.tmpdir}" />
-                <delete file="${build.dstdir}package.xml" />
-            </then>
-        </if>
+        <phingcall target="clean" />
 
     </target>
 
@@ -232,12 +219,71 @@
             <option name="notes" value="${build.notes}"/>
         </phergiepkg>
 
+        <phingcall target="build" />
+
+        <phingcall target="clean" />
+
+    </target>
+
+    <target name="docs" depends="input">
+        
+        <property name="build.tmpdir" value="Phergie_Docs-${build.version.release}" />
+        <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
+
+        <delete file="${build.tarball}" quiet="true" />
+
+        <mkdir dir="${build.tmpdir}" />
+
+        <phpdocumentor title="API Documentation"
+            destdir="${build.tmpdir}/api"
+            output="HTML:Smarty:PHP">
+            <fileset refid="core" />
+            <projdocfileset dir=".">
+                <include name="LICENSE" />
+            </projdocfileset>
+        </phpdocumentor>
+
+        <phergiepkg name="Phergie_Docs" dir="${build.tmpdir}">
+            <fileset dir="${build.tmpdir}">
+                <include name="api**" />
+            </fileset>
+            <option name="baseinstalldir" value="/" />
+            <option name="outputdirectory" value="${build.dstdir}" />
+            <option name="channel" value="pear.phergie.org" />
+            <option name="summary" value="Phergie core library documentation" />
+            <option name="description" value="The Phergie_Docs package provides documentation for the Phergie core libraries." />
+            <option name="apiversion" value="${build.version.api}" />
+            <option name="apistability" value="${build.stability.api}" />
+            <option name="releaseversion" value="${build.version.release}" />
+            <option name="releasestability" value="${build.stability.release}" />
+            <option name="phpdep" value="${build.phpdep}" />
+            <option name="pearinstallerdep" value="${build.pearinstallerdep}" />
+            <option name="license" value="http://phergie.org/license New BSD License" />
+            <option name="packagetype" value="php" />
+            <option name="notes" value="${build.notes}" />
+            <mapping name="exceptions">
+                <element key="api" value="doc" />
+            </mapping>
+        </phergiepkg>
+
+        <phingcall target="build" />
+
+        <phingcall target="clean" />
+
+    </target>
+
+    <target name="build">
+
         <tar destfile="${build.tarball}" compression="gzip">
             <fileset dir="${build.dstdir}">
                 <include name="${build.tmpdir}**" />
                 <include name="package.xml" />
             </fileset>
         </tar>
+
+    </target>
+
+    <target name="clean">
 
         <if>
             <istrue value="${clean}" />
