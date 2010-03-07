@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,23 +11,23 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
- * @package   Phergie
+ * @category  Phergie
+ * @package   Phergie_Plugin_Ping
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Ping
  */
 
 /**
- * Uses a self CTCP PING to ensure that the client connection has not been 
+ * Uses a self CTCP PING to ensure that the client connection has not been
  * dropped.
  *
- * @category Phergie 
- * @package  Phergie
+ * @category Phergie
+ * @package  Phergie_Plugin_Ping
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Ping
  */
 class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
 {
@@ -57,7 +57,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Updates the timestamp since the last received event when a new event 
+     * Updates the timestamp since the last received event when a new event
      * arrives.
      *
      * @return void
@@ -78,16 +78,16 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Performs a self ping if the event threshold has been exceeded or 
-     * issues a termination command if the ping threshold has been exceeded. 
+     * Performs a self ping if the event threshold has been exceeded or
+     * issues a termination command if the ping threshold has been exceeded.
      *
      * @return void
      */
     public function onTick()
     {
         $time = time();
-        
-        if (!empty($this->lastPing) 
+
+        if (!empty($this->lastPing)
             && $time - $this->lastPing > $this->getConfig('ping.ping', 10)
         ) {
             $this->doQuit();
