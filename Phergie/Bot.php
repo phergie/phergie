@@ -337,8 +337,8 @@ class Phergie_Bot
                 ->setConnection($connection)
                 ->setEvent($event)
                 ->preEvent()
-                ->{'on' . ucfirst($event->getType())}()
-                ->preDispatch();
+                ->{'on' . ucfirst($event->getType())}();
+
 
             $this->processEventQueue($connection);
         }
@@ -354,7 +354,10 @@ class Phergie_Bot
     protected function processEventQueue(Phergie_Connection $connection) {
         $driver = $this->getDriver();
         $events = $this->getEventHandler();
+        $plugins = $this->getPluginHandler();
         $ui = $this->getUi();
+
+        $plugins->preDispatch();
 
         foreach ($events as $event) {
             $ui->onCommand($event, $connection);
@@ -364,7 +367,7 @@ class Phergie_Bot
                     $event->getArguments()
             );
         }
-        $this->getPluginHandler()->postDispatch();
+        $plugins->postDispatch();
 
         if ($events->hasEventOfType(Phergie_Event_Request::TYPE_QUIT)) {
             $ui->onQuit($connection);
