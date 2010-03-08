@@ -231,7 +231,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     public function getPlugin($name)
     {
         // If the plugin is loaded, return the instance
-        $index = strtolower($name);
+        $lower = strtolower($name);
         if (isset($this->plugins[$lower])) {
             return $this->plugins[$lower];
         }
@@ -251,7 +251,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
         $this->addPlugin($name);
 
         // Return the added plugin
-        return $this->plugins[$index];
+        return $this->plugins[$lower];
     }
 
     /**
