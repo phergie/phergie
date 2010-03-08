@@ -320,7 +320,6 @@ class Phergie_Bot
     {
         $driver = $this->getDriver();
         $plugins = $this->getPluginHandler();
-        $events = $this->getEventHandler();
         $connections = $this->getConnectionHandler();
         $ui = $this->getUi();
 
@@ -329,6 +328,7 @@ class Phergie_Bot
         foreach ($connections as $connection) {
             $driver->setConnection($connection);
             if (!($event = $driver->getEvent())) {
+                $this->processEventQueue($connection);
                 continue;
             }
             $ui->onEvent($event, $connection);
@@ -339,22 +339,38 @@ class Phergie_Bot
                 ->preEvent()
                 ->{'on' . ucfirst($event->getType())}()
                 ->preDispatch();
-            foreach ($events as $event) {
-                $ui->onCommand($event, $connection);
-                $method = 'do' . ucfirst(strtolower($event->getType())); 
-                call_user_func_array(
-                    array($driver, $method), 
-                    $event->getArguments()
-                );
-            }
-            $plugins->postDispatch();
 
-            if ($events->hasEventOfType(Phergie_Event_Request::TYPE_QUIT)) {
-                $ui->onQuit($connection);
-                $connections->removeConnection($connection);
-            }
-            $events->clearEvents();
+            $this->processEventQueue($connection);
         }
+    }
+
+    /**
+     * Processes events that have been added to the event handler
+     * 
+     * @param Phergie_Connection $connection 
+     * 
+     * @return void
+     */
+    protected function processEventQueue(Phergie_Connection $connection) {
+        $driver = $this->getDriver();
+        $events = $this->getEventHandler();
+        $ui = $this->getUi();
+
+        foreach ($events as $event) {
+            $ui->onCommand($event, $connection);
+            $method = 'do' . ucfirst(strtolower($event->getType()));
+            call_user_func_array(
+                    array($driver, $method),
+                    $event->getArguments()
+            );
+        }
+        $this->getPluginHandler()->postDispatch();
+
+        if ($events->hasEventOfType(Phergie_Event_Request::TYPE_QUIT)) {
+            $ui->onQuit($connection);
+            $this->getConnectionHandler()->removeConnection($connection);
+        }
+        $events->clearEvents();
     }
 
     /**
