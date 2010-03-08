@@ -485,6 +485,16 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
+     * Handler for when the bot receives a CTCP PING request.
+     *
+     * @return void
+     * @link http://www.invlogic.com/irc/ctcp.html#4.2
+     */
+    public function onCtcpPing()
+    {
+    }
+
+    /**
      * Handler for when the bot receives a CTCP request of an unknown type. 
      *
      * @return void

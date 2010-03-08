@@ -12,21 +12,21 @@
  * http://phergie.org/license
  *
  * @category  Phergie 
- * @package   Phergie
+ * @package   Phergie_Plugin_Quit
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Quit
  */
 
 /**
  * Terminates the current connection upon command.
  *
  * @category Phergie 
- * @package  Phergie
+ * @package  Phergie_Plugin_Quit
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Quit
  * @uses     Phergie_Plugin_Command pear.phergie.org
  */
 class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract

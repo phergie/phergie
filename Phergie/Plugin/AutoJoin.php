@@ -12,11 +12,11 @@
  * http://phergie.org/license
  *
  * @category  Phergie 
- * @package   Phergie
+ * @package   Phergie_Plugin_AutoJoin
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_AutoJoin
  */
 
 /**
@@ -31,10 +31,10 @@
  * corresponding to that hostname.
  *
  * @category Phergie 
- * @package  Phergie
+ * @package  Phergie_Plugin_AutoJoin
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_AutoJoin
  */
 class Phergie_Plugin_AutoJoin extends Phergie_Plugin_Abstract
 {

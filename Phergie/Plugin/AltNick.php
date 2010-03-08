@@ -12,11 +12,11 @@
  * http://phergie.org/license
  *
  * @category  Phergie 
- * @package   Phergie
+ * @package   Phergie_Plugin_AltNick
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_AltNick
  */
 
 /**
@@ -24,10 +24,10 @@
  * not available for use.
  *
  * @category Phergie 
- * @package  Phergie
+ * @package  Phergie_Plugin_AltNick
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_AltNick
  * @uses     extension spl 
  */
 class Phergie_Plugin_AltNick extends Phergie_Plugin_Abstract

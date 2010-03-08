@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,28 +11,28 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
- * @package   Phergie
+ * @category  Phergie
+ * @package   Phergie_Plugin_Ctcp
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Ctcp
  */
 
 /**
  * Responds to various CTCP requests sent by the server and users.
  *
- * @category Phergie 
- * @package  Phergie
+ * @category Phergie
+ * @package  Phergie_Plugin_Ctcp
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
- * @link      http://www.irchelp.org/irchelp/rfc/ctcpspec.html 
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Ctcp
+ * @link     http://www.irchelp.org/irchelp/rfc/ctcpspec.html
  */
 class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
 {
     /**
-     * Responds to a CTCP TIME request from a user with the current local 
+     * Responds to a CTCP TIME request from a user with the current local
      * time.
      *
      * @return void
@@ -44,7 +44,7 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Responds to a CTCP VERSION request from a user with the codebase 
+     * Responds to a CTCP VERSION request from a user with the codebase
      * version.
      *
      * @return void
@@ -79,10 +79,10 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
         $connection = $this->getConnection();
         $name = $connection->getNick();
         $realname = $connection->getRealname();
-        $username = $connection->getUsername(); 
+        $username = $connection->getUsername();
 
-        $finger 
-            = (empty($realname) ? $realname : $name) . 
+        $finger
+            = (empty($realname) ? $realname : $name) .
             ' (' . (!empty($username) ? $username : $name) . ')';
 
         $this->doFinger($source, $finger);
