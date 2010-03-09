@@ -72,7 +72,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onPingReply()
+    public function onPingResponse()
     {
         $this->lastPing = null;
     }
@@ -86,14 +86,15 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
     public function onTick()
     {
         $time = time();
-
-        if (!empty($this->lastPing)
-            && $time - $this->lastPing > $this->getConfig('ping.ping', 10)
+        if (!empty($this->lastPing)) {
+            if($time - $this->lastPing > $this->getConfig('ping.ping', 10)) {
+                $this->doQuit();
+            }
+        } elseif (
+            $time - $this->lastEvent > $this->getConfig('ping.event', 300)
         ) {
-            $this->doQuit();
-        } elseif ($time - $this->lastEvent > $this->getConfig('ping.event', 300)) {
-            $this->lastPing = time();
-            $this->doPing($this->lastPing);
+            $this->lastPing = $time;
+            $this->doPing($this->getConnection()->getNick(), $this->lastPing);
         }
     }
 }

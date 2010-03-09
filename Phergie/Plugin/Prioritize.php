@@ -40,6 +40,7 @@ class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
         'raw',
         'pass',
         'user',
+        'ping',
         'pong',
         'notice',
         'join',
