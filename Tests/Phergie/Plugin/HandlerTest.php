@@ -88,4 +88,87 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(0, $count);
     }
+    
+    /**
+     * Ensures a newly instantiated handler does not default to autoload
+     *
+     * @return void
+     */
+    public function testDefaultsToNotAutoload()
+    {
+        $this->assertFalse($this->handler->getAutoload());
+    }
+
+    /**
+     * Can add a plugin to the handler by shortname
+     *
+     * @return void
+     */
+    public function testAddPluginToHandlerByShortname()
+    {
+        $returned_plugin = $this->handler->addPlugin('Ping');
+        $this->assertTrue($this->handler->hasPlugin('Ping'));
+        $this->assertTrue(
+            $this->handler->getPlugin('Ping')
+            instanceof Phergie_Plugin_Ping
+        );
+        $this->assertEquals(
+            $this->handler->getPlugin('Ping'),
+            $returned_plugin
+        );
+    }
+
+
+    /**
+     * Can add a plugin to the handler by instance
+     *
+     * @return void
+     */
+    public function testAddPluginToHandlerByInstance()
+    {
+        $plugin = new Phergie_Plugin_Ping;
+        $returned_plugin = $this->handler->addPlugin($plugin);
+
+        $this->assertTrue($this->handler->hasPlugin('Ping'));
+        $this->assertTrue(
+            $this->handler->getPlugin('Ping')
+            instanceof Phergie_Plugin_Ping
+        );
+        $this->assertEquals($plugin, $returned_plugin);
+    }
+
+    /**
+     * addPlugin() returns the same plugin when requested twice
+     *
+     * @return void
+     */
+    public function testAddPluginReturnsSamePluginWhenAskedTwice()
+    {
+        $plugin1 = $this->handler->addPlugin('Ping');
+        $plugin2 = $this->handler->addPlugin('Ping');
+        $this->assertEquals($plugin1, $plugin2);
+    }
+
+    
+    /**
+     * Tests an exception is thrown when trying to get a plugin
+     * that is not already loaded and autoload is off
+     *
+     * @depends testDefaultsToNotAutoload
+     * @return void
+     */
+    public function testExceptionThrownWhenLoadingPluginWithoutAutoload()
+    {
+        try {
+            $this->handler->getPlugin('Ping');
+        } catch (Phergie_Plugin_Exception $expected) {
+            $this->assertEquals(
+                Phergie_Plugin_Exception::ERR_PLUGIN_NOT_LOADED,
+                $expected->getCode()
+            );
+            return;
+        }
+
+        $this->fail('An expected exception has not been raised.');
+    }
 }
