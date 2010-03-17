@@ -12,19 +12,14 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie
+ * @package   Tests
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
 
-require_once 'PHPUnit/Framework.php';
-
-// Handler requires Phergie_Autoload to function properly
-// Testing of Phergie_Autoload should happen in a different test suite
-require_once dirname(__FILE__) . '/../../../Phergie/Autoload.php';
-Phergie_Autoload::registerAutoloader();
+require_once dirname(__FILE__) . '/../../TestHelper.php';
 
 /**
  * Unit test suite for Pherge_Plugin_Handler
