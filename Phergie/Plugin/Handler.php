@@ -119,7 +119,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
             foreach (array_reverse($this->paths) as $path) {
                 $file = $path['path'] . $plugin . '.php';
                 if (file_exists($file)) {
-                    include $file;
+                    include_once $file;
                     $class = $path['prefix'] . $plugin;
                     if (class_exists($class)) {
                         break;
