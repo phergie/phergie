@@ -98,8 +98,14 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @todo add tests for addPath
+     */
+
+    /**
      * Can add a plugin to the handler by shortname
      *
+     * @todo refactor to use mock classes. note: addPlugin looks at the
+     *       filesystem, so this may be problematic
      * @return void
      */
     public function testAddPluginToHandlerByShortname()
@@ -141,6 +147,26 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             $plugin, $this->handler->getPlugin('TestPlugin'),
             'getPlugin returns the same plugin'
         );
+    }
+
+    /**
+     * addPlugin throws an exception when it can't find the plugin
+     *
+     * @return void
+     */
+    public function testAddPluginThrowsExceptionIfCannotFindPlugin()
+    {
+        try {
+            $this->handler->addPlugin('TestPlugin');
+        } catch(Phergie_Plugin_Exception $e) {
+            $this->assertEquals(
+                Phergie_Plugin_Exception::ERR_CLASS_NOT_FOUND,
+                $e->getCode()
+            );
+            return;
+        }
+
+        $this->fail('An expected exception has not been raised.');
     }
 
     /**
