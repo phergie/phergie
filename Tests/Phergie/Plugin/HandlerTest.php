@@ -98,8 +98,72 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo add tests for addPath
+     * addPath provides a fluent interface
+     *
+     * @return void
      */
+    public function testAddPathProvidesFluentInterface()
+    {
+        $handler = $this->handler->addPath(dirname(__FILE__));
+        $this->assertSame($this->handler, $handler);
+    }
+
+    /**
+     * addPath throws an exception when it cannot read the directory
+     *
+     * @return void
+     */
+    public function testAddPathThrowsExceptionOnUnreadableDirectory()
+    {
+        try {
+            $this->handler->addPath('/an/unreadable/directory/path');
+        } catch(Phergie_Plugin_Exception $e) {
+            $this->assertEquals(
+                Phergie_Plugin_Exception::ERR_DIRECTORY_NOT_READABLE,
+                $e->getCode()
+            );
+            return;
+        }
+
+        $this->fail('An expected exception has not been raised.');
+    }
+
+    /**
+     * adds a path into the plugin handler and then ensures that files
+     * in that location can be found
+     *
+     * @return void
+     */
+    public function testAddPath()
+    {
+        $plugin_name = 'TestPluginFromFile';
+        try {
+            $this->handler->addPlugin($plugin_name);
+        } catch(Phergie_Plugin_Exception $e) {
+            $this->assertEquals(
+                Phergie_Plugin_Exception::ERR_CLASS_NOT_FOUND,
+                $e->getCode()
+            );
+            
+            $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+
+            try {
+                $this->handler->addPlugin($plugin_name);
+            } catch(Phergie_Plugin_Exception $e) {
+                $this->fail(
+                    'After adding the directory, the plugin was still'
+                    . 'not found.'
+                );
+            }
+            
+            return;
+        }
+
+        $this->fail(
+            'Before adding the directory, an expected exception'
+            . 'was not raised'
+        );
+    }
 
     /**
      * Can add a plugin to the handler by shortname
