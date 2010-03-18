@@ -168,20 +168,21 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     /**
      * Can add a plugin to the handler by shortname
      *
-     * @todo refactor to use mock classes. note: addPlugin looks at the
-     *       filesystem, so this may be problematic
      * @return void
      */
     public function testAddPluginToHandlerByShortname()
     {
-        $returned_plugin = $this->handler->addPlugin('Ping');
-        $this->assertTrue($this->handler->hasPlugin('Ping'));
-        $this->assertTrue(
-            $this->handler->getPlugin('Ping')
-            instanceof Phergie_Plugin_Ping
+        $plugin_name = 'TestPluginFromFile';
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+
+        $returned_plugin = $this->handler->addPlugin($plugin_name);
+        $this->assertTrue($this->handler->hasPlugin($plugin_name));
+        $this->assertType(
+            'Phergie_Plugin_TestPluginFromFile',
+            $this->handler->getPlugin($plugin_name)
         );
         $this->assertEquals(
-            $this->handler->getPlugin('Ping'),
+            $this->handler->getPlugin($plugin_name),
             $returned_plugin
         );
     }
@@ -225,6 +226,49 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
         } catch(Phergie_Plugin_Exception $e) {
             $this->assertEquals(
                 Phergie_Plugin_Exception::ERR_CLASS_NOT_FOUND,
+                $e->getCode()
+            );
+            return;
+        }
+
+        $this->fail('An expected exception has not been raised.');
+    }
+
+    /**
+     * addPlugin throws an exception when trying to instantiate a
+     * class that doesn't extend from Phergie_Plugin_Abstract
+     *
+     * @return void
+     */
+    public function testAddPluginThrowsExceptionIfRequestingNonPlugin()
+    {
+        try {
+            $this->handler->addPlugin('Handler');
+        } catch(Phergie_Plugin_Exception $e) {
+            $this->assertEquals(
+                Phergie_Plugin_Exception::ERR_INCORRECT_BASE_CLASS,
+                $e->getCode()
+            );
+            return;
+        }
+
+        $this->fail('An expected exception has not been raised.');
+    }
+
+    /**
+     * addPlugin throws an exception when trying to instantiate a
+     * class that can't be instantiated.
+     *
+     * @return void
+     */
+    public function testAddPluginThrowsExceptionIfPluginNotInstantiable()
+    {
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+        try {
+            $this->handler->addPlugin('TestNonInstantiablePluginFromFile');
+        } catch(Phergie_Plugin_Exception $e) {
+            $this->assertEquals(
+                Phergie_Plugin_Exception::ERR_CLASS_NOT_INSTANTIABLE,
                 $e->getCode()
             );
             return;
