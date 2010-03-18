@@ -47,6 +47,14 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     protected $socket;
 
     /**
+     * Amount of time in seconds to wait to receive an event each time the 
+     * socket is polled
+     *
+     * @var int
+     */
+    protected $timeout = 0.1;
+
+    /**
      * Handles construction of command strings and their transmission to the 
      * server.
      *
@@ -96,7 +104,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @param Phergie_Connection $connection Active connection
      *
-     * @return Phergie_Driver_Abstract Provides a fluent interface
+     * @return Phergie_Driver_Streams Provides a fluent interface
      */
     public function setConnection(Phergie_Connection $connection)
     {
@@ -108,6 +116,34 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Set the active connection
         return parent::setConnection($connection);
+    }
+
+    /**
+     * Sets the amount of time to wait for a new event each time the socket 
+     * is polled.
+     *
+     * @param float $timeout Amount of time in seconds
+     *
+     * @return Phergie_Driver_Streams Provides a fluent interface
+     */
+    public function setTimeout($timeout)
+    {
+        $timeout = (float) $timeout;
+        if ($timeout) {
+            $this->timeout = $timeout;
+        }
+        return $this;
+    }
+
+    /**
+     * Returns the amount of time to wait for a new event each time the 
+     * socket is polled.
+     *
+     * @return float Amount of time in seconds
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
     }
 
     /**
@@ -282,7 +318,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED
             );
         }
-        stream_set_timeout($this->socket, 1);
+        stream_set_timeout($this->socket, $this->timeout);
 
         // Send the password if one is specified
         if (!empty($password)) {
