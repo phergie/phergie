@@ -50,7 +50,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * Amount of time in seconds to wait to receive an event each time the 
      * socket is polled
      *
-     * @var int
+     * @var float 
      */
     protected $timeout = 0.1;
 
@@ -318,7 +318,9 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED
             );
         }
-        stream_set_timeout($this->socket, $this->timeout);
+
+        $seconds = (int) $this->timeout;
+        stream_set_timeout($this->socket, $seconds, ($this->timeout - $seconds) * 1000000);
 
         // Send the password if one is specified
         if (!empty($password)) {
