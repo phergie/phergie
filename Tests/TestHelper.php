@@ -12,16 +12,15 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie
+ * @package   Phergie_Tests 
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Tests
  */
 
-error_reporting(E_ALL);
+error_reporting(E_ALL | E_STRICT);
 
-// Phergie components require Phergie_Autoload to function
-// correctly.
+// Phergie components require Phergie_Autoload to function correctly.
 require_once dirname(__FILE__) . '/../Phergie/Autoload.php';
 Phergie_Autoload::registerAutoloader();
