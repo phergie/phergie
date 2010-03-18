@@ -278,6 +278,10 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @todo add a tests for using addPlugin with a shortname and args
+     */
+
+    /**
      * implements __isset
      *
      * @return void
@@ -307,9 +311,12 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function testAddPluginReturnsSamePluginWhenAskedTwice()
     {
-        $plugin1 = $this->handler->addPlugin('Ping');
-        $plugin2 = $this->handler->addPlugin('Ping');
-        $this->assertEquals($plugin1, $plugin2);
+        $plugin_name = 'TestPluginFromFile';
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+
+        $plugin1 = $this->handler->addPlugin($plugin_name);
+        $plugin2 = $this->handler->addPlugin($plugin_name);
+        $this->assertSame($plugin1, $plugin2);
     }
 
     
@@ -322,8 +329,10 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function testExceptionThrownWhenLoadingPluginWithoutAutoload()
     {
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+
         try {
-            $this->handler->getPlugin('Ping');
+            $this->handler->getPlugin('TestPluginFromFile');
         } catch (Phergie_Plugin_Exception $expected) {
             $this->assertEquals(
                 Phergie_Plugin_Exception::ERR_PLUGIN_NOT_LOADED,
