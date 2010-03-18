@@ -19,8 +19,6 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
-require_once dirname(__FILE__) . '/../../TestHelper.php';
-
 /**
  * Unit test suite for Pherge_Plugin_Handler
  *

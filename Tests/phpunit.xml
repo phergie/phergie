@@ -1,4 +1,4 @@
-<?php
+<!--
 /**
  * Phergie
  *
@@ -12,16 +12,15 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie
+ * @package   Tests
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
-
-error_reporting(E_ALL);
-
-// Phergie components require Phergie_Autoload to function
-// correctly.
-require_once dirname(__FILE__) . '/../Phergie/Autoload.php';
-Phergie_Autoload::registerAutoloader();
+-->
+<phpunit colors="true" bootstrap="./TestHelper.php">
+    <testsuite name="Phergie Test Suite">
+        <directory>./</directory>
+    </testsuite>
+</phpunit>
