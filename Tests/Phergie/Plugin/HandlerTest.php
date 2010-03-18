@@ -120,13 +120,10 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     public function testAddPluginToHandlerByInstance()
     {
         $plugin = $this->getMock('Phergie_Plugin_Abstract');
-        
         $plugin
             ->expects($this->any())
             ->method('getName')
             ->will($this->returnValue('TestPlugin'));
-
-        $this->assertEquals('TestPlugin', $plugin->getName());
 
         $returned_plugin = $this->handler->addPlugin($plugin);
 
@@ -139,6 +136,29 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             $plugin, $this->handler->getPlugin('TestPlugin'),
             'getPlugin returns the same plugin'
         );
+    }
+
+    /**
+     * implements __isset
+     *
+     * @return void
+     */
+    public function testPluginHandlerImplementsIsset()
+    {
+        $plugin_name = 'TestPlugin';
+
+        $this->assertFalse(isset($this->handler->{$plugin_name}));
+
+        $plugin = $this->getMock('Phergie_Plugin_Abstract');
+        $plugin
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue($plugin_name));
+
+        $this->handler->addPlugin($plugin);
+
+        $this->assertTrue(isset($this->handler->{$plugin_name}));
+
     }
 
     /**
