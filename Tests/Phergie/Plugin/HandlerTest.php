@@ -119,15 +119,26 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function testAddPluginToHandlerByInstance()
     {
-        $plugin = new Phergie_Plugin_Ping;
+        $plugin = $this->getMock('Phergie_Plugin_Abstract');
+        
+        $plugin
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue('TestPlugin'));
+
+        $this->assertEquals('TestPlugin', $plugin->getName());
+
         $returned_plugin = $this->handler->addPlugin($plugin);
 
-        $this->assertTrue($this->handler->hasPlugin('Ping'));
-        $this->assertTrue(
-            $this->handler->getPlugin('Ping')
-            instanceof Phergie_Plugin_Ping
+        $this->assertTrue($this->handler->hasPlugin('TestPlugin'));
+        $this->assertSame(
+            $plugin, $returned_plugin,
+            'addPlugin returns the same plugin'
         );
-        $this->assertEquals($plugin, $returned_plugin);
+        $this->assertSame(
+            $plugin, $this->handler->getPlugin('TestPlugin'),
+            'getPlugin returns the same plugin'
+        );
     }
 
     /**
