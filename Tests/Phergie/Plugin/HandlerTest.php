@@ -63,6 +63,11 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(
             $reflection->implementsInterface('IteratorAggregate')
         );
+
+        $this->assertType(
+            'Iterator', $this->handler->getIterator(),
+            'getIterator() must actually return an Iterator'
+        );
     }
 
     /**
