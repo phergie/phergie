@@ -274,7 +274,10 @@ class Phergie_Bot
         foreach ($config['plugins'] as $name) {
             try {
                 $plugin = $plugins->addPlugin($name);
-                $plugin->onLoad();
+                $plugin
+                    ->setConfig($config)
+                    ->setEventHandler($events)
+                    ->onLoad();
                 $ui->onPluginLoad($name);
             } catch (Phergie_Plugin_Exception $e) {
                 $ui->onPluginFailure($name, $e->getMessage());
@@ -283,8 +286,6 @@ class Phergie_Bot
                 }
             }
         }
-        $plugins->setConfig($config);
-        $plugins->setEventHandler($events);
     }
 
     /**
