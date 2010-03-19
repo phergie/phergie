@@ -48,6 +48,7 @@ require dirname(__FILE__) . '/Twitter/laconica.class.php';
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Twitter
+ * @uses     Phergie_Plugin_Helper_Time pear.phergie.org
  */
 class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
 {
