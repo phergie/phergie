@@ -133,6 +133,26 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
     }
 
     /**
+     * Returns a list of events of a specified type.
+     *
+     * @param string $type Event type from Phergie_Event_Request::TYPE_* 
+     *        constants
+     *
+     * @return array Array containing event instances of the specified type 
+     *         or an empty array if no such events were found
+     */
+    public function getEventsOfType($type)
+    {
+        $events = array();
+        foreach ($this->events as $event) {
+            if ($event->getType() == $type) {
+                $events[] = $type;
+            }
+        }
+        return $events;
+    }
+
+    /**
      * Returns an iterator for the current event queue.
      *
      * @return ArrayIterator
