@@ -19,6 +19,8 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
+require_once(dirname(__FILE__) . '/TestCase.php');
+
 /**
  * Unit test suite for Pherge_Plugin_Pong.
  *
@@ -28,40 +30,45 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie
  */
-class Phergie_Plugin_PongTest extends PHPUnit_Framework_TestCase
+class Phergie_Plugin_PongTest extends Phergie_Plugin_TestCase
 {
-    /**
-     * @var Phergie_Plugin_Pong
-     */
-    protected $object;
-    /**
-     * @var Phergie_Event_Handler
-     */
-    protected $handler;
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp()
     {
-        $connection = new Phergie_Connection();
-        $this->handler = new Phergie_Event_Handler();
-        $this->object = new Phergie_Plugin_Pong;
-        $this->object->setEventHandler($this->handler);
-        $this->object->setConnection($connection);
-        $event = new Phergie_Event_Request();
-        $event->setType(Phergie_Event_Request::TYPE_PING);
-        $this->object->setEvent($event);
+        $this->setPlugin(new Phergie_Plugin_Pong);
     }
 
     /**
      * Test that when a ping is received, a Phergie_Event_Command::TYPE_PONG
      * is set to the handler
+     *
+     * @event Phergie_Event_Command::TYPE_PING
      */
     public function testOnPing()
     {
-        $this->object->onPing();
-        $this->assertTrue($this->handler->hasEventOfType(Phergie_Event_Command::TYPE_PONG));
+        $this->plugin->onPing();
+        $this->assertHasEvent(Phergie_Event_Command::TYPE_PONG);
     }
+
+    /**
+     * Test that when a ping is received, a Phergie_Event_Command::TYPE_PONG
+     * is set to the handler
+     *
+     * @event Phergie_Event_Command::TYPE_PING
+     */
+    public function testOnPingResponseArguement()
+    {
+        $this->plugin->onPing();
+        $this->assertHasEvent(Phergie_Event_Command::TYPE_PONG);
+        $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PONG);
+        $this->assertTrue(count($events) === 1,
+                          'Ping Response should only add one event');
+        $this->assertEquals($events[0], 'pong',
+                           'Asserting that the ping response arguement is "pong"');
+
+    }
+
 }
