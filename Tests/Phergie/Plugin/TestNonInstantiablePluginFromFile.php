@@ -29,7 +29,8 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Tests
  */
-class Phergie_Plugin_TestNonInstantiablePluginFromFile extends Phergie_Plugin_Abstract
+class Phergie_Plugin_TestNonInstantiablePluginFromFile
+extends Phergie_Plugin_Abstract
 {
     /**
      * Private constructor to ensure that this class is not instantiable.
