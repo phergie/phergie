@@ -283,8 +283,21 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo add a tests for using addPlugin with a shortname and args
+     * addPlugin with shortname and arguments passes args to constructor
+     *
+     * @return null
      */
+    public function testAddPluginShortnamePassesArgsToConstructor() {
+        $plugin_name = 'TestPluginFromFile';
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+
+        $arguments = array('a', 'b', 'c');
+
+        $plugin = $this->handler->addPlugin($plugin_name, $arguments);
+        for($i = 0; $i < count($arguments); $i++) {
+            $this->assertEquals($arguments[$i], $plugin->getArg($i));
+        }
+    }
 
     /**
      * implements __isset

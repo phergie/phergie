@@ -31,4 +31,32 @@
  */
 class Phergie_Plugin_TestPluginFromFile extends Phergie_Plugin_Abstract
 {
+    /**
+     * holds the arguments that were passed in to the constructor
+     * @var array
+     */
+    protected $args;
+
+    /**
+     * processes a variable number of arguments into the args property
+     *
+     * @return null
+     */
+    public function __construct()
+    {
+        $this->args = func_get_args();
+    }
+
+    /**
+     * returns the argument at the requested index that was stored
+     * when passed in on class instantiation
+     * 
+     * @param int $index of the argument
+     * 
+     * @return mixed
+     */
+    public function getArg($index)
+    {
+        return @$this->args[$index];
+    }
 }
