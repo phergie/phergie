@@ -97,4 +97,64 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
             $this->doPing($this->getConnection()->getNick(), $this->lastPing);
         }
     }
+
+    /**
+     * Gets the last ping time
+     * lastPing needs exposing for things such as unit testing
+     *
+     * @return int timestamp of last ping
+     */
+    public function getLastPing()
+    {
+        return $this->lastPing;
+    }
+
+    /**
+     * Set the last ping time
+     * lastPing needs to be exposed for unit testing
+     * 
+     * @param int|null $ping
+     * @return self
+     */
+    public function setLastPing($ping = null)
+    {
+        if (null === $ping) {
+            $ping = time();
+        }
+        if (!is_int($ping)) {
+            throw new InvalidArgumentException('$ping must be an integer or null');
+        }
+        $this->lastPing = $ping;
+        return $this;
+    }
+
+    /**
+     * Gets the last event time
+     * lastEvent needs exposing for things such as unit testing
+     *
+     * @return int timestamp of last ping
+     */
+    public function getLastEvent()
+    {
+        return $this->lastEvent;
+    }
+
+    /**
+     * Set the last event time
+     * lastEvent needs to be exposed for unit testing
+     *
+     * @param int|null $event
+     * @return self
+     */
+    public function setLastEvent($event = null)
+    {
+        if (null === $event) {
+            $event = time();
+        }
+        if (!is_int($event)) {
+            throw new InvalidArgumentException('$ping must be an integer or null');
+        }
+        $this->lastEvent = $event;
+        return $this;
+    }
 }

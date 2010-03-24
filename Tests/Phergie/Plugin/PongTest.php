@@ -64,10 +64,10 @@ class Phergie_Plugin_PongTest extends Phergie_Plugin_TestCase
         $this->plugin->onPing();
         $this->assertHasEvent(Phergie_Event_Command::TYPE_PONG);
         $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PONG);
-        $this->assertTrue(count($events) === 1,
-                          'Ping Response should only add one event');
-        $this->assertEquals($events[0], 'pong',
-                           'Asserting that the ping response arguement is "pong"');
+        $this->assertTrue(count($events) === 1, 'Assert that only one pong is emitted');
+        $this->assertEventEmitter(current($events),
+                                  $this->plugin,
+                                  'Assert that the tested plugin emitted the event');
 
     }
 

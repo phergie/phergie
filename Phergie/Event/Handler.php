@@ -146,7 +146,7 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
         $events = array();
         foreach ($this->events as $event) {
             if ($event->getType() == $type) {
-                $events[] = $type;
+                $events[] = $event;
             }
         }
         return $events;
