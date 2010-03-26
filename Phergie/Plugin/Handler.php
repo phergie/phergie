@@ -249,9 +249,13 @@ class Phergie_Plugin_Handler implements IteratorAggregate
 
         // If autoloading is enabled, attempt to load the plugin
         $this->addPlugin($name);
+        $plugin = $this->plugins[$lower];
+
+        // Execute the onLoad event handler for the added plugin
+        $plugin->onLoad();
 
         // Return the added plugin
-        return $this->plugins[$lower];
+        return $plugin;
     }
 
     /**
