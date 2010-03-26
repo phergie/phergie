@@ -141,7 +141,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function testAddPath()
     {
-        $plugin_name = 'TestPluginFromFile';
+        $plugin_name = 'Mock';
         try {
             $this->handler->addPlugin($plugin_name);
         } catch(Phergie_Plugin_Exception $e) {
@@ -156,7 +156,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
                 $this->handler->addPlugin($plugin_name);
             } catch(Phergie_Plugin_Exception $e) {
                 $this->fail(
-                    'After adding the directory, the plugin was still'
+                    'After adding the directory, the plugin was still '
                     . 'not found.'
                 );
             }
@@ -177,13 +177,13 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function testAddPluginToHandlerByShortname()
     {
-        $plugin_name = 'TestPluginFromFile';
+        $plugin_name = 'Mock';
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
         $returned_plugin = $this->handler->addPlugin($plugin_name);
         $this->assertTrue($this->handler->hasPlugin($plugin_name));
         $this->assertType(
-            'Phergie_Plugin_TestPluginFromFile',
+            'Phergie_Plugin_Mock',
             $this->handler->getPlugin($plugin_name)
         );
         $this->assertEquals(
@@ -287,16 +287,21 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      *
      * @return null
      */
-    public function testAddPluginShortnamePassesArgsToConstructor() {
-        $plugin_name = 'TestPluginFromFile';
+    public function testAddPluginShortnamePassesArgsToConstructor()
+    {
+        $plugin_name = 'Mock';
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
         $arguments = array('a', 'b', 'c');
 
         $plugin = $this->handler->addPlugin($plugin_name, $arguments);
-        for($i = 0; $i < count($arguments); $i++) {
-            $this->assertEquals($arguments[$i], $plugin->getArg($i));
-        }
+        $this->assertAttributeSame(
+            $arguments,
+            'args',
+            $plugin,
+            'Arguments passed in to addPlugin match the arguments '
+            . 'the Mock plugin constructor received'
+        );
     }
 
     /**
@@ -329,7 +334,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function testAddPluginReturnsSamePluginWhenAskedTwice()
     {
-        $plugin_name = 'TestPluginFromFile';
+        $plugin_name = 'Mock';
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
         $plugin1 = $this->handler->addPlugin($plugin_name);
@@ -350,7 +355,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
         try {
-            $this->handler->getPlugin('TestPluginFromFile');
+            $this->handler->getPlugin('Mock');
         } catch (Phergie_Plugin_Exception $expected) {
             $this->assertEquals(
                 Phergie_Plugin_Exception::ERR_PLUGIN_NOT_LOADED,
