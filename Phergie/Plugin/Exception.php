@@ -104,4 +104,10 @@ class Phergie_Plugin_Exception extends Phergie_Exception
      * such situations
      */
     const ERR_INVALID_CALL = 12;
+
+    /**
+     * Error indicating that a fatal runtime issue was encountered within a 
+     * plugin
+     */
+    const ERR_FATAL_ERROR = 13;
 }

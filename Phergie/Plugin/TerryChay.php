@@ -28,7 +28,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_TerryChay
- * @uses     Phergie_Plugin_Command pear.phergie.org optional
+ * @uses     Phergie_Plugin_Http pear.phergie.org
  */
 class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
 {
@@ -40,13 +40,30 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
     const URL = 'http://phpdoc.info/chayism/';
 
     /**
+     * HTTP plugin
+     *
+     * @var Phergie_Plugin_Http
+     */
+    protected $http;
+
+    /**
+     * Checks for dependencies.
+     *
+     * @return void
+     */
+    public function onLoad()
+    {
+        $this->http = $this->getPluginHandler()->getPlugin('Http');
+    }
+
+    /**
      * Fetches a chayism.
      *
      * @return string|bool Fetched chayism or FALSE if the operation failed 
      */
     public function getChayism()
     {
-        return file_get_contents(self::URL);
+        return $this->http->get(self::URL)->getContent();
     }
 
     /**
@@ -64,7 +81,7 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
             = '{^(' . preg_quote($this->getConfig('command.prefix')) . 
             '\s*)?.*(terry\s+chay|tychay)}ix';
 
-        if (preg_match($pattern, $message, $m)
+        if (preg_match($pattern, $message)
             && $fact = $this->getChayism()
         ) {
             $this->doPrivmsg($source, 'Fact: ' . $fact);
@@ -83,7 +100,7 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
         $source = $event->getSource();
         $ctcp = $event->getArgument(1);
 
-        if (preg_match('({terry[\s_+-]*chay}|tychay)ix', $ctcp, $m)
+        if (preg_match('({terry[\s_+-]*chay}|tychay)ix', $ctcp)
             && $fact = $this->getChayism()
         ) {
             $this->doCtcpReply($source, 'TERRYCHAY', $fact);

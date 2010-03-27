@@ -27,6 +27,7 @@
  * @author   Phergie Development Team <team@phergie.org> 
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_BeerScore
+ * @uses     Phergie_Plugin_Http pear.phergie.org
  */
 class Phergie_Plugin_BeerScore extends Phergie_Plugin_Abstract
 {
@@ -59,6 +60,23 @@ class Phergie_Plugin_BeerScore extends Phergie_Plugin_Abstract
     const API_BASE_URL = 'http://caedmon.net/beerscore/';
 
     /**
+     * HTTP plugin
+     *
+     * @var Phergie_Plugin_Http
+     */
+    protected $http;
+
+    /** 
+     * Checks for dependencies.
+     *
+     * @return void
+     */
+    public function onLoad()
+    {
+        $this->http = $this->getPluginHandler()->getPlugin('Http');
+    }
+
+    /**
      * Handles beerscore commands.
      *
      * @param string $searchstring String to use in seaching for beer scores
@@ -67,17 +85,19 @@ class Phergie_Plugin_BeerScore extends Phergie_Plugin_Abstract
      */
     public function onCommandBeerscore($searchstring)
     {
-        $target = $this->getEvent()->getNick();
-        $source = $this->getEvent()->getSource();
+        $event = $this->getEvent();
+        $target = $event->getNick();
+        $source = $event->getSource();
 
         $apiurl = self::API_BASE_URL . rawurlencode($searchstring);
-        $result = json_decode(file_get_contents($apiurl));
+        $response = $this->http->get($apiurl);
 
-        if (!$result || !isset($result->type) || !is_array($result->beer)) {
+        if ($response->isError()) {
             $this->doNotice($target, 'Score not found (or failed to contact API)');
             return;
         }
 
+        $result = $response->getContent();
         switch ($result->type) {
         case self::TYPE_SCORE:
             // small enough number to get scores
@@ -128,11 +148,9 @@ class Phergie_Plugin_BeerScore extends Phergie_Plugin_Abstract
                 $num = 'at least 100';
             }
             $resultsword = (($result->num > 1) ? 'results' : 'result');
-            $str = "{$target}: {$num} {$resultsword}; {$beer->searchurl}";
+            $str = "{$target}: {$num} {$resultsword}; {$result->searchurl}";
             $this->doPrivmsg($source, $str);
             break;
         }
     }
 }
-
-// vim: language=php tab=4 et indent=4
