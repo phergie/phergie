@@ -29,6 +29,21 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Tests
  */
-class Phergie_Plugin_TestPluginFromFile extends Phergie_Plugin_Abstract
+class Phergie_Plugin_Mock extends Phergie_Plugin_Abstract
 {
+    /**
+     * holds the arguments that were passed in to the constructor
+     * @var array
+     */
+    protected $args;
+
+    /**
+     * processes a variable number of arguments into the args property
+     *
+     * @return null
+     */
+    public function __construct()
+    {
+        $this->args = func_get_args();
+    }
 }
