@@ -1,7 +1,35 @@
 <?php
+/**
+ * Phergie 
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie 
+ * @package   Phergie_Plugin_Google
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Google
+ */
 
 /**
- * Google API
+ * Base class for plugins to provide event handler stubs and commonly needed
+ * functionality.
+ *
+ * @category Phergie 
+ * @package  Phergie_Plugin_Google
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Google
+ * @uses     Phergie_Plugin_Command pear.phergie.org
+ * @uses     Phergie_Plugin_Http pear.phergie.org
  */
 class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
 {
@@ -40,7 +68,11 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         ),
         array(
             'cmd' => 'gconvert [value] [currency from] [currency to]',
-            'desc' => 'Does the currency conversion between the currencies specified'
+            'desc' => 'Converts a monetary value from one currency to another'
+        ),
+        array(
+            'cmd' => 'convert [unit] [to] [unit2]',
+            'desc' => 'Convert a value from one metric to another'
         )
     );
 
@@ -67,9 +99,9 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * Returns the first result of a Google search.
      *
      * @param string $query Search term
-     * @todo Implement use of URL shortening here
      *
      * @return void
+     * @todo Implement use of URL shortening here
      */
     public function onCommandG($query)
     {
@@ -83,7 +115,6 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $event = $this->getEvent();
         $source = $event->getSource();
         $nick = $event->getNick();
-        var_dump($json);
         if ($json->cursor->estimatedResultCount > 0) {
             $msg
                 = $nick
@@ -107,7 +138,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onCommandGc($query) {
+    public function onCommandGc($query)
+    {
         $url = 'http://ajax.googleapis.com/ajax/services/search/web';
         $params = array(
             'v' => '1.0',
@@ -133,8 +165,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
     /**
      * Performs a Google Translate search for the given term.
      *
-     * @param string $from Language of the search term
-     * @param string $to Language to which the search term should be 
+     * @param string $from  Language of the search term
+     * @param string $to    Language to which the search term should be 
      *        translated
      * @param string $query Term to translate
      *
@@ -156,7 +188,10 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         if (empty($json->responseData->translatedText)) {
             $this->doPrivmsg($source, $nick . ': ' . $json->responseDetails);
         } else {
-            $this->doPrivmsg($source, $nick . ': ' . $json->responseData->translatedText);
+            $this->doPrivmsg(
+                $source, 
+                $nick . ': ' . $json->responseData->translatedText
+            );
         }
     }
 
@@ -167,7 +202,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onCommandGw($location) {
+    public function onCommandGw($location)
+    {
         $url = 'http://www.google.com/ig/api';
         $params = array(
             'weather' => $location,
@@ -179,9 +215,11 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $source = $this->getEvent()->getSource();
         if (!isset($xml->problem_cause)) {
             $city = $xml->forecast_information->city->attributes()->data[0];
-            $time = $xml->forecast_information->current_date_time->attributes()->data[0];
+            $time = $xml->forecast_information->current_date_time->attributes()
+                ->data[0];
             $condition = $xml->current_conditions->condition->attributes()->data[0];
-            $temp = $xml->current_conditions->temp_c->attributes()->data[0] . 'º C';
+            $temp = $xml->current_conditions->temp_c->attributes()->data[0] 
+                . 'ï¿½ C';
             $humidity = $xml->current_conditions->humidity->attributes()->data[0];
             $wind = $xml->current_conditions->wind_condition->attributes()->data[0];
             $msg = implode(' - ', array($city, $temp, $condition, $humidity, $wind));
@@ -194,8 +232,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
                 $condition = $linha->condition->attributes()->data[0];
                 $msg 
                     = 'Forecast: ' . $day . 
-                    ' - Min: ' . $min . 'º C' . 
-                    ' - Max: ' . $max . 'º C' . 
+                    ' - Min: ' . $min . 'ï¿½ C' . 
+                    ' - Max: ' . $max . 'ï¿½ C' . 
                     ' - ' . $condition;
                 $this->doPrivmsg($source, $msg);
             }
@@ -229,14 +267,15 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $event = $this->getEvent();
         $source = $event->getSource();
         $nick = $event->getNick();
-        if(!empty($json)) {
+        if (!empty($json)) {
             $qtd = count($json['Placemark']);
             if ($qtd > 1) {
                 if ($qtd <= 3) {
-                    foreach ($json['Placemark'] as $places){
+                    foreach ($json['Placemark'] as $places) {
                         $xy = $places['Point']['coordinates'];
                         $address = utf8_decode($places['address']);
-                        $url = 'http://maps.google.com/maps?sll=' . $xy[1] . ',' . $xy[0] . '&z=15';
+                        $url = 'http://maps.google.com/maps?sll=' . $xy[1] . ',' 
+                            . $xy[0] . '&z=15';
                         $msg = $nick . ' -> ' . $address . ' - ' . $url;
                         $this->doPrivmsg($source, $msg);
                     }
@@ -250,7 +289,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             } elseif ($qtd == 1) {
                 $xy = $json['Placemark'][0]['Point']['coordinates'];
                 $address = utf8_decode($json['Placemark'][0]['address']);
-                $url = 'http://maps.google.com/maps?sll=' . $xy[1] . ',' . $xy[0] . '&z=15';
+                $url = 'http://maps.google.com/maps?sll=' . $xy[1] . ',' . $xy[0] 
+                    . '&z=15';
                 $msg = $nick . ' -> ' . $address . ' - ' . $url;
                 $this->doPrivmsg($source, $msg);
             } else {
@@ -266,8 +306,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * another.
      *
      * @param string $value Value to convert
-     * @param string $from Source metric
-     * @param string $to Destination metric
+     * @param string $from  Source metric
+     * @param string $to    Destination metric
      *
      * @return void
      */
@@ -285,7 +325,11 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $source = $event->getSource();
         $nick = $event->getNick();
         if ($contents) {
-            preg_match('#<span class=bld>.*? ' . $to . '</span>#im', $contents, $matches);
+            preg_match(
+                '#<span class=bld>.*? ' . $to . '</span>#im',
+                $contents,
+                $matches
+            );
             if (!$matches[0]) {
                 $this->doPrivmsg($source, $nick . ', I can\'t do that.');
             } else {
@@ -298,6 +342,58 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             }
         } else {
             $this->doPrivmsg($source, $nick . ', we had a problem.');
+        }
+    }
+
+    /**
+     * Performs a Google search to convert a value from one unit to another.
+     *
+     * @param string $unit  Source metric 
+     * @param string $to    Value to be converted
+     * @param string $unit2 Destination metric 
+     *
+     * @return void
+     */
+    public function onCommandConvert($unit, $to, $unit2)
+    {
+        $url = 'http://www.google.com/search?q=' 
+            . urlencode($unit . ' ' . $to . ' ' . $unit2);
+        $response = $this->http->get($url);
+        $contents = $response->getContent();
+        $event = $this->getEvent();
+        $source = $event->getSource();
+        $nick = $event->getNick();
+
+        if (empty($contents)) {
+            $this->doPrivmsg(
+                $target,
+                $nick . ', sorry, I can\'t give you an answer right now.'
+            );
+            return;
+        }
+
+        $doc = new DomDocument;
+        $doc->loadHTML($contents);
+        foreach ($doc->getElementsByTagName('h2') as $element) {
+            if ($element->getAttribute('class') == 'r') {
+                $children = $element->childNodes;
+                $text = str_replace(
+                    array(chr(195), chr(151), chr(160)),
+                    array('x', '', ' '),
+                    $children->item(0)->nodeValue
+                );
+                if ($children->length >= 3) {
+                    $text
+                        .= '^' . $children->item(1)->nodeValue 
+                        . $children->item(2)->nodeValue;
+                }
+            }
+        }
+
+        if (isset($text)) {
+            $this->doPrivmsg($source, $nick . ': ' . $text);
+        } else {
+            $this->doPrivmsg($target, $nick . ', sorry I can\'t do that.');
         }
     }
 }
