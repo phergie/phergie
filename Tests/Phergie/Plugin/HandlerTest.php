@@ -168,8 +168,28 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
         }
 
         $this->fail(
-            'Before adding the directory, an expected exception'
+            'Before adding the directory, an expected exception '
             . 'was not raised'
+        );
+    }
+
+    /**
+     * addPlugin returns the plugin instance that was added
+     *
+     * @return void
+     */
+    public function testAddPluginByInstanceReturnsPluginInstance() {
+        $plugin = $this->getMock('Phergie_Plugin_Abstract');
+        $plugin
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue('TestPlugin'));
+
+        $returned_plugin = $this->handler->addPlugin($plugin);
+        $this->assertSame(
+            $returned_plugin,
+            $plugin,
+            'addPlugin returns the same instance that is passed to it'
         );
     }
 
@@ -183,7 +203,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
         $plugin_name = 'Mock';
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
-        $returned_plugin = $this->handler->addPlugin($plugin_name);
+        $this->handler->addPlugin($plugin_name);
         $this->assertTrue($this->handler->hasPlugin($plugin_name));
         $this->assertType(
             'Phergie_Plugin_Mock',
@@ -209,7 +229,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             ->method('getName')
             ->will($this->returnValue('TestPlugin'));
 
-        $returned_plugin = $this->handler->addPlugin($plugin);
+        $this->handler->addPlugin($plugin);
 
         $this->assertTrue($this->handler->hasPlugin('TestPlugin'));
         $this->assertSame(
