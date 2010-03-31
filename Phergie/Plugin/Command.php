@@ -87,13 +87,14 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         // Get the content of the message
         $event = $this->getEvent();
         $msg = trim($event->getText());
+        $prefix = $this->getConfig('command.prefix');
 
         // Check for the command prefix if one is set and needed
-        if ($this->config['command.prefix'] && $event->isInChannel()) {
-            if (strpos($msg, $this->config['command.prefix']) !== 0) {
+        if ($prefix && $event->isInChannel()) {
+            if (strpos($msg, $prefix) !== 0) {
                 return;
             } else {
-                $msg = substr($msg, strlen($this->config['command.prefix']));
+                $msg = substr($msg, strlen($prefix));
             }
         }
 
