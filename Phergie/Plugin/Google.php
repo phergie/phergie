@@ -20,8 +20,9 @@
  */
 
 /**
- * Base class for plugins to provide event handler stubs and commonly needed
- * functionality.
+ * Provides commands used to access several services offered by Google 
+ * including search, translation, weather, maps, and currency and general 
+ * value unit conversion.
  *
  * @category Phergie 
  * @package  Phergie_Plugin_Google
