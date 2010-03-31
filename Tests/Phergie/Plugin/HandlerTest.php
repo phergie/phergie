@@ -203,15 +203,16 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
         $plugin_name = 'Mock';
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
-        $this->handler->addPlugin($plugin_name);
+        $returned_plugin = $this->handler->addPlugin($plugin_name);
         $this->assertTrue($this->handler->hasPlugin($plugin_name));
         $this->assertType(
             'Phergie_Plugin_Mock',
             $this->handler->getPlugin($plugin_name)
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->handler->getPlugin($plugin_name),
-            $returned_plugin
+            $returned_plugin,
+            'Handler contains plugin when added by shortname.'
         );
     }
 
@@ -229,7 +230,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             ->method('getName')
             ->will($this->returnValue('TestPlugin'));
 
-        $this->handler->addPlugin($plugin);
+        $returned_plugin = $this->handler->addPlugin($plugin);
 
         $this->assertTrue($this->handler->hasPlugin('TestPlugin'));
         $this->assertSame(
