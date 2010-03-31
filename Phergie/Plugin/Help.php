@@ -62,7 +62,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
      *
      * @return void
      *
-     * @plugin_cmd Show all actived plugins with help available
+     * @plugin_cmd Show all active plugins with help available
      * @plugin_cmd [plugin] Shows commands line for a specific plugin
      */
     public function onCommandHelp($plugin = null)
@@ -71,29 +71,38 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
 
         if (!$plugin) {
             $msg = 'These plugins below have help information available.';
-            $this->doNotice($nick, $msg);
+            $this->doPrivMsg($nick, $msg);
 
-            $msg = join(', ', array_keys($this->registry));
-            $this->doNotice($nick, $msg);
+            foreach ($this->registry as $plugin => $data) {
+                $this->doPrivMsg($nick, "{$plugin} - {$data['desc']}");
+            }
         } else {
-            if ($plugin = $this->getPluginHandler()->getPlugin($plugin)) {
+            if (isset($this->getPluginHandler()->{$plugin})
+                && isset($this->registry[strtolower($plugin)]['cmd'])
+            ) {
                 $msg
                     = 'The ' . 
-                    $plugin->getName() . 
+                    $plugin . 
                     ' plugin exposes the commands shown below.';
-                $this->doNotice($nick, $msg);
-                if ($this->config['command.prefix']) {
+                $this->doPrivMsg($nick, $msg);
+                if ($this->getConfig('command.prefix')) {
                     $msg
                         = 'Note that these commands must be prefixed with "' .  
-                        $this->config['command.prefix'] . 
-                        '" (without quotes) when issued.';
-                    $this->doNotice($nick, $msg);
+                        $this->getConfig('command.prefix') .
+                        '" (without quotes) when issued in a public channel.';
+                    $this->doPrivMsg($nick, $msg);
                 }
-                foreach ($plugin->helpCmds as $cmd) {
-                    $this->doNotice($nick, $cmd['cmd'] . ' - ' . $cmd['desc']);
+
+                foreach ($this->registry[strtolower($plugin)]['cmd']
+                    as $cmd => $descs
+                ) {
+                    foreach ($descs as $desc) {
+                        $this->doPrivMsg($nick, $cmd . ' - ' . $desc);
+                    }
                 }
+
             } else {
-                $this->doNotice($nick, 'That plugin is not loaded.');
+                $this->doPrivMsg($nick, 'That plugin is not loaded.');
             }
         }
     }
@@ -126,7 +135,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     public function setCommandDescription(
         Phergie_Plugin_Abstract $plugin,
         $command,
-        $description
+        array $description
     ) {
         $this->registry[strtolower($plugin->getName())]
             ['cmd'][$command] = $description;
@@ -161,7 +170,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
                     $this->setCommandDescription(
                         $plugin,
                         $cmd,
-                        join(' ', $annotations['plugin_cmd'])
+                        $annotations['plugin_cmd']
                     );
                 }
             }

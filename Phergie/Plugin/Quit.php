@@ -28,6 +28,8 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Quit
  * @uses     Phergie_Plugin_Command pear.phergie.org
+ *
+ * @plugin_desc Terminates the current connection upon command.
  */
 class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
 {
@@ -39,6 +41,8 @@ class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $this->getPluginHandler()->getPlugin('Command');
+        $help = $this->getPluginHandler()->getPlugin('Help');
+        $help->register($this);
     }
 
     /**
@@ -46,6 +50,8 @@ class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
      * bot terminate the current connection.
      *
      * @return void
+     *
+     * @plugin_cmd terminates the connection
      */
     public function onCommandQuit()
     {
