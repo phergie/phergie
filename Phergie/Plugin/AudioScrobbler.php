@@ -20,8 +20,6 @@
  */
 
 /**
- * Uses a self CTCP PING to ensure that the client connection has not been
- * dropped.
  *
  * @category Phergie
  * @package  Phergie_Plugin_AudioScrobbler
@@ -29,6 +27,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_AudioScrobbler
  * @uses     Phergie_Plugin_Command pear.phergie.org
+ * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     extension simplexml
  */
 class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
@@ -53,9 +52,16 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
      * @var string
      */
     protected $query = '?method=user.getrecenttracks&user=%s&api_key=%s';
+
+    /**
+     * HTTP plugin
+     *
+     * @var Phergie_Plugin_Http
+     */
+    protected $http;
     
     /**
-     * check and load plugin's dependencies.
+     * Check for dependencies.
      *
      * @return void
      */
@@ -65,11 +71,13 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
             $this->fail('SimpleXML php extension is required');
         }
         
-        $this->getPluginHandler()->getPlugin('Command');
+        $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Command');
+        $this->http = $plugins->getPlugin('Http');
     }
     
     /**
-     * Command function to get user's status on last.fm
+     * Command function to get a user's status on last.fm.
      * 
      * @param string $user User identifier
      *
@@ -78,13 +86,15 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
     public function onCommandLastfm($user = null)
     {
         if ($key = $this->config['audioscrobbler.lastfm_api_key']) {
-            $scrobbled = $this->getScrobbled($user, $this->lastfm_url, $key);
-            $this->doPrivmsg($this->getEvent()->getSource(), $scrobbled);
+            $scrobbled = $this->getScrobbled($user, $this->lastfmUrl, $key);
+            if ($scrobbled) {
+                $this->doPrivmsg($this->getEvent()->getSource(), $scrobbled);
+            }
         }
     }
 
     /**
-     * Command function to get users status on libre.fm
+     * Command function to get a user's status on libre.fm.
      * 
      * @param string $user User identifier
      *
@@ -93,35 +103,46 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
     public function onCommandLibrefm($user = null)
     {
         if ($key = $this->config['audioscrobbler.librefm_api_key']) {
-            $scrobbled = $this->getScrobbled($user, $this->librefm_url, $key);
-            $this->doPrivmsg($this->getEvent()->getSource(), $scrobbled);
+            $scrobbled = $this->getScrobbled($user, $this->librefmUrl, $key);
+            if ($scrobbled) {
+                $this->doPrivmsg($this->getEvent()->getSource(), $scrobbled);
+            }
         }
     }
 
     /**
-     * Simple Scrobbler API function to get recent track formatted in string
+     * Simple Scrobbler API function to get a formatted string of the most 
+     * recent track played by a user.
      * 
-     * @param string $user User name to lookup
+     * @param string $user Username to look up
      * @param string $url  Base URL of the scrobbler service
      * @param string $key  Scrobbler service API key
      *
-     * @return string A formatted string of the most recent track played.
+     * @return string Formatted string of the most recent track played
      */
     public function getScrobbled($user, $url, $key)
     {
-        $user = $user ? $user : $this->getEvent()->getNick();
+        $event = $this->getEvent();
+        $user = $user ? $user : $event->getNick();
         $url = sprintf($url . $this->query, urlencode($user), urlencode($key));
-        
-        $response = file_get_contents($url);
-        try {
-            $xml = new SimpleXMLElement($response);
+
+        $response = $this->http->get($url);
+        if ($response->isError()) {
+            $this->doNotice(
+                $event->getSource(),
+                'Can\'t find status for ' . $user . ': HTTP ' . 
+                    $response->getCode() . ' ' . $response->getMessage()
+            );
+            return false; 
         }
-        catch (Exception $e) {
-            return 'Can\'t find status for ' . $user;
-        }
         
+        $xml = $response->getContent();
         if ($xml->error) {
-            return 'Can\'t find status for ' . $user;
+            $this->doNotice(
+                $event->getSource(),
+                'Can\'t find status for ' . $user . ': API ' . $xml->error
+            );
+            return false; 
         }
         
         $recenttracks = $xml->recenttracks;
