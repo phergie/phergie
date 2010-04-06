@@ -86,16 +86,15 @@ class Phergie_Bot
     public function getDriver()
     {
         if (empty($this->driver)) {
-
-			// Check if a driver has been defined in the configuration to use
-			// as the default
-			$config = $this->getConfig();
-			if (isset($config['driver'])) {
-				$class = 'Phergie_Driver_' . ucfirst($config['driver']);
-			} else {
-				// Otherwise default to the Streams driver.
-				$class = 'Phergie_Driver_Streams';
-			}
+            // Check if a driver has been defined in the configuration to use
+            // as the default
+            $config = $this->getConfig();
+            if (isset($config['driver'])) {
+                $class = 'Phergie_Driver_' . ucfirst($config['driver']);
+            } else {
+                // Otherwise default to the Streams driver.
+                $class = 'Phergie_Driver_Streams';
+            }
 
             $this->driver = new $class;
         }
@@ -159,7 +158,10 @@ class Phergie_Bot
     public function getPluginHandler()
     {
         if (empty($this->plugins)) {
-            $this->plugins = new Phergie_Plugin_Handler;
+            $this->plugins = new Phergie_Plugin_Handler(
+                $this->getConfig(),
+                $this->getEventHandler()
+            );
         }
         return $this->plugins;
     }
@@ -267,17 +269,12 @@ class Phergie_Bot
     {
         $config = $this->getConfig();
         $plugins = $this->getPluginHandler();
-        $events = $this->getEventHandler();
         $ui = $this->getUi();
         
         $plugins->setAutoload($config['plugins.autoload']);
         foreach ($config['plugins'] as $name) {
             try {
                 $plugin = $plugins->addPlugin($name);
-                $plugin
-                    ->setConfig($config)
-                    ->setEventHandler($events)
-                    ->onLoad();
                 $ui->onPluginLoad($name);
             } catch (Phergie_Plugin_Exception $e) {
                 $ui->onPluginFailure($name, $e->getMessage());
