@@ -356,6 +356,9 @@ class Phergie_Event_Request
      */
     public function isFromUser()
     {
+        if (empty($this->hostmask)) {
+            return false;
+        }
         $username = $this->hostmask->getUsername();
         return !empty($username);
     }
