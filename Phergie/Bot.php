@@ -304,7 +304,8 @@ class Phergie_Bot
 
             $ui->onConnect($data['host']);
             $driver->setConnection($connection)->doConnect();
-            $plugins->setConnection($connection)->onConnect();
+            $plugins->setConnection($connection);
+            $plugins->onConnect();
         }
     }
 
@@ -324,15 +325,18 @@ class Phergie_Bot
 
         foreach ($connections as $connection) {
             $driver->setConnection($connection);
-            $plugins->setConnection($connection)->onTick();
+            $plugins->setConnection($connection);
+            $plugins->onTick();
 
             if ($event = $driver->getEvent()) {
                 $ui->onEvent($event, $connection);
+                $plugins->setEvent($event);
 
-                $plugins
-                    ->setEvent($event)
-                    ->preEvent()
-                    ->{'on' . ucfirst($event->getType())}();
+                if (!$plugins->preEvent()) {
+                    continue;
+                }
+
+                $plugins->{'on' . ucfirst($event->getType())}();
             }
 
             if (count($events)) {
