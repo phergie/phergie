@@ -168,8 +168,28 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
         }
 
         $this->fail(
-            'Before adding the directory, an expected exception'
+            'Before adding the directory, an expected exception '
             . 'was not raised'
+        );
+    }
+
+    /**
+     * addPlugin returns the plugin instance that was added
+     *
+     * @return void
+     */
+    public function testAddPluginByInstanceReturnsPluginInstance() {
+        $plugin = $this->getMock('Phergie_Plugin_Abstract');
+        $plugin
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue('TestPlugin'));
+
+        $returned_plugin = $this->handler->addPlugin($plugin);
+        $this->assertSame(
+            $returned_plugin,
+            $plugin,
+            'addPlugin returns the same instance that is passed to it'
         );
     }
 
@@ -189,9 +209,10 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             'Phergie_Plugin_Mock',
             $this->handler->getPlugin($plugin_name)
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->handler->getPlugin($plugin_name),
-            $returned_plugin
+            $returned_plugin,
+            'Handler contains plugin when added by shortname.'
         );
     }
 
