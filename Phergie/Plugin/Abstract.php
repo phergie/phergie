@@ -315,7 +315,8 @@ abstract class Phergie_Plugin_Abstract
      * Handler for when any event is received but has not yet been dispatched 
      * to the plugin handler method specific to its event type.
      *
-     * @return void
+     * @return bool|null|void FALSE to short-circuit further event 
+     *         processing, TRUE or NULL otherwise
      */
     public function preEvent()
     {

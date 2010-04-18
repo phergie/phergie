@@ -392,20 +392,21 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     /**
      * Proxies method calls to all plugins containing the called method. An  
      * individual plugin may short-circuit this process by explicitly 
-     * returning false.
+     * returning FALSE.
      *
      * @param string $name Name of the method called
      * @param array  $args Arguments passed in the method call
      *
-     * @return Phergie_Plugin_Handler Provides a fluent interface 
+     * @return bool FALSE if a plugin short-circuits processing by returning 
+     *         FALSE, TRUE otherwise
      */
     public function __call($name, array $args)
     {
         foreach ($this->plugins as $plugin) {
             if (call_user_func_array(array($plugin, $name), $args) === false) {
-                break;
+                return false;
             }
         }
-        return $this;
+        return true;
     }
 }
