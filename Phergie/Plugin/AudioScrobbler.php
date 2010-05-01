@@ -167,7 +167,7 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
         } else {
             $msg = sprintf(
                 '%s, %s was listening to %s by %s',
-                $track->date,
+                date('j M Y, H:i', (int) $track->date['uts']),
                 $recenttracks['user'],
                 $track->name,
                 $track->artist

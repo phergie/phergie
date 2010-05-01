@@ -371,6 +371,9 @@ class Phergie_Bot
     public function run()
     {
         set_time_limit(0);
+        
+        $timezone = $this->getConfig('timezone', 'UTC');
+        date_default_timezone_set($timezone);
 
         $ui = $this->getUi();
         $ui->setEnabled($this->getConfig('ui.enabled'));

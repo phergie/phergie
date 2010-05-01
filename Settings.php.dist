@@ -15,6 +15,9 @@ return array(
             // 'transport' => 'ssl' // uncomment to connect using SSL
         )
     ),
+    
+    // Time zone. See: http://www.php.net/manual/en/timezones.php
+    'timezone' => 'UTC',
 
     // Whitelist of plugins to load
     'plugins' => array(
