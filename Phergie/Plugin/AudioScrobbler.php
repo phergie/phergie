@@ -147,6 +147,16 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
         
         $recenttracks = $xml->recenttracks;
         $track = $recenttracks->track[0];
+        
+        // If the user exists, but has not scrobbled anything, the result will be empty.
+        if (empty($track->name) && empty($track->artist)) {
+            $msg = sprintf(
+                'Can\'t find track information for %s',
+                $recenttracks['user']
+            );
+            return $msg;
+        }
+        
         if (isset($track['nowplaying'])) {
             $msg = sprintf(
                 '%s is listening to %s by %s',
