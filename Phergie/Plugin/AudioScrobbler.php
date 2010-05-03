@@ -20,7 +20,13 @@
  */
 
 /**
- *
+ * TODO: Make the "nick-binding" use an SQLite database instead of having them
+ *       hard-coded in to the config file.
+ * 
+ * Configuration settings:
+ * "audioscrobbler.lastfm_api_key":  API given by last.fm (string).
+ * "audioscrobbler.librefm_api_key": API key given by libre.fm (string).
+ * 
  * @category Phergie
  * @package  Phergie_Plugin_AudioScrobbler
  * @author   Phergie Development Team <team@phergie.org>
@@ -131,7 +137,7 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
             $this->doNotice(
                 $event->getNick(),
                 'Can\'t find status for ' . $user . ': HTTP ' . 
-                    $response->getCode() . ' ' . $response->getMessage()
+                $response->getCode() . ' ' . $response->getMessage()
             );
             return false; 
         }
@@ -148,7 +154,8 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
         $recenttracks = $xml->recenttracks;
         $track = $recenttracks->track[0];
         
-        // If the user exists, but has not scrobbled anything, the result will be empty.
+        // If the user exists but has not scrobbled anything, the result will
+        // be empty.
         if (empty($track->name) && empty($track->artist)) {
             $this->doNotice(
                 $event->getNick(),
