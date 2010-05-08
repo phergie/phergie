@@ -29,7 +29,7 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Quit
  * @uses     Phergie_Plugin_Command pear.phergie.org
  *
- * @plugin_desc Terminates the current connection upon command.
+ * @pluginDesc Terminates the current connection upon command.
  */
 class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
 {
@@ -51,7 +51,7 @@ class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
      *
      * @return void
      *
-     * @plugin_cmd terminates the connection
+     * @pluginCmd terminates the connection
      */
     public function onCommandQuit()
     {
