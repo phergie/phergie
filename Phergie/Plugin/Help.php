@@ -42,6 +42,13 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     protected $registry;
 
     /**
+     * Whether the registry has been alpha sorted
+     *
+     * @var bool
+     */
+    protected $registry_sorted = false;
+
+    /**
      * Checks for dependencies.
      *
      * @return void
@@ -70,6 +77,12 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
         $nick = $this->getEvent()->getNick();
 
         if (!$plugin) {
+            // protect from sorting the registry each time help is called
+            if (!$this->registry_sorted) {
+                asort($this->registry);
+                $this->registry_sorted = true;
+            }
+
             $msg = 'These plugins below have help information available.';
             $this->doPrivMsg($nick, $msg);
 
@@ -97,7 +110,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
                     as $cmd => $descs
                 ) {
                     foreach ($descs as $desc) {
-                        $this->doPrivMsg($nick, $cmd . ' - ' . $desc);
+                        $this->doPrivMsg($nick, "{$cmd} {$desc}");
                     }
                 }
 
