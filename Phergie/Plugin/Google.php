@@ -31,51 +31,11 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Google
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
+ *
+ * @pluginDesc Provide access to some Google services
  */
 class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
 {
-    /**
-     * Description of this plugin for the Help plugin
-     *
-     * @var string
-     */
-    public $helpDesc = 'Provide access to some Google services.';
-
-    /**
-     * Description of commands offered by this plugin for the Help plugin
-     *
-     * @var array
-     */
-    public $helpCmds = array(
-        array(
-            'cmd' => 'g [query]',
-            'desc' => 'Do a search on Google'
-        ),
-        array(
-            'cmd' => 'gc [query]',
-            'desc' => 'Do a search on Google and count the results'
-        ),
-        array(
-            'cmd' => 'translate [from language] [to language] [text to translate]',
-            'desc' => 'Do a translation on Google'
-        ),
-        array(
-            'cmd' => 'weather [location]',
-            'desc' => 'Show the weather to the specified location'
-        ),
-        array(
-            'cmd' => 'map [location]',
-            'desc' => 'Get the location from Google Maps to the location specified'
-        ),
-        array(
-            'cmd' => 'gconvert [value] [currency from] [currency to]',
-            'desc' => 'Converts a monetary value from one currency to another'
-        ),
-        array(
-            'cmd' => 'convert [unit] [to] [unit2]',
-            'desc' => 'Convert a value from one metric to another'
-        )
-    );
 
     /**
      * HTTP plugin
@@ -94,6 +54,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Command');
         $this->http = $plugins->getPlugin('Http');
+        $plugins->getPlugin('Help')->register($this);
     }
 
     /**
@@ -103,6 +64,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      *
      * @return void
      * @todo Implement use of URL shortening here
+     *
+     * @pluginCmd [query] do a search on google
      */
     public function onCommandG($query)
     {
@@ -138,6 +101,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $query Search term
      *
      * @return void
+     *
+     * @pluginCmd [query] Do a search on Google and count the results
      */
     public function onCommandGc($query)
     {
@@ -172,6 +137,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $query Term to translate
      *
      * @return void
+     *
+     * @pluginCmd [from language] [to language] [text to translate] Do a translation on Google
      */
     public function onCommandGt($from, $to, $query)
     {
@@ -202,6 +169,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $location Location to search for
      *
      * @return void
+     *
+     * @pluginCmd [location] Show the weather for the specified location
      */
     public function onCommandGw($location)
     {
@@ -249,6 +218,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $location Location to search for
      *
      * @return void
+     *
+     * @pluginCmd [location] Get the location from Google Maps to the location specified
      */
     public function onCommandGmap($location)
     {
@@ -311,6 +282,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $to    Destination metric
      *
      * @return void
+     *
+     * @pluginCmd [value] [currency from] [currency to] Converts a monetary value from one currency to another
      */
     public function onCommandGconvert($value, $from, $to)
     {
@@ -354,6 +327,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $unit2 Destination metric 
      *
      * @return void
+     *
+     * @pluginCmd [unit] [to] [unit2] Convert a value from one metric to another
      */
     public function onCommandConvert($unit, $to, $unit2)
     {
