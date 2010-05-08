@@ -22,7 +22,7 @@
 require_once(dirname(__FILE__) . '/TestCase.php');
 
 /**
- * Unit test suite for Pherge_Plugin_Pong.
+ * Unit test suite for Pherge_Plugin_TerryChay.
  *
  * @category Phergie
  * @package  Phergie_Tests
