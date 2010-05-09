@@ -119,6 +119,33 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
+     * Returns an array of keys for sockets with data to read.
+     * 
+     * @param int $wait how long to poll for active streams
+     *
+     * @return array a list of hostmasks
+     */
+    public function activeReadSockets($wait = 0)
+    {
+        $read  = $this->sockets;
+        $write = null;
+        $error = null;
+
+        $active = array();
+
+        if (count($this->sockets) > 0) {
+            $number = stream_select($read, $write, $error, $wait);
+            if ($number > 0) {
+                foreach ($read as $item) {
+                    $active[] = array_search($item, $this->sockets);
+                }
+            }
+        }
+
+        return $active;
+    }
+
+    /**
      * Sets the amount of time to wait for a new event each time the socket 
      * is polled.
      *

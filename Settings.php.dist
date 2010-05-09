@@ -16,6 +16,8 @@ return array(
         )
     ),
     
+    'processor' => 'async',    
+    'processor.options' => array('wait' => 30),    
     // Time zone. See: http://www.php.net/manual/en/timezones.php
     'timezone' => 'UTC',
 
