@@ -29,14 +29,14 @@ class PhergiePackageTask extends PearPackage2Task
 
             if (!$have_summary || !$have_description) {
                 $description = substr($doc, 0, strpos($doc, '@'));
-                $description = preg_replace(array('#/\*\*|\h+\*|\*\h+/#m', '#[\h]+#m'), array('', ' '), $description);
+                $description = trim(preg_replace(array('#^[\h*]*|[\h*]*$#m', '#[\h]+#m'), array('', ' '), $description));
                 $split = preg_split('/\v\v+/', $description);
                 $summary = trim(array_shift($split));
                 if (!$have_summary) {
-                    $this->pkg->setSummary($summary);
+                    $this->pkg->setSummary(htmlentities($summary, ENT_QUOTES));
                 }
                 if (!$have_description) {
-                    $this->pkg->setDescription($description);
+                    $this->pkg->setDescription(htmlentities($description, ENT_QUOTES));
                 }
             }
 
