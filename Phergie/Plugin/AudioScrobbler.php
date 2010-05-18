@@ -20,6 +20,9 @@
  */
 
 /**
+ * Provides commands to look up information on tracks played by specific 
+ * users on the Last.fm and Libre.fm services.
+ *
  * TODO: Make the "nick-binding" use an SQLite database instead of having them
  *       hard-coded in to the config file.
  * 
