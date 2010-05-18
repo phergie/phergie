@@ -133,7 +133,7 @@ abstract class Phergie_Plugin_TestCase extends PHPUnit_Framework_TestCase
         }
         $event = new $eventClass();
         $event->setType($eventType);
-        $event->setArguements($eventArgs);
+        $event->setArguments($eventArgs);
         $this->plugin->setEvent($event);
         $this->eventArgs = $eventArgs;
     }
