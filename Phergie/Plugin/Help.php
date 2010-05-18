@@ -29,7 +29,7 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Help
  * @uses     Phergie_Plugin_Command pear.phergie.org
  *
- * @plugin_desc Provides access to plugin help information
+ * @pluginDesc Provides access to plugin help information
  */
 class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
 {
@@ -40,6 +40,13 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
      * @var array
      */
     protected $registry;
+
+    /**
+     * Whether the registry has been alpha sorted
+     *
+     * @var bool
+     */
+    protected $registry_sorted = false;
 
     /**
      * Checks for dependencies.
@@ -62,14 +69,20 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
      *
      * @return void
      *
-     * @plugin_cmd Show all active plugins with help available
-     * @plugin_cmd [plugin] Shows commands line for a specific plugin
+     * @pluginCmd Show all active plugins with help available
+     * @pluginCmd [plugin] Shows commands line for a specific plugin
      */
     public function onCommandHelp($plugin = null)
     {
         $nick = $this->getEvent()->getNick();
 
         if (!$plugin) {
+            // protect from sorting the registry each time help is called
+            if (!$this->registry_sorted) {
+                asort($this->registry);
+                $this->registry_sorted = true;
+            }
+
             $msg = 'These plugins below have help information available.';
             $this->doPrivMsg($nick, $msg);
 
@@ -97,7 +110,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
                     as $cmd => $descs
                 ) {
                     foreach ($descs as $desc) {
-                        $this->doPrivMsg($nick, $cmd . ' - ' . $desc);
+                        $this->doPrivMsg($nick, "{$cmd} {$desc}");
                     }
                 }
 
@@ -155,22 +168,22 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
         $class = new ReflectionClass($plugin);
 
         $annotations = self::parseAnnotations($class->getDocComment());
-        if (isset($annotations['plugin_desc'])) {
+        if (isset($annotations['pluginDesc'])) {
             $this->setPluginDescription(
                 $plugin,
-                join(' ', $annotations['plugin_desc'])
+                join(' ', $annotations['pluginDesc'])
             );
         }
 
         foreach ($class->getMethods() as $method) {
             if (strpos($method->getName(), 'onCommand') !== false) {
                 $annotations = self::parseAnnotations($method->getDocComment());
-                if (isset($annotations['plugin_cmd'])) {
+                if (isset($annotations['pluginCmd'])) {
                     $cmd = strtolower(substr($method->getName(), 9));
                     $this->setCommandDescription(
                         $plugin,
                         $cmd,
-                        $annotations['plugin_cmd']
+                        $annotations['pluginCmd']
                     );
                 }
             }
