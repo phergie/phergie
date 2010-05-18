@@ -17,7 +17,7 @@ return array(
     ),
     
     'processor' => 'async',    
-    'processor.options' => array('wait' => 30),    
+    'processor.options' => array('usec' => 0.2),
     // Time zone. See: http://www.php.net/manual/en/timezones.php
     'timezone' => 'UTC',
 

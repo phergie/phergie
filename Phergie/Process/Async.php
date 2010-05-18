@@ -21,8 +21,8 @@
 
 /**
  * Connection data processor which polls to handle input in an 
- * asynchronous manner. Will also cause the appication tick at
- * the user defined wait time.
+ * asynchronous manner. Will also cause the application tick at
+ * the user-defined wait time.
  *
  * @category Phergie 
  * @package  Phergie
@@ -32,73 +32,90 @@
  */
 class Phergie_Process_Async extends Phergie_Process_Abstract
 {
-
     /**
-     * How long to poll for stream activity
+     * Length of time to poll for stream activity (seconds)
      *
      * @var int
      */
-    protected $wait;
+    protected $sec;
 
     /**
-     * Records when the appication last performed a tick
+     * Length of time to poll for stream activity (microseconds)
+     *
+     * @var int
+     */
+    protected $usec;
+
+    /**
+     * Records when the application last performed a tick
      *
      * @var int
      */
     protected $lastTick = 0;
 
     /**
-     * Overrides the parent class to setup wait option.
+     * Overrides the parent class to set the poll time. 
      *
      * @param Phergie_Bot $bot     Main bot class
-     * @param array       $options processor arguments
+     * @param array       $options Processor arguments
      *
      * @return void
      */
-    public function __construct(Phergie_Bot $bot, $options)
+    public function __construct(Phergie_Bot $bot, array $options)
     {
-        if (!isset($options['wait']) && !is_int($options['wait'])) {
-            throw new Phergie_Process_Exception('Option "wait" for Async must be an int.');
+        foreach (array('sec', 'usec') as $var) {
+            if (isset($options[$var]) && !is_int($options[$var])) {
+                throw new Phergie_Process_Exception(
+                    'Processor option "' . $var . '" must be an integer'
+                );
+            }
+            $this->$var = $options[$var];
         }
-            
-        $this->wait = $options['wait'];
+
+        if (empty($this->sec) && empty($this->usec)) {
+            throw new Phergie_Process_Exception(
+                'One of the processor options "sec" or "usec" must be specified'
+            );
+        }
 
         parent::__construct($bot, $options);
     }
 
     /**
-     * Wait for stream activity and perform event processing 
-     * on connections with data to read.
+     * Waits for stream activity and performs event processing on 
+     * connections with data to read.
      *
      * @return void
      */
     protected function handleEventsAsync()
     {
-        if ($keys = $this->driver->activeReadSockets($this->wait)) {
-            $connections = $this->connections->getConnections($keys);
-            foreach ($connections as $connection) {
-                $this->driver->setConnection($connection);
-                $this->plugins->setConnection($connection);
-                $this->plugins->onTick();
+        $hostmasks = $this->driver->getActiveReadSockets($this->sec, $this->usec));
+        if (!$hostmasks) {
+            return;
+        }
+        $connections = $this->connections->getConnections($hostmasks);
+        foreach ($connections as $connection) {
+            $this->driver->setConnection($connection);
+            $this->plugins->setConnection($connection);
+            $this->plugins->onTick();
 
-                if ($event = $this->driver->getEvent()) {
-                    $this->ui->onEvent($event, $connection);
-                    $this->plugins->setEvent($event);
+            if ($event = $this->driver->getEvent()) {
+                $this->ui->onEvent($event, $connection);
+                $this->plugins->setEvent($event);
 
-                    if (!$this->plugins->preEvent()) {
-                        continue;
-                    }
-
-                    $this->plugins->{'on' . ucfirst($event->getType())}();
+                if (!$this->plugins->preEvent()) {
+                    continue;
                 }
 
-                $this->processEvents($connection);
+                $this->plugins->{'on' . ucfirst($event->getType())}();
             }
+
+            $this->processEvents($connection);
         }
     }
 
     /**
-     * Perform appication tick event on all plugins and connections.
+     * Perform application tick event on all plugins and connections.
      *
      * @return void
      */
@@ -107,7 +124,6 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
         foreach ($this->connections as $connection) {
             $this->plugins->setConnection($connection);
             $this->plugins->onTick();
-
             $this->processEvents($connection);
         }
     }
@@ -127,5 +143,4 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
         }
         $this->handleEventsAsync();
     }
-
 }

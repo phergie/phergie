@@ -103,21 +103,28 @@ class Phergie_Connection_Handler implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns an array of connections for a set number of hostmask keys 
+     * Returns a list of specified connection objects.
      *
-     * @return array a list of Phergie_Connection objects
+     * @param array|string $keys One or more hostmasks identifying the 
+     *        connections to return
+     *
+     * @return array List of Phergie_Connection objects corresponding to the 
+     *         specified hostmask(s)
      */
     public function getConnections($keys)
     {
         $connections = array();
+
+        if (!is_array($keys)) {
+            $keys = array($keys);
+        }
         
         foreach ($keys as $key) {
-	        if (isset($this->connections[$key])) {
+            if (isset($this->connections[$key])) {
                 $connections[] = $this->connections[$key];
-	        }
+            }
         }
 
         return $connections;
     }
-
 }

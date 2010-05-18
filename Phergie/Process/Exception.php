@@ -20,7 +20,7 @@
  */
 
 /**
- * Exception related to processor operations.
+ * Exception related to event processor operations.
  *
  * @category Phergie 
  * @package  Phergie

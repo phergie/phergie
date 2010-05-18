@@ -119,22 +119,23 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Returns an array of keys for sockets with data to read.
+     * Returns a list of hostmasks corresponding to sockets with data to read.
      * 
-     * @param int $wait how long to poll for active streams
+     * @param int $sec  Length of time to wait for new data (seconds)
+     * @param int $usec Length of time to wait for new data (microseconds)
      *
-     * @return array a list of hostmasks
+     * @return array List of hostmasks or an empty array if none were found 
+     *         to have data to read
      */
-    public function activeReadSockets($wait = 0)
+    public function getActiveReadSockets($sec = 0, $usec = 200000)
     {
-        $read  = $this->sockets;
+        $read = $this->sockets;
         $write = null;
         $error = null;
-
         $active = array();
 
         if (count($this->sockets) > 0) {
-            $number = stream_select($read, $write, $error, $wait);
+            $number = stream_select($read, $write, $error, $sec, $usec);
             if ($number > 0) {
                 foreach ($read as $item) {
                     $active[] = array_search($item, $this->sockets);
@@ -347,7 +348,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         $seconds = (int) $this->timeout;
-        stream_set_timeout($this->socket, $seconds, ($this->timeout - $seconds) * 1000000);
+        $microseconds = ($this->timeout - $seconds) * 1000000;
+        stream_set_timeout($this->socket, $seconds, $microseconds);
 
         // Send the password if one is specified
         if (!empty($password)) {
@@ -632,7 +634,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Sends a CTCP VERSION request or response to a user.
      *
-     * @param string $nick User nick
+     * @param string $nick    User nick
      * @param string $version Version string to send for a response
      *
      * @return void
@@ -666,7 +668,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Sends a CTCP FINGER request to a user.
      *
-     * @param string $nick User nick
+     * @param string $nick   User nick
      * @param string $finger Finger string to send for a response
      *
      * @return void

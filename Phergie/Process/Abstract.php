@@ -30,7 +30,6 @@
  */
 abstract class Phergie_Process_Abstract
 {
-
     /**
      * Current driver instance
      *
@@ -67,7 +66,7 @@ abstract class Phergie_Process_Abstract
     protected $ui;
 
     /**
-     * List of agruments for use within the instance
+     * List of arguments for use within the instance
      *
      * @var array
      */
@@ -76,19 +75,19 @@ abstract class Phergie_Process_Abstract
     /**
      * Gets the required class refences from Phergie_Bot.
      *
-     * @param Phergie_Bot $bot     Main bot class
+     * @param Phergie_Bot $bot     Current bot instance in use 
      * @param array       $options Optional processor arguments
      *      
      * @return void
      */
-    public function __construct(Phergie_Bot $bot, $options = array())
+    public function __construct(Phergie_Bot $bot, array $options = array())
     {
-        $this->driver      = $bot->getDriver();
-        $this->plugins     = $bot->getPluginHandler();
+        $this->driver = $bot->getDriver();
+        $this->plugins = $bot->getPluginHandler();
         $this->connections = $bot->getConnectionHandler();
-        $this->events      = $bot->getEventHandler();
-        $this->ui          = $bot->getUi();
-        $this->options     = $options;
+        $this->events = $bot->getEventHandler();
+        $this->ui = $bot->getUi();
+        $this->options = $options;
     }
 
     /**
@@ -128,5 +127,4 @@ abstract class Phergie_Process_Abstract
      * @return void
      */
     public abstract function handleEvents();
-
 }

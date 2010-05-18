@@ -31,7 +31,6 @@
  */
 class Phergie_Process_Standard extends Phergie_Process_Abstract
 {
-
     /**
      * Obtains and processes incoming events, then sends resulting outgoing 
      * events.
@@ -59,5 +58,4 @@ class Phergie_Process_Standard extends Phergie_Process_Abstract
             $this->processEvents($connection);
         }
     }
-
 }

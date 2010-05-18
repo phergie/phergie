@@ -138,9 +138,9 @@ class Phergie_Bot
      * Returns the entire configuration in use or the value of a specific 
      * configuration setting.
      *
-     * @param string $index Optional index of a specific configuration 
+     * @param string $index   Optional index of a specific configuration 
      *        setting for which the corresponding value should be returned
-     * @param mixed $default value to return if no match is found for $index
+     * @param mixed  $default Value to return if no match is found for $index
      *
      * @return mixed Value corresponding to $index or the entire 
      *         configuration if $index is not specified
@@ -273,7 +273,7 @@ class Phergie_Bot
     }
 
     /**
-     * Returns an processer instance, creating it if it does not 
+     * Returns a processer instance, creating one if none exists. 
      *
      * @return Phergie_Process_Abstract
      */
@@ -284,10 +284,13 @@ class Phergie_Bot
             
             $type = $this->getConfig('processor');
             if (!empty($type)) {
-                $class = "Phergie_Process_" . ucfirst($type);
+                $class = 'Phergie_Process_' . ucfirst($type);
             }
 
-            $this->processor = new $class($this, $this->getConfig('processor.options', array()));
+            $this->processor = new $class(
+                $this, 
+                $this->getConfig('processor.options', array())
+            );
         }
         return $this->processor;
     }
