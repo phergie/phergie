@@ -63,6 +63,12 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
      */
     public function __construct(Phergie_Bot $bot, array $options)
     {
+        if (!$bot->getDriver() instanceof Phergie_Driver_Streams) {
+            throw new Phergie_Process_Exception(
+                'The Async event processor requires the Streams driver'
+            );
+        }
+
         foreach (array('sec', 'usec') as $var) {
             if (isset($options[$var]) && !is_int($options[$var])) {
                 throw new Phergie_Process_Exception(
