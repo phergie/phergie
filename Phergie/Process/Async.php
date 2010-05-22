@@ -95,7 +95,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
      */
     protected function handleEventsAsync()
     {
-        $hostmasks = $this->driver->getActiveReadSockets($this->sec, $this->usec));
+        $hostmasks = $this->driver->getActiveReadSockets($this->sec, $this->usec);
         if (!$hostmasks) {
             return;
         }
