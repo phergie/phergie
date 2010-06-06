@@ -65,7 +65,8 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
             // @todo Modify this to be rethrown as an appropriate 
             //       Phergie_Plugin_Exception and handled in Phergie_Plugin_Php
         } catch (PDOException $e) {
-        }
+            echo 'PDO failure: '.$e->getMessage();
+        } 
     }
 
     /**
@@ -114,12 +115,16 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
     protected function buildDatabase($rebuild = false)
     {
         // Check to see if the functions table exists
-        $table = $this->database->exec("SELECT COUNT(*) FROM `sqlite_master` WHERE `name` = 'functions'");
-
+        $checkstmt = $this->database->query("SELECT COUNT(*) FROM `sqlite_master` WHERE `name` = 'functions'");
+        $checkstmt->execute();
+        $result = $checkstmt->fetch(PDO::FETCH_ASSOC);
+        unset( $checkstmt );
+        $table = $result['COUNT(*)'];
+        unset( $result );
         // If the table doesn't exist, create it
         if (!$table) {
-            $this->database->exec('CREATE TABLE `functions` (`name` VARCHAR(255), `description` TEXT)');
-            $this->database->exec('CREATE UNIQUE INDEX `functions_name` ON `functions` (`name`)');
+                $this->database->exec('CREATE TABLE `functions` (`name` VARCHAR(255), `description` TEXT)');
+                $this->database->exec('CREATE UNIQUE INDEX `functions_name` ON `functions` (`name`)');
         }
 
         // If we created a new table, fill it with data
