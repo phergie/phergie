@@ -47,6 +47,13 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
     protected $usec;
 
     /**
+     * Length of time to wait between ticks.
+     *
+     * @var int
+     */
+    protected $wait = 0;
+
+    /**
      * Records when the application last performed a tick
      *
      * @var int
