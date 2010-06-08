@@ -271,6 +271,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     protected function deleteMessage($rowid, $channel, $nick)
     {
+        $nick = strtolower($nick);
         $q = $this->db->prepare('DELETE FROM remind WHERE rowid = :rowid');
         $q->execute(array('rowid' => $rowid));
 
