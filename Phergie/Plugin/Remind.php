@@ -176,10 +176,15 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
             ));
         } catch (PDOException $e) { }
 
-        $this->doPrivmsg($source, 'Will tell ' . $recipient . ': ' . $message);
+        if ($rowid = $this->db->lastInsertId()) {
+            $this->doPrivmsg($source, 'ok, ' . $nick . ', message stored');
+        } else {
+            $this->doPrivmsg($source, $nick . ': bad things happened. Message not saved.');
+            return;
+        }
 
         if ($this->keepListInMemory) {
-            $this->msgStorage[$source][$recipient] = $message;
+            $this->msgStorage[$source][strtolower($recipient)] = $rowid;
         }
     }
 
