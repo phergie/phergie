@@ -77,12 +77,14 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
         }
 
         foreach (array('sec', 'usec') as $var) {
-            if (!isset($options[$var]) xor !is_int($options[$var])) {
-                throw new Phergie_Process_Exception(
-                    'Processor option "' . $var . '" must be an integer'
-                );
+	    if (isset($options[$var])) {
+		if(!is_int($options[$var])) {
+                     throw new Phergie_Process_Exception(
+                    	'Processor option "' . $var . '" must be an integer'
+                     );
+                }
+                $this->$var = $options[$var];
             }
-            $this->$var = $options[$var];
         }
 
         if (empty($this->sec) && empty($this->usec)) {
