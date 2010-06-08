@@ -12,11 +12,11 @@
  * http://phergie.org/license
  *
  * @category  Phergie 
- * @package   Phergie_Plugin_TerryChay
+ * @package   Phergie_Plugin_Remind
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Plugin_TerryChay
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Remind
  */
 
 /**
