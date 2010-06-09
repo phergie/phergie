@@ -89,6 +89,8 @@ class Phergie_Plugin_TheFuckingWeather extends Phergie_Plugin_Abstract
     /**
     * Alias for TheFuckingWeather command.
     *
+    * @param string $location Location term
+    *
     * @return void
     * @pluginCmd [location] Alias for thefuckingweather command.
     */
@@ -105,31 +107,40 @@ class Phergie_Plugin_TheFuckingWeather extends Phergie_Plugin_Abstract
      * @return string|bool Search result or FALSE if none is found
      * @todo Try to optimize pregs
      */
-    protected function getWeather($location) {
+    protected function getWeather($location)
+    {
         $url = $this->url . urlencode($location);
         $response = $this->http->get($url);
         $content = $response->getContent();
 
-        preg_match_all('#<div><span class="small">(.*?)<\/span><\/div>#im',
-                        $content, $matches);
+        preg_match_all(
+            '#<div><span class="small">(.*?)<\/span><\/div>#im',
+            $content, $matches
+        );
         $location = $matches[1][0];
 
         if (!empty($location)) {
-            preg_match_all('#<div class="large" >(.*?)<br \/>#im',
-                            $content, $matches);
+            preg_match_all(
+                '#<div class="large" >(.*?)<br \/>#im',
+                $content, $matches
+            );
             $temp_numb = (int) $matches[1][0];
             $temp_numb .= ' F / ' . round(($temp_numb - 32) / 1.8, 0) . ' C?!';
 
-            preg_match_all('#<br \/>(.*?)<\/div><div  id="remark"><br \/>#im',
-                            $content, $matches);
+            preg_match_all(
+                '#<br \/>(.*?)<\/div><div  id="remark"><br \/>#im',
+                $content, $matches
+            );
             $temp_desc = $matches[1][0];
 
-            preg_match_all('#<div  id="remark"><br \/>\n<span>(.*?)<\/span><\/div>#im',
-                            $content, $matches);
+            preg_match_all(
+                '#<div  id="remark"><br \/>\n<span>(.*?)<\/span><\/div>#im',
+                $content, $matches
+            );
             $remark = $matches[1][0];
 
             $result = "{$location}: {$temp_numb} {$temp_desc} ({$remark})";
-            $result = preg_replace('/</',' <', $result);
+            $result = preg_replace('/</', ' <', $result);
             $result = strip_tags($result);
             return html_entity_decode($result);
         } else {

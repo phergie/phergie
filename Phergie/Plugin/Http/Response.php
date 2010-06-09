@@ -97,12 +97,12 @@ class Phergie_Plugin_Http_Response
     public function isError()
     {
         switch (substr($this->code, 0, 1)) {
-            case '0':
-            case '4':
-            case '5':
-                return true;
-            default:
-                return false;
+        case '0':
+        case '4':
+        case '5':
+            return true;
+        default:
+            return false;
         }
     }
 
@@ -132,7 +132,7 @@ class Phergie_Plugin_Http_Response
     /**
      * Sets the content of the response body.
      *
-     * @param mixed $body Response body content
+     * @param mixed $content Response body content
      *
      * @return Phergie_Plugin_Http_Response Provides a fluent interface
      */

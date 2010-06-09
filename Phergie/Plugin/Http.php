@@ -74,10 +74,10 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * response object. Note that the calling plugin is responsible for 
      * indicating any dependencies related to specified handler callbacks.
      *
-     * @param string $type PCRE regular expression (without delimiters) that  
+     * @param string   $type     PCRE regular expression (without delimiters) that
      *        matches one or more MIME types
-     * @param callback $callback Callback to execute when a response of a  
-     *        content type matched by $type is encountered
+     * @param callback $callback Callback to execute when a response of a content
+     *        type matched by $type is encountered
      *
      * @return Phergie_Plugin_Http Provides a fluent interface
      */
@@ -119,8 +119,8 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * Supporting method that acts as an error handler to intercept HTTP 
      * responses resulting in PHP-level errors.
      *
-     * @param int $errno Level of the error raised
-     * @param string $errstr Error message
+     * @param int    $errno   Level of the error raised
+     * @param string $errstr  Error message
      * @param string $errfile Name of the file in which the error was raised
      * @param string $errline Line number on which the error was raised
      *
@@ -142,8 +142,8 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     /**
      * Supporting method that executes a request and handles the response.
      *
-     * @param string $url URL to request
-     * @param array $context Associative array of stream context parameters 
+     * @param string $url     URL to request
+     * @param array  $context Associative array of stream context parameters 
      *
      * @return Phergie_Plugin_Http_Response Object representing the response 
      *         resulting from the request
@@ -193,16 +193,15 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     /**
      * Performs a GET request.
      *
-     * @param string $url URL for the request
-     * @param array $query Optional associative array of parameters 
+     * @param string $url     URL for the request
+     * @param array  $query   Optional associative array of parameters
      *        constituting the URL query string if $url has none
-     * @param array $context Optional associative array of additional stream 
+     * @param array  $context Optional associative array of additional stream
      *        context parameters
      *
      * @return Phergie_Plugin_Http_Response Received response data
      */
-    public function get($url, array $query = array(), 
-        array $context = array())
+    public function get($url, array $query = array(), array $context = array())
     {
         if (!empty($query)) {
             $url .= '?' . http_build_query($query);
@@ -216,16 +215,15 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     /**
      * Performs a HEAD request.
      *
-     * @param string $url URL for the request
-     * @param array $query Optional associative array of parameters 
+     * @param string $url     URL for the request
+     * @param array  $query   Optional associative array of parameters
      *        constituting the URL query string if $url has none
-     * @param array $context Optional associative array of additional stream 
+     * @param array  $context Optional associative array of additional stream 
      *        context parameters
      *
      * @return Phergie_Plugin_Http_Response Received response data
      */
-    public function head($url, array $query = array(), 
-        array $context = array())
+    public function head($url, array $query = array(), array $context = array())
     {
         if (!empty($query)) {
             $url .= '?' . http_build_query($query);
@@ -239,19 +237,18 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     /**
      * Performs a POST request.
      *
-     * @param string $url URL for the request
-     * @param array $query Optional associative array of parameters 
+     * @param string $url     URL for the request
+     * @param array  $query   Optional associative array of parameters 
      *        constituting the URL query string if $url has none
-     * @param array $post Optional associative array of parameters 
+     * @param array  $post    Optional associative array of parameters 
      *        constituting the POST request body if it is using the 
      *        traditional URL-encoded format
-     * @param array $context Optional associative array of additional stream 
+     * @param array  $context Optional associative array of additional stream 
      *        context parameters
      *
      * @return Phergie_Plugin_Http_Response Received response data
      */
-    public function post($url, array $query = array(), 
-        array $post = array(), array $context = array())
+    public function post($url, array $query = array(), array $post = array(), array $context = array())
     {
         if (!empty($params)) {
             $url .= '?' . http_build_query($query);
@@ -261,7 +258,8 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
 
         if (!empty($post) 
             && (!empty($context['header'])
-            xor stripos($context['header'], 'Content-Type'))) {
+            xor stripos($context['header'], 'Content-Type'))
+        ) {
             if (!empty($context['header'])) {
                 $context['header'] .= "\r\n";
             } else {

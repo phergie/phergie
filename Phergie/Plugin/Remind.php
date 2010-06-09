@@ -95,8 +95,14 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     /**
      * Handle reminder requests
      *
+<<<<<<< HEAD
      * @param string $recipient
      * @param string $message
+=======
+     * @param string $recipient recipient of the message
+     * @param string $message   message to tell the recipient
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return void
      * @see handleRemind()
      */
@@ -108,8 +114,14 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     /**
      * Handle reminder requests
      *
+<<<<<<< HEAD
      * @param string $recipient
      * @param string $message
+=======
+     * @param string $recipient recipient of the message
+     * @param string $message   message to tell the recipient
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return void
      * @see handleRemind()
      */
@@ -121,8 +133,14 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     /**
      * Handle reminder requests
      *
+<<<<<<< HEAD
      * @param string $recipient
      * @param string $message
+=======
+     * @param string $recipient recipient of the message
+     * @param string $message   message to tell the recipient
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return void
      * @see handleRemind()
      */
@@ -136,6 +154,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      *
      * @param string $recipient name of the recipient
      * @param string $message   message to store
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return void
      */
     protected function handleRemind($recipient, $message)
@@ -148,8 +170,13 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
             return;
         }
 
+<<<<<<< HEAD
         $q = $this->db->prepare('
             INSERT INTO remind
+=======
+        $q = $this->db->prepare(
+            'INSERT INTO remind
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
                 (
                     time,
                     channel,
@@ -164,6 +191,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
                     :recipient,
                     :sender,
                     :message
+<<<<<<< HEAD
                 )
         ');
         try {
@@ -175,6 +203,22 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
                 'message' => $message
             ));
         } catch (PDOException $e) { }
+=======
+                )'
+        );
+        try {
+            $q->execute(
+                array(
+                    'time' => date(DATE_RFC822),
+                    'channel' => $source,
+                    'recipient' => strtolower($recipient),
+                    'sender' => strtolower($nick),
+                    'message' => $message
+                )
+            );
+        } catch (PDOException $e) {
+        }
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
 
         if ($rowid = $this->db->lastInsertId()) {
             $this->doPrivmsg($source, 'ok, ' . $nick . ', message stored');
@@ -193,6 +237,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      *
      * @param string $channel channel to check
      * @param string $nick    nick to check
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return void
      */
     protected function deliverReminders($channel, $nick)
@@ -204,7 +252,12 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         // short circuit if there's no message in memory (if allowed)
         if ($this->keepListInMemory
+<<<<<<< HEAD
             && !isset($this->msgStorage[$channel][strtolower($nick)])) {
+=======
+            && !isset($this->msgStorage[$channel][strtolower($nick)])
+        ) {
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
             return;
         }
 
@@ -220,20 +273,43 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         foreach ($msgs as $msg) {
             $ts = new Phergie_Plugin_Helper_Time($msg['time']);
+<<<<<<< HEAD
             $this->doPrivmsg($channel, sprintf('%s: (from %s, %s ago) %s',
                 $nick, $msg['sender'], $ts->getCountdown(), $msg['message']));
+=======
+            $formatted = sprintf(
+                '%s: (from %s, %s ago) %s',
+                $nick, $msg['sender'], $ts->getCountdown(), $msg['message']
+            );
+            $this->doPrivmsg($channel, $formatted);
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
             $this->deleteMessage($msg['rowid'], $channel, $nick);
         }
 
         if ($privmsgs) {
             foreach ($privmsgs as $msg) {
                 $ts = new Phergie_Plugin_Helper_Time($msg['time']);
+<<<<<<< HEAD
                 $this->doPrivmsg($nick, sprintf('from %s, %s ago: %s',
                     $msg['sender'], $ts->getCountdown(), $msg['message']));
                 $this->deleteMessage($msg['rowid'], $channel, $nick);
             }
             $this->doPrivmsg($channel, sprintf('%s: (%d more messages sent in private.)',
                 $nick, count($privmsgs)));
+=======
+                $formatted = sprintf(
+                    'from %s, %s ago: %s',
+                    $msg['sender'], $ts->getCountdown(), $msg['message']
+                );
+                $this->doPrivmsg($nick, $formatted);
+                $this->deleteMessage($msg['rowid'], $channel, $nick);
+            }
+            $formatted = sprintf(
+                '%s: (%d more messages sent in private.)',
+                $nick, count($privmsgs)
+            );
+            $this->doPrivmsg($channel, $formatted);
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
         }
     }
 
@@ -242,6 +318,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      *
      * @param string $channel   channel on which to check for pending messages
      * @param string $recipient user for which to check pending messages
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return array of records
      */
     protected function fetchMessages($channel = null, $recipient = null)
@@ -267,6 +347,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      * @param int    $rowid   ID of the message to delete
      * @param string $channel message's channel
      * @param string $nick    message's recipient
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return void
      */
     protected function deleteMessage($rowid, $channel, $nick)
@@ -277,7 +361,12 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         if ($this->keepListInMemory) {
             if (isset($this->msgStorage[$channel][$nick])
+<<<<<<< HEAD
                 && $this->msgStorage[$channel][$nick] == $rowid) {
+=======
+                && $this->msgStorage[$channel][$nick] == $rowid
+            ) {
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
                 unset($this->msgStorage[$channel][$nick]);
             }
         }
@@ -287,13 +376,23 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      * Determines if a table exists
      *
      * @param string $name Table name
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
      * @return bool
      */
     protected function haveTable($name)
     {
+<<<<<<< HEAD
         return (bool) $this->db->query(
             'SELECT COUNT(*) FROM sqlite_master WHERE name = ' . $this->db->quote($name)
             )->fetchColumn();
+=======
+        $sql = 'SELECT COUNT(*) FROM sqlite_master WHERE name = '
+            . $this->db->quote($name);
+        return (bool) $this->db->query($sql)->fetchColumn();
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
     }
 
     /**
@@ -304,8 +403,13 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     protected function createTables()
     {
         if (!$this->haveTable('remind')) {
+<<<<<<< HEAD
             $this->db->exec('
                 CREATE TABLE
+=======
+            $this->db->exec(
+                'CREATE TABLE
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
                     remind
                     (
                         time INTEGER,
@@ -313,8 +417,13 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
                         recipient TEXT,
                         sender TEXT,
                         message TEXT
+<<<<<<< HEAD
                     )
             ');
+=======
+                    )'
+            );
+>>>>>>> b779700af1603c263aaa7aa151d3bb26920ad5fe
         }
     }
 
