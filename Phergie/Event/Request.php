@@ -27,7 +27,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie
- * @link      http://www.irchelp.org/irchelp/rfc/chapter4.html
+ * @link     http://www.irchelp.org/irchelp/rfc/chapter4.html
  */
 class Phergie_Event_Request 
     extends Phergie_Event_Abstract 

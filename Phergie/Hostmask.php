@@ -196,8 +196,8 @@ class Phergie_Hostmask
     /**
      * Returns whether a given hostmask matches a given pattern.
      *
-     * @param string $pattern Pattern using conventions of a ban mask where 
-     *        * represents a wildcard
+     * @param string $pattern  Pattern using conventions of a ban mask where 
+     *        represents a wildcard
      * @param string $hostmask Optional hostmask to match against, if not 
      *        the current hostmask instance
      *

@@ -260,7 +260,7 @@ abstract class Phergie_Driver_Abstract
     /**
      * Sends a CTCP VERSION request or response to a user.
      *
-     * @param string $nick User nick
+     * @param string $nick    User nick
      * @param string $version Version string to send for a response
      *
      * @return void
@@ -282,7 +282,7 @@ abstract class Phergie_Driver_Abstract
     /**
      * Sends a CTCP FINGER request to a user.
      *
-     * @param string $nick User nick
+     * @param string $nick   User nick
      * @param string $finger Finger string to send for a response
      *
      * @return void

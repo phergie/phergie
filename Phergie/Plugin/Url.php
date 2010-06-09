@@ -236,12 +236,13 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $source = $this->getEvent()->getSource();
         $user = $this->getEvent()->getNick();
 
+        $pattern = '#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) | (';
+            .($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis',
+
         // URL Match
-        if (preg_match_all('#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) |
-                            ('.($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis',
-                            $this->getEvent()->getArgument(1), $matches, PREG_SET_ORDER)) {
+        if (preg_match_all($pattern, $this->getEvent()->getArgument(1), $matches, PREG_SET_ORDER)) {
             $responses = array();
-            foreach($matches as $m) {
+            foreach ($matches as $m) {
                 $url = trim(rtrim($m[0], ', ].?!;'));
 
                 // Check to see if the URL was from an email address, is a directory, etc
@@ -275,15 +276,15 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
                 // Process TLD if it's not an IP
                 if (empty($m[1])) {
-	                // Get the TLD from the host
-	                $pos = strrpos($parsed['host'], '.');
-	                $parsed['tld'] = ($pos !== false ? substr($parsed['host'], ($pos+1)) : '');
+                    // Get the TLD from the host
+                    $pos = strrpos($parsed['host'], '.');
+                    $parsed['tld'] = ($pos !== false ? substr($parsed['host'], ($pos+1)) : '');
 
-	                // Check to see if the URL has a valid TLD
-	                if (is_array($this->tldList) && !in_array(strtolower($parsed['tld']), $this->tldList)) {
-	                    $this->debug('Invalid Url: ' . $parsed['tld'] . ' is not a supported TLD. (' . $url . ')');
-	                    continue;
-	                }
+                    // Check to see if the URL has a valid TLD
+                    if (is_array($this->tldList) && !in_array(strtolower($parsed['tld']), $this->tldList)) {
+                        $this->debug('Invalid Url: ' . $parsed['tld'] . ' is not a supported TLD. (' . $url . ')');
+                        continue;
+                    }
                 }
 
                 // Check to see if the URL is to a secured site or not and handle it accordingly
@@ -314,15 +315,17 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
                 $title = self::getTitle($url);
                 if (!empty($title)) {
-                    $responses[] = str_replace(array(
-                        '%title%',
-                        '%link%',
-                        '%nick%'
-                    ), array(
-                        $title,
-                        $shortenedUrl,
-                        $user
-                    ), $this->messageFormat);
+                    $responses[] = str_replace(
+                        array(
+                            '%title%',
+                            '%link%',
+                            '%nick%'
+                        ), array(
+                         $title,
+                            $shortenedUrl,
+                            $user
+                        ), $this->messageFormat
+                    );
                 }
 
                 // Update cache
@@ -335,22 +338,28 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
              */
             if (count($responses) > 0) {
                 if ($this->mergeLinks) {
-                    $this->doPrivmsg($source, str_replace(array(
-                        '%message%',
-                        '%nick%'
-                    ), array(
-                        implode('; ', $responses),
-                        $user
-                    ), $this->baseFormat));
-                } else {
-                    foreach($responses as $response) {
-                        $this->doPrivmsg($source, str_replace(array(
+                    $message = str_replace(
+                        array(
                             '%message%',
                             '%nick%'
                         ), array(
-                            $response,
+                            implode('; ', $responses),
                             $user
-                        ), $this->baseFormat));
+                        ), $this->baseFormat
+                    );
+                    $this->doPrivmsg($source, $message);
+                } else {
+                    foreach ($responses as $response) {
+                        $message = str_replace(
+                            array(
+                                '%message%',
+                                '%nick%'
+                            ), array(
+                                implode('; ', $responses),
+                                $user
+                            ), $this->baseFormat
+                        );
+                        $this->doPrivmsg($source, $message);
                     }
                 }
             }
@@ -361,8 +370,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      * Checks a given URL (+shortened) against the cache to verify if they were
      * previously posted on the channel.
      *
-     * @param string $url The URL to check against
+     * @param string $url          The URL to check against
      * @param string $shortenedUrl The shortened URL to check against
+     *
      * @return bool
      */
     protected function checkUrlCache($url, $shortenedUrl)
@@ -387,8 +397,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
          * If cache expiration is enabled, check to see if the given url has expired in the cache
          * If expire is disabled, simply check to see if the url is listed
          */
-        if (($expire > 0 && (($cache['url'] + $expire) > time() || ($cache['shortened'] + $expire) > time())) ||
-            ($expire <= 0 && (isset($cache['url']) || isset($cache['shortened'])))) {
+        if (($expire > 0 && (($cache['url'] + $expire) > time() || ($cache['shortened'] + $expire) > time()))
+            || ($expire <= 0 && (isset($cache['url']) || isset($cache['shortened'])))
+        ) {
             unset($cache, $url, $shortenedUrl, $expire);
             return true;
         }
@@ -400,8 +411,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      * Updates the cache and adds the given URL (+shortened) to the cache. It
      * also handles cleaning the cache of old entries as well.
      *
-     * @param string $url The URL to add to the cache
+     * @param string $url          The URL to add to the cache
      * @param string $shortenedUrl The shortened to add to the cache
+     *
      * @return bool
      */
     protected function updateUrlCache($url, $shortenedUrl)
@@ -437,8 +449,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      * truncates and appends an ellipsis to the string if it exceeds a given
      * length.
      *
-     * @param string $str String to decode
-     * @param int $trim Maximum string length, optional
+     * @param string $str  String to decode
+     * @param int    $trim Maximum string length, optional
+     *
      * @return string
      */
     protected function decode($str, $trim = null)
@@ -452,6 +465,13 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
     /**
      * Custom error handler meant to handle 404 errors and such
+     *
+     * @param int    $errno   the error code
+     * @param string $errstr  the error string
+     * @param string $errfile file the error occured in
+     * @param int    $errline line the error occured on
+     *
+     * @return bool
      */
     public function onPhpError($errno, $errstr, $errfile, $errline)
     {
@@ -462,15 +482,18 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 $this->errorMessage = (isset($this->httpErrors[$m[1]]) ? $this->httpErrors[$m[1]] : $m[1]);
                 $this->debug('PHP Warning:  ' . $errstr . 'in ' . $errfile . ' on line ' . $errline);
                 return true;
+            }
+
             // Safely ignore these SSL warnings so they don't appear in the log
-            } else if (stripos($errstr, 'SSL: fatal protocol error in') !== false ||
-                       stripos($errstr, 'failed to open stream') !== false ||
-                       stripos($errstr, 'HTTP request failed') !== false ||
-                       stripos($errstr, 'SSL: An existing connection was forcibly closed by the remote host') !== false ||
-                       stripos($errstr, 'Failed to enable crypto in') !== false ||
-                       stripos($errstr, 'SSL: An established connection was aborted by the software in your host machine') !== false ||
-                       stripos($errstr, 'SSL operation failed with code') !== false ||
-                       stripos($errstr, 'unable to connect to') !== false) {
+            if (stripos($errstr, 'SSL: fatal protocol error in') !== false ||
+                || stripos($errstr, 'failed to open stream') !== false
+                || stripos($errstr, 'HTTP request failed') !== false
+                || stripos($errstr, 'SSL: An existing connection was forcibly closed by the remote host') !== false
+                || stripos($errstr, 'Failed to enable crypto in') !== false
+                || stripos($errstr, 'SSL: An established connection was aborted by the software in your host machine') !== false
+                || stripos($errstr, 'SSL operation failed with code') !== false
+                || stripos($errstr, 'unable to connect to') !== false
+            ) {
                 $this->errorStatus = true;
                 $this->debug('PHP Warning:  ' . $errstr . 'in ' . $errfile . ' on line ' . $errline);
                 return true;
@@ -482,6 +505,10 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     /**
      * Takes a url, parses and cleans the URL without of all the junk
      * and then return the hex checksum of the url.
+     *
+     * @param string $url url to checksum
+     *
+     * @return string the hex checksum of the cleaned url
      */
     protected function getUrlChecksum($url)
     {
@@ -490,10 +517,14 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         return dechex(crc32($checksum));
     }
 
-    /*
-    * Parses a given URI and procceses the output to remove redundant
-    * or missing values.
-    */
+    /**
+     * Parses a given URI and procceses the output to remove redundant
+     * or missing values.
+     *
+     * @param string $url the url to parse
+     *
+     * @return array the url components
+     */
     protected function parseUrl($url)
     {
         if (is_array($url)) return $url;
@@ -522,11 +553,16 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         return $parsed;
     }
 
-    /*
-    * Parses a given URI and then glues it back together in the proper format.
-    * If base is set, then it chops off the scheme, user and pass and fragment
-    * information to return a more unique base URI.
-    */
+    /**
+     * Parses a given URI and then glues it back together in the proper format.
+     * If base is set, then it chops off the scheme, user and pass and fragment
+     * information to return a more unique base URI.
+     *
+     * @param string $uri  uri to rebuild
+     * @param string $base set to true to only return the base components
+     *
+     * @return string the rebuilt uri
+     */
     protected function glueUrl($uri, $base = false)
     {
         $parsed = $uri;
@@ -549,14 +585,14 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 }
             }
             $uri .= (!empty($parsed['host']) ? $parsed['host'] : '');
-            if (!empty($parsed['port']) &&
-                (($parsed['scheme'] == 'http' && $parsed['port'] == 80) ||
-                ($parsed['scheme'] == 'https' && $parsed['port'] == 443))) {
+            if (!empty($parsed['port'])
+                && (($parsed['scheme'] == 'http' && $parsed['port'] == 80)
+                || ($parsed['scheme'] == 'https' && $parsed['port'] == 443))
+            ) {
                 unset($parsed['port']);
             }
             $uri .= (!empty($parsed['port']) ? ':' . $parsed['port'] : '');
-            if(!empty($parsed['path']) && (!$base || $base && $parsed['path'] != '/'))
-            {
+            if (!empty($parsed['path']) && (!$base || $base && $parsed['path'] != '/')) {
                 $uri .= (substr($parsed['path'], 0, 1) == '/') ? $parsed['path'] : ('/' . $parsed['path']);
             }
             $uri .= (!empty($parsed['query']) ? '?' . $parsed['query'] : '');
@@ -567,107 +603,136 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         return $uri;
     }
 
-    /*
-    * Checks the given string to see if its a valid IP4 address
-    */
-    protected function checkValidIP($ip) {
+    /**
+     * Checks the given string to see if its a valid IP4 address
+     *
+     * @param string $ip the ip to validate
+     *
+     * @return bool
+     */
+    protected function checkValidIP($ip)
+    {
         return long2ip(ip2long($ip)) === $ip;
     }
 
     /**
- 	 * Returns the title of the given page
- 	 *
- 	 * @param string $url url to the page
- 	 * @return string title
- 	 */
+     * Returns the title of the given page
+     *
+     * @param string $url url to the page
+     *
+     * @return string title
+     */
     public function getTitle($url)
     {
-		$opts = array(
-			'http' => array(
-				'timeout' => 3.5,
-				'method' => 'GET',
-				'user_agent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.12) Gecko/20080201 Firefox/2.0.0.12'
-			)
-		);
-		$context = stream_context_create($opts);
+        $opts = array(
+            'http' => array(
+                'timeout' => 3.5,
+                'method' => 'GET',
+                'user_agent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.12) Gecko/20080201 Firefox/2.0.0.12'
+            )
+        );
+        $context = stream_context_create($opts);
 
-		if ($page = fopen($url, 'r', false, $context)) {
-			stream_set_timeout($page, 3.5);
-			$data = stream_get_meta_data($page);
-			foreach($data['wrapper_data'] as $header) {
-				if (preg_match('/^Content-Type: ([^;]+)/', $header, $match) &&
-					!preg_match('#^(text/x?html|application/xhtml+xml)$#', $match[1])) {
-					$title = $match[1];
-				}
-			}
-			if (!isset($title)) {
-				$content = '';
-				$tstamp = time() + 5;
+        if ($page = fopen($url, 'r', false, $context)) {
+            stream_set_timeout($page, 3.5);
+            $data = stream_get_meta_data($page);
+            foreach ($data['wrapper_data'] as $header) {
+                if (preg_match('/^Content-Type: ([^;]+)/', $header, $match)
+                    && !preg_match('#^(text/x?html|application/xhtml+xml)$#', $match[1])
+                ) {
+                    $title = $match[1];
+                }
+            }
+            if (!isset($title)) {
+                $content = '';
+                $tstamp = time() + 5;
 
-				while ($chunk = fread($page, 64)) {
-					$data = stream_get_meta_data($page);
-					if ($data['timed_out']) {
-						$this->debug('Url Timed Out: ' . $url);
-						$this->errorStatus = true;
-						break;
-					}
-					$content .= $chunk;
-					// Check for timeout
-					if (time() > $tstamp) break;
-					// Try to read title
-					if (preg_match('#<title[^>]*>(.*)#is', $content, $m)) {
-						// Start another loop to grab some more data in order to be sure we have the complete title
-						$content = $m[1];
-						$loop = 2;
-						while (($chunk = fread($page, 64)) && $loop-- && !strstr($content, '<')) {
-							$content .= $chunk;
-							// Check for timeout
-							if (time() > $tstamp) break;
-						}
-						preg_match('#^([^<]*)#is', $content, $m);
-						$title = preg_replace('#\s+#', ' ', $m[1]);
-						$title = trim($this->decode($title, $this->titleLength));
-						break;
-					}
-					// Title won't appear beyond that point so stop parsing
-					if (preg_match('#</head>|<body#i', $content)) {
-						break;
-					}
-				}
-			}
-			fclose($page);
-		} else if (!$this->errorStatus) {
-			$this->debug('Couldn\t Open Url: ' . $url);
-		}
+                while ($chunk = fread($page, 64)) {
+                    $data = stream_get_meta_data($page);
+                    if ($data['timed_out']) {
+                        $this->debug('Url Timed Out: ' . $url);
+                        $this->errorStatus = true;
+                        break;
+                    }
+                    $content .= $chunk;
+                    // Check for timeout
+                    if (time() > $tstamp) break;
+                    // Try to read title
+                    if (preg_match('#<title[^>]*>(.*)#is', $content, $m)) {
+                        // Start another loop to grab some more data in order to be sure we have the complete title
+                        $content = $m[1];
+                        $loop = 2;
+                        while (($chunk = fread($page, 64)) && $loop-- && !strstr($content, '<')) {
+                            $content .= $chunk;
+                            // Check for timeout
+                            if (time() > $tstamp) break;
+                        }
+                        preg_match('#^([^<]*)#is', $content, $m);
+                        $title = preg_replace('#\s+#', ' ', $m[1]);
+                        $title = trim($this->decode($title, $this->titleLength));
+                        break;
+                    }
+                    // Title won't appear beyond that point so stop parsing
+                    if (preg_match('#</head>|<body#i', $content)) {
+                        break;
+                    }
+                }
+            }
+            fclose($page);
+        } else if (!$this->errorStatus) {
+            $this->debug('Couldn\t Open Url: ' . $url);
+        }
 
-		if (empty($title)) {
-			if ($this->errorStatus) {
-				if (!$this->showErrors || empty($this->errorMessage)) {
-					return;
-				}
-				$title = $this->errorMessage;
-				$this->errorStatus = false;
-				$this->errorMessage = null;
-			} else {
-				$title = 'No Title';
-			}
-		}
+        if (empty($title)) {
+            if ($this->errorStatus) {
+                if (!$this->showErrors || empty($this->errorMessage)) {
+                    return;
+                }
+                $title = $this->errorMessage;
+                $this->errorStatus = false;
+                $this->errorMessage = null;
+            } else {
+                $title = 'No Title';
+            }
+        }
 
-		return $title;
+        return $title;
     }
 
+    /**
+     * Output a debug message
+     *
+     * @param string $msg the message to output
+     *
+     * @return void
+     */
     protected function debug($msg)
     {
         echo "(DEBUG:Url) $msg\n";
     }
 
+    /**
+     * Placeholder/porting helper. Has no function.
+     *
+     * @param string $str a string to return
+     *
+     * @return string
+     */
     protected function decodeTranslit($str)
     {
         // placeholder/porting helper
         return $str;
     }
 
-    public function registerRenderer($obj) {
+    /**
+     * Add a renderer to the stack
+     *
+     * @param object $obj the renderer to add
+     *
+     * @return void
+     */
+    public function registerRenderer($obj)
+    {
         $this->renderers[] = $obj;
         array_unique($this->renderers);
     }

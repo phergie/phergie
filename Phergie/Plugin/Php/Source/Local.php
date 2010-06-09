@@ -62,9 +62,10 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
         try {
             $this->database = new PDO('sqlite:' . $path . '/functions.db');
             $this->buildDatabase();
-        // @todo Modify this to be rethrown as an appropriate 
-        //       Phergie_Plugin_Exception and handled in Phergie_Plugin_Php
-        } catch (PDOException $e) { }
+            // @todo Modify this to be rethrown as an appropriate 
+            //       Phergie_Plugin_Exception and handled in Phergie_Plugin_Php
+        } catch (PDOException $e) {
+        }
     }
 
     /**
@@ -72,6 +73,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
      * 
      * @param string $function Search pattern to match against the function 
      *        name, wildcards supported using %
+     *
      * @return array|null Associative array containing the function name and 
      *         description or NULL if no results are found
      */
@@ -86,7 +88,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
         $stmt->execute(array(':function' => $function));
 
         // Check the results
-        if(count($stmt) > 0) {
+        if (count($stmt) > 0) {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             /**
              * @todo add class and function URLS
@@ -106,35 +108,36 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
      *
      * @param bool $rebuild TRUE to force a rebuild of the table used to 
      *        house function information, FALSE otherwise, defaults to FALSE
+     *
      * @return void
      */
     protected function buildDatabase($rebuild = false)
     {
         // Check to see if the functions table exists
         $table = $this->database->exec("SELECT COUNT(*) FROM `sqlite_master` WHERE `name` = 'functions'");
-        
+
         // If the table doesn't exist, create it
-        if(!$table) {
+        if (!$table) {
             $this->database->exec('CREATE TABLE `functions` (`name` VARCHAR(255), `description` TEXT)');
             $this->database->exec('CREATE UNIQUE INDEX `functions_name` ON `functions` (`name`)');
         }
 
         // If we created a new table, fill it with data
-        if(!$table || $rebuild) {
+        if (!$table || $rebuild) {
             // Get the contents of the source file
             // @todo Handle possible error cases better here; the @ operator 
             //       shouldn't be needed
             $contents = @file($this->url, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
 
-            if(!$contents) {
+            if (!$contents) {
                 return;
             }
-            
+
             // Parse the contents
             $valid = array();
             $firstPart = '';
             $lineNumber = 0;
-            foreach($contents as $line) {
+            foreach ($contents as $line) {
                 // Clean the current line
                 $line = trim($line);
 
@@ -153,12 +156,11 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                  */
                 if (($lineNumber % 2) === 0) {
                     $firstPart = $line;
-                }
-                // ... it's the last part of the complete function description
-                else {
+                } else {
+                    // ... it's the last part of the complete function description
                     $completeLine = $firstPart . ' ' . $line;
                     $firstPart = '';
-                    if(preg_match('{^([^\s]*)[\s]?([^)]*)\(([^\)]*)\)[\sU]+([\sa-zA-Z0-9\.\-_]*)$}', $completeLine, $matches)) {
+                    if (preg_match('{^([^\s]*)[\s]?([^)]*)\(([^\)]*)\)[\sU]+([\sa-zA-Z0-9\.\-_]*)$}', $completeLine, $matches)) {
                         $valid[] = $matches;
                     }
                 }
@@ -169,7 +171,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
             unset($contents);
 
             // Process the valid matches
-            if(count($valid) > 0) {
+            if (count($valid) > 0) {
                 // Clear the database
                 $this->database->exec('DELETE * FROM `functions`');
 
@@ -178,10 +180,10 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                 $this->database->beginTransaction();
 
                 // Insert the data
-                foreach($valid as $function) {
+                foreach ($valid as $function) {
                     // Extract function values
                     list( , $retval, $name, $params, $desc) = $function;
-                    if(empty($name)) {
+                    if (empty($name)) {
                         $name = $retval;
                         $retval = '';
                     }

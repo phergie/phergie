@@ -39,7 +39,8 @@ class Phergie_Plugin_Acl extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         if (!$this->getConfig('acl.blacklist')
-            && !$this->getConfig('acl.whitelist')) {
+            && !$this->getConfig('acl.whitelist')
+        ) {
             $this->plugins->removePlugin($this);
         }
     }
