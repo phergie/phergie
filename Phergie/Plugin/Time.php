@@ -30,16 +30,19 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Time
  */
-class Phergie_Plugin_Time extends Datetime
+class Phergie_Plugin_Time extends Phergie_Plugin_Abstract 
 {
     /**
-     * Outputs the object's internal time as days, minutes and seconds
+     * Returns the time interval between the current time and a given 
+     * timestamp. 
+     *
+     * @param string $timestamp Timestamp compatible with strtotime()
      *
      * @return string
      */
-    public function getCountdown()
+    public function getCountdown($timestamp)
     {
-        $time = time() - $this->format('U');
+        $time = time() - strtotime($timestamp); 
         $return = array();
 
         $days = floor($time / 86400);
@@ -66,5 +69,4 @@ class Phergie_Plugin_Time extends Datetime
 
         return implode(' ', $return);
     }
-
 }

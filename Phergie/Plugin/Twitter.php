@@ -180,9 +180,9 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     protected function formatTweet(StdClass $tweet, $includeUrl = true)
     {
-        $ts = new Phergie_Plugin_Time($tweet->created_at);
+        $ts = $this->plugins->time->getCountDown($tweet->created_at);
         $out =  '<@' . $tweet->user->screen_name .'> '. $tweet->text
-            . ' - ' . $ts->getCountDown() . ' ago';
+            . ' - ' . $ts . ' ago';
         if ($includeUrl) {
             $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
         }
