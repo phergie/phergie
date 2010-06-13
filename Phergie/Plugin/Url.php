@@ -236,8 +236,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $source = $this->getEvent()->getSource();
         $user = $this->getEvent()->getNick();
 
-        $pattern = '#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) | (';
-            .($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis',
+        $pattern = '#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) | ('
+            .($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis';
 
         // URL Match
         if (preg_match_all($pattern, $this->getEvent()->getArgument(1), $matches, PREG_SET_ORDER)) {
@@ -485,7 +485,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             }
 
             // Safely ignore these SSL warnings so they don't appear in the log
-            if (stripos($errstr, 'SSL: fatal protocol error in') !== false ||
+            if (stripos($errstr, 'SSL: fatal protocol error in') !== false
                 || stripos($errstr, 'failed to open stream') !== false
                 || stripos($errstr, 'HTTP request failed') !== false
                 || stripos($errstr, 'SSL: An existing connection was forcibly closed by the remote host') !== false
