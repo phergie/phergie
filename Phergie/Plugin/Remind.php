@@ -28,7 +28,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Drink
- * @uses     Phergie_Plugin_Command
+ * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Helper_Time pear.phergie.org
  */
 class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
