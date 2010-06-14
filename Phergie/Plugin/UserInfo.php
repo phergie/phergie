@@ -34,6 +34,8 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     const VOICE   = 2;
     const HALFOP  = 4;
     const OP      = 8;
+    const ADMIN   = 16;
+    const OWNER   = 32;
 
     /**
      * An array containing all the user information for a given channel
@@ -57,7 +59,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
 
         list($chan, $modes, $nicks) = $args;
 
-        if (!preg_match('/(?:\+|-)[hov+-]+/i', $modes)) {
+        if (!preg_match('/(?:\+|-)[hovaq+-]+/i', $modes)) {
             return;
         }
 
@@ -71,6 +73,12 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             $mode = null;
 
             switch ($char) {
+            case 'q':
+                $mode = self::OWNER;
+                break;
+            case 'a':
+                $mode = self::ADMIN;
+                break;
             case 'o':
                 $mode = self::OP;
                 break;
@@ -179,7 +187,11 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             $user = trim(strtolower($user));
             $flag = self::REGULAR;
 
-            if ($user[0] == '@') {
+            if ($user[0] == '~') {
+                $flag |= self::OWNER;
+            } else if ($user[0] == '&') {
+                $flag |= self::ADMIN;
+            } else if ($user[0] == '@') {
                 $flag |= self::OP;
             } else if ($user[0] == '%') {
                 $flag |= self::HALFOP;
@@ -210,6 +222,10 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
 
         if (preg_match('#^ishere (\S+)$#', $msg, $m)) {
             $this->doPrivmsg($target, $this->isIn($m[1], $target) ? 'true' : 'false');
+        } elseif (preg_match('#^isowner (\S+)$#', $msg, $m)) {
+            $this->doPrivmsg($target, $this->isOwner($m[1], $target) ? 'true' : 'false');
+        } elseif (preg_match('#^isadmin (\S+)$#', $msg, $m)) {
+            $this->doPrivmsg($target, $this->isAdmin($m[1], $target) ? 'true' : 'false');
         } elseif (preg_match('#^isop (\S+)$#', $msg, $m)) {
             $this->doPrivmsg($target, $this->isOp($m[1], $target) ? 'true' : 'false');
         } elseif (preg_match('#^ishop (\S+)$#', $msg, $m)) {
@@ -247,6 +263,32 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         }
 
         return ($this->store[$chan][$nick] & $mode) != 0;
+    }
+
+    /**
+     * Checks whether or not a given user has owner (~) status
+     *
+     * @param string $nick The nick to check
+     * @param string $chan The channel to check in
+     *
+     * @return bool
+     */
+    public function isOwner($nick, $chan)
+    {
+        return $this->is(self::OWNER, $nick, $chan);
+    }
+
+    /**
+     * Checks whether or not a given user has admin (&) status
+     *
+     * @param string $nick The nick to check
+     * @param string $chan The channel to check in
+     *
+     * @return bool
+     */
+    public function isAdmin($nick, $chan)
+    {
+        return $this->is(self::ADMIN, $nick, $chan);
     }
 
     /**
