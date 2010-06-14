@@ -48,7 +48,7 @@ require dirname(__FILE__) . '/Twitter/laconica.class.php';
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Twitter
- * @uses     Phergie_Plugin_Helper_Time pear.phergie.org
+ * @uses     Phergie_Plugin_Time pear.phergie.org
  */
 class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
 {
@@ -180,9 +180,9 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     protected function formatTweet(StdClass $tweet, $includeUrl = true)
     {
-        $ts = new Phergie_Plugin_Helper_Time($tweet->created_at);
+        $ts = $this->plugins->time->getCountDown($tweet->created_at);
         $out =  '<@' . $tweet->user->screen_name .'> '. $tweet->text
-            . ' - ' . $ts->getCountDown() . ' ago';
+            . ' - ' . $ts . ' ago';
         if ($includeUrl) {
             $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
         }
