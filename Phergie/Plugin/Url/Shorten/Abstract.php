@@ -94,11 +94,11 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
             return call_user_func($params['callback'], $response);
         }
 
-		$code = $response->getCode();
-		$content = trim($response->getContent);
-		if ($code < 200 || $code >= 300 || empty($content)) {
-			return false;
-		}
+        $code = $response->getCode();
+        $content = trim($response->getContent);
+        if ($code < 200 || $code >= 300 || empty($content)) {
+            return false;
+        }
 
         return $response->getContent();
     }
