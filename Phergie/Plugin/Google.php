@@ -323,54 +323,44 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
     /**
      * Performs a Google search to convert a value from one unit to another.
      *
-     * @param string $unit  Source metric 
-     * @param string $to    Value to be converted
-     * @param string $unit2 Destination metric 
+     * @param string $query Query of the form "[quantity] [unit] to [unit2]"
      *
      * @return void
      *
-     * @pluginCmd [unit] [to] [unit2] Convert a value from one metric to another
+     * @pluginCmd [quantity] [unit] to [unit2] Convert a value from one 
+     *            metric to another
      */
-    public function onCommandConvert($unit, $to, $unit2)
+    public function onCommandConvert($query)
     {
-        $url = 'http://www.google.com/search?q=' 
-            . urlencode($unit . ' ' . $to . ' ' . $unit2);
+        $url = 'http://www.google.com/search?q=' . urlencode($query);
         $response = $this->http->get($url);
         $contents = $response->getContent();
         $event = $this->getEvent();
         $source = $event->getSource();
         $nick = $event->getNick();
 
-        if (empty($contents)) {
-            $this->doPrivmsg(
-                $target,
-                $nick . ', sorry, I can\'t give you an answer right now.'
-            );
+        if ($response->isError()) {
+            $code = $response->getCode();
+            $message = $response->getMessage();
+            $this->doNotice($nick, 'ERROR: ' . $code . ' ' . $message);
             return;
         }
 
-        $doc = new DomDocument;
-        $doc->loadHTML($contents);
-        foreach ($doc->getElementsByTagName('h2') as $element) {
-            if ($element->getAttribute('class') == 'r') {
-                $children = $element->childNodes;
-                $text = str_replace(
-                    array(chr(195), chr(151), chr(160)),
-                    array('x', '', ' '),
-                    $children->item(0)->nodeValue
-                );
-                if ($children->length >= 3) {
-                    $text
-                        .= '^' . $children->item(1)->nodeValue 
-                        . $children->item(2)->nodeValue;
-                }
-            }
+        $start = strpos($contents, '<h3 class=r>');
+        if ($start !== false) {
+            $end = strpos($contents, '</b>', $start);
+            $text = strip_tags(substr($contents, $start, $end - $start));
+            $text = str_replace(
+                array(chr(195), chr(151), chr(160)),
+                array('x', '', ' '),
+                $text
+            );
         }
 
         if (isset($text)) {
             $this->doPrivmsg($source, $nick . ': ' . $text);
         } else {
-            $this->doPrivmsg($target, $nick . ', sorry I can\'t do that.');
+            $this->doNotice($nick, 'Sorry I couldn\'t find an answer.');
         }
     }
 }
