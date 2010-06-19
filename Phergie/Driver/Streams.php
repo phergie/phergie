@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,11 +20,11 @@
  */
 
 /**
- * Driver that uses the sockets wrapper of the streams extension for 
- * communicating with the server and handles formatting and parsing of 
+ * Driver that uses the sockets wrapper of the streams extension for
+ * communicating with the server and handles formatting and parsing of
  * events using PHP.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -47,28 +47,29 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     protected $socket;
 
     /**
-     * Amount of time in seconds to wait to receive an event each time the 
+     * Amount of time in seconds to wait to receive an event each time the
      * socket is polled
      *
-     * @var float 
+     * @var float
      */
     protected $timeout = 0.1;
 
     /**
-     * Handles construction of command strings and their transmission to the 
+     * Handles construction of command strings and their transmission to the
      * server.
      *
      * @param string       $command Command to send
-     * @param string|array $args    Optional string or array of sequential 
+     * @param string|array $args    Optional string or array of sequential
      *        arguments
      *
-     * @return string Command string that was sent 
+     * @return string Command string that was sent
      * @throws Phergie_Driver_Exception
      */
     protected function send($command, $args = '')
     {
         $connection = $this->getConnection();
         $encoding = $connection->getEncoding();
+
         // Require an open socket connection to continue
         if (empty($this->socket)) {
             throw new Phergie_Driver_Exception(
@@ -119,7 +120,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Overrides the parent class to set the currently active socket handler 
+     * Overrides the parent class to set the currently active socket handler
      * when the active connection is changed.
      *
      * @param Phergie_Connection $connection Active connection
@@ -140,11 +141,11 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
     /**
      * Returns a list of hostmasks corresponding to sockets with data to read.
-     * 
+     *
      * @param int $sec  Length of time to wait for new data (seconds)
      * @param int $usec Length of time to wait for new data (microseconds)
      *
-     * @return array List of hostmasks or an empty array if none were found 
+     * @return array List of hostmasks or an empty array if none were found
      *         to have data to read
      */
     public function getActiveReadSockets($sec = 0, $usec = 200000)
@@ -167,7 +168,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Sets the amount of time to wait for a new event each time the socket 
+     * Sets the amount of time to wait for a new event each time the socket
      * is polled.
      *
      * @param float $timeout Amount of time in seconds
@@ -184,7 +185,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Returns the amount of time to wait for a new event each time the 
+     * Returns the amount of time to wait for a new event each time the
      * socket is polled.
      *
      * @return float Amount of time in seconds
@@ -195,7 +196,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     }
 
     /**
-     * Supporting method to parse event argument strings where the last 
+     * Supporting method to parse event argument strings where the last
      * argument may contain a colon.
      *
      * @param string $args  Argument string to parse
@@ -211,7 +212,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Listens for an event on the current connection.
      *
-     * @return Phergie_Event_Interface|null Event instance if an event was 
+     * @return Phergie_Event_Interface|null Event instance if an event was
      *         received, NULL otherwise
      */
     public function getEvent()
@@ -237,7 +238,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             // If the event could be from the server or a user...
 
             // Parse the server hostname or user hostmask, command, and arguments
-            list($prefix, $cmd, $args) 
+            list($prefix, $cmd, $args)
                 = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
             if (strpos($prefix, '@') !== false) {
                 $hostmask = Phergie_Hostmask::fromString($prefix);
@@ -299,17 +300,17 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         case 'oper':
         case 'topic':
         case 'mode':
-            $args = $this->parseArguments($args); 
+            $args = $this->parseArguments($args);
             break;
 
         case 'part':
         case 'kill':
         case 'invite':
-            $args = $this->parseArguments($args, 2); 
+            $args = $this->parseArguments($args, 2);
             break;
 
         case 'kick':
-            $args = $this->parseArguments($args, 3); 
+            $args = $this->parseArguments($args, 3);
             break;
 
         // Remove the target from responses
@@ -380,14 +381,14 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $this->send(
             'USER',
             array(
-                $username, 
-                $hostname, 
-                $hostname, 
+                $username,
+                $hostname,
+                $hostname,
                 $realname
             )
         );
 
-        $this->send('NICK', $nick); 
+        $this->send('NICK', $nick);
 
         // Add the socket handler to the internal array for socket handlers
         $this->sockets[(string) $connection->getHostmask()] = $this->socket;
@@ -415,7 +416,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Joins a channel.
      *
-     * @param string $channels Comma-delimited list of channels to join 
+     * @param string $channels Comma-delimited list of channels to join
      * @param string $keys     Optional comma-delimited list of channel keys
      *
      * @return void
@@ -434,7 +435,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Leaves a channel.
      *
-     * @param string $channels Comma-delimited list of channels to leave 
+     * @param string $channels Comma-delimited list of channels to leave
      *
      * @return void
      */
@@ -620,9 +621,9 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Sends a CTCP response to a user.
      *
-     * @param string       $nick    User nick 
+     * @param string       $nick    User nick
      * @param string       $command Command to send
-     * @param string|array $args    String or array of sequential arguments 
+     * @param string|array $args    String or array of sequential arguments
      *        (optional)
      *
      * @return void
@@ -635,7 +636,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         $buffer = rtrim(strtoupper($command) . ' ' . $args);
 
-        $this->doNotice($nick, chr(1) . $buffer . chr(1)); 
+        $this->doNotice($nick, chr(1) . $buffer . chr(1));
     }
 
     /**
@@ -672,7 +673,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * Sends a CTCP TIME request to a user.
      *
      * @param string $nick User nick
-     * @param string $time Time string to send for a response 
+     * @param string $time Time string to send for a response
      *
      * @return void
      */
