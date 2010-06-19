@@ -62,7 +62,6 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
      */
     public function onConnect()
     {
-        // Construct a new data source
         $this->source = new Phergie_Plugin_Php_Source_Local;
     }
 
@@ -75,14 +74,13 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
      */
     public function onCommandPhp($functionName)
     {
-        // Search for the function
+        $nick = $this->event->getNick();
         if ($function = $this->source->findFunction($functionName)) {
-            $msg = 'PHP ' . $function['name'] . ': ' . $function['description'];
+            $msg = $nick . ': ' . $function['description'];
+            $this->doPrivmsg($this->event->getSource(), $msg);
         } else {
             $msg = 'Search for function ' . $functionName . ' returned no results.';
+            $this->doNotice($nick, $msg);
         }
-        
-        // Return the result to the source
-        $this->doPrivmsg($this->getEvent()->getSource(), $msg);
     }
 }
