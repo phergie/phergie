@@ -36,7 +36,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     /**
      * Number of reminders to show in public.
      */
-    const PUBLIC_REMINDERS = 3;
+    protected $publicReminders = 3;
 
     /**
      * PDO resource for a SQLite database containing the reminders.
@@ -83,7 +83,12 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
         }
 
         if (isset($this->config['remind.use_memory'])) {
-            $this->keepListInMemory = (bool)$this->config['remind.use_memory'];
+            $this->keepListInMemory = (bool) $this->config['remind.use_memory'];
+        }
+
+        if (isset($this->config['remind.public_reminders'])) {
+            $this->publicReminders = (int) $this->config['remind.public_reminders'];
+            $this->publicReminders = max($this->publicReminders, 0);
         }
 
         try {
@@ -237,9 +242,9 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         // fetch and deliver messages
         $reminders = $this->fetchMessages($channel, $nick);
-        if (count($reminders) > self::PUBLIC_REMINDERS) {
-            $msgs = array_slice($reminders, 0, self::PUBLIC_REMINDERS);
-            $privmsgs = array_slice($reminders, self::PUBLIC_REMINDERS);
+        if (count($reminders) > $this->publicReminders) {
+            $msgs = array_slice($reminders, 0, $this->publicReminders);
+            $privmsgs = array_slice($reminders, $this->publicReminders);
         } else {
             $msgs = $reminders;
             $privmsgs = false;
