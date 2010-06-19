@@ -31,14 +31,34 @@
 class Phergie_Plugin_Url_Shorten_Trim extends Phergie_Plugin_Url_Shorten_Abstract
 {
     /**
-     * Short a URL through the tr.im api
+     * Returns an array of request parameters given a url to shorten. The
+     * following keys are valid request parameters:
      *
      * @param string $url the url to shorten
      *
-     * @return string string the shortened url
+     * @return array the request parameters
      */
-    public function shorten($url)
+    protected function getRequestParams($url)
     {
-        return file_get_contents('http://api.tr.im/v1/trim_simple?url=' . rawurlencode($url));
+        return array(
+            'uri' => 'http://api.tr.im/v1/trim_simple?url=' . rawurlencode($url),
+            'callback' => array($this, 'onComplete')
+        );
+    }
+
+    /**
+     * Callback for when the URL has been shortened. Checks for error messages.
+     *
+     * @param Phergie_Plugin_Http_Response $response the response object
+     *
+     * @return string|bool the shortened url or false on failure
+     */
+    protected function onComplete($response)
+    {
+        if (strpos($response->getContent(), 'Error: ') === 0) {
+            return false;
+        }
+
+        return $response->getContent();
     }
 }
