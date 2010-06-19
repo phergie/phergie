@@ -46,4 +46,9 @@ class Phergie_Driver_Exception extends Phergie_Exception
      * Error indicating that an attempt to initiate a connection failed
      */
     const ERR_CONNECTION_ATTEMPT_FAILED = 3;
+
+    /**
+     * Error indicating that an attempt to send data via a connection failed
+     */
+    const ERR_CONNECTION_WRITE_FAILED = 4;
 }

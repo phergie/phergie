@@ -92,7 +92,25 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Transmit the command over the socket connection
-        fwrite($this->socket, $buffer . "\r\n");
+        $attempts = 0;
+        $written = 0;
+        $temp = $buffer . "\r\n";
+        $length = strlen($buffer);
+        while (true) {
+            $written += (int) fwrite($this->socket, $temp);
+            if ($written < $length) {
+                $temp = substr($temp, $written);
+                $attempts++;
+                if ($attempts == 3) {
+                    throw new Phergie_Driver_Exception(
+                        'Unable to write to socket',
+                        Phergie_Driver_Exception::ERR_CONNECTION_WRITE_FAILED
+                    );
+                }
+            } else {
+                break;
+            }
+        }
 
         // Return the command string that was transmitted
         return $buffer;
