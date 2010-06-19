@@ -222,7 +222,11 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @pluginCmd [location] Get the location from Google Maps to the location specified
      */
     public function onCommandGmap($location)
-    {
+    {	
+        $event = $this->getEvent();
+        $source = $event->getSource();
+        $nick = $event->getNick();
+	
         $location = utf8_encode($location);
         $url = 'http://maps.google.com/maps/geo';
         $params = array(
@@ -232,20 +236,17 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             'sensor' => 'false',
             'oe' => 'utf8',
             'mrt' => 'all',
-            'key' => $this->_config['google.key']
+            'key' => $this->getConfig('google.key')
         );
         $response = $this->http->get($url, $params); 
-        $json = (array) $response->getContent();
-        $event = $this->getEvent();
-        $source = $event->getSource();
-        $nick = $event->getNick();
+        $json =  $response->getContent();
         if (!empty($json)) {
-            $qtd = count($json['Placemark']);
+            $qtd = count($json->Placemark);
             if ($qtd > 1) {
                 if ($qtd <= 3) {
-                    foreach ($json['Placemark'] as $places) {
-                        $xy = $places['Point']['coordinates'];
-                        $address = utf8_decode($places['address']);
+                    foreach ($json->Placemark as $places) {
+                        $xy = $places->Point->coordinates;
+                        $address = utf8_decode($places->address);
                         $url = 'http://maps.google.com/maps?sll=' . $xy[1] . ',' 
                             . $xy[0] . '&z=15';
                         $msg = $nick . ' -> ' . $address . ' - ' . $url;
@@ -259,8 +260,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
                     $this->doPrivmsg($source, $msg);
                 }
             } elseif ($qtd == 1) {
-                $xy = $json['Placemark'][0]['Point']['coordinates'];
-                $address = utf8_decode($json['Placemark'][0]['address']);
+                $xy = $json->Placemark[0]->Point->coordinates;
+                $address = utf8_decode($json->Placemark[0]->address);
                 $url = 'http://maps.google.com/maps?sll=' . $xy[1] . ',' . $xy[0] 
                     . '&z=15';
                 $msg = $nick . ' -> ' . $address . ' - ' . $url;
