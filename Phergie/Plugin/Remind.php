@@ -76,7 +76,11 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     public function onConnect()
     {
-        $path = dirname(__FILE__) . '/reminder.db';
+        $dir = dirname(__FILE__) . '/' . $this->getName();
+        $path = $dir . '/reminder.db';
+        if (!file_exists($dir)) {
+            mkdir($dir);
+        }
 
         if (isset($this->config['remind.use_memory'])) {
             $this->keepListInMemory = (bool)$this->config['remind.use_memory'];
