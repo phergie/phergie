@@ -28,15 +28,15 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Remind
- * @uses     Phergie_Plugin_Command
- * @uses     Phergie_Plugin_Helper_Time pear.phergie.org
+ * @uses     Phergie_Plugin_Command pear.phergie.org
+ * @uses     Phergie_Plugin_Time pear.phergie.org
  */
 class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 {
     /**
      * Number of reminders to show in public.
      */
-    const PUBLIC_REMINDERS = 3;
+    protected $publicReminders = 3;
 
     /**
      * PDO resource for a SQLite database containing the reminders.
@@ -64,11 +64,31 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        $this->getPluginHandler()->getPlugin('Command');
-        $path = dirname(__FILE__) . '/reminder.db';
+        $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Command');
+        $plugins->getPlugin('Time');
+    }
+
+    /**
+     * Creates the database if it does not already exist.
+     *
+     * @return void
+     */
+    public function onConnect()
+    {
+        $dir = dirname(__FILE__) . '/' . $this->getName();
+        $path = $dir . '/reminder.db';
+        if (!file_exists($dir)) {
+            mkdir($dir);
+        }
 
         if (isset($this->config['remind.use_memory'])) {
-            $this->keepListInMemory = (bool)$this->config['remind.use_memory'];
+            $this->keepListInMemory = (bool) $this->config['remind.use_memory'];
+        }
+
+        if (isset($this->config['remind.public_reminders'])) {
+            $this->publicReminders = (int) $this->config['remind.public_reminders'];
+            $this->publicReminders = max($this->publicReminders, 0);
         }
 
         try {
@@ -222,19 +242,19 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         // fetch and deliver messages
         $reminders = $this->fetchMessages($channel, $nick);
-        if (count($reminders) > self::PUBLIC_REMINDERS) {
-            $msgs = array_slice($reminders, 0, self::PUBLIC_REMINDERS);
-            $privmsgs = array_slice($reminders, self::PUBLIC_REMINDERS);
+        if (count($reminders) > $this->publicReminders) {
+            $msgs = array_slice($reminders, 0, $this->publicReminders);
+            $privmsgs = array_slice($reminders, $this->publicReminders);
         } else {
             $msgs = $reminders;
             $privmsgs = false;
         }
 
         foreach ($msgs as $msg) {
-            $ts = new Phergie_Plugin_Helper_Time($msg['time']);
+            $ts = $this->plugins->time->getCountdown($msg['time']);
             $formatted = sprintf(
                 '%s: (from %s, %s ago) %s',
-                $nick, $msg['sender'], $ts->getCountdown(), $msg['message']
+                $nick, $msg['sender'], $ts, $msg['message']
             );
             $this->doPrivmsg($channel, $formatted);
             $this->deleteMessage($msg['rowid'], $channel, $nick);
@@ -242,10 +262,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         if ($privmsgs) {
             foreach ($privmsgs as $msg) {
-                $ts = new Phergie_Plugin_Helper_Time($msg['time']);
+                $ts = $this->plugins->time->getCountdown($msg['time']);
                 $formatted = sprintf(
                     'from %s, %s ago: %s',
-                    $msg['sender'], $ts->getCountdown(), $msg['message']
+                    $msg['sender'], $ts, $msg['message']
                 );
                 $this->doPrivmsg($nick, $formatted);
                 $this->deleteMessage($msg['rowid'], $channel, $nick);

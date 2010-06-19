@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Url
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -23,10 +23,10 @@
  * Monitors incoming messages for instances of URLs and responds with messages
  * containing relevant information about detected URLs.
  *
- * Has an utility method accessible via 
+ * Has an utility method accessible via
  * $this->getPlugin('Url')->getTitle('http://foo..').
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Url
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -38,7 +38,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     /**
      * Links output format
      *
-     * Can use the variables %nick%, %title% and %link% in it to display 
+     * Can use the variables %nick%, %title% and %link% in it to display
      * page titles and links
      *
      * @var string
@@ -47,7 +47,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $messageFormat = '[ %link% ] %title%';
 
     /**
-     * Flag indicating whether a single response should be sent for a single 
+     * Flag indicating whether a single response should be sent for a single
      * message containing multiple links
      *
      * @var bool
@@ -62,7 +62,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $titleLength = 40;
 
     /**
-     * Url cache to prevent spamming, especially with multiple bots on the 
+     * Url cache to prevent spamming, especially with multiple bots on the
      * same channel
      *
      * @var array
@@ -89,16 +89,16 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $limit = 10;
 
     /**
-     * Flag that determines if the plugin will fall back to using an HTTP 
-     * stream when a URL using SSL is detected and OpenSSL support isn't 
-     * available in the PHP installation in use 
+     * Flag that determines if the plugin will fall back to using an HTTP
+     * stream when a URL using SSL is detected and OpenSSL support isn't
+     * available in the PHP installation in use
      *
      * @var bool
      */
     protected $sslFallback = true;
 
     /**
-     * Flag that is set to true by the custom error handler if an HTTP error 
+     * Flag that is set to true by the custom error handler if an HTTP error
      * code has been received
      *
      * @var boolean
@@ -107,7 +107,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $errorMessage = null;
 
     /**
-     * Flag indicating whether or not to display error messages as the title 
+     * Flag indicating whether or not to display error messages as the title
      * if a link posted encounters an error
      *
      * @var boolean
@@ -122,7 +122,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $detectSchemeless = false;
 
     /**
-     * List of error messages to return when the requested URL returns an 
+     * List of error messages to return when the requested URL returns an
      * HTTP error
      *
      * @var array
@@ -193,7 +193,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         // Get a list of valid TLDs
         if (!is_array($this->tldList) || count($this->tldList) <= 6) {
-            $tldPath = dirname(__FILE__) . '/url.tld.txt';
+            $tldPath = dirname(__FILE__) . '/Url/url.tld.txt';
             $this->tldList = explode("\n", file_get_contents($tldPath));
             $this->debug('Loaded ' . count($this->tldList) . ' tlds');
             rsort($this->tldList);
@@ -221,7 +221,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      * found, responds with its title if it is an HTML document and the
      * shortened equivalent of its original URL if it meets length requirements.
      *
-     * @todo Update this to pull configuration settings from $this->config 
+     * @todo Update this to pull configuration settings from $this->config
      *       rather than caching them as class properties
      * @return void
      */

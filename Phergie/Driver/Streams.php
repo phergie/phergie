@@ -89,6 +89,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 $end = count($args) - 1;
                 $args[$end] = ':' . $args[$end];
                 $args = implode(' ', $args);
+            } else {
+                $args = ':' . $args;
             }
 
             $buffer .= ' ' . $args;
