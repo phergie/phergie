@@ -12,7 +12,8 @@ return array(
             'realname' => 'Matthew Turland',
             'nick' => 'Phergie2',
             // 'password' => 'password goes here if needed',
-            // 'transport' => 'ssl' // uncomment to connect using SSL
+            // 'transport' => 'ssl', // uncomment to connect using SSL
+            // 'encoding' => 'UTF8', // uncomment if using UTF8
         )
     ),
     

@@ -67,6 +67,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     protected function send($command, $args = '')
     {
+        $connection = $this->getConnection();
+        $encoding = $connection->getEncoding();
         // Require an open socket connection to continue
         if (empty($this->socket)) {
             throw new Phergie_Driver_Exception(
@@ -92,10 +94,10 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Transmit the command over the socket connection
-        $attempts = 0;
-        $written = 0;
+        $attempts = $written = 0;
         $temp = $buffer . "\r\n";
-        $length = strlen($buffer);
+        $is_multibyte = !substr($encoding, 0, 8) === 'ISO-8859' && $encoding !== 'ASCII' && $encoding !== 'CP1252';
+        $length = ($is_multibyte) ? mb_strlen($buffer, '8bit') : strlen($buffer);
         while (true) {
             $written += (int) fwrite($this->socket, $temp);
             if ($written < $length) {
