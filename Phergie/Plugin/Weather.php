@@ -116,6 +116,13 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $weather .= ', Relative humidity ' . $xml->cc->hmid . '%';
         $weather .= ', Current conditions ' . $xml->cc->t;
         $weather .= ', Last update ' . $xml->cc->lsup;
+        $weather .= ' [ http://weather.com/weather/today/';
+        $weather .= str_replace(
+            array('(', ')', ',', ' '),
+            array('', '', '', '+'),
+            $xml->loc->dnam
+        );
+        $weather .= ' ]';
 
         $this->doPrivmsg($this->event->getSource(), $nick . ': ' . $weather);
     }
