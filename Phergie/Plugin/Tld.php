@@ -72,8 +72,8 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Command
      */
     public function onLoad()
     {
-        //$help = $this->getPluginHandler()->getPlugin('Help');
-        //$help->register($this);
+        $help = $this->getPluginHandler()->getPlugin('Help');
+        $help->register($this);
 
         if (!is_array(self::$fixedTlds)) {
             self::$fixedTlds = array(
@@ -207,6 +207,8 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Command
      * @param string $tld tld to process
      *
      * @return null
+     *
+     * @pluginCmd .[tld] request details about the tld
      */
     public function onCommandTld($tld)
     {
