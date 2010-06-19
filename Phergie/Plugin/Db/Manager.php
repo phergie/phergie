@@ -39,7 +39,8 @@ abstract class Phergie_Plugin_Db_Manager
     private $_db;
 
     /**
-     * gets the connection to the database
+     * gets the connection to the database, stores it in $this->_db
+     * and then returns the connection
      *
      * @return PDO
      */

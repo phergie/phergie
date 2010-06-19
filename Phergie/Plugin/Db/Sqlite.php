@@ -100,7 +100,7 @@ class Phergie_Plugin_Db_Sqlite extends Phergie_Plugin_Db_Manager
      */
     public function getDb()
     {
-        if ($this->_db == null) {
+        if (@$this->_db == null) {
             $this->_db = new PDO(
                     "sqlite:{$this->_db_directory}{$this->_db_file}"
             );
