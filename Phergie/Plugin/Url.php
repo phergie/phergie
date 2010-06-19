@@ -43,7 +43,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      *
      * @var string
      */
-    protected $baseFormat = '%nick%: %message%';
+    protected $baseFormat = '%message%';
     protected $messageFormat = '[ %link% ] %title%';
 
     /**
