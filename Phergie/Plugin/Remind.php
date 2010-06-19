@@ -28,8 +28,8 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Remind
- * @uses     Phergie_Plugin_Command
- * @uses     Phergie_Plugin_Helper_Time pear.phergie.org
+ * @uses     Phergie_Plugin_Command pear.phergie.org
+ * @uses     Phergie_Plugin_Time pear.phergie.org
  */
 class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 {
@@ -64,7 +64,18 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        $this->getPluginHandler()->getPlugin('Command');
+        $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Command');
+        $plugins->getPlugin('Time');
+    }
+
+    /**
+     * Creates the database if it does not already exist.
+     *
+     * @return void
+     */
+    public function onConnect()
+    {
         $path = dirname(__FILE__) . '/reminder.db';
 
         if (isset($this->config['remind.use_memory'])) {
@@ -231,10 +242,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
         }
 
         foreach ($msgs as $msg) {
-            $ts = new Phergie_Plugin_Helper_Time($msg['time']);
+            $ts = $this->plugins->time->getCountdown($msg['time']);
             $formatted = sprintf(
                 '%s: (from %s, %s ago) %s',
-                $nick, $msg['sender'], $ts->getCountdown(), $msg['message']
+                $nick, $msg['sender'], $ts, $msg['message']
             );
             $this->doPrivmsg($channel, $formatted);
             $this->deleteMessage($msg['rowid'], $channel, $nick);
@@ -242,10 +253,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         if ($privmsgs) {
             foreach ($privmsgs as $msg) {
-                $ts = new Phergie_Plugin_Helper_Time($msg['time']);
+                $ts = $this->plugins->time->getCountdown($msg['time']);
                 $formatted = sprintf(
                     'from %s, %s ago: %s',
-                    $msg['sender'], $ts->getCountdown(), $msg['message']
+                    $msg['sender'], $ts, $msg['message']
                 );
                 $this->doPrivmsg($nick, $formatted);
                 $this->deleteMessage($msg['rowid'], $channel, $nick);
