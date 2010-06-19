@@ -30,6 +30,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_TerryChay
  * @uses     Phergie_Plugin_Command pear.phergie.org
+ * @uses     extension pspell
  */
 class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
 {
@@ -62,6 +63,8 @@ class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
         if (!$this->getConfig('spellcheck.lang')) {
             $this->fail('Setting spellcheck.lang must be filled-in');
         }
+
+        $this->plugins->getPlugin('Command');
     }
 
     /**
