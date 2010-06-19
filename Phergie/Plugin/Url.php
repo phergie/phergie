@@ -208,6 +208,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 'merge_links' => 'mergeLinks',
                 'title_length' => 'titleLength',
                 'show_errors' => 'showErrors',
+                'expire' => 'expire',
             ) as $config => $local) {
             if (isset($this->config["url.{$config}"])) {
                 $this->$local = $this->config["uri.{$config}"];
