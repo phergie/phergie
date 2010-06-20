@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,9 +20,9 @@
  */
 
 /**
- * Handles events initiated by plugins. 
+ * Handles events initiated by plugins.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -51,13 +51,13 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
      * Adds an event to the queue.
      *
      * @param Phergie_Plugin_Abstract $plugin Plugin originating the event
-     * @param string                  $type   Event type, corresponding to a 
+     * @param string                  $type   Event type, corresponding to a
      *        Phergie_Event_Command::TYPE_* constant
      * @param array                   $args   Optional event arguments
      *
      * @return Phergie_Event_Handler Provides a fluent interface
      */
-    public function addEvent(Phergie_Plugin_Abstract $plugin, $type, 
+    public function addEvent(Phergie_Plugin_Abstract $plugin, $type,
         array $args = array()
     ) {
         if (!defined('Phergie_Event_Command::TYPE_' . strtoupper($type))) {
@@ -102,7 +102,7 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
     /**
      * Replaces the current event queue with a given queue of events.
      *
-     * @param array $events Ordered list of objects of the class 
+     * @param array $events Ordered list of objects of the class
      *        Phergie_Event_Command
      *
      * @return Phergie_Event_Handler Provides a fluent interface
@@ -116,10 +116,10 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
     /**
      * Returns whether an event of the given type exists in the queue.
      *
-     * @param string $type Event type from Phergie_Event_Request::TYPE_* 
+     * @param string $type Event type from Phergie_Event_Request::TYPE_*
      *        constants
      *
-     * @return bool TRUE if an event of the specified type exists in the 
+     * @return bool TRUE if an event of the specified type exists in the
      *         queue, FALSE otherwise
      */
     public function hasEventOfType($type)
@@ -135,10 +135,10 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
     /**
      * Returns a list of events of a specified type.
      *
-     * @param string $type Event type from Phergie_Event_Request::TYPE_* 
+     * @param string $type Event type from Phergie_Event_Request::TYPE_*
      *        constants
      *
-     * @return array Array containing event instances of the specified type 
+     * @return array Array containing event instances of the specified type
      *         or an empty array if no such events were found
      */
     public function getEventsOfType($type)
@@ -150,6 +150,22 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
             }
         }
         return $events;
+    }
+
+    /**
+     * Removes a single event from the event queue.
+     *
+     * @param Phergie_Event_Command $event Event to remove
+     *
+     * @return Phergie_Event_Handler Provides a fluent interface
+     */
+    public function removeEvent(Phergie_Event_Command $event)
+    {
+        $key = array_search($event, $this->events);
+        if ($key !== false) {
+            unset($this->events[$key]);
+        }
+        return $this;
     }
 
     /**
