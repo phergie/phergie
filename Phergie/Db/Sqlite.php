@@ -79,10 +79,9 @@ class Phergie_Db_Sqlite extends Phergie_Db_Manager
 
         $dir = dirname($this->dbFile);
         if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
-            throw new Phergie_Exception(
+            throw new Phergie_Db_Exception(
                 'Unable to create directory',
-                Phergie_Db_Exception::
-                ERR_UNABLE_TO_CREATE_DIRECTORY
+                Phergie_Db_Exception::ERR_UNABLE_TO_CREATE_DIRECTORY
             );
         }
 
