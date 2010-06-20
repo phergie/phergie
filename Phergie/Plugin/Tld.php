@@ -36,13 +36,6 @@
 class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
 {
     /**
-     * static instance of this class
-     *
-     * @var Phergie_Plugin_Tld
-     */
-    protected static $instance;
-
-    /**
      * connection to the database
      * @var PDO
      */
@@ -196,9 +189,6 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
             );
         } catch (PDOException $e) {
         }
-
-        // Create a static instance of the class
-        self::$instance = $this;
     }
 
     /**
@@ -212,14 +202,8 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
      */
     public function onCommandTld($tld)
     {
-        // ensure first character of tld is '.'
-        if (strpos($tld, '.') !== 0) {
-            return;
-        }
-
-        // strip leading '.'
-        $tld = substr($tld, 1);
-        $description = self::getTld($tld);
+        $tld = ltrim($tld, '.');
+        $description = $this->getTld($tld);
         $this->doPrivmsg(
             $this->event->getSource(),
             "{$this->getEvent()->getNick()}: .{$tld} -> "
@@ -232,16 +216,16 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
      *
      * @param string $tld TLD to search for
      * 
-     * @return string Defination of the given TLD
+     * @return string Definition of the given TLD
      */
-    public static function getTld($tld)
+    public function getTld($tld)
     {
         $tld = trim(strtolower($tld));
         if (isset(self::$fixedTlds[$tld])) {
             return self::$fixedTlds[$tld];
-        } else if (self::$instance->db) {
-            if (self::$instance->select->execute(array('tld' => $tld))) {
-                $tlds = self::$instance->select->fetch();
+        } else {
+            if ($this->select->execute(array('tld' => $tld))) {
+                $tlds = $this->select->fetch();
                 if (is_array($tlds)) {
                     return '(' . $tlds['type'] . ') ' . $tlds['description'];
                 }
@@ -251,14 +235,14 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Retrieves a list of all the TLDs and their definations
+     * Retrieves a list of all the TLDs and their definitions
      *
-     * @return array Array of all the TLDs and their definations
+     * @return array Array of all the TLDs and their definitions
      */
-    public static function getTlds()
+    public function getTlds()
     {
-        if (self::$instance->db && self::$instance->selectAll->execute()) {
-            $tlds = self::$instance->selectAll->fetchAll();
+        if ($this->selectAll->execute()) {
+            $tlds = $this->selectAll->fetchAll();
             if (is_array($tlds)) {
                 $tldinfo = array();
                 foreach ($tlds as $key => $tld) {
