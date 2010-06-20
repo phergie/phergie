@@ -33,7 +33,7 @@
  *
  * @pluginDesc Provides information for a top level domain.
  */
-class Phergie_Plugin_Tld extends Phergie_Plugin_Command
+class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
 {
     /**
      * static instance of this class
