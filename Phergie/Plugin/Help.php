@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Help
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Provides access to descriptions of plugins and the commands they provide.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Help
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -60,11 +60,11 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Displays a list of plugins with help information available or 
+     * Displays a list of plugins with help information available or
      * commands available for a specific plugin.
      *
-     * @param string $plugin Short name of the plugin for which commands 
-     *        should be returned, else a list of plugins with help 
+     * @param string $plugin Short name of the plugin for which commands
+     *        should be returned, else a list of plugins with help
      *        information available is returned
      *
      * @return void
@@ -94,13 +94,13 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
                 && isset($this->registry[strtolower($plugin)]['cmd'])
             ) {
                 $msg
-                    = 'The ' . 
-                    $plugin . 
+                    = 'The ' .
+                    $plugin .
                     ' plugin exposes the commands shown below.';
                 $this->doPrivMsg($nick, $msg);
                 if ($this->getConfig('command.prefix')) {
                     $msg
-                        = 'Note that these commands must be prefixed with "' .  
+                        = 'Note that these commands must be prefixed with "' .
                         $this->getConfig('command.prefix') .
                         '" (without quotes) when issued in a public channel.';
                     $this->doPrivMsg($nick, $msg);
@@ -122,10 +122,10 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
 
     /**
      * Sets the description for the plugin instance
-     * 
+     *
      * @param Phergie_Plugin_Abstract $plugin      plugin instance
      * @param string                  $description plugin description
-     * 
+     *
      * @return void
      */
     public function setPluginDescription(
@@ -138,7 +138,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
 
     /**
      * Sets the description for the command on the plugin instance
-     * 
+     *
      * @param Phergie_Plugin_Abstract $plugin      plugin instance
      * @param string                  $command     from onCommand method
      * @param string                  $description command description
@@ -158,7 +158,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
      * registers the plugin with the help plugin. this will parse the docblocks
      * for specific annotations that this plugin will respond with when
      * queried.
-     * 
+     *
      * @param Phergie_Plugin_Abstract $plugin plugin instance
      *
      * @return void
@@ -191,7 +191,8 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Taken from PHPUnit/Util/Test.php:436
+     * Taken from PHPUnit/Util/Test.php:243 and modified to fix an issue
+     * with tag content spanning multiple lines.
      *
      * PHPUnit
      *
@@ -235,13 +236,16 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     {
         $annotations = array();
 
-        $regex = '/@(?P<name>[A-Za-z_-]+)(?:[ \t]+(?P<value>.*?))?[ \t]*\r?$/m';
+        $regex = '/@(?P<name>[A-Za-z_-]+)(?:[ \t]+(?P<value>.*?))?(?:\*\/|\* @)/ms';
 
         if (preg_match_all($regex, $docblock, $matches)) {
             $numMatches = count($matches[0]);
 
             for ($i = 0; $i < $numMatches; ++$i) {
-                $annotations[$matches['name'][$i]][] = $matches['value'][$i];
+                $annotation = $matches['value'][$i];
+                $annotation = preg_replace('/\s*\v+\s*\*\s*/', ' ', $annotation);
+                $annotation = rtrim($annotation);
+                $annotations[$matches['name'][$i]][] = $annotation;
             }
         }
 
