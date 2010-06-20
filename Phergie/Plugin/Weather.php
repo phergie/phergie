@@ -85,9 +85,9 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             return;
         }
 
-        $where = $xml->loc[0]['id'];
+        $where = (string) $xml->loc[0]['id'];
         $response = $this->plugins->http->get(
-            'http://xoap.weather.com/weather/local/' . $location,
+            'http://xoap.weather.com/weather/local/' . $where,
             array(
                 'cc' => '*',
                 'link' => 'xoap',
@@ -106,23 +106,26 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         }
 
         $xml = $response->getContent();
-        $weather = 'Weather for ' . $xml->loc->dnam . ' - ';
-        $weather .= 'Current temperature ' . $xml->cc->tmp . $xml->head->ut . ' / ';
-        if ($xml->head->ut == 'F') {
-            $weather .= round(((($xml->cc->tmp - 32) * 5) / 9)) . 'C';
+        $weather = 'Weather for ' . (string) $xml->loc->dnam . ' - ';
+        $weather .= 'Current temperature ' .
+            (string) $xml->cc->tmp .
+            (string) $xml->head->ut . ' / ';
+        if ((string) $xml->head->ut == 'F') {
+            $weather .= round(((((int) $xml->cc->tmp - 32) * 5) / 9)) . 'C';
         } else {
-            $weather .= round(((($xml->cc->tmp * 9) / 5) + 32)) . 'F';
+            $weather .= round(((((int) $xml->cc->tmp * 9) / 5) + 32)) . 'F';
         }
-        $weather .= ', Relative humidity ' . $xml->cc->hmid . '%';
-        $weather .= ', Current conditions ' . $xml->cc->t;
-        $weather .= ', Last update ' . $xml->cc->lsup;
-        $weather .= ' [ http://weather.com/weather/today/';
-        $weather .= str_replace(
-            array('(', ')', ',', ' '),
-            array('', '', '', '+'),
-            $xml->loc->dnam
-        );
-        $weather .= ' ]';
+        $weather .=
+            ', Relative humidity ' . (string) $xml->cc->hmid . '%' .
+            ', Current conditions ' . (string) $xml->cc->t .
+            ', Last update ' . (string) $xml->cc->lsup .
+            ' [ http://weather.com/weather/today/' .
+            str_replace(
+                array('(', ')', ',', ' '),
+                array('', '', '', '+'),
+                (string) $xml->loc->dnam
+            ) .
+            ' ]';
 
         $this->doPrivmsg($this->event->getSource(), $nick . ': ' . $weather);
     }
