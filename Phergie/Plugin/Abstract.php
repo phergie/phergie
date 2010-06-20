@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -23,7 +23,7 @@
  * Base class for plugins to provide event handler stubs and commonly needed
  * functionality.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -67,20 +67,43 @@ abstract class Phergie_Plugin_Abstract
     protected $event;
 
     /**
+     * Plugin short name
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
      * Returns the short name for the plugin based on its class name.
      *
      * @return string
      */
     public function getName()
     {
-        return substr(strrchr(get_class($this), '_'), 1);
+        if (empty($this->name)) {
+            $this->name = substr(strrchr(get_class($this), '_'), 1);
+        }
+        return $this->name;
     }
 
     /**
-     * Indicates that the plugin failed to load due to an unsatisfied 
+     * Sets the short name for the plugin.
+     *
+     * @param string $name Plugin short name
+     *
+     * @return Phergie_Plugin_Abstract Provides a fluent interface
+     */
+    public function setName($name)
+    {
+        $this->name = (string) $name;
+        return $this;
+    }
+
+    /**
+     * Indicates that the plugin failed to load due to an unsatisfied
      * runtime requirement, such as a missing dependency.
      *
-     * @param string $message Error message to provide more information 
+     * @param string $message Error message to provide more information
      *        about the reason for the failure
      *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
@@ -108,17 +131,17 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Returns the current configuration handler or the value of a single 
+     * Returns the current configuration handler or the value of a single
      * setting from it.
      *
-     * @param string $name    Optional name of a setting for which the value 
+     * @param string $name    Optional name of a setting for which the value
      *        should be returned instead of the entire configuration handler
-     * @param mixed  $default Optional default value to return if no value 
+     * @param mixed  $default Optional default value to return if no value
      *        is set for the setting indicated by $name
      *
-     * @return Phergie_Config|mixed Configuration handler or value of the 
+     * @return Phergie_Config|mixed Configuration handler or value of the
      *         setting specified by $name
-     * @throws Phergie_Plugin_Exception No configuration handler has been set 
+     * @throws Phergie_Plugin_Exception No configuration handler has been set
      */
     public function getConfig($name = null, $default = null)
     {
@@ -154,7 +177,7 @@ abstract class Phergie_Plugin_Abstract
      * Returns the current plugin handler.
      *
      * @return Phergie_Plugin_Handler
-     * @throws Phergie_Plugin_Exception No plugin handler has been set 
+     * @throws Phergie_Plugin_Exception No plugin handler has been set
      */
     public function getPluginHandler()
     {
@@ -184,7 +207,7 @@ abstract class Phergie_Plugin_Abstract
      * Returns the current event handler.
      *
      * @return Phergie_Event_Handler
-     * @throws Phergie_Plugin_Exception No event handler has been set 
+     * @throws Phergie_Plugin_Exception No event handler has been set
      */
     public function getEventHandler()
     {
@@ -214,7 +237,7 @@ abstract class Phergie_Plugin_Abstract
      * Returns the current event connection.
      *
      * @return Phergie_Connection
-     * @throws Phergie_Plugin_Exception No connection has been set 
+     * @throws Phergie_Plugin_Exception No connection has been set
      */
     public function getConnection()
     {
@@ -281,8 +304,8 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when the plugin is initially loaded - useful for checking 
-     * runtime dependencies or performing any setup necessary for the plugin 
+     * Handler for when the plugin is initially loaded - useful for checking
+     * runtime dependencies or performing any setup necessary for the plugin
      * to function properly such as initializing a database.
      *
      * @return void
@@ -301,8 +324,8 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for each tick, a single iteration of the continuous loop 
-     * executed by the bot to receive, handle, and send events - useful for  
+     * Handler for each tick, a single iteration of the continuous loop
+     * executed by the bot to receive, handle, and send events - useful for
      * repeated execution of tasks on a time interval.
      *
      * @return void
@@ -312,10 +335,10 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when any event is received but has not yet been dispatched 
+     * Handler for when any event is received but has not yet been dispatched
      * to the plugin handler method specific to its event type.
      *
-     * @return bool|null|void FALSE to short-circuit further event 
+     * @return bool|null|void FALSE to short-circuit further event
      *         processing, TRUE or NULL otherwise
      */
     public function preEvent()
@@ -323,8 +346,8 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for after plugin processing of an event has concluded but 
-     * before any events triggered in response by plugins are sent to the 
+     * Handler for after plugin processing of an event has concluded but
+     * before any events triggered in response by plugins are sent to the
      * server - useful for modifying outgoing events before they are sent.
      *
      * @return void
@@ -334,8 +357,8 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for after any events triggered by plugins in response to a 
-     * received event are sent to the server. 
+     * Handler for after any events triggered by plugins in response to a
+     * received event are sent to the server.
      *
      * @return void
      */
@@ -454,12 +477,12 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when the bot receives a ping event from a server, at 
-     * which point it is expected to respond with a pong request within 
+     * Handler for when the bot receives a ping event from a server, at
+     * which point it is expected to respond with a pong request within
      * a short period else the server may terminate its connection.
      *
      * @return void
-     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2 
+     * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_6_2
      */
     public function onPing()
     {
@@ -496,7 +519,7 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when the bot receives a CTCP request of an unknown type. 
+     * Handler for when the bot receives a CTCP request of an unknown type.
      *
      * @return void
      * @link http://www.invlogic.com/irc/ctcp.html
@@ -506,7 +529,7 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when a reply is received for a CTCP PING request sent by 
+     * Handler for when a reply is received for a CTCP PING request sent by
      * the bot.
      *
      * @return void
@@ -517,7 +540,7 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when a reply is received for a CTCP TIME request sent by 
+     * Handler for when a reply is received for a CTCP TIME request sent by
      * the bot.
      *
      * @return void
@@ -528,7 +551,7 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when a reply is received for a CTCP VERSION request sent 
+     * Handler for when a reply is received for a CTCP VERSION request sent
      * by the bot.
      *
      * @return void
@@ -539,7 +562,7 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when a reply received for a CTCP request of an unknown 
+     * Handler for when a reply received for a CTCP request of an unknown
      * type.
      *
      * @return void
@@ -560,7 +583,7 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when the bot receives an invitation to join a channel. 
+     * Handler for when the bot receives an invitation to join a channel.
      *
      * @return void
      * @link http://irchelp.org/irchelp/rfc/chapter4.html#c4_2_7
@@ -570,7 +593,7 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
-     * Handler for when a server response is received to a command issued by 
+     * Handler for when a server response is received to a command issued by
      * the bot.
      *
      * @return void
