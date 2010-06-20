@@ -32,27 +32,18 @@
 abstract class Phergie_Db_Manager
 {
     /**
-     * PDO connection to the database
+     * Returns a connection to the database.
      *
-     * @var PDO
-     */
-    private $_db;
-
-    /**
-     * gets the connection to the database, stores it in $this->_db
-     * and then returns the connection
-     *
-     * @return PDO
+     * @return object
      */
     public abstract function getDb();
 
     /**
-     * checks if a table exists within the database
+     * Checks if a table/collection exists within the database.
      *
-     * @param string $table_name table name to check for existance
+     * @param string $table Table/collection name to check for
      *
      * @return boolean
-     * @abstract
      */
-    public abstract function hasTable($table_name);
+    public abstract function hasTable($table);
 }
