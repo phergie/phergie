@@ -45,6 +45,9 @@
             <include name="Phergie/Connection/Exception.php" />
             <include name="Phergie/Connection/Handler.php" />
             <include name="Phergie/Connection.php" />
+            <include name="Phergie/Db/Exception.php" />
+            <include name="Phergie/Db/Manager.php" />
+            <include name="Phergie/Db/Sqlite.php" />
             <include name="Phergie/Driver/Abstract.php" />
             <include name="Phergie/Driver/Exception.php" />
             <include name="Phergie/Driver/Streams.php" />

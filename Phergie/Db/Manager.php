@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,25 +11,25 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
- * @package   Phergie_Plugin_Command
+ * @category  Phergie
+ * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Plugin_Command
+ * @link      http://pear.phergie.org/package/Phergie_Command
  */
 
 /**
  * Database management class. Provides a base API for managing databases
  * within
  *
- * @category Phergie 
- * @package  Phergie_Plugin_Db_Manager
+ * @category Phergie
+ * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie_Plugin_Db_Manager
+ * @link     http://pear.phergie.org/package/Phergie_Db_Manager
  */
-abstract class Phergie_Plugin_Db_Manager
+abstract class Phergie_Db_Manager
 {
     /**
      * PDO connection to the database
@@ -48,7 +48,7 @@ abstract class Phergie_Plugin_Db_Manager
 
     /**
      * checks if a table exists within the database
-     * 
+     *
      * @param string $table_name table name to check for existance
      *
      * @return boolean

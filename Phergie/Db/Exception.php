@@ -29,7 +29,7 @@
  * @link     http://pear.phergie.org/package/Phergie
  */
 
-class Phergie_Plugin_Db_Exception extends Phergie_Exception
+class Phergie_Db_Exception extends Phergie_Exception
 {
     /**
      * Error indicating that a directory needed to support database

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -12,7 +12,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Url
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -24,7 +24,7 @@
  * Responds to a request for a TLD (formatted as .tld where tld is the TLD to
  * be looked up) with its corresponding description.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Tld
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -79,10 +79,10 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
         }
 
         try {
-            $db_manager = new Phergie_Plugin_Db_Sqlite('tld.db');
-            $db_manager->setDbDirectory(dirname(__FILE__) . '/Tld');
-            $this->db = $db_manager->getDb();
-            if (!$db_manager->hasTable('tld')) {
+            $dbFile = dirname(__FILE__) . '/Tld/tld.db';
+            $dbManager = new Phergie_Db_Sqlite($dbFile);
+            $this->db = $dbManager->getDb();
+            if (!$dbManager->hasTable('tld')) {
                 $query = 'CREATE TABLE tld ('
                         . 'tld VARCHAR(20), '
                         . 'type VARCHAR(20), '
@@ -215,7 +215,7 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
      * Retrieves the definition for a given TLD if it exists
      *
      * @param string $tld TLD to search for
-     * 
+     *
      * @return string Definition of the given TLD
      */
     public function getTld($tld)
