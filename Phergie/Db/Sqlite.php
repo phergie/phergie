@@ -104,7 +104,7 @@ class Phergie_Db_Sqlite extends Phergie_Db_Manager
 
         return (bool) $db->query(
             'SELECT COUNT(*) FROM sqlite_master WHERE name = '
-            . $this->_db->quote($table)
+            . $db->quote($table)
         )->fetchColumn();
     }
 }
