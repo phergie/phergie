@@ -36,18 +36,21 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
                 var_export($callback, true),PHP_EOL;
             return;
         } else {
+            $register = time();
             $classname = ( is_string($callback[0]) )?
                 $callback[0] : get_class($callback[0]);
             $this->callbacks[] = array(
                 'call' => $callback,
                 'delay'=>$delay,
                 'args'=>$arguments,
-                'registered'=>time(),
+                'registered'=>$register,
+                'scheduled'=>$register+$delay,
                 'repeat'=>$repeat
             );
             echo 'DEBUG(Cron): Callback registered '.$classname.' '.$callback[1].
                 " scheduled for ".date('H:i:s', time()+$delay)."\n";
             unset($classname);
+            unset($register);
         }
         
     }
@@ -62,7 +65,7 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
     {
         $time = time();
         foreach ( $this->callbacks as $key=>$call ) {
-            $stime = $call['registered'] + $call['delay'];
+            $stime = $call['scheduled'];
             if ( $stime  < $time ) {
                 if ( empty($call['args']) ) {
                     call_user_func($call['call']);
@@ -76,7 +79,7 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
                 if ( $call['repeat'] ) {
                     echo $debughead." next execution at ".
                         date('H:i:s', $time+$call['delay']).".\n";
-                    $this->callbacks[$key]['registered'] = $time;
+                    $this->callbacks[$key]['scheduled'] = $time+$call['delay'];
                 } else {
                     echo $debughead." removed from callback list.\n";
                     unset($this->callbacks[$key]);
