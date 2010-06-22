@@ -32,6 +32,13 @@
 class Phergie_Db_Sqlite extends Phergie_Db_Manager
 {
     /**
+     * Database connection
+     *
+     * @var PDO
+     */
+    protected $db;
+
+    /**
      * Database file path
      *
      * @var string
@@ -85,7 +92,7 @@ class Phergie_Db_Sqlite extends Phergie_Db_Manager
             );
         }
 
-        $this->db = new PDO($this->dbFile);
+        $this->db = new PDO('sqlite:' . $this->dbFile);
 
         return $this->db;
     }
@@ -104,7 +111,7 @@ class Phergie_Db_Sqlite extends Phergie_Db_Manager
 
         return (bool) $db->query(
             'SELECT COUNT(*) FROM sqlite_master WHERE name = '
-            . $this->_db->quote($table)
+            . $db->quote($table)
         )->fetchColumn();
     }
 }
