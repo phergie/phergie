@@ -55,7 +55,7 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         $plugin = ucfirst($plugin);
 
         if (!$this->plugins->hasPlugin($plugin)) {
-            echo 'DEBUG(Reload): Loading ', $plugin, PHP_EOL;
+            echo 'DEBUG(Reload): ' . ucfirst($plugin) . ' is not loaded yet, loading', PHP_EOL;
             $this->plugins->getPlugin($plugin);
             return;
         }
@@ -70,17 +70,19 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         }
 
         $class = $info['class'];
-        do {
-            $newClass = $class . '_' . rand();
-        } while (class_exists($newClass, false));
-
         $contents = file_get_contents($info['file']);
+        $newClass = $class . '_' . sha1($contents);
+
+        if (class_exists($newClass, false)) {
+            echo 'DEBUG(Reload): Class ', $class, ' has not changed since last reload', PHP_EOL;
+            return;
+        }
+
         $contents = preg_replace(
             array('/<\?(?:php)?/', '/class\s+' . $class . '/i'),
             array('', 'class ' . $newClass),
             $contents
         );
-        var_dump($class, $newClass, $contents);
         eval($contents);
 
         $instance = new $newClass;
