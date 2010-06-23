@@ -622,73 +622,29 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     public function getTitle($url)
     {
-        $opts = array(
-            'http' => array(
-                'timeout' => 3.5,
-                'method' => 'GET',
-                'user_agent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.12) Gecko/20080201 Firefox/2.0.0.12'
-            )
+        $http = $this->plugins->getPlugin('Http');
+        $options = array(
+            'timeout' => 3.5,
+            'user_agent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.12) Gecko/20080201 Firefox/2.0.0.12'
         );
-        $context = stream_context_create($opts);
 
-        if ($page = fopen($url, 'r', false, $context)) {
-            stream_set_timeout($page, 3.5);
-            $data = stream_get_meta_data($page);
-            foreach ($data['wrapper_data'] as $header) {
-                if (preg_match('/^Content-Type: ([^;]+)/', $header, $match)
-                    && !preg_match('#^(text/x?html|application/xhtml+xml)$#', $match[1])
-                ) {
-                    $title = $match[1];
-                }
-            }
-            if (!isset($title)) {
-                $content = '';
-                $tstamp = time() + 5;
+        $response = $http->get($url, array(), $options);
 
-                while ($chunk = fread($page, 64)) {
-                    $data = stream_get_meta_data($page);
-                    if ($data['timed_out']) {
-                        $this->debug('Url Timed Out: ' . $url);
-                        $this->errorStatus = true;
-                        break;
-                    }
-                    $content .= $chunk;
-                    // Check for timeout
-                    if (time() > $tstamp) break;
-                    // Try to read title
-                    if (preg_match('#<title[^>]*>(.*)#is', $content, $m)) {
-                        // Start another loop to grab some more data in order to be sure we have the complete title
-                        $content = $m[1];
-                        $loop = 2;
-                        while (($chunk = fread($page, 64)) && $loop-- && !strstr($content, '<')) {
-                            $content .= $chunk;
-                            // Check for timeout
-                            if (time() > $tstamp) break;
-                        }
-                        preg_match('#^([^<]*)#is', $content, $m);
-                        $title = preg_replace('#\s+#', ' ', $m[1]);
-                        $title = trim($this->decode($title, $this->titleLength));
-                        break;
-                    }
-                    // Title won't appear beyond that point so stop parsing
-                    if (preg_match('#</head>|<body#i', $content)) {
-                        break;
-                    }
-                }
+        $header = $response->getHeaders('Content-Type');
+        if (!preg_match('#^(text/x?html|application/xhtml+xml)(?:;.*)?$#', $header)) {
+            $title = $header;
+        }
+
+        $content = $response->getContent();
+        if (empty($title)) {
+            if (preg_match('#<title[^>]*>(.*?)</title>#is', $content, $match)) {
+                $title = html_entity_decode(trim($match[1]));
             }
-            fclose($page);
-        } else if (!$this->errorStatus) {
-            $this->debug('Couldn\t Open Url: ' . $url);
         }
 
         if (empty($title)) {
-            if ($this->errorStatus) {
-                if (!$this->showErrors || empty($this->errorMessage)) {
-                    return;
-                }
-                $title = $this->errorMessage;
-                $this->errorStatus = false;
-                $this->errorMessage = null;
+            if ($response->isError()) {
+                $title = $response->getCodeAsString();
             } else {
                 $title = 'No Title';
             }
