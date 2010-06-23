@@ -38,6 +38,43 @@ class Phergie_Plugin_Http_Response
     protected $code;
 
     /**
+     * HTTP response strings
+     *
+     * @var array
+     */
+    protected $codeStrings = array(
+        0   => 'No Response',
+        100 => 'Continue',
+        200 => 'OK',
+        201 => 'Created',
+        204 => 'No Content',
+        206 => 'Partial Content',
+        300 => 'Multiple Choices',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        303 => 'See Other',
+        304 => 'Not Modified',
+        307 => 'Temporary Redirect',
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        406 => 'Not Acceptable',
+        408 => 'Request Timeout',
+        410 => 'Gone',
+        413 => 'Request Entity Too Large',
+        414 => 'Request URI Too Long',
+        415 => 'Unsupported Media Type',
+        416 => 'Requested Range Not Satisfiable',
+        417 => 'Expectation Failed',
+        500 => 'Internal Server Error',
+        501 => 'Method Not Implemented',
+        503 => 'Service Unavailable',
+        506 => 'Variant Also Negotiates'
+    );
+
+    /**
      * Description of the HTTP response code or the error message if no HTTP 
      * response was received
      *
@@ -87,6 +124,22 @@ class Phergie_Plugin_Http_Response
     public function getCode()
     {
         return $this->code;
+    }
+
+    /**
+     * Returns the HTTP response code text.
+     *
+     * @return string Response code text
+     */
+    public function getCodeAsString()
+    {
+        $code = $this->code;
+
+        if (!isset($this->codeStrings[$code])) {
+            return 'Unkown HTTP Status';
+        }
+
+        return $this->codeStrings[$code];
     }
 
     /**
