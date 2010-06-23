@@ -84,7 +84,7 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
             return $url;
         }
 
-        if (is_array($params['post'])) {
+        if (!empty($params['post'])) {
             $response = $this->http->post($params['uri'], $params['get'], $params['post'], $options);
         } else {
             $response = $this->http->get($params['uri'], $params['get'], $options);
