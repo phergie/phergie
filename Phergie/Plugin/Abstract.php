@@ -131,7 +131,7 @@ abstract class Phergie_Plugin_Abstract
      *
      * @return Phergie_Plugin_Abstract Provides a fluent interface
      */
-    protected function log($message)
+    public function log($message)
     {
         $this->log->log($message);
         return $this;

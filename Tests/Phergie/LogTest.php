@@ -109,7 +109,7 @@ class Phergie_LogTest extends PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    public function testLog()
+    public function testLogWithMockAdapter()
     {
         $message = 'test';
 
@@ -119,6 +119,29 @@ class Phergie_LogTest extends PHPUnit_Framework_TestCase
         $time = time();
         $this->log->log($message);
         $entry = date('H:i:s', $time) . ' DEBUG(' . __CLASS__ . '): ' . $message;
+
+        $entries = $adapter->getEntries();
+        $this->assertEquals($entries, array($entry));
+    }
+
+    /**
+     * Tests logging messages from a plugin.
+     *
+     * @return void
+     */
+    public function testLogFromPlugin()
+    {
+        $message = 'test';
+
+        $adapter = new Phergie_Log_Mock;
+        $this->log->addAdapter($adapter);
+
+        $plugin = new Phergie_Plugin_Mock;
+        $plugin->setLog($this->log);
+
+        $time = time();
+        $plugin->log($message);
+        $entry = date('H:i:s', $time) . ' DEBUG(Mock): ' . $message;
 
         $entries = $adapter->getEntries();
         $this->assertEquals($entries, array($entry));

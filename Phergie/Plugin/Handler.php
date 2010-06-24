@@ -239,7 +239,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
         $plugin->setPluginHandler($this);
         $plugin->setConfig($this->config);
         $plugin->setEventHandler($this->events);
-        $plugin->setLog($log);
+        $plugin->setLog($this->log);
         $plugin->onLoad();
 
         return $plugin;
