@@ -69,22 +69,34 @@ class Phergie_Plugin_Handler implements IteratorAggregate
     protected $events;
 
     /**
+     * Phergie_Log_Handler instance that should be passed in to any plugin
+     * instantiated within the handler
+     *
+     * @var Phergie_Log
+     */
+    protected $log;
+
+    /**
      * Constructor to initialize class properties and add the path for core
      * plugins.
      *
      * @param Phergie_Config        $config configuration to pass to any
-     *                                      instantiated plugin
+     *        instantiated plugin
      * @param Phergie_Event_Handler $events event handler to pass to any
-     *                                      instantiated plugin
+     *        instantiated plugin
+     * @param Phergie_Log           $log    logger to pass to any
+     *        instantiated plugin
      *
      * @return void
      */
     public function __construct(
         Phergie_Config $config,
-        Phergie_Event_Handler $events
+        Phergie_Event_Handler $events,
+        Phergie_Log $log
     ) {
         $this->config = $config;
         $this->events = $events;
+        $this->log = $log;
 
         $this->plugins = array();
         $this->paths = array();
@@ -212,11 +224,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate
                 $instance = new $class;
             }
 
-            // Configure and add the instance
-            $instance->setPluginHandler($this);
-            $instance->setConfig($this->config);
-            $instance->setEventHandler($this->events);
-            $instance->onLoad();
+            // Store the instance
             $this->plugins[$index] = $instance;
             $plugin = $instance;
 
@@ -226,6 +234,13 @@ class Phergie_Plugin_Handler implements IteratorAggregate
             // Add the plugin instance to the list of plugins
             $this->plugins[strtolower($plugin->getName())] = $plugin;
         }
+
+        // Configure and initialize the instance
+        $plugin->setPluginHandler($this);
+        $plugin->setConfig($this->config);
+        $plugin->setEventHandler($this->events);
+        $plugin->setLog($log);
+        $plugin->onLoad();
 
         return $plugin;
     }
