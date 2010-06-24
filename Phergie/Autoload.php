@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Autoloader for Phergie classes.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -37,9 +37,9 @@ class Phergie_Autoload
      */
     public function __construct()
     {
-        $path = dirname(__FILE__);
+        $path = realpath(dirname(__FILE__) . '/..');
         $includePath = get_include_path();
-        $includePathList = explode(PATH_SEPARATOR, $includePath); 
+        $includePathList = explode(PATH_SEPARATOR, $includePath);
         if (!in_array($path, $includePathList)) {
             self::addPath($path);
         }
@@ -54,9 +54,6 @@ class Phergie_Autoload
      */
     public function load($class)
     {
-        if (substr($class, 0, 8) == 'Phergie_') {
-            $class = substr($class, 8);
-        }
         include str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
     }
 
