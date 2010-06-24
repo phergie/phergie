@@ -125,6 +125,19 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
+     * Shorthand method for writing to the debugging log.
+     *
+     * @param string $message Message to write to the log
+     *
+     * @return Phergie_Plugin_Abstract Provides a fluent interface
+     */
+    protected function log($message)
+    {
+        $this->log->log($message);
+        return $this;
+    }
+
+    /**
      * Sets the current configuration handler.
      *
      * @param Phergie_Config $config Configuration handler
