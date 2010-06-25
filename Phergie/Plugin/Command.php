@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Command
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,20 +20,21 @@
  */
 
 /**
- * Handles parsing and execution of commands sent by users via messages sent 
+ * Handles parsing and execution of commands sent by users via messages sent
  * to channels in which the bot is present or directly to the bot.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Command
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Command
  * @uses     extension reflection
+ * @uses     Phergie_Plugin_Message pear.phergie.org
  */
 class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
 {
     /**
-     * Cache for command lookups used to confirm that methods exist and 
+     * Cache for command lookups used to confirm that methods exist and
      * parameter counts match
      *
      * @var array
@@ -48,6 +49,19 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
     protected $methodPrefix = 'onCommand';
 
     /**
+     * Message extraction plugin
+     *
+     * @var Phergie_Plugin_Message
+     */
+    protected $message = null;
+
+    public function onLoad() {
+        $plugins = $this->getPluginHandler();
+
+        $this->message = $plugins->getPlugin('Message');
+    }
+
+    /**
      * Populates the methods cache.
      *
      * @return void
@@ -58,8 +72,8 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             $reflector = new ReflectionClass($plugin);
             foreach ($reflector->getMethods() as $method) {
                 $name = $method->getName();
-                if (strpos($name, $this->methodPrefix) === 0 
-                    && !isset($this->methods[$name])
+                if (strpos($name, $this->methodPrefix) === 0
+                && !isset($this->methods[$name])
                 ) {
                     $this->methods[$name] = array(
                         'total' => $method->getNumberOfParameters(),
@@ -84,23 +98,16 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             $this->populateMethodCache();
         }
 
-        // Get the content of the message
-        $event = $this->getEvent();
-        $msg = trim($event->getText());
-        $prefix = $this->getConfig('command.prefix');
+        $msg = $this->message->getMessage();
 
-        // Check for the command prefix if one is set and needed
-        if ($prefix && $event->isInChannel()) {
-            if (strpos($msg, $prefix) !== 0) {
-                return;
-            } else {
-                $msg = substr($msg, strlen($prefix));
-            }
+        // Prefix condition failed
+        if($msg === false) {
+            return;
         }
 
         // Separate the command and arguments
         $parsed = preg_split('/\s+/', $msg, 2);
-        $method = $this->methodPrefix . ucfirst(strtolower(array_shift($parsed))); 
+        $method = $this->methodPrefix . ucfirst(strtolower(array_shift($parsed)));
         $args = count($parsed) ? array_shift($parsed) : '';
 
         // Check to ensure the command exists
@@ -122,11 +129,11 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             // Parse the arguments
             $args = preg_split('/\s+/', $args, $this->methods[$method]['total']);
 
-            // If the minimum arguments are passed, call the method 
+            // If the minimum arguments are passed, call the method
             if ($this->methods[$method]['required'] <= count($args)) {
                 call_user_func_array(
-                    array($this->getPluginHandler(), $method),
-                    $args
+                array($this->getPluginHandler(), $method),
+                $args
                 );
             }
         }
