@@ -78,13 +78,6 @@ class Phergie_Bot
     protected $ui;
 
     /**
-     * Current logger instance
-     *
-     * @var Phergie_Log
-     */
-    protected $log;
-
-    /**
      * Current processor instance
      *
      * @var Phergie_Process_Abstract
@@ -179,8 +172,7 @@ class Phergie_Bot
         if (empty($this->plugins)) {
             $this->plugins = new Phergie_Plugin_Handler(
                 $this->getConfig(),
-                $this->getEventHandler(),
-                $this->getLog()
+                $this->getEventHandler()
             );
         }
         return $this->plugins;
@@ -277,33 +269,6 @@ class Phergie_Bot
     public function setUi(Phergie_Ui_Abstract $ui)
     {
         $this->ui = $ui;
-        return $this;
-    }
-
-    /**
-     * Returns a logger instance, creating it if it does not already exist.
-     *
-     * @return Phergie_Log
-     */
-    public function getLog()
-    {
-        if (empty($this->log)) {
-            $this->log = new Phergie_Log;
-            $this->log->addAdapter(new Phergie_Log_Stdout);
-        }
-        return $this->log;
-    }
-
-    /**
-     * Sets the logger instance to use.
-     *
-     * @param Phergie_Log $log Logger instance
-     *
-     * @return Phergie_Bot Provides a fluent interface
-     */
-    public function setLog(Phergie_Log $log)
-    {
-        $this->log = $log;
         return $this;
     }
 

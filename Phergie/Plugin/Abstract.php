@@ -53,13 +53,6 @@ abstract class Phergie_Plugin_Abstract
     protected $events;
 
     /**
-     * Current logger instance
-     *
-     * @var Phergie_Log
-     */
-    protected $log;
-
-    /**
      * Current connection instance
      *
      * @var Phergie_Connection
@@ -122,19 +115,6 @@ abstract class Phergie_Plugin_Abstract
             $message,
             Phergie_Plugin_Exception::ERR_REQUIREMENT_UNSATISFIED
         );
-    }
-
-    /**
-     * Shorthand method for writing to the debugging log.
-     *
-     * @param string $message Message to write to the log
-     *
-     * @return Phergie_Plugin_Abstract Provides a fluent interface
-     */
-    public function log($message)
-    {
-        $this->log->log($message);
-        return $this;
     }
 
     /**
@@ -268,35 +248,6 @@ abstract class Phergie_Plugin_Abstract
             );
         }
         return $this->connection;
-    }
-
-    /**
-     * Sets the logger instance to use.
-     *
-     * @param Phergie_Log $log Logger instance
-     *
-     * @return Phergie_Plugin_Abstract Provides a fluent interface
-     */
-    public function setLog(Phergie_Log $log)
-    {
-        $this->log = $log;
-        return $this;
-    }
-
-    /**
-     * Returns the current logger.
-     *
-     * @return Phergie_Log
-     */
-    public function getLog()
-    {
-        if (empty($this->log)) {
-            throw new Phergie_Plugin_Exception(
-                'Logger cannot be accessed before one is set',
-                Phergie_Plugin_Exception::ERR_NO_LOGGER
-            );
-        }
-        return $this->log;
     }
 
     /**

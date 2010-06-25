@@ -110,10 +110,4 @@ class Phergie_Plugin_Exception extends Phergie_Exception
      * plugin
      */
     const ERR_FATAL_ERROR = 13;
-
-    /**
-     * Error indicating that an attempt was made to access the logger before
-     * one had been set
-     */
-    const ERR_NO_LOGGER = 14;
 }
