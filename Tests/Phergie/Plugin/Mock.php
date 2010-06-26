@@ -21,7 +21,7 @@
 
 /**
  * Creates a plugin on the filesystem that can be used by
- * Phergie_Plugin_Handler's addPath utility to be located and loaded.
+ * Phergie_Plugin_Handler::addPath() to be located and loaded.
  *
  * @category Phergie
  * @package  Phergie_Tests
@@ -32,18 +32,30 @@
 class Phergie_Plugin_Mock extends Phergie_Plugin_Abstract
 {
     /**
-     * holds the arguments that were passed in to the constructor
+     * Arguments passed to the constructor
+     *
      * @var array
      */
-    protected $args;
+    protected $arguments;
 
     /**
-     * processes a variable number of arguments into the args property
+     * Stores all arguments for later use.
      *
-     * @return null
+     * @return void
      */
     public function __construct()
     {
-        $this->args = func_get_args();
+        $this->arguments = func_get_args();
+    }
+
+    /**
+     * Returns all constructor arguments.
+     *
+     * @return array Enumerated array containing the arguments passed to the
+     *         constructor in order
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
     }
 }
