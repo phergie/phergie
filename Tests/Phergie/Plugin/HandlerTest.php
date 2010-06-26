@@ -38,75 +38,232 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     protected $handler;
 
     /**
+     * Mock Phergie_Config instance passed to the plugin handler constructor
+     *
+     * @var Phergie_Config
+     */
+    protected $config;
+
+    /**
+     * Mock Phergie_Event_Handler instance passed to the plugin handler
+     * constructor
+     *
+     * @var Phergie_Event_Handler
+     */
+    protected $events;
+
+    /**
+     * Returns a mock plugin instance.
+     *
+     * @param string $name    Optional short name for the mock plugin, defaults
+     *        to 'TestPlugin'
+     * @param array  $methods Optional list of methods to override
+     *
+     * @return Phergie_Plugin_Abstract
+     */
+    protected function getMockPlugin($name = 'TestPlugin', array $methods = array())
+    {
+        $methods[] = 'getName';
+        $plugin = $this->getMock('Phergie_Plugin_Abstract', $methods);
+        $plugin
+            ->expects($this->any())
+            ->method('getName')
+            ->will($this->returnValue($name));
+        return $plugin;
+    }
+
+    /**
      * Sets up a new handler instance before each test.
      *
      * @return void
      */
     public function setUp()
     {
+        $this->config = $this->getMock('Phergie_Config');
+        $this->events = $this->getMock('Phergie_Event_Handler');
         $this->handler = new Phergie_Plugin_Handler(
-            new Phergie_Config(),
-            new Phergie_Event_Handler()
+            $this->config,
+            $this->events
         );
     }
 
     /**
-     * Destroys the handler instance after each test
+     * Tests iterability of the plugin handler.
      *
      * @return void
      */
-    public function tearDown()
-    {
-        unset($this->handler);
-    }
-
-    /**
-     * Ensures that we can iterate over the handler
-     *
-     * @return void
-     */
-    public function testImplementsIterator()
+    public function testImplementsIteratorAggregate()
     {
         $reflection = new ReflectionObject($this->handler);
+
         $this->assertTrue(
-            $reflection->implementsInterface('IteratorAggregate')
+            $reflection->implementsInterface('IteratorAggregate'),
+            'Handler does not implement IteratorAggregate'
         );
 
         $this->assertType(
-            'Iterator', $this->handler->getIterator(),
-            'getIterator() must actually return an Iterator'
+            'Iterator',
+            $this->handler->getIterator(),
+            'getIterator() must return an iterator'
         );
     }
 
     /**
-     * Ensures a newly instantiated handler does not have plugins associated
-     * with it
+     * Tests countability of the plugin handler.
      *
-     * @depends testImplementsIterator
+     * @return void
+     */
+    public function testImplementsCountable()
+    {
+        $reflection = new ReflectionObject($this->handler);
+
+        $this->assertTrue(
+            $reflection->implementsInterface('Countable'),
+            'Handler does not implement Countable'
+        );
+
+        $this->assertType(
+            'int',
+            count($this->handler),
+            'count() must return an integer'
+        );
+    }
+
+    /**
+     * Tests the plugin handler exposing added plugins as instance
+     * properties of the handler via isset().
+     *
+     * @return void
+     */
+    public function testImplementsIsset()
+    {
+        $pluginName = 'TestPlugin';
+        $this->assertFalse(isset($this->handler->{$pluginName}));
+        $plugin = $this->getMockPlugin($pluginName);
+        $this->handler->addPlugin($plugin);
+        $this->assertTrue(isset($this->handler->{$pluginName}));
+    }
+
+    /**
+     * Tests the plugin handler exposing added plugins as instance
+     * properties of the handler.
+     *
+     * @depends testImplementsIsset
+     * @return void
+     */
+    public function testImplementsGet()
+    {
+        $plugin = $this->getMockPlugin();
+        $this->handler->addPlugin($plugin);
+        $name = $plugin->getName();
+        $getPlugin = $this->handler->getPlugin($name);
+        $this->assertTrue(isset($this->handler->$name));
+        $get = $this->handler->$name;
+        $this->assertSame($getPlugin, $get);
+    }
+
+    /**
+     * Tests the plugin handler allowing for plugin removal via unset().
+     *
+     * @depends testImplementsGet
+     * @return void
+     */
+    public function testImplementsUnset()
+    {
+        $plugin = $this->getMockPlugin();
+        $this->handler->addPlugin($plugin);
+        unset($this->handler->{$plugin->getName()});
+        $this->assertFalse($this->handler->hasPlugin($plugin->getName()));
+    }
+
+    /**
+     * Tests the plugin handler executing a callback on all contained
+     * plugins where one plugin short-circuits the process.
+     *
+     * @return void
+     */
+    public function testImplementsCallWithShortCircuit()
+    {
+        $plugin1 = $this->getMockPlugin('TestPlugin1', array('callback'));
+        $plugin1
+            ->expects($this->once())
+            ->method('callback')
+            ->will($this->returnValue(false));
+        $this->handler->addPlugin($plugin1);
+
+        $plugin2 = $this->getMockPlugin('TestPlugin2', array('callback'));
+        $plugin2
+            ->expects($this->exactly(0))
+            ->method('callback');
+        $this->handler->addPlugin($plugin2);
+
+        $this->assertFalse($this->handler->callback());
+    }
+
+    /**
+     * Tests the plugin handler executing a callback on all contained
+     * plugins where no plugins short-circuit the process.
+     *
+     * @return void
+     */
+    public function testImplementsCallWithoutShortCircuit()
+    {
+        foreach (range(1, 2) as $index) {
+            $plugin = $this->getMockPlugin('TestPlugin' . $index, array('callback'));
+            $plugin
+                ->expects($this->once())
+                ->method('callback');
+            $this->handler->addPlugin($plugin);
+        }
+
+        $this->assertTrue($this->handler->callback());
+    }
+
+    /**
+     * Tests a newly instantiated handler not having plugins associated with
+     * it.
+     *
+     * @depends testImplementsCountable
      * @return void
      */
     public function testEmptyHandlerHasNoPlugins()
     {
-        $count = 0;
-        foreach ($this->handler as $plugin) {
-            $count++;
-        }
-
-        $this->assertEquals(0, $count);
+        $this->assertEquals(0, count($this->handler));
     }
-    
+
     /**
-     * Ensures a newly instantiated handler does not default to autoload
+     * Tests a newly instantiated handler not having autoloading enabled by
+     * default.
      *
      * @return void
      */
-    public function testDefaultsToNotAutoload()
+    public function testGetAutoloadDefaultsToNotAutoload()
     {
         $this->assertFalse($this->handler->getAutoload());
     }
 
     /**
-     * addPath provides a fluent interface
+     * Tests setAutoload().
+     *
+     * @depends testGetAutoloadDefaultsToNotAutoload
+     * @return void
+     */
+    public function testSetAutoload()
+    {
+        $this->assertSame(
+            $this->handler->setAutoload(true),
+            $this->handler,
+            'setAutoload() does not provide a fluent interface'
+        );
+
+        $this->assertTrue(
+            $this->handler->getAutoload(),
+            'setAutoload() had no effect on getAutoload()'
+        );
+    }
+
+    /**
+     * Tests addPath() providing a fluent interface.
      *
      * @return void
      */
@@ -117,7 +274,8 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * addPath throws an exception when it cannot read the directory
+     * Tests addPath() throwing an exception when it cannot read the
+     * directory.
      *
      * @return void
      */
@@ -133,122 +291,113 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->fail('An expected exception has not been raised.');
+        $this->fail('An expected exception has not been raised');
     }
 
     /**
-     * adds a path into the plugin handler and then ensures that files
-     * in that location can be found
+     * Tests adding a path to the plugin handler.
      *
      * @return void
      */
     public function testAddPath()
     {
-        $plugin_name = 'Mock';
+        $pluginName = 'Mock';
+
         try {
-            $this->handler->addPlugin($plugin_name);
+            $this->handler->addPlugin($pluginName);
         } catch(Phergie_Plugin_Exception $e) {
             $this->assertEquals(
                 Phergie_Plugin_Exception::ERR_CLASS_NOT_FOUND,
                 $e->getCode()
             );
-            
-            $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
-
-            try {
-                $this->handler->addPlugin($plugin_name);
-            } catch(Phergie_Plugin_Exception $e) {
-                $this->fail(
-                    'After adding the directory, the plugin was still '
-                    . 'not found.'
-                );
-            }
-            
-            return;
         }
 
-        $this->fail(
-            'Before adding the directory, an expected exception '
-            . 'was not raised'
-        );
-    }
+        if (!isset($e)) {
+            $this->fail('Plugin loaded, path was already present');
+        }
 
-    /**
-     * addPlugin returns the plugin instance that was added
-     *
-     * @return void
-     */
-    public function testAddPluginByInstanceReturnsPluginInstance() {
-        $plugin = $this->getMock('Phergie_Plugin_Abstract');
-        $plugin
-            ->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue('TestPlugin'));
-
-        $returned_plugin = $this->handler->addPlugin($plugin);
-        $this->assertSame(
-            $returned_plugin,
-            $plugin,
-            'addPlugin returns the same instance that is passed to it'
-        );
-    }
-
-    /**
-     * Can add a plugin to the handler by shortname
-     *
-     * @return void
-     */
-    public function testAddPluginToHandlerByShortname()
-    {
-        $plugin_name = 'Mock';
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
-        $returned_plugin = $this->handler->addPlugin($plugin_name);
-        $this->assertTrue($this->handler->hasPlugin($plugin_name));
+        try {
+            $this->handler->addPlugin($pluginName);
+        } catch(Phergie_Plugin_Exception $e) {
+            $this->fail('Added path, plugin still not found');
+        }
+    }
+
+    /**
+     * Tests addPlugin() returning an added plugin instance.
+     *
+     * @return void
+     */
+    public function testAddPluginByInstanceReturnsPluginInstance()
+    {
+        $plugin = $this->getMockPlugin();
+        $returnedPlugin = $this->handler->addPlugin($plugin);
+        $this->assertSame(
+            $returnedPlugin,
+            $plugin,
+            'addPlugin() does not return the instance passed to it'
+        );
+    }
+
+    /**
+     * Tests adding a plugin to the handler using the plugin's short name.
+     *
+     * @return void
+     */
+    public function testAddPluginByShortName()
+    {
+        $pluginName = 'Mock';
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+
+        $returnedPlugin = $this->handler->addPlugin($pluginName);
+        $this->assertTrue($this->handler->hasPlugin($pluginName));
+
         $this->assertType(
             'Phergie_Plugin_Mock',
-            $this->handler->getPlugin($plugin_name)
+            $this->handler->getPlugin($pluginName)
         );
+
         $this->assertSame(
-            $this->handler->getPlugin($plugin_name),
-            $returned_plugin,
-            'Handler contains plugin when added by shortname.'
+            $this->handler->getPlugin($pluginName),
+            $returnedPlugin,
+            'Handler does not contain added plugin'
         );
     }
 
 
     /**
-     * Can add a plugin to the handler by instance
+     * Tests adding a plugin instance to the handler.
      *
      * @return void
      */
-    public function testAddPluginToHandlerByInstance()
+    public function testAddPluginByInstance()
     {
-        $plugin = $this->getMock('Phergie_Plugin_Abstract');
-        $plugin
-            ->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue('TestPlugin'));
-
-        $returned_plugin = $this->handler->addPlugin($plugin);
-
+        $plugin = $this->getMockPlugin();
+        $returnedPlugin = $this->handler->addPlugin($plugin);
         $this->assertTrue($this->handler->hasPlugin('TestPlugin'));
+
         $this->assertSame(
-            $plugin, $returned_plugin,
-            'addPlugin returns the same plugin'
+            $plugin,
+            $returnedPlugin,
+            'addPlugin() does not return added plugin instance'
         );
+
         $this->assertSame(
-            $plugin, $this->handler->getPlugin('TestPlugin'),
-            'getPlugin returns the same plugin'
+            $plugin,
+            $this->handler->getPlugin('TestPlugin'),
+            'getPlugin() does not return added plugin instance'
         );
     }
 
     /**
-     * addPlugin throws an exception when it can't find the plugin
+     * Tests addPlugin() throwing an exception when the plugin class file
+     * can't be found.
      *
      * @return void
      */
-    public function testAddPluginThrowsExceptionIfCannotFindPlugin()
+    public function testAddPluginThrowsExceptionWhenPluginFileNotFound()
     {
         try {
             $this->handler->addPlugin('TestPlugin');
@@ -260,12 +409,68 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->fail('An expected exception has not been raised.');
+        $this->fail('An expected exception has not been raised');
     }
 
     /**
-     * addPlugin throws an exception when trying to instantiate a
-     * class that doesn't extend from Phergie_Plugin_Abstract
+     * Recursively removes all files and subdirectories in a directory.
+     *
+     * @param string $path Directory path
+     * @return void
+     */
+    private function removeDirectory($path)
+    {
+        if (file_exists($path)) {
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($path),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($it as $entry) {
+                if ($it->isDot()) {
+                    continue;
+                }
+                if ($entry->isDir()) {
+                    rmdir($entry->getPathname());
+                } else {
+                    unlink($entry->getPathname());
+                }
+            }
+        }
+    }
+
+    /**
+     * Tests addPlugin() throwing an exception when the plugin class file is
+     * found, but does not contain the plugin class as expected.
+     *
+     * @return void
+     */
+    public function testAddPluginThrowsExceptionWhenPluginClassNotFound()
+    {
+        $path = sys_get_temp_dir() . '/Phergie/Plugin';
+        $this->removeDirectory(dirname($path));
+        mkdir($path, 0777, true);
+        touch($path . '/TestPlugin.php');
+        $this->handler->addPath($path, 'Phergie_Plugin_');
+
+        try {
+            $this->handler->addPlugin('TestPlugin');
+        } catch(Phergie_Plugin_Exception $e) { }
+
+        if (isset($e)) {
+            $this->assertEquals(
+                Phergie_Plugin_Exception::ERR_CLASS_NOT_FOUND,
+                $e->getCode()
+            );
+        } else {
+            $this->fail('An expected exception has not been raised');
+        }
+
+        $this->removeDirectory(dirname($path));
+    }
+
+    /**
+     * Tests addPlugin() throwing an exception when trying to instantiate a
+     * class that doesn't extend Phergie_Plugin_Abstract.
      *
      * @return void
      */
@@ -281,11 +486,11 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->fail('An expected exception has not been raised.');
+        $this->fail('An expected exception has not been raised');
     }
 
     /**
-     * addPlugin throws an exception when trying to instantiate a
+     * Tests addPlugin() throwing an exception when trying to instantiate a
      * class that can't be instantiated.
      *
      * @return void
@@ -303,143 +508,88 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->fail('An expected exception has not been raised.');
+        $this->fail('An expected exception has not been raised');
     }
 
     /**
-     * addPlugin with shortname and arguments passes args to constructor
-     *
-     * @return null
-     */
-    public function testAddPluginShortnamePassesArgsToConstructor()
-    {
-        $plugin_name = 'Mock';
-        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
-
-        $arguments = array('a', 'b', 'c');
-
-        $plugin = $this->handler->addPlugin($plugin_name, $arguments);
-        $this->assertAttributeSame(
-            $arguments,
-            'args',
-            $plugin,
-            'Arguments passed in to addPlugin match the arguments '
-            . 'the Mock plugin constructor received'
-        );
-    }
-
-    /**
-     * addPlugin passes Phergie_Config to instantiated plugin
-     *
-     * @return null
-     */
-    public function testAddPluginPassesPhergieConfigToInstantiatedPlugin()
-    {
-        $my_config = new Phergie_Config();
-        $my_config['my_option'] = 'my_value';
-
-        // create a new handler with this config
-        unset($this->handler);
-        $this->handler = new Phergie_Plugin_Handler(
-            $my_config,
-            new Phergie_Event_Handler()
-        );
-
-        $plugin_name = 'Mock';
-        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
-
-        $plugin = $this->handler->addPlugin($plugin_name);
-
-        $this->assertSame(
-            $my_config,
-            $plugin->getConfig(),
-            'addPlugin passes Phergie_Config to instantiated plugin'
-        );
-    }
-
-    /**
-     * addPlugin passes Phergie_Event_Handler to instantiated plugin
-     *
-     * @return null
-     */
-    public function testAddPluginPassesPhergieEventHandlerToInstantiatedPlugin()
-    {
-        $plugin = $this->getMock('Phergie_Plugin_Abstract');
-        $plugin
-            ->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue('TestPlugin'));
-
-        $my_event_handler = new Phergie_Event_Handler();
-        $my_event_handler->addEvent($plugin, 'ping');
-
-        // create a new plugin handler with this event handler
-        unset($this->handler);
-        $this->handler = new Phergie_Plugin_Handler(
-            new Phergie_Config(),
-            $my_event_handler
-        );
-
-        $plugin_name = 'Mock';
-        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
-
-        $plugin = $this->handler->addPlugin($plugin_name);
-
-        $this->assertSame(
-            $my_event_handler,
-            $plugin->getEventHandler(),
-            'addPlugin passes Phergie_Event_Handler to instantiated plugin'
-        );
-    }
-
-    /**
-     * @todo addPlugin calls onLoad() to instantiated plugin
-     */
-
-    /**
-     * implements __isset
+     * Tests adding a plugin by its short name with arguments passed to the
+     * plugin constructor.
      *
      * @return void
      */
-    public function testPluginHandlerImplementsIsset()
+    public function testAddPluginShortNamePassesArgsToConstructor()
     {
-        $plugin_name = 'TestPlugin';
+        $pluginName = 'Mock';
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
 
-        $this->assertFalse(isset($this->handler->{$plugin_name}));
+        $arguments = array('a', 'b', 'c');
+        $plugin = $this->handler->addPlugin($pluginName, $arguments);
 
-        $plugin = $this->getMock('Phergie_Plugin_Abstract');
-        $plugin
-            ->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue($plugin_name));
-
-        $this->handler->addPlugin($plugin);
-
-        $this->assertTrue(isset($this->handler->{$plugin_name}));
-
+        $this->assertAttributeSame(
+            $arguments,
+            'arguments',
+            $plugin,
+            'Arguments do not match'
+        );
     }
 
     /**
-     * addPlugin() returns the same plugin when requested twice
+     * Tests addPlugin() passing Phergie_Config to an instantiated plugin.
+     *
+     * @return void
+     */
+    public function testAddPluginPassesConstructorArguments()
+    {
+        $pluginName = 'Mock';
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+        $plugin = $this->handler->addPlugin($pluginName);
+
+        $this->assertSame(
+            $this->config,
+            $plugin->getConfig(),
+            'Phergie_Config instances do not match'
+        );
+
+        $this->assertSame(
+            $this->events,
+            $plugin->getEventHandler(),
+            'Phergie_Event_Handler instances do not match'
+        );
+    }
+
+    /**
+     * Tests addPlugin() calling onLoad() on an instantiated plugin.
+     *
+     * @return void
+     */
+    public function testAddPluginCallsOnLoadOnInstantiatedPlugin()
+    {
+        $plugin = $this->getMockPlugin(null, array('onLoad'));
+        $plugin
+            ->expects($this->once())
+            ->method('onLoad');
+        $this->handler->addPlugin($plugin);
+    }
+
+    /**
+     * Tests addPlugin() returning the same plugin when called twice.
      *
      * @return void
      */
     public function testAddPluginReturnsSamePluginWhenAskedTwice()
     {
-        $plugin_name = 'Mock';
+        $pluginName = 'Mock';
         $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
-
-        $plugin1 = $this->handler->addPlugin($plugin_name);
-        $plugin2 = $this->handler->addPlugin($plugin_name);
+        $plugin1 = $this->handler->addPlugin($pluginName);
+        $plugin2 = $this->handler->addPlugin($pluginName);
         $this->assertSame($plugin1, $plugin2);
     }
 
-    
     /**
-     * Tests an exception is thrown when trying to get a plugin
-     * that is not already loaded and autoload is off
+     * Tests getPlugin() throwing an exception when trying to get an
+     * unloaded plugin with autoload disabled.
      *
-     * @depends testDefaultsToNotAutoload
+     * @depends testGetAutoloadDefaultsToNotAutoload
      * @return void
      */
     public function testExceptionThrownWhenLoadingPluginWithoutAutoload()
@@ -456,6 +606,134 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->fail('An expected exception has not been raised.');
+        $this->fail('An expected exception has not been raised');
+    }
+
+    /**
+     * Tests addPlugins() with a plugin short name and no plugin constructor
+     * arguments.
+     *
+     * @depends testAddPluginByShortName
+     * @depends testAddPluginByInstance
+     * @return void
+     */
+    public function testAddPluginsWithoutArguments()
+    {
+        $prefix = 'Phergie_Plugin_';
+        $this->handler->addPath(dirname(__FILE__), $prefix);
+
+        $plugin = 'Mock';
+        $this->handler->addPlugins(array($plugin));
+        $returnedPlugin = $this->handler->getPlugin($plugin);
+        $this->assertContains(
+            get_class($returnedPlugin),
+            $prefix . $plugin,
+            'Short name plugin not of expected class'
+        );
+    }
+
+    /**
+     * Tests addPlugins() with a plugin short name and plugin constructor
+     * arguments.
+     *
+     * @depends testAddPluginByShortName
+     * @depends testAddPluginByInstance
+     * @return void
+     */
+    public function testAddPluginsWithArguments()
+    {
+        $prefix = 'Phergie_Plugin_';
+        $this->handler->addPath(dirname(__FILE__), $prefix);
+
+        $arguments = array(1, 2, 3);
+        $plugin = array('Mock', $arguments);
+        $this->handler->addPlugins(array($plugin));
+        $returnedPlugin = $this->handler->getPlugin('Mock');
+        $this->assertEquals(
+            $arguments,
+            $returnedPlugin->getArguments(),
+            'Constructor arguments for instance plugin do not match'
+        );
+    }
+
+    /**
+     * Tests removePlugin() with a plugin instance.
+     *
+     * @depends testAddPluginByInstance
+     * @return void
+     */
+    public function testRemovePluginByInstance()
+    {
+        $plugin = $this->getMockPlugin();
+        $this->handler->addPlugin($plugin);
+        $this->handler->removePlugin($plugin);
+        $this->assertFalse(
+            $this->handler->hasPlugin($plugin->getName()),
+            'Plugin was not removed'
+        );
+    }
+
+    /**
+     * Tests removePlugin() with a plugin short name.
+     *
+     * @depends testAddPluginByShortName
+     * @return void
+     */
+    public function testRemovePluginByShortName()
+    {
+        $plugin = 'Mock';
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+
+        $this->handler->addPlugin($plugin);
+        $this->handler->removePlugin($plugin);
+        $this->assertFalse(
+            $this->handler->hasPlugin($plugin),
+            'Plugin was not removed'
+        );
+    }
+
+    /**
+     * Tests getPlugin() when the plugin is not already loaded and
+     * autoloading is disabled.
+     *
+     * @depends testSetAutoload
+     * @return void
+     */
+    public function testGetPluginWithAutoloadEnabled()
+    {
+        $this->handler->setAutoload(true);
+        $this->handler->addPath(dirname(__FILE__), 'Phergie_Plugin_');
+        $plugin = $this->handler->getPlugin('Mock');
+        $this->assertType(
+            'Phergie_Plugin_Mock',
+            $plugin,
+            'Retrieved plugin not of expected class'
+        );
+    }
+
+    /**
+     * Tests getPlugins().
+     *
+     * @depends testGetPluginWithAutoloadEnabled
+     * @return void
+     */
+    public function testGetPlugins()
+    {
+        $plugin1 = $this->getMockPlugin('TestPlugin1');
+        $this->handler->addPlugin($plugin1);
+
+        $plugin2 = $this->getMockPlugin('TestPlugin2');
+        $this->handler->addPlugin($plugin2);
+
+        $expected = array(
+            'testplugin1' => $plugin1,
+            'testplugin2' => $plugin2,
+        );
+
+        $actual = $this->handler->getPlugins();
+        $this->assertEquals($expected, $actual);
+
+        $actual = $this->handler->getPlugins(array('testplugin1', 'testplugin2'));
+        $this->assertEquals($expected, $actual);
     }
 }
