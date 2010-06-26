@@ -65,17 +65,12 @@ class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
         }
 
         $this->plugins->getPlugin('Command');
-    }
-
-    /**
-     * Initializes the data source. 
-     *
-     * @return void
-     */
-    public function onConnect()
-    {
+       
+        set_error_handler(array($this, 'loadDictionaryError'));
         $this->pspell = pspell_new($this->getConfig('spellcheck.lang'));
-        $this->limit  = $this->getConfig('spellcheck.limit', 5);
+        restore_error_handler();
+
+        $this->limit = $this->getConfig('spellcheck.limit', 5);
     }
 
     /**
@@ -105,6 +100,21 @@ class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
         }
          
         $this->doPrivmsg($source, $message);
+    }
+
+    /**
+     * Handle any errors from loading dictionary
+     *
+     * @param integer $errno   Error code
+     * @param string  $errstr  Error message
+     * @param string  $errfile File that errored
+     * @param integer $errline Line where the error happened
+     *
+     * @return void
+     */
+    protected function loadDictionaryError($errno, $errstr, $errfile, $errline)
+    {
+        $this->fail($errstr);
     }
 
 }
