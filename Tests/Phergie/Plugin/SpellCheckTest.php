@@ -53,20 +53,16 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
         $this->spell = new Phergie_Plugin_SpellCheck();
         $this->setPlugin(new Phergie_Plugin_Command());
         
-        $handler = new Phergie_Plugin_Handler(new Phergie_Config(), $this->handler);
+        $config = $this->plugin->getConfig();
+        
+        $handler = new Phergie_Plugin_Handler($config, $this->handler);
         $this->plugin->setPluginHandler($handler);
         
         $handler->addPlugin($this->plugin);
         $handler->addPlugin($this->spell);
 
-        $config = $this->plugin->getConfig();
-        $this->spell->setConfig($config); 
-
         $this->spell->setEventHandler($this->handler);
         $this->spell->setConnection($this->connection);
-
-        $this->spell->onLoad();
-        $this->spell->onConnect();
     }
 
     /**
@@ -76,6 +72,8 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
      */
     public function testSpell()
     {
+        $this->spell->onLoad();
+        
         $this->copyEvent();
         $this->plugin->onPrivMsg();
         $this->assertDoesNotHaveEvent(Phergie_Event_Command::TYPE_PRIVMSG);
@@ -88,6 +86,8 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
      */
     public function testSpellTest()
     {
+        $this->spell->onLoad();
+        
         $this->copyEvent();
         $this->plugin->onPrivMsg();
 
@@ -112,6 +112,8 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
      */
     public function testSpellTestz()
     {
+        $this->spell->onLoad();
+        
         $this->copyEvent();
         $this->plugin->onPrivMsg();
         
@@ -142,7 +144,7 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
         $this->copyEvent();
         $config['spellcheck.limit'] = 6;
         
-        $this->spell->onConnect();
+        $this->spell->onLoad();
         $this->plugin->onPrivMsg();
         
         $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PRIVMSG);
@@ -167,6 +169,8 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
      */
     public function testSpellNoSuggestions()
     {
+        $this->spell->onLoad();
+        
         $this->copyEvent();
         $this->plugin->onPrivMsg();
         
