@@ -12,7 +12,7 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie_Tests 
+ * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
