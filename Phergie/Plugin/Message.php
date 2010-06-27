@@ -37,9 +37,11 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
      * This is the case when the message starts with the bot's name
      * followed by [,:>] or when it is a private message.
      *
-     * @return boolean true when the message is specifically targeted at the bot, false otherwise.
+     * @return boolean true when the message is specifically targeted at the bot,
+     *                 false otherwise.
      */
-    public function isTargetedMessage() {
+    public function isTargetedMessage()
+    {
         $event = $this->getEvent();
 
         $self = preg_quote($this->connection->getNick());
@@ -50,15 +52,18 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
         $}ix
 REGEX;
 
-        return !$event->isInChannel() || preg_match($targetPattern, $event->getText()) > 0;
+        return !$event->isInChannel() 
+            || preg_match($targetPattern, $event->getText()) > 0;
     }
 
     /**
      * Allow for prefix and bot name aware extraction of a message
      *
-     * @return string|bool $message The message, which is possibly targeted at the bot or false if a prefix requirement failed
+     * @return string|bool $message The message, which is possibly targeted at the 
+     *                              bot or false if a prefix requirement failed
      */
-    public function getMessage() {
+    public function getMessage()
+    {
         $event = $this->getEvent();
 
         $prefix = preg_quote($this->getConfig('command.prefix'));
@@ -98,7 +103,7 @@ REGEX;
 
         $match = null;
 
-        if(!preg_match($pattern, $message, $match)) {
+        if (!preg_match($pattern, $message, $match)) {
             return false;
         }
 
