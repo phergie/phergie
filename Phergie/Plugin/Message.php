@@ -76,7 +76,7 @@ REGEX;
         |
         	\s*{$prefix}          # or start with the prefix
         )
-        \s+(.*)                   # always end with the message
+        \s*(.*)                   # always end with the message
         $}ix
 REGEX;
 
