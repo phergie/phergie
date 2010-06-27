@@ -110,11 +110,8 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
         $dir = dirname(__FILE__) . '/' . $this->getName();
         $path = $dir . '/karma.db';
 
-        if (!file_exists($dir)) {
-            mkdir($dir);
-        }
+        $manager = new Phergie_Db_Sqlite($path);
 
-        $this->db = null;
         $this->lastGc = null;
         $this->log = array();
 
@@ -174,8 +171,11 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
             $this->fixedKarma[strtolower($this->getConnection()->getNick())] = $static;
         }
         try {
-            $this->db = new PDO('sqlite:' . $path);
-            $this->createTables();
+            $this->db = $manager->getDb();
+
+            if(!$manager->hasTable('karma')) {
+                $this->createTables();
+            }
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
@@ -581,38 +581,22 @@ REGEX;
 
 
     /**
-     * Determines if a table exists
-     *
-     * @param string $name Table name
-     *
-     * @return bool
-     */
-    protected function hasTable($name)
-    {
-        $sql = 'SELECT COUNT(*) FROM sqlite_master WHERE name = '
-        . $this->db->quote($name);
-        return (bool) $this->db->query($sql)->fetchColumn();
-    }
-
-    /**
      * Creates the database table(s) (if they don't exist)
      *
      * @return void
      */
     protected function createTables()
     {
-        if (!$this->hasTable('karma')) {
-            $this->db->exec('
-				CREATE TABLE karma ( term VARCHAR ( 255 ), karma MEDIUMINT ) ;
-				CREATE UNIQUE INDEX karmaTerm ON karma ( term ) ;
-				CREATE INDEX karmaIndex ON karma ( karma ) ;'
-            );
-            $this->db->exec('
-				CREATE TABLE comment ( term VARCHAR ( 255 ) , comment VARCHAR ( 255 ) , sign VARCHAR ( 8 )) ;
-				CREATE INDEX commentTerm ON comment ( term ) ;
-				CREATE UNIQUE INDEX commentUnique ON comment ( comment ) ;'
-            );
-        }
+        $this->db->exec('
+            CREATE TABLE karma ( term VARCHAR ( 255 ), karma MEDIUMINT ) ;
+            CREATE UNIQUE INDEX karmaTerm ON karma ( term ) ;
+            CREATE INDEX karmaIndex ON karma ( karma ) ;'
+        );
+        $this->db->exec('
+            CREATE TABLE comment ( term VARCHAR ( 255 ) , comment VARCHAR ( 255 ) , sign VARCHAR ( 8 )) ;
+            CREATE INDEX commentTerm ON comment ( term ) ;
+            CREATE UNIQUE INDEX commentUnique ON comment ( comment ) ;'
+        );
     }
 
 }
