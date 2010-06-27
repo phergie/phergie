@@ -115,7 +115,9 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
         $this->lastGc = null;
         $this->log = array();
 
-        if(!defined('M_EULER')) {
+        // use a separate db for reply handling
+
+        if (!defined('M_EULER')) {
             define('M_EULER', '0.57721566490153286061');
         }
 
@@ -168,12 +170,13 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
         $static = $this->config['karma.static'];
 
         if ($static) {
-            $this->fixedKarma[strtolower($this->getConnection()->getNick())] = $static;
+            $nick = $this->getConnection()->getNick();
+            $this->fixedKarma[$nick] = $static;
         }
         try {
             $this->db = $manager->getDb();
 
-            if(!$manager->hasTable('karma')) {
+            if (!$manager->hasTable('karma')) {
                 $this->createTables();
             }
         } catch (PDO_Exception $e) {
@@ -195,7 +198,7 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
 
         $message = $this->message->getMessage();
 
-        if($message === false) {
+        if ($message === false) {
             return;
         }
 
@@ -207,9 +210,11 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
 		(?:  # start with ++ or -- before the term
 			(?P<action> \+\+|--)
 			(?:
-				(?P<term>\(.+?\)+)(?P<comment>.*) # don't require whitespace after a closing parenthesis
+				(?P<term>\(.+?\)+)(?P<comment>.*) # don't require whitespace
+				                                  # after a closing parenthesis
 			|
-				(?P<term>\S+)(?:\s+(?P<comment>.*))? # do require whitespace after a single word term
+				(?P<term>\S+)(?:\s+(?P<comment>.*))? # do require whitespace 
+				                                     # after a single word term
 			)
 
 		|   # follow the term with ++ or --
@@ -233,13 +238,13 @@ REGEX;
 REGEX;
         $match = null;
 
-        if(preg_match($modifyPattern, $message, $match)) {
+        if (preg_match($modifyPattern, $message, $match)) {
             $action = $match['action'];
             $term = $match['term'];
             $comment = strlen($match['comment']) > 0 ? $match['comment'] : null;
 
             $this->modifyKarma($term, $action, $comment);
-        } elseif(preg_match($versusPattern, $message, $match)) {
+        } elseif (preg_match($versusPattern, $message, $match)) {
             $term0 = trim($match['term0']);
             $term1 = trim($match['term1']);
             $method = $match['method'];
@@ -251,55 +256,62 @@ REGEX;
     /**
      * Get the karma rating for a given term
      * 
-     * @param $term
+     * @param string $term The term for which the karma needs to be retrieved
+     * 
+     * @return void
      */
     public function onCommandKarma($term)
     {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
 
-        // If a karma request is enclosed in parentheses, we assume it is an actual karma request
+        // If a karma request is enclosed in parentheses, 
+        // we assume it is an actual karma request
         $hasParentheses = substr($term, 0, 1) === '(' && substr($term, -1) === ')';
 
         // Remove parentheses
-        if($hasParentheses) {
+        if ($hasParentheses) {
             $term = trim(substr($term, 1, -1));
         }
 
         // Lets not investigate empty terms
-        if(strlen($term) === 0) {
+        if (strlen($term) === 0) {
             return;
         }
 
         $forSelf = false;
 
         // By 'me' we mean ourselves
-        if(strtolower($term) === 'me') {
+        if (strtolower($term) === 'me') {
             $forSelf = true;
             $term = $nick;
         }
 
         $canonicalTerm = $this->getCanonicalTerm($term);
 
-        if(in_array($canonicalTerm, $this->karmaBlacklist)) {
+        if (in_array($canonicalTerm, $this->karmaBlacklist)) {
             $this->doNotice($nick, "{$term} is blacklisted");
             return;
         }
 
-        if(isset($this->fixedKarma[$canonicalTerm])) {
-            $this->doPrivmsg($source, "{$nick}: " . sprintf($this->fixedKarma[$canonicalTerm], $term) . '.');
+        if (isset($this->fixedKarma[$canonicalTerm])) {
+            $this->doPrivmsg(
+                $source, 
+                "{$nick}: " . sprintf($this->fixedKarma[$canonicalTerm], $term) . '.'
+            );
             return;
         }
 
         $karma = $this->fetchKarma($term);
 
         // No karma known for term ...
-        if($karma === false) {
-            // ... and not targeted, no parentheses and counting more than two words in the sentence
+        if ($karma === false) {
+            // ... and not targeted, no parentheses
+            // and counting more than two words in the sentence
             // probably this is just a sentence starting with "karma", do nothing
-            if(!$this->message->isTargetedMessage()
-            && !$hasParentheses
-            && preg_match_all('|\s+|', $term, $_) > 1
+            if (!$this->message->isTargetedMessage()
+                && !$hasParentheses
+                && preg_match_all('|\s+|', $term, $_) > 1
             ) {
                 return;
             } else {
@@ -309,7 +321,7 @@ REGEX;
 
         $term = $forSelf ? "you have" : "{$term} has";
 
-        if($karma !== 0) {
+        if ($karma !== 0) {
             $message = "{$nick}: {$term} karma of {$karma}.";
         } else {
             $message = "{$nick}: {$term} neutral karma.";
@@ -321,10 +333,12 @@ REGEX;
     /**
      * Get the canonical form of a given term.
      *
-     * In the canonical form all sequences of whitespace are replaced by a single space
-     * and all characters are lowercased.
+     * In the canonical form all sequences of whitespace 
+     * are replaced by a single space and all characters
+     * are lowercased.
      *
-     * @param string $term
+     * @param string $term The term for which a canonical form is required
+     * 
      * @return string The canonical term
      */
     protected function getCanonicalTerm($term)
@@ -336,9 +350,11 @@ REGEX;
      * Compare the karma between two terms. Optionally increase/decrease
      * the karma of either term.
      * 
-     * @param string $term0
-     * @param string $term1
+     * @param string $term0  The first term
+     * @param string $term1  The second term
      * @param string $method The comparison method used (either < or >)
+     * 
+     * @return void
      */
     protected function compareKarma($term0, $term1, $method)
     {
@@ -351,26 +367,27 @@ REGEX;
         $canonicalTerm1 = $this->getCanonicalTerm($term1);
 
         // Nothing to be done
-        if(isset($this->fixedKarma[$canonicalTerm0])
-                || isset($this->fixedKarma[$canonicalTerm1])
-                || $canonicalTerm0 === ''
-	            || $canonicalTerm1 === '') {
+        if (isset($this->fixedKarma[$canonicalTerm0])
+            || isset($this->fixedKarma[$canonicalTerm1])
+            || $canonicalTerm0 === ''
+            || $canonicalTerm1 === ''
+        ) {
             return;
         }
 
-        if($canonicalTerm0 === 'me') {
+        if ($canonicalTerm0 === 'me') {
             $term0 = $nick;
             $canonicalTerm0 = $this->getCanonicalTerm($nick);
         }
 
-        if($canonicalTerm1 === 'me') {
+        if ($canonicalTerm1 === 'me') {
             $term1 = $nick;
             $canonicalTerm1 = $this->getCanonicalTerm($nick);
         }
 
         $everthing = array('all', '*', 'everything');
 
-        if(in_array($canonicalTerm0, $everthing)) {
+        if (in_array($canonicalTerm0, $everthing)) {
             $term0 = 'everything';
             $karma0 = 0;
         } else {
@@ -378,11 +395,11 @@ REGEX;
         }
 
         // First word is unknown, do nothing
-        if($karma0 === false) {
+        if ($karma0 === false) {
             return;
         }
 
-        if(in_array($canonicalTerm1, $everthing)) {
+        if (in_array($canonicalTerm1, $everthing)) {
             $term1 = 'everything';
             $karma1 = 0;
         } else {
@@ -390,29 +407,34 @@ REGEX;
         }
 
         // Second word is unknown or karmas are equal, do nothing
-        if($karma1 === false || $karma0 === $karma1) {
+        if ($karma1 === false || $karma0 === $karma1) {
             return;
         }
 
 
-        $assertion = ($method === '<' && $karma0 < $karma1) || ($method === '>' && $karma0 > $karma1); 
+        $assertion = ($method === '<' && $karma0 < $karma1) 
+            || ($method === '>' && $karma0 > $karma1); 
         $replies = $assertion ? $this->positiveAnswers : $this->negativeAnswers;
 
-        if($method === '<') {
+        if ($method === '<') {
             list($term0, $term1) = array($term1, $term0);
         }
 
-        if($term0 === 'everything') {
+        if ($term0 === 'everything') {
             $this->modifyKarma($term1, '--', null);
-        } elseif($term1 === 'everything') {
+        } elseif ($term1 === 'everything') {
             $this->modifyKarma($term0, '++', null);
         }
 
-        if(!$assertion) {
+        if (!$assertion) {
             list($term0, $term1) = array($term1, $term0);
         }
 
-        $message = str_replace(array('%owner%','%owned%'), array($term0, $term1), $replies[array_rand($replies,1)]);
+        $message = str_replace(
+            array('%owner%','%owned%'), 
+            array($term0, $term1), 
+            $replies[array_rand($replies, 1)]
+        );
 
         $this->doPrivmsg($source, $message);
 
@@ -422,9 +444,11 @@ REGEX;
     /**
      * Modify a terms karma.
      * 
-     * @param string $term The term to modify
-     * @param string $action The karma action (either ++ or --)
+     * @param string      $term    The term to modify
+     * @param string      $action  The karma action (either ++ or --)
      * @param string|null $comment The comment to go with the karma modification
+     * 
+     * @return void
      */
     protected function modifyKarma($term, $action, $comment)
     {
@@ -435,16 +459,16 @@ REGEX;
         $hasParentheses = substr($term, 0, 1) === '(' && substr($term, -1) === ')';
 
         // Remove parentheses
-        if($hasParentheses) {
+        if ($hasParentheses) {
             $term = trim(substr($term, 1, -1));
         }
 
         // Do nothing on a noop
-        if(strlen($term) === 0) {
+        if (strlen($term) === 0) {
             return;
         }
 
-        if(strtolower($term) === 'me') {
+        if (strtolower($term) === 'me') {
             $forSelf = true;
             $term = $nick;
         }
@@ -452,12 +476,17 @@ REGEX;
         $canonicalTerm = $this->getCanonicalTerm($term);
 
         // Do nothing if the karma is fixed or blacklisted
-        if (isset($this->fixedKarma[$canonicalTerm]) || in_array($canonicalTerm, $this->karmaBlacklist)) {
+        if (isset($this->fixedKarma[$canonicalTerm]) 
+            || in_array($canonicalTerm, $this->karmaBlacklist)
+        ) {
             return;
         }
 
-        if(strcasecmp($term, $nick) === 0 && $action === '++') {
-            $this->doNotice($nick, "Bad {$nick}! You can not modify your own Karma. Shame on you!");
+        if (strcasecmp($term, $nick) === 0 && $action === '++') {
+            $this->doNotice(
+                $nick,
+                "Bad {$nick}! You can not modify your own Karma. Shame on you!"
+            );
 
             $term = $nick;
             $canonicalTerm = $this->getCanonicalTerm($nick);
@@ -469,22 +498,25 @@ REGEX;
         $limit = intval($this->getConfig('karma.limit', 3));
 
         // Once per day, clear the log
-        if($this->lastGc !== date('d')) {
+        if ($this->lastGc !== date('d')) {
             $this->lastGc = date('d');
             $this->log = array();
         }
             
         // Register the hostmask / term combination
-        if(!isset($this->log[$hostMask][$canonicalTerm])) {
+        if (!isset($this->log[$hostMask][$canonicalTerm])) {
             $this->log[$hostMask][$canonicalTerm] = 0;
         }
 
-        if($this->log[$hostMask][$canonicalTerm] >= $limit) {
+        if ($this->log[$hostMask][$canonicalTerm] >= $limit) {
             $hostLimit = $this->log[$hostMask][$canonicalTerm];
 
             // Three strikes, you're out, so lets decrement their karma for spammage
             if ($hostLimit == ($limit+3)) {
-                $this->doNotice($nick, "Bad {$nick}! Didn't I tell you that you reached your limit already?");
+                $this->doNotice(
+                    $nick,
+                    "Bad {$nick}! Didn't I tell you that you reached your limit already?"
+                );
                 $this->log[$hostMask][$canonicalTerm] = $limit;
 
                 $term = $nick;
@@ -492,7 +524,10 @@ REGEX;
                 $action = '--';
 
             } else {
-                $this->doNotice($nick, "You have currently reached your limit in modifying {$term} for this day, please wait a bit.");
+                $this->doNotice(
+                    $nick,
+                    "You have currently reached your limit in modifying {$term} for this day, please wait a bit."
+                );
                 $this->log[$hostMask][$canonicalTerm]++;
                 return;
             }
@@ -508,15 +543,15 @@ REGEX;
         if ($karma !== false) {
             $karma += $action == '++' ? 1 : -1;
 
-            $statement = $this->db->prepare('
-                UPDATE karma SET karma = :karma WHERE term = :term'
+            $statement = $this->db->prepare(
+                'UPDATE karma SET karma = :karma WHERE term = :term'
             );
         } else {
             $karma = $action == '++' ? 1 : -1;
 
-            $statement = $this->db->prepare('
-				INSERT INTO karma ( term, karma )
-                	VALUES ( :term, :karma )'
+            $statement = $this->db->prepare(
+                'INSERT INTO karma ( term, karma )
+                 VALUES ( :term, :karma )'
             );
         }
 
@@ -528,7 +563,7 @@ REGEX;
         $statement->execute($args);
 
         // If we have no comment, insert none
-        if($comment === null) {
+        if ($comment === null) {
             return;
         }
 
@@ -543,16 +578,18 @@ REGEX;
 REGEX;
         $comment = trim(preg_replace($commentPattern, '$1$2$3', $comment));
 
-        if($comment === '') {
+        if ($comment === '') {
             return;
         }
 
-        $statement =  $this->db->prepare('
-            INSERT INTO comment ( term, comment, sign )
-            VALUES ( :term, :comment, :sign )'
+        $statement =  $this->db->prepare(
+            'INSERT INTO comment ( term, comment, sign )
+             VALUES ( :term, :comment, :sign )'
         );
 
-        $args = array(':term' => $canonicalTerm, ':comment' => $comment, ':sign' => $action);
+        $args = array(':term' => $canonicalTerm
+                     ,':comment' => $comment
+                     ,':sign' => $action);
 
         $statement->execute($args);
     }
@@ -561,18 +598,22 @@ REGEX;
      * Get the amount of karma for the specified term
      *
      * @param string $term The term to fetch the karma for
-     * @return integer|boolean false if no karma is set, or an integer value denoting the term's karma
+     * 
+     * @return integer|boolean false if no karma is set, 
+     *                         or an integer value denoting the term's karma
      */
     protected function fetchKarma($term)
     {
         $term = $this->getCanonicalTerm($term);
 
-        $query = $this->db->prepare('SELECT karma FROM karma WHERE term = :term LIMIT 1');
+        $query = $this->db->prepare(
+            'SELECT karma FROM karma WHERE term = :term LIMIT 1'
+        );
 
         $query->execute(array(':term' => $term));
         $result = $query->fetch(PDO :: FETCH_ASSOC);
 
-        if($result === false) {
+        if ($result === false) {
             return false;
         }
 
@@ -587,15 +628,17 @@ REGEX;
      */
     protected function createTables()
     {
-        $this->db->exec('
-            CREATE TABLE karma ( term VARCHAR ( 255 ), karma MEDIUMINT ) ;
-            CREATE UNIQUE INDEX karmaTerm ON karma ( term ) ;
-            CREATE INDEX karmaIndex ON karma ( karma ) ;'
+        $this->db->exec(
+            'CREATE TABLE karma ( term VARCHAR ( 255 ), karma MEDIUMINT ) ;
+             CREATE UNIQUE INDEX karmaTerm ON karma ( term ) ;
+             CREATE INDEX karmaIndex ON karma ( karma ) ;'
         );
-        $this->db->exec('
-            CREATE TABLE comment ( term VARCHAR ( 255 ) , comment VARCHAR ( 255 ) , sign VARCHAR ( 8 )) ;
-            CREATE INDEX commentTerm ON comment ( term ) ;
-            CREATE UNIQUE INDEX commentUnique ON comment ( comment ) ;'
+        $this->db->exec(
+            'CREATE TABLE comment ( term VARCHAR ( 255 ) 
+                                   ,comment VARCHAR ( 255 )
+                                   ,sign VARCHAR ( 8 )) ;
+             CREATE INDEX commentTerm ON comment ( term ) ;
+             CREATE UNIQUE INDEX commentUnique ON comment ( comment ) ;'
         );
     }
 
