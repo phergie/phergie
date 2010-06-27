@@ -55,7 +55,13 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
      */
     protected $message = null;
 
-    public function onLoad() {
+    /**
+     * Load the Message plugin
+     * 
+     * @return void
+     */
+    public function onLoad()
+    {
         $plugins = $this->getPluginHandler();
 
         $this->message = $plugins->getPlugin('Message');
@@ -73,7 +79,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             foreach ($reflector->getMethods() as $method) {
                 $name = $method->getName();
                 if (strpos($name, $this->methodPrefix) === 0
-                && !isset($this->methods[$name])
+                    && !isset($this->methods[$name])
                 ) {
                     $this->methods[$name] = array(
                         'total' => $method->getNumberOfParameters(),
@@ -101,7 +107,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         $msg = $this->message->getMessage();
 
         // Prefix condition failed
-        if($msg === false) {
+        if ($msg === false) {
             return;
         }
 
@@ -132,8 +138,8 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             // If the minimum arguments are passed, call the method
             if ($this->methods[$method]['required'] <= count($args)) {
                 call_user_func_array(
-                array($this->getPluginHandler(), $method),
-                $args
+                    array($this->getPluginHandler(), $method),
+                    $args
                 );
             }
         }
