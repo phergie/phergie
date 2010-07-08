@@ -56,6 +56,30 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     }
 
     /**
+     * Converts a temperature in Celsius to Fahrenheit.
+     *
+     * @param int $temp Temperature in Celsius
+     *
+     * @return int Temperature converted to Fahrenheit
+     */
+    public function convertCelsiusToFahrenheit($temp)
+    {
+        return round(((((int) $temp * 9) / 5) + 32));
+    }
+
+    /**
+     * Converts a temperature in Fahrenheit to Celsius.
+     *
+     * @param int $temp Temperature in Fahrenheit
+     *
+     * @return int Temperature converted to Celsius
+     */
+    public function convertFahrenheitToCelsius($temp)
+    {
+        return round(((((int) $temp - 32) * 5) / 9));
+    }
+
+    /**
      * Returns a weather report for a specified location.
      *
      * @param string $location Zip code or city/state/country specification
@@ -107,18 +131,44 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
 
         $xml = $response->getContent();
         $weather = 'Weather for ' . (string) $xml->loc->dnam . ' - ';
-        $weather .= 'Current temperature ' .
-            (string) $xml->cc->tmp .
-            (string) $xml->head->ut . ' / ';
-        if ((string) $xml->head->ut == 'F') {
-            $weather .= round(((((int) $xml->cc->tmp - 32) * 5) / 9)) . 'C';
-        } else {
-            $weather .= round(((((int) $xml->cc->tmp * 9) / 5) + 32)) . 'F';
+        switch ($xml->head->ut) {
+            case 'F':
+                $tempF = $xml->cc->tmp;
+                $tempC = $this->convertFahrenheitToCelsius($tempF);
+                break;
+            case 'C':
+                $tempC = $xml->cc->tmp;
+                $tempF = $this->convertCelsiusToFahrenheit($tempC);
+                break;
+            default:
+                $this->doNotice(
+                    $this->event->getNick(),
+                    'ERROR: No scale information given.');
+                break;
+        }
+        $r = $xml->cc->hmid;
+        $tempF2 = $tempF * $tempF;
+        $r2 = $r * $r;
+        $hiF = round(
+            -42.379 +
+            (2.04901523 * $tempF) +
+            (10.14333127 * $r) -
+            (.22475541 * $tempF * $r) -
+            (6.83783 * pow(10,-3) * $tempF2) -
+            (5.481717 * pow(10,-2) * $r2) +
+            (1.22874 * pow(10,-3) * $tempF2 * $r) +
+            (8.5282 * pow(10,-4) * $tempF * $r2) -
+            (1.99 * pow(10,-6) * $tempF2 * $r2)
+        );
+        $hiC = $this->convertFahrenheitToCelsius($hiF);
+        $weather .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
+        $weather .= ', Humidity: ' . (string) $xml->cc->hmid . '%';
+        if ($hiF > $tempF || $hiC > $tempC) {
+            $weather .= ', Heat Index: ' . $hiF . 'F/' . $hiC . 'C';
         }
         $weather .=
-            ', Relative humidity ' . (string) $xml->cc->hmid . '%' .
-            ', Current conditions ' . (string) $xml->cc->t .
-            ', Last update ' . (string) $xml->cc->lsup .
+            ', Conditions: ' . (string) $xml->cc->t .
+            ', Updated: ' . (string) $xml->cc->lsup .
             ' [ http://weather.com/weather/today/' .
             str_replace(
                 array('(', ')', ',', ' '),
