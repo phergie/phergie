@@ -244,6 +244,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
             if (strpos($prefix, '@') !== false) {
                 $hostmask = Phergie_Hostmask::fromString($prefix);
+            } else {
+                $hostmask = new Phergie_Hostmask(null, null, $prefix);
             }
         }
 
