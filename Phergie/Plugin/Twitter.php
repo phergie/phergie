@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Twitter
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,7 +20,7 @@
  */
 
 /**
- * These requires are for library code, so they don't fit Autoload's normal 
+ * These requires are for library code, so they don't fit Autoload's normal
  * conventions.
  *
  * @link http://github.com/scoates/simpletweet
@@ -68,11 +68,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     protected $twitterpassword = null;
 
     /**
-     * Allow only admins to tweet
-     */
-    protected $requireAdmin = true;
-
-    /**
      * Register with the URL plugin, if possible
      *
      * @return void
@@ -91,13 +86,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        // see if tweetrequireadmin defined in config
-        if (isset($this->config['twitter.tweetrequireadmin'])
-            && $req = $this->config['twitter.tweetrequireadmin']
-        ) {
-            // if so, override default
-            $this->requireAdmin = $req;
-        }
         if (!isset($this->config['twitter.class'])
             || !$twitterClass = $this->config['twitter.class']
         ) {
@@ -150,12 +138,8 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onCommandTweet($txt)
     {
-        echo "Tweet!\n";
         $nick = $this->getEvent()->getNick();
         if (!$this->twitteruser) {
-            return;
-        }
-        if ($this->requireAdmin && !$this->fromAdmin(true)) {
             return;
         }
         $source = $this->getEvent()->getSource();
@@ -173,7 +157,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      * Formats a Tweet into a message suitable for output
      *
      * @param object $tweet      JSON-decoded tweet object from Twitter
-     * @param bool   $includeUrl whether or not to include the URL in the 
+     * @param bool   $includeUrl whether or not to include the URL in the
      *  formatted output
      *
      * @return string
@@ -218,6 +202,5 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
 
         // if we get this far, we haven't satisfied the URL, so bail:
         return false;
-
     }
 }
