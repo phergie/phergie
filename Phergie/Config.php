@@ -83,6 +83,22 @@ class Phergie_Config implements ArrayAccess
     }
 
     /**
+     * Merges an associative array of configuration setting values into the
+     * current configuration settings.
+     *
+     * @param array $settings Associative array of configuration setting
+     *        values keyed by setting name
+     *
+     * @return Phergie_Config Provides a fluent interface
+     */
+    public function readArray(array $settings)
+    {
+        $this->settings += $settings;
+
+        return $this;
+    }
+
+    /**
      * Writes the values of the current configuration settings back to their
      * originating files.
      *
