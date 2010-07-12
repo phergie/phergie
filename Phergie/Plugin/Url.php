@@ -227,15 +227,131 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     public function onPrivmsg()
     {
+        $this->handleMsg();
+    }
+
+    /**
+     * Checks an incoming message for the presence of a URL and, if one is
+     * found, responds with its title if it is an HTML document and the
+     * shortened equivalent of its original URL if it meets length requirements.
+     *
+     * @todo Update this to pull configuration settings from $this->config
+     *       rather than caching them as class properties
+     * @return void
+     */
+    public function onAction()
+    {
+        $this->handleMsg();
+    }
+
+    /**
+     * Handles message events and responds with url titles.
+     *
+     * @return void
+     */
+    protected function handleMsg()
+    {
         $source = $this->getEvent()->getSource();
         $user = $this->getEvent()->getNick();
 
+        $responses = array();
+        $urls = $this->findUrls($this->getEvent()->getArgument(1));
+
+        foreach ($urls as $parsed) {
+            $url = $parsed['glued'];
+
+            // allow out-of-class renderers to handle this URL
+            foreach ($this->renderers as $renderer) {
+                if ($renderer->renderUrl($parsed) === true) {
+                    // renderers should return true if they've fully
+                    // rendered the passed URL (they're responsible
+                    // for their own output)
+                    $this->debug('Handled by renderer: ' . get_class($renderer));
+                    continue 2;
+                }
+            }
+
+            // Convert url
+            $shortenedUrl = $this->shortener->shorten($url);
+            if (!$shortenedUrl) {
+                $this->debug('Invalid Url: Unable to shorten. (' . $url . ')');
+                continue;
+            }
+
+            // Prevent spamfest
+            if ($this->checkUrlCache($url, $shortenedUrl)) {
+                $this->debug('Invalid Url: URL is in the cache. (' . $url . ')');
+                continue;
+            }
+
+            $title = self::getTitle($url);
+            if (!empty($title)) {
+                $responses[] = str_replace(
+                    array(
+                        '%title%',
+                        '%link%',
+                        '%nick%'
+                    ), array(
+                        $title,
+                        $shortenedUrl,
+                        $user
+                    ), $this->messageFormat
+                );
+            }
+
+            // Update cache
+            $this->updateUrlCache($url, $shortenedUrl);
+            unset($title, $shortenedUrl, $title);
+        }
+
+        /**
+            * Check to see if there were any URL responses, format them and handle if they
+            * get merged into one message or not
+            */
+        if (count($responses) > 0) {
+            if ($this->mergeLinks) {
+                $message = str_replace(
+                    array(
+                        '%message%',
+                        '%nick%'
+                    ), array(
+                        implode('; ', $responses),
+                        $user
+                    ), $this->baseFormat
+                );
+                $this->doPrivmsg($source, $message);
+            } else {
+                foreach ($responses as $response) {
+                    $message = str_replace(
+                        array(
+                            '%message%',
+                            '%nick%'
+                        ), array(
+                            implode('; ', $responses),
+                            $user
+                        ), $this->baseFormat
+                    );
+                    $this->doPrivmsg($source, $message);
+                }
+            }
+        }
+    }
+
+    /**
+     * Detect URLs in a given string.
+     *
+     * @param string $message the string to detect urls in
+     *
+     * @return array the array of urls found
+     */
+    public function findUrls($message)
+    {
         $pattern = '#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) | ('
             .($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis';
+        $urls = array();
 
         // URL Match
-        if (preg_match_all($pattern, $this->getEvent()->getArgument(1), $matches, PREG_SET_ORDER)) {
-            $responses = array();
+        if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $m) {
                 $url = trim(rtrim($m[0], ', ].?!;'));
 
@@ -249,17 +365,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 if (!$parsed = $this->parseUrl($url)) {
                     $this->debug('Invalid Url: Could not parse the URL. (' . $url . ')');
                     continue;
-                }
-
-                // allow out-of-class renderers to handle this URL
-                foreach ($this->renderers as $renderer) {
-                    if ($renderer->renderUrl($parsed) === true) {
-                        // renderers should return true if they've fully
-                        // rendered the passed URL (they're responsible
-                        // for their own output)
-                        $this->debug('Handled by renderer: ' . get_class($renderer));
-                        continue 2;
-                    }
                 }
 
                 // Check to see if the given IP/Host is valid
@@ -295,73 +400,12 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                     $this->debug('Invalid Url: ' . $parsed['scheme'] . ' is not a supported scheme. (' . $url . ')');
                     continue;
                 }
-                $url = $this->glueURL($parsed);
-                unset($parsed);
 
-                // Convert url
-                $shortenedUrl = $this->shortener->shorten($url);
-                if (!$shortenedUrl) {
-                    $this->debug('Invalid Url: Unable to shorten. (' . $url . ')');
-                    continue;
-                }
-
-                // Prevent spamfest
-                if ($this->checkUrlCache($url, $shortenedUrl)) {
-                    $this->debug('Invalid Url: URL is in the cache. (' . $url . ')');
-                    continue;
-                }
-
-                $title = self::getTitle($url);
-                if (!empty($title)) {
-                    $responses[] = str_replace(
-                        array(
-                            '%title%',
-                            '%link%',
-                            '%nick%'
-                        ), array(
-                         $title,
-                            $shortenedUrl,
-                            $user
-                        ), $this->messageFormat
-                    );
-                }
-
-                // Update cache
-                $this->updateUrlCache($url, $shortenedUrl);
-                unset($title, $shortenedUrl, $title);
-            }
-            /**
-             * Check to see if there were any URL responses, format them and handle if they
-             * get merged into one message or not
-             */
-            if (count($responses) > 0) {
-                if ($this->mergeLinks) {
-                    $message = str_replace(
-                        array(
-                            '%message%',
-                            '%nick%'
-                        ), array(
-                            implode('; ', $responses),
-                            $user
-                        ), $this->baseFormat
-                    );
-                    $this->doPrivmsg($source, $message);
-                } else {
-                    foreach ($responses as $response) {
-                        $message = str_replace(
-                            array(
-                                '%message%',
-                                '%nick%'
-                            ), array(
-                                implode('; ', $responses),
-                                $user
-                            ), $this->baseFormat
-                        );
-                        $this->doPrivmsg($source, $message);
-                    }
-                }
+                $urls[] = $parsed + array('glued' => $this->glueURL($parsed));
             }
         }
+
+        return $urls;
     }
 
     /**
