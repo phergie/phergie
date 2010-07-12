@@ -127,7 +127,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * @return bool Always returns TRUE to allow normal execution to 
      *         continue once this method terminates
      */
-    protected function handleError($errno, $errstr, $errfile, $errline)
+    public function handleError($errno, $errstr, $errfile, $errline)
     {
         if ($httperr = strstr($errstr, 'HTTP/')) {
             $parts = $this->parseStatusLine($httperr); 
@@ -164,6 +164,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
             $message = $status['message'];
             $headers = array();
             foreach (array_slice($meta['wrapper_data'], 1) as $header) {
+                if (!strpos(':', $header)) continue;
                 list($name, $value) = explode(': ', $header, 2);
                 $headers[$name] = $value;
             }
@@ -174,7 +175,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
                 ->setMessage($message)
                 ->setHeaders($headers)
                 ->setMeta($meta);
- 
+
             $body = stream_get_contents($stream);
             $type = $this->response->getHeaders('content-type');
             foreach ($this->handlers as $expr => $handler) {
