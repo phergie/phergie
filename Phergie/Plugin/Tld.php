@@ -30,6 +30,8 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Tld
  * @uses     Phergie_Plugin_Http pear.phergie.org
+ * @uses     extension PDO
+ * @uses     extension pdo_sqlite
  *
  * @pluginDesc Provides information for a top level domain.
  */
@@ -78,116 +80,22 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
             );
         }
 
+        $dbFile = dirname(__FILE__) . '/Tld/tld.db';
         try {
-            $dbFile = dirname(__FILE__) . '/Tld/tld.db';
-            $dbManager = new Phergie_Db_Sqlite($dbFile);
-            $this->db = $dbManager->getDb();
-            if (!$dbManager->hasTable('tld')) {
-                $query = 'CREATE TABLE tld ('
-                        . 'tld VARCHAR(20), '
-                        . 'type VARCHAR(20), '
-                        . 'description VARCHAR(255))';
+            $this->db = new PDO('sqlite:' . $dbFile);
 
-                $this->db->exec($query);
+            $this->select = $this->db->prepare('
+                SELECT type, description
+                FROM tld
+                WHERE LOWER(tld) = LOWER(:tld)
+            ');
 
-                // prepare a statement to populate the table with
-                // tld information
-                $insert = $this->db->prepare(
-                    'INSERT INTO tld
-                    (tld, type, description)
-                    VALUES (:tld, :type, :description)'
-                );
-
-                // grab tld data from iana.org...
-                $contents = file_get_contents(
-                    'http://www.iana.org/domains/root/db/'
-                );
-
-                // ...and then parse it out
-                $regex = '{<tr class="iana-group[^>]*><td><a[^>]*>\s*\.?([^<]+)\s*'
-                        . '(?:<br/><span[^>]*>[^<]*</span>)?</a></td><td>\s*'
-                        . '([^<]+)\s*</td><td>\s*([^<]+)\s*}i';
-                preg_match_all($regex, $contents, $matches, PREG_SET_ORDER);
-
-                foreach ($matches as $match) {
-                    list(, $tld, $type, $description) = array_pad($match, 4, null);
-                    $type = trim(strtolower($type));
-                    if ($type != 'test') {
-                        $tld = trim(strtolower($tld));
-                        $description = trim($description);
-
-                        switch ($tld) {
-
-                        case 'com':
-                            $description = 'Commercial';
-                            break;
-
-                        case 'info':
-                            $description = 'Information';
-                            break;
-
-                        case 'net':
-                            $description = 'Network';
-                            break;
-
-                        case 'org':
-                            $description = 'Organization';
-                            break;
-
-                        case 'edu':
-                            $description = 'Educational';
-                            break;
-
-                        case 'name':
-                            $description = 'Individuals, by name';
-                            break;
-                        }
-
-                        if (empty($tld) || empty($description)) {
-                            continue;
-                        }
-
-                        $regex = '{(^(?:Reserved|Restricted)\s*(?:exclusively\s*)?'
-                                 . '(?:for|to)\s*(?:members of\s*)?(?:the|support)?'
-                                 . '\s*|\s*as advised.*$)}i';
-                        $description = preg_replace($regex, '', $description);
-                        $description = ucfirst(trim($description));
-
-                        $data = array_map(
-                            'html_entity_decode', array(
-                                'tld' => $tld,
-                                'type' => $type,
-                                'description' => $description
-                            )
-                        );
-
-                        $insert->execute($data);
-                    }
-                }
-
-                unset(
-                    $insert,
-                    $matches,
-                    $match,
-                    $contents,
-                    $tld,
-                    $type,
-                    $description,
-                    $data,
-                    $regex
-                );
-            }
-
-            // Create a prepared statements for retrieving TLDs
-            $this->select = $this->db->prepare(
-                'SELECT type, description '
-                . 'FROM tld WHERE LOWER(tld) = LOWER(:tld)'
-            );
-
-            $this->selectAll = $this->db->prepare(
-                'SELECT tld, type, description FROM tld'
-            );
+            $this->selectAll = $this->db->prepare('
+                SELECT tld, type, description
+                FROM btld
+            ');
         } catch (PDOException $e) {
+            $this->getPluginHandler()->removePlugin($this);
         }
     }
 
@@ -258,4 +166,3 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
         return false;
     }
 }
-
