@@ -628,15 +628,14 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             'user_agent' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.12) Gecko/20080201 Firefox/2.0.0.12'
         );
 
-        $response = $http->get($url, array(), $options);
-
+        $response = $http->head($url, array(), $options);
         $header = $response->getHeaders('Content-Type');
+
         if (!preg_match('#^(text/x?html|application/xhtml+xml)(?:;.*)?$#', $header)) {
             $title = $header;
-        }
-
-        $content = $response->getContent();
-        if (empty($title)) {
+        }else{
+            $response = $http->get($url, array(), $options);
+            $content = $response->getContent();
             if (preg_match('#<title[^>]*>(.*?)</title>#is', $content, $match)) {
                 $title = html_entity_decode(trim($match[1]));
             }
