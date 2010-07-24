@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,11 +20,11 @@
  */
 
 /**
- * Connection data processor which polls to handle input in an 
+ * Connection data processor which polls to handle input in an
  * asynchronous manner. Will also cause the application tick at
  * the user-defined wait time.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -61,7 +61,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
     protected $lastTick = 0;
 
     /**
-     * Overrides the parent class to set the poll time. 
+     * Overrides the parent class to set the poll time.
      *
      * @param Phergie_Bot $bot     Main bot class
      * @param array       $options Processor arguments
@@ -87,7 +87,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
             }
         }
 
-        if (empty($this->sec) && empty($this->usec)) {
+        if (isset($this->sec) && isset($this->usec)) {
             throw new Phergie_Process_Exception(
                 'One of the processor options "sec" or "usec" must be specified'
             );
@@ -97,7 +97,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
     }
 
     /**
-     * Waits for stream activity and performs event processing on 
+     * Waits for stream activity and performs event processing on
      * connections with data to read.
      *
      * @return void
@@ -144,7 +144,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
     }
 
     /**
-     * Obtains and processes incoming events, then sends resulting outgoing 
+     * Obtains and processes incoming events, then sends resulting outgoing
      * events.
      *
      * @return void
