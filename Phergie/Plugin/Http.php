@@ -166,7 +166,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
             $message = $status['message'];
             $headers = array();
             foreach (array_slice($meta['wrapper_data'], 1) as $header) {
-                if (!strpos(':', $header)) {
+                if (!strpos($header, ':')) {
                     continue;
                 }
                 list($name, $value) = explode(': ', $header, 2);
