@@ -336,7 +336,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             if (isset($hostmask)) {
                 $event->setHostmask($hostmask);
             }
-            var_dump($event);
         }
         $event->setRawData($buffer);
         return $event;
