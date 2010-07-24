@@ -31,6 +31,7 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Google
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
+ * @uses     Phergie_Plugin_Temperature pear.phergie.org
  *
  * @pluginDesc Provide access to some Google services
  */
@@ -60,6 +61,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Command');
         $this->http = $plugins->getPlugin('Http');
         $plugins->getPlugin('Help')->register($this);
+        $plugins->getPlugin('Weather');
 
         $this->lang = $this->getConfig('google.lang', 'en');
     }
