@@ -263,8 +263,9 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         case 'privmsg':
         case 'notice':
-            $ctcp = substr(strstr($args, ':'), 1);
-            if (substr($ctcp, 0, 1) === "\x01" && substr($ctcp, -1) === "\x01") {
+            $args = $this->parseArguments($args, 2);
+            list($source, $ctcp) = $args;
+            if (substr($ctcp, 0, 1) === "\001" && substr($ctcp, -1) === "\001") {
                 $ctcp = substr($ctcp, 1, -1);
                 $reply = ($cmd == 'notice');
                 list($cmd, $args) = array_pad(explode(' ', $ctcp, 2), 2, null);
@@ -285,7 +286,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                     }
                     break;
                 case 'action':
-                    $args = array($this->getConnection()->getNick(), $args);
+                    $args = array($source, $args);
                     break;
 
                 default:
@@ -293,11 +294,9 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                     if ($reply) {
                         $cmd .= 'Response';
                     }
-                    $args = array($this->getConnection()->getNick(), $ctcp);
+                    $args = array($source, $args);
                     break;
                 }
-            } else {
-                $args = $this->parseArguments($args, 2);
             }
             break;
 
@@ -337,6 +336,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             if (isset($hostmask)) {
                 $event->setHostmask($hostmask);
             }
+            var_dump($event);
         }
         $event->setRawData($buffer);
         return $event;
