@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Http
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,10 +20,10 @@
  */
 
 /**
- * Provides an HTTP client for plugins to use in contacting web services or 
+ * Provides an HTTP client for plugins to use in contacting web services or
  * retrieving feeds or web pages.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Http
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -46,7 +46,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * @var array
      */
     protected $handlers;
-    
+
     /**
      * Initializes the handler lookup table.
      *
@@ -55,8 +55,10 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $this->handlers = array(
-            '(?:application|text)/xml(?:;.*)?' => 'simplexml_load_string',
-            '(?:(?:application|text)/(?:x-)?json)|text/javascript.*' => 'json_decode',
+            '(?:application|text)/xml(?:;.*)?'
+                => 'simplexml_load_string',
+            '(?:(?:application|text)/(?:x-)?json)|text/javascript.*'
+                => 'json_decode',
         );
 
         if (is_array($this->config['http.handlers'])) {
@@ -68,10 +70,10 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Sets a handler callback for a content type, which is called when a 
-     * response of that content type is received to perform any needed 
-     * transformations on the response body content before storing it in the 
-     * response object. Note that the calling plugin is responsible for 
+     * Sets a handler callback for a content type, which is called when a
+     * response of that content type is received to perform any needed
+     * transformations on the response body content before storing it in the
+     * response object. Note that the calling plugin is responsible for
      * indicating any dependencies related to specified handler callbacks.
      *
      * @param string   $type     PCRE regular expression (without delimiters) that
@@ -96,12 +98,12 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Supporting method that parses the status line of an HTTP response 
+     * Supporting method that parses the status line of an HTTP response
      * message.
      *
      * @param string $status Status line
      *
-     * @return array Associative array containing the HTTP version, response 
+     * @return array Associative array containing the HTTP version, response
      *         code, and response description
      */
     protected function parseStatusLine($status)
@@ -116,7 +118,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Supporting method that acts as an error handler to intercept HTTP 
+     * Supporting method that acts as an error handler to intercept HTTP
      * responses resulting in PHP-level errors.
      *
      * @param int    $errno   Level of the error raised
@@ -124,13 +126,13 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * @param string $errfile Name of the file in which the error was raised
      * @param string $errline Line number on which the error was raised
      *
-     * @return bool Always returns TRUE to allow normal execution to 
+     * @return bool Always returns TRUE to allow normal execution to
      *         continue once this method terminates
      */
     public function handleError($errno, $errstr, $errfile, $errline)
     {
         if ($httperr = strstr($errstr, 'HTTP/')) {
-            $parts = $this->parseStatusLine($httperr); 
+            $parts = $this->parseStatusLine($httperr);
             $this->response
                 ->setCode($parts['code'])
                 ->setMessage($parts['message']);
@@ -143,9 +145,9 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * Supporting method that executes a request and handles the response.
      *
      * @param string $url     URL to request
-     * @param array  $context Associative array of stream context parameters 
+     * @param array  $context Associative array of stream context parameters
      *
-     * @return Phergie_Plugin_Http_Response Object representing the response 
+     * @return Phergie_Plugin_Http_Response Object representing the response
      *         resulting from the request
      */
     public function request($url, array $context)
@@ -164,7 +166,9 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
             $message = $status['message'];
             $headers = array();
             foreach (array_slice($meta['wrapper_data'], 1) as $header) {
-                if (!strpos(':', $header)) continue;
+                if (!strpos(':', $header)) {
+                    continue;
+                }
                 list($name, $value) = explode(': ', $header, 2);
                 $headers[$name] = $value;
             }
@@ -219,7 +223,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * @param string $url     URL for the request
      * @param array  $query   Optional associative array of parameters
      *        constituting the URL query string if $url has none
-     * @param array  $context Optional associative array of additional stream 
+     * @param array  $context Optional associative array of additional stream
      *        context parameters
      *
      * @return Phergie_Plugin_Http_Response Received response data
@@ -239,25 +243,26 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
      * Performs a POST request.
      *
      * @param string $url     URL for the request
-     * @param array  $query   Optional associative array of parameters 
+     * @param array  $query   Optional associative array of parameters
      *        constituting the URL query string if $url has none
-     * @param array  $post    Optional associative array of parameters 
-     *        constituting the POST request body if it is using the 
+     * @param array  $post    Optional associative array of parameters
+     *        constituting the POST request body if it is using the
      *        traditional URL-encoded format
-     * @param array  $context Optional associative array of additional stream 
+     * @param array  $context Optional associative array of additional stream
      *        context parameters
      *
      * @return Phergie_Plugin_Http_Response Received response data
      */
-    public function post($url, array $query = array(), array $post = array(), array $context = array())
-    {
+    public function post($url, array $query = array(),
+        array $post = array(), array $context = array()
+    ) {
         if (!empty($params)) {
             $url .= '?' . http_build_query($query);
         }
 
         $context['method'] = 'POST';
 
-        if (!empty($post) 
+        if (!empty($post)
             && (!empty($context['header'])
             xor stripos($context['header'], 'Content-Type'))
         ) {
@@ -266,7 +271,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
             } else {
                 $context['header'] = '';
             }
-            $context['header'] .= 
+            $context['header'] .=
                 'Content-Type: application/x-www-form-urlencoded';
             $context['content'] = http_build_query($post);
         }
