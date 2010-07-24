@@ -61,11 +61,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $this->http = $plugins->getPlugin('Http');
         $plugins->getPlugin('Help')->register($this);
 
-        if (!isset($this->config['google.lang'])) {
-            $this->lang = 'en';
-        }else{
-            $this->lang = $this->config['google.lang'];
-        }
+        $this->lang = $this->getConfig('google.lang', 'en');
     }
 
     /**
@@ -178,12 +174,14 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * Performs a Google Weather search for the given term.
      *
      * @param string $location Location to search for
+     * @param int    $offset   Optional day offset from the current date
+     *        between 0 and 3 to get the forecast
      *
      * @return void
      *
      * @pluginCmd [location] Show the weather for the specified location
      */
-    public function onCommandGw($location)
+    public function onCommandGw($location, $offset = null)
     {
         $url = 'http://www.google.com/ig/api';
         $params = array(
@@ -193,34 +191,85 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         );
         $response = $this->http->get($url, $params);
         $xml = $response->getContent()->weather;
-        $source = $this->getEvent()->getSource();
-        if (!isset($xml->problem_cause)) {
-            $city = $xml->forecast_information->city->attributes()->data[0];
-            $time = $xml->forecast_information->current_date_time->attributes()
-                ->data[0];
-            $condition = $xml->current_conditions->condition->attributes()->data[0];
-            $temp = $xml->current_conditions->temp_c->attributes()->data[0]
-                . '� C';
-            $humidity = $xml->current_conditions->humidity->attributes()->data[0];
-            $wind = $xml->current_conditions->wind_condition->attributes()->data[0];
-            $msg = implode(' - ', array($city, $temp, $condition, $humidity, $wind));
-            $this->doPrivmsg($source, $msg);
 
-            foreach ($xml->forecast_conditions as $key => $linha) {
-                $day = ucfirst($linha->day_of_week->attributes()->data[0]);
-                $min = $linha->low->attributes()->data[0];
-                $max = $linha->high->attributes()->data[0];
-                $condition = $linha->condition->attributes()->data[0];
-                $msg
-                    = 'Forecast: ' . $day .
-                    ' - Min: ' . $min . '� C' .
-                    ' - Max: ' . $max . '� C' .
-                    ' - ' . $condition;
-                $this->doPrivmsg($source, $msg);
-            }
-        } else {
-            $this->doPrivmsg($source, $xml->problem_cause->attributes()->data[0]);
+        $event = $this->getEvent();
+        $source = $event->getSource();
+        $msg = '';
+        if ($event->isInChannel()) {
+            $msg .= $event->getNick() . ': ';
         }
+
+        if (isset($xml->problem_cause)) {
+            $msg .= $xml->problem_cause->attributes()->data[0];
+            $this->doPrivmsg($source, $msg);
+            return;
+        }
+
+        $temperature = $this->plugins->getPlugin('Temperature');
+
+        $forecast = $xml->forecast_information;
+        $city = $forecast->city->attributes()->data[0];
+        $zip = $forecast->postal_code->attributes()->data[0];
+
+        if ($offset !== null) {
+            $offset = (int) $offset;
+            if ($offset < 0) {
+                $this->doNotice($source, 'Past weather data is not available');
+                return;
+            } elseif ($offset > 3) {
+                $this->doNotice($source, 'Future weather data is limited to 3 days from today');
+                return;
+            }
+
+            $linha = $xml->forecast_conditions[$offset];
+            $low = $linha->low->attributes()->data[0];
+            $high = $linha->high->attributes()->data[0];
+            $units = $forecast->unit_system->attributes()->data[0];
+            $condition = $linha->condition->attributes()->data[0];
+            $day = $linha->day_of_week->attributes()->data[0];
+
+            $date = ($offset == 0) ? time() : strtotime('next ' . $day);
+            $day = ucfirst($day) . ' ' . date('n/j/y', $date);
+
+            if ($units == 'US') {
+                $lowF = $low;
+                $lowC = $temperature->convertFahrenheitToCelsius($low);
+                $highF = $high;
+                $highC = $temperature->convertFahrenheitToCelsius($high);
+            } else {
+                $lowC = $low;
+                $lowF = $temperature->convertCelsiusToFahrenheit($lowC);
+                $highC = $high;
+                $highF = $temperature->convertCelsiusToFahrenheit($high);
+            }
+
+            $msg .= 'Forecast for ' . $city . ' (' . $zip . ')'
+                . ' on ' . $day . ' ::'
+                . ' Low: ' . $lowF . 'F/' . $lowC . 'C,'
+                . ' High: ' . $highF . 'F/' . $highC . 'C,'
+                . ' Conditions: ' . $condition;
+        } else {
+            $conditions = $xml->current_conditions;
+            $condition = $conditions->condition->attributes()->data[0];
+            $tempF = $conditions->temp_f->attributes()->data[0];
+            $tempC = $conditions->temp_c->attributes()->data[0];
+            $humidity = $conditions->humidity->attributes()->data[0];
+            $wind = $conditions->wind_condition->attributes()->data[0];
+            $time = $forecast->current_date_time->attributes()->data[0];
+            $time = date('n/j/y g:i A', strtotime($time)) . ' +0000';
+
+            $hiF = $temperature->getHeatIndex($tempF, $humidity);
+            $hiC = $temperature->convertFahrenheitToCelsius($hiF);
+
+            $msg .= 'Weather for ' . $city . ' (' . $zip . ') -'
+                . ' Temperature: ' . $tempF . 'F/' . $tempC . 'C,'
+                . ' ' . $humidity . ','
+                . ' Heat Index: ' . $hiF . 'F/' . $hiC . 'C,'
+                . ' Conditions: ' . $condition . ','
+                . ' Updated: ' . $time;
+        }
+
+        $this->doPrivmsg($source, $msg);
     }
 
     /**
