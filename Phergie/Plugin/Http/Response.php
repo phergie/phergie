@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Http
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -20,9 +20,9 @@
  */
 
 /**
- * Data structure for HTTP response information. 
+ * Data structure for HTTP response information.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Http
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -33,7 +33,7 @@ class Phergie_Plugin_Http_Response
     /**
      * HTTP response code or 0 if no HTTP response was received
      *
-     * @var string 
+     * @var string
      */
     protected $code;
 
@@ -42,7 +42,7 @@ class Phergie_Plugin_Http_Response
      *
      * @var array
      */
-    protected $codeStrings = array(
+    protected static $codeStrings = array(
         0   => 'No Response',
         100 => 'Continue',
         200 => 'OK',
@@ -75,7 +75,7 @@ class Phergie_Plugin_Http_Response
     );
 
     /**
-     * Description of the HTTP response code or the error message if no HTTP 
+     * Description of the HTTP response code or the error message if no HTTP
      * response was received
      *
      * @var string
@@ -135,11 +135,11 @@ class Phergie_Plugin_Http_Response
     {
         $code = $this->code;
 
-        if (!isset($this->codeStrings[$code])) {
+        if (!isset(self::$codeStrings[$code])) {
             return 'Unkown HTTP Status';
         }
 
-        return $this->codeStrings[$code];
+        return self::$codeStrings[$code];
     }
 
     /**
@@ -198,7 +198,7 @@ class Phergie_Plugin_Http_Response
     /**
      * Returns the content of the response body.
      *
-     * @return mixed Response body content, decoded for supported content 
+     * @return mixed Response body content, decoded for supported content
      *         types
      */
     public function getContent()
@@ -209,7 +209,7 @@ class Phergie_Plugin_Http_Response
     /**
      * Sets the response headers.
      *
-     * @param array $headers Associative array of response headers indexed 
+     * @param array $headers Associative array of response headers indexed
      *        by header name
      *
      * @return Phergie_Plugin_Http_Response Provides a fluent interface
@@ -223,14 +223,14 @@ class Phergie_Plugin_Http_Response
     }
 
     /**
-     * Returns all response headers or the value of a single specified 
+     * Returns all response headers or the value of a single specified
      * response header.
      *
-     * @param string $name Optional name of a single header for which the 
+     * @param string $name Optional name of a single header for which the
      *        associated value should be returned
      *
-     * @return array|string Associative array of all header values, a string  
-     *         containing the value of the header indicated by $name if one 
+     * @return array|string Associative array of all header values, a string
+     *         containing the value of the header indicated by $name if one
      *         is set, or null if one is not
      */
     public function getHeaders($name = null)
@@ -261,11 +261,11 @@ class Phergie_Plugin_Http_Response
     /**
      * Returns all metadata or the value of a single specified metadatum.
      *
-     * @param string $name Optional name of a single metadatum for which the 
+     * @param string $name Optional name of a single metadatum for which the
      *        associated value should be returned
-     * 
-     * @return array|string|null Associative array of all metadata values, a  
-     *         string containing the value of the metadatum indicated by 
+     *
+     * @return array|string|null Associative array of all metadata values, a
+     *         string containing the value of the metadatum indicated by
      *         $name if one is set, or null if one is not
      */
     public function getMeta($name = null)
