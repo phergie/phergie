@@ -124,43 +124,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $detectSchemeless = false;
 
     /**
-     * List of error messages to return when the requested URL returns an
-     * HTTP error
-     *
-     * @var array
-     */
-    protected $httpErrors = array(
-        100 => '100 Continue',
-        200 => '200 OK',
-        201 => '201 Created',
-        204 => '204 No Content',
-        206 => '206 Partial Content',
-        300 => '300 Multiple Choices',
-        301 => '301 Moved Permanently',
-        302 => '302 Found',
-        303 => '303 See Other',
-        304 => '304 Not Modified',
-        307 => '307 Temporary Redirect',
-        400 => '400 Bad Request',
-        401 => '401 Unauthorized',
-        403 => '403 Forbidden',
-        404 => '404 Not Found',
-        405 => '405 Method Not Allowed',
-        406 => '406 Not Acceptable',
-        408 => '408 Request Timeout',
-        410 => '410 Gone',
-        413 => '413 Request Entity Too Large',
-        414 => '414 Request URI Too Long',
-        415 => '415 Unsupported Media Type',
-        416 => '416 Requested Range Not Satisfiable',
-        417 => '417 Expectation Failed',
-        500 => '500 Internal Server Error',
-        501 => '501 Method Not Implemented',
-        503 => '503 Service Unavailable',
-        506 => '506 Variant Also Negotiates'
-    );
-
-    /**
      * Shortener object
      */
     protected $shortener;
@@ -493,45 +456,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             $out = substr($out, 0, $trim) . (strlen($out) > $trim ? '...' : '');
         }
         return $out;
-    }
-
-    /**
-     * Custom error handler meant to handle 404 errors and such
-     *
-     * @param int    $errno   the error code
-     * @param string $errstr  the error string
-     * @param string $errfile file the error occured in
-     * @param int    $errline line the error occured on
-     *
-     * @return bool
-     */
-    public function onPhpError($errno, $errstr, $errfile, $errline)
-    {
-        if ($errno === E_WARNING) {
-            // Check to see if there was HTTP warning while connecting to the site
-            if (preg_match('{HTTP/1\.[01] ([0-9]{3})}i', $errstr, $m)) {
-                $this->errorStatus = $m[1];
-                $this->errorMessage = (isset($this->httpErrors[$m[1]]) ? $this->httpErrors[$m[1]] : $m[1]);
-                $this->debug('PHP Warning:  ' . $errstr . 'in ' . $errfile . ' on line ' . $errline);
-                return true;
-            }
-
-            // Safely ignore these SSL warnings so they don't appear in the log
-            if (stripos($errstr, 'SSL: fatal protocol error in') !== false
-                || stripos($errstr, 'failed to open stream') !== false
-                || stripos($errstr, 'HTTP request failed') !== false
-                || stripos($errstr, 'SSL: An existing connection was forcibly closed by the remote host') !== false
-                || stripos($errstr, 'Failed to enable crypto in') !== false
-                || stripos($errstr, 'SSL: An established connection was aborted by the software in your host machine') !== false
-                || stripos($errstr, 'SSL operation failed with code') !== false
-                || stripos($errstr, 'unable to connect to') !== false
-            ) {
-                $this->errorStatus = true;
-                $this->debug('PHP Warning:  ' . $errstr . 'in ' . $errfile . ' on line ' . $errline);
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
