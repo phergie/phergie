@@ -30,6 +30,8 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Remind
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Time pear.phergie.org
+ * @uses     extension PDO
+ * @uses     extension pdo_sqlite
  */
 class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 {
@@ -67,15 +69,11 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Time');
-    }
 
-    /**
-     * Creates the database if it does not already exist.
-     *
-     * @return void
-     */
-    public function onConnect()
-    {
+        if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
+            $this->fail('PDO and pdo_sqlite extensions must be installed');
+        }
+
         $dir = dirname(__FILE__) . '/' . $this->getName();
         $path = $dir . '/reminder.db';
         if (!file_exists($dir)) {
