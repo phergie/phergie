@@ -31,6 +31,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Url
+ * @uses     Phergie_Plugin_Encoding pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  */
 class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
@@ -176,12 +177,16 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $renderers = array();
 
     /**
-     * Initializes settings, checks dependencies.
+     * Checks for dependencies.
      *
      * @return void
      */
-    public function onConnect()
+    public function onLoad()
     {
+        $plugins = $this->plugins;
+        $plugins->getPlugin('Encoding');
+        $plugins->getPlugin('Http');
+
         // make the shortener configurable
         $shortener = $this->getConfig('url.shortener', 'Trim');
         $shortener = "Phergie_Plugin_Url_Shorten_{$shortener}";
@@ -192,7 +197,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         }
 
         // Get a list of valid TLDs
-        if (!is_array($this->tldList) || count($this->tldList) <= 6) {
+        if (!is_array($this->tldList) || !count($this->tldList)) {
             $tldPath = dirname(__FILE__) . '/Url/url.tld.txt';
             $this->tldList = explode("\n", file_get_contents($tldPath));
             $this->debug('Loaded ' . count($this->tldList) . ' tlds');
@@ -275,7 +280,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             $shortenedUrl = $this->shortener->shorten($url);
             if (!$shortenedUrl) {
                 $this->debug('Invalid Url: Unable to shorten. (' . $url . ')');
-                continue;
+                $shortenedUrl = $url;
             }
 
             // Prevent spamfest
@@ -284,7 +289,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 continue;
             }
 
-            $title = self::getTitle($url);
+            $title = $this->getTitle($url);
             if (!empty($title)) {
                 $responses[] = str_replace(
                     array(
@@ -304,10 +309,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             unset($title, $shortenedUrl, $title);
         }
 
-        /**
-            * Check to see if there were any URL responses, format them and handle if they
-            * get merged into one message or not
-            */
+        // Check to see if there were any URL responses, format them and handle if they
+        // get merged into one message or not
         if (count($responses) > 0) {
             if ($this->mergeLinks) {
                 $message = str_replace(
@@ -380,7 +383,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                     $parsed['tld'] = ($pos !== false ? substr($parsed['host'], ($pos+1)) : '');
 
                     // Check to see if the URL has a valid TLD
-                    if (is_array($this->tldList) && !in_array(strtolower($parsed['tld']), $this->tldList)) {
+                    if (is_array($this->tldList)
+                        && count($this->tldList)
+                        && !in_array(strtolower($parsed['tld']), $this->tldList)) {
                         $this->debug('Invalid Url: ' . $parsed['tld'] . ' is not a supported TLD. (' . $url . ')');
                         continue;
                     }
@@ -498,7 +503,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     protected function decode($str, $trim = null)
     {
-        $out = $this->decodeTranslit($str);
+        $out = $this->plugins->encoding->transliterate($str);
         if ($trim > 0) {
             $out = substr($out, 0, $trim) . (strlen($out) > $trim ? '...' : '');
         }
@@ -555,7 +560,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected function getUrlChecksum($url)
     {
         $checksum = strtolower(urldecode($this->glueUrl($url, true)));
-        $checksum = preg_replace('#\s#', '', $this->decodeTranslit($checksum));
+        $checksum = preg_replace('#\s#', '', $this->plugins->encoding->transliterate($checksum));
         return dechex(crc32($checksum));
     }
 
@@ -677,13 +682,15 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         if (!preg_match('#^(text/x?html|application/xhtml+xml)(?:;.*)?$#', $header)) {
             $title = $header;
-        }else{
+        } else {
             $response = $http->get($url, array(), $options);
             $content = $response->getContent();
             if (preg_match('#<title[^>]*>(.*?)</title>#is', $content, $match)) {
-                $title = html_entity_decode(trim($match[1]));
+                $title = trim($match[1]);
             }
         }
+        $encoding = $this->plugins->getPlugin('Encoding');
+        $title = $encoding->decodeEntities($title);
 
         if (empty($title)) {
             if ($response->isError()) {
@@ -709,19 +716,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Placeholder/porting helper. Has no function.
-     *
-     * @param string $str a string to return
-     *
-     * @return string
-     */
-    protected function decodeTranslit($str)
-    {
-        // placeholder/porting helper
-        return $str;
-    }
-
-    /**
      * Add a renderer to the stack
      *
      * @param object $obj the renderer to add
@@ -730,7 +724,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     public function registerRenderer($obj)
     {
-        $this->renderers[] = $obj;
-        array_unique($this->renderers);
+        $this->renderers[spl_object_hash($obj)] = $obj;
     }
 }
