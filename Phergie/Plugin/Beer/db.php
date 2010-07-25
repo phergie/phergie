@@ -34,7 +34,7 @@ $xpath = new DOMXPath($doc);
 $beers = $xpath->query('//table[@class="beerlist"]/tr/td[1]');
 $db->beginTransaction();
 foreach ($beers as $beer) {
-    $name = $beer->textContent;
+    $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $beer->textContent);
     $link = 'http://beerme.com' . $beer->childNodes->item(1)->getAttribute('href');
     $insert->execute(array($name, $link));
 }
@@ -65,7 +65,7 @@ $columns = fgetcsv($fp, 0, '|');
 $db->beginTransaction();
 while ($line = fgetcsv($fp, 0, '|')) {
     $line = array_combine($columns, $line);
-    $name = $line['name'];
+    $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $line['name']);
     $link = null;
     $insert->execute(array($name, $link));
 }

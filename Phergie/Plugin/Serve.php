@@ -56,10 +56,10 @@ class Phergie_Plugin_Serve extends Phergie_Plugin_Abstract
     protected function getItem($database, $table, array $request)
     {
         $db = new PDO('sqlite:' . $database);
-        if (!empty($match['suggestion'])) {
+        if (!empty($request['suggestion'])) {
             $query = 'SELECT * FROM ' . $table . ' WHERE name LIKE ? ORDER BY RANDOM() LIMIT 1';
             $stmt = $db->prepare($query);
-            $stmt->execute(array('%' . $match['suggestion'] . '%'));
+            $stmt->execute(array('%' . $request['suggestion'] . '%'));
             $item = $stmt->fetchObject();
             if (!$item) {
                 $item = new stdClass;
