@@ -595,7 +595,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             $response = $http->get($url, array(), $options);
             $content = $response->getContent();
             if (preg_match('#<title[^>]*>(.*?)</title>#is', $content, $match)) {
-                $title = trim($match[1]);
+                $title = preg_replace('/[\s\v]+/', ' ', trim($match[1]));
             }
         }
         $encoding = $this->plugins->getPlugin('Encoding');
