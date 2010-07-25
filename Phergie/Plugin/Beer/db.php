@@ -32,11 +32,13 @@ $doc->loadHTML($contents);
 libxml_clear_errors();
 $xpath = new DOMXPath($doc);
 $beers = $xpath->query('//table[@class="beerlist"]/tr/td[1]');
+$db->beginTransaction();
 foreach ($beers as $beer) {
     $name = $beer->textContent;
     $link = 'http://beerme.com' . $beer->childNodes->item(1)->getAttribute('href');
     $insert->execute(array($name, $link));
 }
+$db->commit();
 
 // Clean up
 echo 'Cleaning up', PHP_EOL;
@@ -60,12 +62,14 @@ $file = __DIR__ . '/beers/beers.csv';
 echo 'Processing openbeerdb.com data', PHP_EOL;
 $fp = fopen($file, 'r');
 $columns = fgetcsv($fp, 0, '|');
+$db->beginTransaction();
 while ($line = fgetcsv($fp, 0, '|')) {
     $line = array_combine($columns, $line);
     $name = $line['name'];
     $link = null;
     $insert->execute(array($name, $link));
 }
+$db->commit();
 fclose($fp);
 
 // Clean up
