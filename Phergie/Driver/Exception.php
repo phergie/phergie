@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Exception related to driver operations.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -31,13 +31,13 @@
 class Phergie_Driver_Exception extends Phergie_Exception
 {
     /**
-     * Error indicating that an operation was requested requiring an active 
+     * Error indicating that an operation was requested requiring an active
      * connection before one had been set
      */
     const ERR_NO_ACTIVE_CONNECTION = 1;
 
     /**
-     * Error indicating that an operation was requested requiring an active 
+     * Error indicating that an operation was requested requiring an active
      * connection where one had been set but not initiated
      */
     const ERR_NO_INITIATED_CONNECTION = 2;
@@ -51,4 +51,9 @@ class Phergie_Driver_Exception extends Phergie_Exception
      * Error indicating that an attempt to send data via a connection failed
      */
     const ERR_CONNECTION_WRITE_FAILED = 4;
+
+    /**
+     * Error indicating that an attempt to read data via a connection failed
+     */
+    const ERR_CONNECTION_READ_FAILED = 5;
 }
