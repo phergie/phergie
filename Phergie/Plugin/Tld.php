@@ -41,11 +41,6 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
      * @var PDO
      */
     protected $db;
-    /**
-     * Some fixed TLD values, keys must be lowercase
-     * @var array
-     */
-    protected static $fixedTlds;
 
     /**
      * Prepared statement for selecting a single tld
@@ -68,16 +63,6 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
     {
         $help = $this->getPluginHandler()->getPlugin('Help');
         $help->register($this);
-
-        if (!is_array(self::$fixedTlds)) {
-            self::$fixedTlds = array(
-                'phergie' => 'You can find Phergie at http://www.phergie.org',
-                'spoon'   => 'Don\'t you know? There is no spoon!',
-                'poo'     => 'Do you really think that\'s funny?',
-                'root'    => 'Diagnostic marker to indicate '
-                . 'a root zone load was not truncated.'
-            );
-        }
 
         $dbFile = dirname(__FILE__) . '/Tld/tld.db';
         try {
@@ -128,14 +113,10 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
     public function getTld($tld)
     {
         $tld = trim(strtolower($tld));
-        if (isset(self::$fixedTlds[$tld])) {
-            return self::$fixedTlds[$tld];
-        } else {
-            if ($this->select->execute(array('tld' => $tld))) {
-                $tlds = $this->select->fetch();
-                if (is_array($tlds)) {
-                    return '(' . $tlds['type'] . ') ' . $tlds['description'];
-                }
+        if ($this->select->execute(array('tld' => $tld))) {
+            $tlds = $this->select->fetch();
+            if (is_array($tlds)) {
+                return '(' . $tlds['type'] . ') ' . $tlds['description'];
             }
         }
         return false;
@@ -144,7 +125,8 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
     /**
      * Retrieves a list of all the TLDs and their definitions
      *
-     * @return array Array of all the TLDs and their definitions
+     * @return mixed Array of all the TLDs and their definitions or FALSE on
+      *        failure
      */
     public function getTlds()
     {
@@ -158,7 +140,6 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
                         . $tld['description'];
                     }
                 }
-                unset($tlds);
                 return $tldinfo;
             }
         }

@@ -33,6 +33,7 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Url
  * @uses     Phergie_Plugin_Encoding pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
+ * @uses     Phergie_Plugin_Tld pear.phergie.org
  */
 class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 {
@@ -160,13 +161,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     );
 
     /**
-     * An array containing a list of TLDs used for non-scheme matches
-     *
-     * @var array
-     */
-    protected $tldList = array();
-
-    /**
      * Shortener object
      */
     protected $shortener;
@@ -186,6 +180,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $plugins = $this->plugins;
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Http');
+        $plugins->getPlugin('Tld');
 
         // make the shortener configurable
         $shortener = $this->getConfig('url.shortener', 'Trim');
@@ -194,14 +189,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         if (!$this->shortener instanceof Phergie_Plugin_Url_Shorten_Abstract) {
             $this->fail("Declared shortener class {$shortener} is not of proper ancestry");
-        }
-
-        // Get a list of valid TLDs
-        if (!is_array($this->tldList) || !count($this->tldList)) {
-            $tldPath = dirname(__FILE__) . '/Url/url.tld.txt';
-            $this->tldList = explode("\n", file_get_contents($tldPath));
-            $this->debug('Loaded ' . count($this->tldList) . ' tlds');
-            rsort($this->tldList);
         }
 
         // load config (a bit ugly, but focusing on porting):
@@ -383,9 +370,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                     $parsed['tld'] = ($pos !== false ? substr($parsed['host'], ($pos+1)) : '');
 
                     // Check to see if the URL has a valid TLD
-                    if (is_array($this->tldList)
-                        && count($this->tldList)
-                        && !in_array(strtolower($parsed['tld']), $this->tldList)) {
+                    if ($this->plugins->tld->getTld($parsed['tld']) === false) {
                         $this->debug('Invalid Url: ' . $parsed['tld'] . ' is not a supported TLD. (' . $url . ')');
                         continue;
                     }
