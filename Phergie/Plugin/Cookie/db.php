@@ -35,15 +35,24 @@ $xpath = new DOMXPath($doc);
 $cookies = $xpath->query('//table[@width="90%"]/tr/td[1]/a');
 
 foreach ($cookies as $cookie) {
-    
-    $name = str_replace(array('(',')',"\n", 'cookies'), array('','', ' ', 'cookie' ), trim( $cookie->textContent));
+    $name = $cookie->textContent;
+    foreach (range(0, mb_strlen($name) - 1) as $index) {
+        echo mb_strcut($name, $index, 1), PHP_EOL;
+    }
+    $name = str_replace(
+        array('(',')',"\n", 'cookies'),
+        array('','', ' ', 'cookie'),
+        $name
+    );
+    $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $name);
+    $name = trim($name);
+    $name = rtrim($name, 's');
 
     $link =  'http://en.wikipedia.org' . $cookie->getAttribute('href');
     $insert->execute(array($name, $link));
-    print 'added ['.$name.'] -> '. $link . PHP_EOL;
+    echo 'added [' . $name . '] -> '. $link . PHP_EOL;
 }
 
 // Clean up
 echo 'Cleaning up', PHP_EOL;
 unlink($file);
-
