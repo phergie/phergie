@@ -37,14 +37,14 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
      *
      * @var int
      */
-    protected $sec;
+    protected $sec = 0;
 
     /**
      * Length of time to poll for stream activity (microseconds)
      *
      * @var int
      */
-    protected $usec;
+    protected $usec = 200000;
 
     /**
      * Length of time to wait between ticks.
