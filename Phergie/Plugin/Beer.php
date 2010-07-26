@@ -66,4 +66,17 @@ class Phergie_Plugin_Beer extends Phergie_Plugin_Abstract
             $request
         );
     }
+
+    /**
+     * Adds a "booze" alias for the "beer" command.
+     *
+     * @param string $request Request including the target and an optional
+     *        suggestion of what beer to serve
+     *
+     * @return void
+     */
+    public function onCommandBooze($request)
+    {
+        $this->onCommandBeer($request);
+    }
 }
