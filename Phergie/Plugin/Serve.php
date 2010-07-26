@@ -63,7 +63,7 @@ class Phergie_Plugin_Serve extends Phergie_Plugin_Abstract
             $item = $stmt->fetchObject();
             if (!$item) {
                 $item = new stdClass;
-                $item->name = $match['suggestion'];
+                $item->name = $request['suggestion'];
                 $item->link = null;
             }
         } else {
