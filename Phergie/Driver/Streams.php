@@ -219,6 +219,14 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function getEvent()
     {
+        // Check the socket is still active
+        if (feof($this->socket)) {
+            throw new Phergie_Driver_Exception(
+                'EOF detected on socket',
+                Phergie_Driver_Exception::ERR_CONNECTION_READ_FAILED
+            );
+        }
+
         // Check for a new event on the current connection
         $buffer = fgets($this->socket, 512);
         if ($buffer === false) {
