@@ -87,7 +87,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
             }
         }
 
-        if (isset($this->sec) && isset($this->usec)) {
+        if (!isset($this->sec) && !isset($this->usec)) {
             throw new Phergie_Process_Exception(
                 'One of the processor options "sec" or "usec" must be specified'
             );
