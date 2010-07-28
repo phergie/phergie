@@ -229,12 +229,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Check for a new event on the current connection
         $buffer = fgets($this->socket, 512);
-        if ($buffer === false) {
-            throw new Phergie_Driver_Exception(
-                'Unable to read from socket',
-                Phergie_Driver_Exception::ERR_CONNECTION_READ_FAILED
-            );
-        }
 
         // If no new event was found, return NULL
         if (empty($buffer)) {
