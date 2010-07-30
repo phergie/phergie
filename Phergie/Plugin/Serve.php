@@ -113,20 +113,21 @@ class Phergie_Plugin_Serve extends Phergie_Plugin_Abstract
         $item = $this->getItem($database, $table, $match);
 
         // Reprocess the request for censorship if required
-        $attempts = 0;
-        while ($censor && $attempts < 3) {
+        if ($this->plugins->hasPlugin('Censor')) {
             $plugin = $this->plugins->getPlugin('Censor');
-            $clean = $plugin->cleanString($item->name);
-            if ($item->name != $clean) {
-                $attempts++;
-                $item = $this->getItem($database, $table, $match);
-            } else {
-                $censor = false;
+            $attempts = 0;
+            while ($censor && $attempts < 3) {
+                $clean = $plugin->cleanString($item->name);
+                if ($item->name != $clean) {
+                    $attempts++;
+                    $item = $this->getItem($database, $table, $match);
+                } else {
+                    $censor = false;
+                }
             }
-        }
-
-        if ($censor && $attempts == 3) {
-            $this->doAction($this->event->getSource(), 'shrugs.');
+            if ($censor && $attempts == 3) {
+                $this->doAction($this->event->getSource(), 'shrugs.');
+            }
         }
 
         // Derive the proper article for the item
