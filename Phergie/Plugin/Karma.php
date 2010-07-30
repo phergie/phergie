@@ -21,427 +21,409 @@
 
 /**
  * Handles requests for incrementation or decrementation of a maintained list
- * of counters for specified terms and antithrottling to prevent extreme
- * inflation or depression of counters by any single individual.
+ * of counters for specified terms.
  *
  * @category Phergie
  * @package  Phergie_Plugin_Karma
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Karma
+ * @uses     extension PDO
+ * @uses     extension pdo_sqlite
+ * @uses     Phergie_Plugin_Command pear.phergie.org
+ * @uses     Phergie_Plugin_Message pear.phergie.org
  */
 class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
 {
     /**
-     * Stores the SQLite object
+     * SQLite object
      *
      * @var resource
      */
     protected $db = null;
 
     /**
-     * Retains the last garbage collection date
-     *
-     * @var array
-     */
-    protected $lastGc = null;
-
-    /**
-     * Logs the karma usages and limits users to one karma change per word
-     * and per day
-     *
-     * @return void
-     */
-    protected $log = array();
-
-    /**
-     * Some fixed karma values, keys must be lowercase
-     *
-     * @var array
-     */
-    protected $fixedKarma;
-
-    /**
-     * A list of blacklisted values
-     *
-     * @var array
-     */
-    protected $karmaBlacklist;
-
-    /**
-     * Answers for correct assertions
-     */
-    protected $positiveAnswers;
-
-    /**
-     * Answers for incorrect assertions
-     */
-    protected $negativeAnswers;
-
-    /**
-     * Prepared PDO statements
+     * Prepared statement to add a new karma record
      *
      * @var PDOStatement
      */
     protected $insertKarma;
-    protected $updateKarma;
-    protected $fetchKarma;
-    protected $insertComment;
 
     /**
-     * Connects to the database containing karma ratings and initializes
-     * class properties.
+     * Prepared statement to update an existing karma record
+     *
+     * @var PDOStatement
+     */
+    protected $updateKarma;
+
+    /**
+     * Retrieves an existing karma record
+     *
+     * @var PDOStatement
+     */
+    protected $fetchKarma;
+
+    /**
+     * Retrieves an existing fixed karma record
+     *
+     * @var PDOStatement
+     */
+    protected $fetchFixedKarma;
+
+    /**
+     * Retrieves a positive answer for a karma comparison
+     *
+     * @var PDOStatement
+     */
+    protected $fetchPositiveAnswer;
+
+    /**
+     * Retrieves a negative answer for a karma comparison
+     *
+     * @var PDOStatement
+     */
+    protected $fetchNegativeAnswer;
+
+    /**
+     * Check for dependencies and initializes a database connection and
+     * prepared statements.
      *
      * @return void
      */
     public function onLoad()
     {
-        $this->db = null;
-        $this->lastGc = null;
-        $this->log = array();
+        $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Command');
+        $plugins->getPlugin('Message');
 
-        if(!defined('M_EULER')) {
-            define('M_EULER', '0.57721566490153286061');
-        }
-
-        $this->fixedKarma = array(
-            'phergie'      => '%s has karma of awesome',
-            'pi'           => '%s has karma of ' . M_PI,
-            'Î '            => '%s has karma of ' . M_PI,
-            'Ï€'            => '%s has karma of ' . M_PI,
-            'chucknorris'  => '%s has karma of Warning: Integer out of range',
-            'chuck norris' => '%s has karma of Warning: Integer out of range',
-            'c'            => '%s has karma of 299 792 458 m/s',
-            'e'            => '%s has karma of ' . M_E,
-            'euler'        => '%s has karma of ' . M_EULER,
-            'mole'         => '%s has karma of 6.02214e23 molecules',
-            'avogadro'     => '%s has karma of 6.02214e23 molecules',
-            'spoon'        => '%s has no karma. There is no spoon',
-            'mc^2'         => '%s has karma of E',
-            'mc2'          => '%s has karma of E',
-            'mcÂ²'          => '%s has karma of E',
-            'i'            => '%s haz big karma',
-            'karma' => 'The karma law says that all living creatures are responsible for their karma - their actions and the effects of their actions. You should watch yours.'
-        );
-
-        $this->karmaBlacklist = array(
-            '*',
-            'all',
-            'everything'
-        );
-
-        $this->positiveAnswers = array(
-            'No kidding, %owner% totally kicks %owned%\'s ass !',
-            'True that.',
-            'I concur.',
-            'Yay, %owner% ftw !',
-            '%owner% is made of WIN!',
-            'Nothing can beat %owner%!',
-        );
-
-        $this->negativeAnswers = array(
-            'No sir, not at all.',
-            'You\'re wrong dude, %owner% wins.',
-            'I\'d say %owner% is better than %owned%.',
-            'You must be joking, %owner% ftw!',
-            '%owned% is made of LOSE!',
-            '%owned% = Epic Fail',
-        );
-
-        // Load or initialize the database
-        $class = new ReflectionClass(get_class($this));
-        $dir = dirname($class->getFileName() . '/' . $this->name);
-        $this->db = new PDO('sqlite:' . $dir . 'karma.db');
-
-        // Check to see if the table exists
-        $table = $this->db->query('
-            SELECT COUNT(*)
-            FROM sqlite_master
-            WHERE name = ' . $this->db->quote('karmas')
-        )->fetchColumn();
-
-        // Create database tables if necessary
-        if (!$table) {
-            $this->db->query('
-                CREATE TABLE karmas ( word VARCHAR ( 255 ), karma MEDIUMINT );
-                CREATE UNIQUE INDEX word ON karmas ( word );
-                CREATE INDEX karmaIndex ON karmas ( karma );
-                CREATE TABLE comments ( wordid INT , comment VARCHAR ( 255 ) );
-                CREATE INDEX wordidIndex ON comments ( wordid );
-                CREATE UNIQUE INDEX commentUnique ON comments ( comment );
-            ');
-        }
-
-        $this->insertKarma = $this->db->prepare('
-            INSERT INTO karmas (
-                word,
-                karma
-            )
-            VALUES (
-                :word,
-                :karma
-            )
-        ');
-
-        $this->insertComment = $this->db->prepare('
-            INSERT INTO comments (
-                wordid,
-                comment
-            )
-            VALUES (
-                :wordid,
-                :comment
-            )
-        ');
+        $file = dirname(__FILE__) . '/Karma/karma.db';
+        $this->db = new PDO('sqlite:' . $file);
 
         $this->fetchKarma = $this->db->prepare('
-            SELECT karma, ROWID id FROM karmas WHERE LOWER(word) = LOWER(:word) LIMIT 1
+            SELECT karma
+            FROM karmas
+            WHERE term = :term
+            LIMIT 1
+        ');
+
+        $this->insertKarma = $this->db->prepare('
+            INSERT INTO karmas (term, karma)
+            VALUES (:term, :karma)
         ');
 
         $this->updateKarma = $this->db->prepare('
-            UPDATE karmas SET karma = :karma WHERE LOWER(word) = LOWER(:word)
+            UPDATE karmas
+            SET karma = :karma
+            WHERE term = :term
+        ');
+
+        $this->fetchFixedKarma = $this->db->prepare('
+            SELECT karma
+            FROM fixed_karmas
+            WHERE term = :term
+            LIMIT 1
+        ');
+
+        $this->fetchPositiveAnswer = $this->db->prepare('
+            SELECT answer
+            FROM positive_answers
+            ORDER BY RAND()
+            LIMIT 1
+        ');
+
+        $this->fetchNegativeAnswer = $this->db->prepare('
+            SELECT answer
+            FROM negative_answers
+            ORDER BY RAND()
+            LIMIT 1
         ');
     }
 
     /**
-     * Checks for dependencies.
+     * Get the canonical form of a given term.
      *
-     * @return void
+     * In the canonical form all sequences of whitespace
+     * are replaced by a single space and all characters
+     * are lowercased.
+     *
+     * @param string $term Term for which a canonical form is required
+     *
+     * @return string Canonical term
      */
-    public static function onLoad()
+    protected function getCanonicalTerm($term)
     {
-    	if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
-            $this->fail('PDO and pdo_sqlite extensions must be installed');
-    	}
+        $canonicalTerm = strtolower(preg_replace('|\s+|', ' ', trim($term, '()')));
+        switch ($canonicalTerm) {
+            case 'me':
+                $canonicalTerm = strtolower($this->event->getNick());
+                break;
+            case 'all':
+            case '*':
+            case 'everything':
+                $canonicalTerm = 'everything';
+                break;
+        }
+        return $canonicalTerm;
     }
 
     /**
-     * Handles requests for incrementation, decrementation, or lookup of karma
-     * ratings sent via messages from users.
+     * Intercepts a message and processes any contained recognized commands.
      *
      * @return void
      */
     public function onPrivmsg()
     {
-        $source = $this->event->getSource();
-        $message = $this->event->getArgument(1);
-        $target = $this->event->getNick();
+        $message = $this->getEvent()->getText();
 
-        // Command prefix check
-        $prefix = preg_quote(trim($this->getConfig('command.prefix')));
-        $bot = preg_quote($this->getConfig('connections.nick'));
-        $exp = '(?:(?:' . $bot . '\s*[:,>]?\s+(?:' . $prefix . ')?)|(?:' . $prefix . '))';
+        $modifyPattern = <<<REGEX
+		{^
+		(?J) # allow overwriting capture names
+		\s*  # ignore leading whitespace
 
-        // Karma status request
-        if (preg_match('#^' . $exp . 'karma\s+(.+)$#i', $message, $m)) {
-            // Return user's value if "me" is requested
-            if (strtolower($m[1]) === 'me') {
-                $m[1] = $target;
-            }
-            // Clean the term
-            $term = $this->doCleanWord($m[1]);
+		(?:  # start with ++ or -- before the term
+			(?P<action> \+\+|--)
+			(?:
+				(?P<term>\(.+?\)+)
+            )
+		|   # follow the term with ++ or --
+			(?P<term>
+				\S+?
+			|
+				\(.+?\)+
+			)
+			(?P<action>\+\+|--) # allow no whitespace between the term and the action
+		)
+		$}ix
+REGEX;
 
-            // Check the blacklist
-            if (is_array($this->karmaBlacklist) && in_array($term, $this->karmaBlacklist)) {
-                $this->doNotice($target, $term . ' is blacklisted');
-                return;
-            }
+        $versusPattern = <<<REGEX
+        {^
+        	(?P<term0>[^><]+)
+        		(?P<method><|>)
+        	(?P<term1>[^><]+)$#
+        $}ix
+REGEX;
 
-            // Return fixed value if set
-            if (isset($this->fixedKarma[$term])) {
-                $this->doPrivmsg($source, $target . ': ' . sprintf($this->fixedKarma[$term], $m[1]) . '.');
-                return;
-            }
+        $match = null;
 
-            // Return current karma or neutral if not set yet
-            $this->fetchKarma->execute(array(':word'=>$term));
-            $res = $this->fetchKarma->fetch(PDO::FETCH_ASSOC);
-
-            // Sanity check if someone if someone prefixed their conversation with karma
-            if (!$res && substr_count($term, ' ') > 1 && !(substr($m[1], 0, 1) === '(' && substr($m[1], -1) === ')')) {
-                return;
-            }
-
-            // Clean the raw term if it was contained within brackets
-            if (substr($m[1], 0, 1) === '(' && substr($m[1], -1) === ')') {
-                $m[1] = substr($m[1], 1, -1);
-            }
-
-            if ($res && $res['karma'] != 0) {
-                $this->doPrivmsg($source, $target . ': ' . $m[1] . ' has karma of ' . $res['karma'] . '.');
-            } else {
-                $this->doPrivmsg($source, $target . ': ' . $m[1] . ' has neutral karma.');
-            }
-        // Incrementation/decrementation request
-        } elseif (preg_match('{^' . $exp . '?(?:(\+{2,2}|-{2,2})(\S+?|\(.+?\)+)|(\S+?|\(.+?\)+)(\+{2,2}|-{2,2}))(?:\s+(.*))?$}ix', $message, $m)) {
-            if (!empty($m[4])) {
-                $m[1] = $m[4]; // Increment/Decrement
-                $m[2] = $m[3]; // Word
-            }
-            $m[3] = (isset($m[5]) ? $m[5] : null); // Comment
-            unset($m[4], $m[5]);
-            list(, $sign, $word, $comment) = array_pad($m, 4, null);
-
-            // Clean the word
-            $word = strtolower($this->doCleanWord($word));
-            if (empty($word)) {
-                return;
-            }
-
-            // Do nothing if the karma is fixed or blacklisted
-            if (isset($this->fixedKarma[$word]) ||
-                is_array($this->karmaBlacklist) && in_array($word, $this->karmaBlacklist)) {
-                return;
-            }
-
-            // Force a decrementation if someone tries to update his own karma
-            if ($word == strtolower($target) && $sign != '--' && !$this->fromAdmin(true)) {
-                $this->doNotice($target, 'Bad ' . $target . '! You can not modify your own Karma. Shame on you!');
-                $sign = '--';
-            }
-
-            // Antithrottling check
-            $host = $this->event->getHost();
-            $limit = $this->getConfig('karma.limit');
-            // This is waiting on the Acl plugin from Elazar, being bypassed for now
-            //if ($limit > 0 && !$this->fromAdmin()) {
-            if ($limit > 0) {
-                if (isset($this->log[$host][$word]) && $this->log[$host][$word] >= $limit) {
-                    // Three strikes, you're out, so lets decrement their karma for spammage
-                    if ($this->log[$host][$word] == ($limit+3)) {
-                        $this->doNotice($target, 'Bad ' . $target . '! Didn\'t I tell you that you reached your limit already?');
-                        $this->log[$host][$word] = $limit;
-                        $word = $target;
-                        $sign = '--';
-                    // Toss a notice to the user if they reached their limit
-                    } else {
-                        $this->doNotice($target, 'You have currently reached your limit in modifying ' . $word . ' for this day, please wait a bit.');
-                        $this->log[$host][$word]++;
-                        return;
-                    }
-                } else {
-                    if (isset($this->log[$host][$word])) {
-                        $this->log[$host][$word]++;
-                    } else {
-                        $this->log[$host][$word] = 1;
-                    }
-                }
-            }
-
-            // Get the current value then update or create entry
-            $this->fetchKarma->execute(array(':word'=>$word));
-            $res = $this->fetchKarma->fetch(PDO::FETCH_ASSOC);
-            if ($res) {
-                $karma = ($res['karma'] + ($sign == '++' ? 1 : -1));
-                $args = array(
-                    ':word' => $word,
-                    ':karma' => $karma
-                );
-                $this->updateKarma->execute($args);
-            } else {
-                $karma = ($sign == '++' ? '1' : '-1');
-                $args = array(
-                    ':word' => $word,
-                    ':karma' => $karma
-                );
-                $this->insertKarma->execute($args);
-                $this->fetchKarma->execute(array(':word'=>$word));
-                $res = $this->fetchKarma->fetch(PDO::FETCH_ASSOC);
-            }
-            $id = $res['id'];
-            // Add comment
-            $comment = preg_replace('{(?:^//(.*)|^#(.*)|^/\*(.*?)\*/$)}', '$1$2$3', $comment);
-            if (!empty($comment)) {
-                $this->insertComment->execute(array(':wordid' => $id, ':comment' => $comment));
-            }
-            // Perform garbage collection on the antithrottling log if needed
-            if (date('d') !== $this->lastGc) {
-                $this->doGc();
-            }
-        // Assertion request
-        } elseif (preg_match('#^' . $exp . '?([^><]+)(<|>)([^><]+)$#', $message, $m)) {
-            // Trim words
-            $word1 = strtolower($this->doCleanWord($m[1]));
-            $word2 = strtolower($this->doCleanWord($m[3]));
-            $operator = $m[2];
-
-            // Do nothing if the karma is fixed
-            if (isset($this->fixedKarma[$word1]) || isset($this->fixedKarma[$word2]) ||
-                empty($word1) || empty($word2)) {
-                return;
-            }
-
-            // Fetch first word
-            if ($word1 === '*' || $word1 === 'all' || $word1 === 'everything') {
-                $res = array('karma' => 0);
-                $word1 = 'everything';
-            } else {
-                $this->fetchKarma->execute(array(':word'=>$word1));
-                $res = $this->fetchKarma->fetch(PDO::FETCH_ASSOC);
-            }
-            // If it exists, fetch second word
-            if ($res) {
-                if ($word2 === '*' || $word2 === 'all' || $word2 === 'everything') {
-                    $res2 = array('karma' => 0);
-                    $word2 = 'everything';
-                } else {
-                    $this->fetchKarma->execute(array(':word'=>$word2));
-                    $res2 = $this->fetchKarma->fetch(PDO::FETCH_ASSOC);
-                }
-                // If it exists, compare and return value
-                if ($res2 && $res['karma'] != $res2['karma']) {
-                    $assertion = ($operator === '<' && $res['karma'] < $res2['karma']) || ($operator === '>' && $res['karma'] > $res2['karma']);
-                    // Switch arguments if they are in the wrong order
-                    if ($operator === '<') {
-                        $tmp = $word2;
-                        $word2 = $word1;
-                        $word1 = $tmp;
-                    }
-                    $this->doPrivmsg($source, $assertion ? $this->fetchPositiveAnswer($word1, $word2) : $this->fetchNegativeAnswer($word1, $word2));
-                    // If someone asserts that something is greater or lesser than everything, we increment/decrement that something at the same time
-                    if ($word2 === 'everything') {
-                        $this->event = clone$this->event;
-                        $this->event->setArguments(array($this->event->getArgument(0), '++'.$word1));
-                        $this->onPrivmsg();
-                    } elseif ($word1 === 'everything') {
-                        $this->event = clone$this->event;
-                        $this->event->setArguments(array($this->event->getArgument(0), '--'.$word2));
-                        $this->onPrivmsg();
-                    }
-                }
-            }
+        if (preg_match($modifyPattern, $message, $match)) {
+            $action = $match['action'];
+            $term = $this->getCanonicalTerm($match['term']);
+            $this->modifyKarma($term, $action);
+        } elseif (preg_match($versusPattern, $message, $match)) {
+            $term0 = trim($match['term0']);
+            $term1 = trim($match['term1']);
+            $method = $match['method'];
+            $this->compareKarma($term0, $term1, $method);
         }
-    }
-
-    protected function fetchPositiveAnswer($owner, $owned)
-    {
-        return str_replace(array('%owner%','%owned%'), array($owner, $owned), $this->positiveAnswers[array_rand($this->positiveAnswers,1)]);
-    }
-
-    protected function fetchNegativeAnswer($owned, $owner)
-    {
-        return str_replace(array('%owner%','%owned%'), array($owner, $owned), $this->negativeAnswers[array_rand($this->negativeAnswers,1)]);
-    }
-
-    protected function doCleanWord($word)
-    {
-        $word = trim($word);
-        if (substr($word, 0, 1) === '(' && substr($word, -1) === ')') {
-            $word = trim(substr($word, 1, -1));
-        }
-        $word = preg_replace('#\s+#', ' ', strtolower(trim($word)));
-        return $word;
     }
 
     /**
-     * Performs garbage collection on the antithrottling log.
+     * Get the karma rating for a given term.
+     *
+     * @param string $term Term for which the karma rating needs to be
+     *        retrieved
      *
      * @return void
      */
-    public function doGc()
+    public function onCommandKarma($term)
     {
-        unset($this->log);
-        $this->log = array();
-        $this->lastGc = date('d');
+        $source = $this->getEvent()->getSource();
+        $nick = $this->getEvent()->getNick();
+
+        if (empty($term)) {
+            return;
+        }
+
+        $canonicalTerm = $this->getCanonicalTerm($term);
+
+        $fixedKarma = $this->fetchFixedKarma($canonicalTerm);
+        if ($fixedKarma) {
+            $message = $nick . ': ' . $term . $fixedKarma . '.';
+            $this->doPrivmsg($source, $message);
+            return;
+        }
+
+        $karma = $this->fetchKarma($canonicalTerm);
+
+        $message = $nick . ': ';
+
+        if ($term == 'me') {
+            $message .= 'You have';
+        } else {
+            $message .= $term . ' has';
+        }
+
+        $message .= ' ';
+
+        if ($karma) {
+            $message .= 'karma of ' . $karma;
+        } else {
+            $message .= 'neutral karma';
+        }
+
+        $message .= '.';
+
+        $this->doPrivmsg($source, $message);
+    }
+
+    /**
+     * Resets the karma for a term to 0.
+     *
+     * @param string $term Term for which to reset the karma rating
+     *
+     * @return void
+     */
+    public function onCommandReincarnate($term)
+    {
+        $data = array(
+            ':term' => $term,
+            ':karma' => 0
+        );
+        $this->updateKarma->execute($data);
+    }
+
+    /**
+     * Compares the karma between two terms. Optionally increases/decreases
+     * the karma of either term.
+     *
+     * @param string $term0  First term
+     * @param string $term1  Second term
+     * @param string $method Comparison method (< or >)
+     *
+     * @return void
+     */
+    protected function compareKarma($term0, $term1, $method)
+    {
+        $event = $this->getEvent();
+        $nick = $event->getNick();
+        $source = $event->getSource();
+
+        $canonicalTerm0 = $this->getCanonicalTerm($term0);
+        $canonicalTerm1 = $this->getCanonicalTerm($term1);
+
+        $fixedKarma0 = $this->fetchFixedKarma($canonicalTerm0);
+        $fixedKarma1 = $this->fetchFixedKarma($canonicalTerm1);
+
+        if ($fixedKarma0
+            || $fixedKarma1
+            || empty($canonicalTerm0)
+            || empty($canonicalTerm1)
+        ) {
+            return;
+        }
+
+        if ($canonicalTerm0 == 'everything') {
+            $change = $method == '<' ? '++' : '--';
+            $this->modifyKarma($canonicalTerm1, $change);
+            $karma0 = 0;
+            $karma1 = $this->fetchKarma($canonicalTerm1);
+        } elseif ($canonicalTerm1 == 'everything') {
+            $change = $method == '<' ? '--' : '++';
+            $this->modifyKarma($canonicalTerm0, $change);
+            $karma0 = $this->fetchKarma($canonicalTerm1);
+            $karma1 = 0;
+        } else {
+            $karma0 = $this->fetchKarma($canonicalTerm0);
+            $karma1 = $this->fetchKarma($canonicalTerm1);
+        }
+
+        if (($method == '<'
+            && $karma0 < $karma1)
+            || ($method == '>'
+            && $karma0 > $karma1)) {
+            $replies = $this->fetchPositiveAnswers;
+        } else {
+            $replies = $this->fetchNegativeAnswers;
+        }
+        $reply = $replies->fetchColumn();
+
+        if (max($karma0, $karma1) == $karma1) {
+            list($canonicalTerm0, $canonicalTerm1) =
+                array($canonicalTerm1, $canonicalTerm0);
+        }
+
+        $message = str_replace(
+            array('%owner%','%owned%'),
+            array($canonicalTerm0, $canonicalTerm1),
+            $reply
+        );
+
+        $this->doPrivmsg($source, $message);
+    }
+
+    /**
+     * Modifes a term's karma.
+     *
+     * @param string $term   Term to modify
+     * @param string $action Karma action (either ++ or --)
+     *
+     * @return void
+     */
+    protected function modifyKarma($term, $action)
+    {
+        if (empty($term)) {
+            return;
+        }
+
+        $karma = $this->fetchKarma($term);
+        if ($karma !== false) {
+            $statement = $this->updateKarma;
+        } else {
+            $statement = $this->insertKarma;
+        }
+
+        $karma += ($action == '++') ? 1 : -1;
+
+        $args = array(
+            ':term'  => $term,
+            ':karma' => $karma
+        );
+        $statement->execute($args);
+    }
+
+    /**
+     * Returns the karma rating for a specified term for which the karma
+     * rating can be modified.
+     *
+     * @param string $term Term for which to fetch the corresponding karma
+     *        rating
+     *
+     * @return integer|boolean Integer value denoting the term's karma or
+     *         FALSE if there is the specified term has no associated karma
+     *         rating
+     */
+    protected function fetchKarma($term)
+    {
+        $this->fetchKarma->execute(array(':term' => $term));
+        $result = $this->fetchKarma->fetch(PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            return false;
+        }
+
+        return (int) $result['karma'];
+    }
+
+    /**
+     * Returns a phrase describing the karma rating for a specified term for
+     * which the karma rating is fixed.
+     *
+     * @param string $term Term for which to fetch the corresponding karma
+     *        rating
+     *
+     * @return string Phrase describing the karma rating, which may be append
+     *         to the term to form a complete response
+     */
+    protected function fetchFixedKarma($term)
+    {
+        $this->fetchFixedKarma->execute(array(':term' => $term));
+        $result = $this->fetchFixedKarma->fetch(PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            return false;
+        }
+
+        return $result['karma'];
     }
 }
