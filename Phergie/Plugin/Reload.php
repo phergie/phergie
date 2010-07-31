@@ -87,6 +87,7 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
 
         $instance = new $newClass;
         $instance->setName($plugin);
+        $instance->setEvent($this->event);
         $this->plugins
             ->removePlugin($plugin)
             ->addPlugin($instance);
