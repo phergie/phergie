@@ -127,14 +127,14 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
         $this->fetchPositiveAnswer = $this->db->prepare('
             SELECT answer
             FROM positive_answers
-            ORDER BY RAND()
+            ORDER BY RANDOM()
             LIMIT 1
         ');
 
         $this->fetchNegativeAnswer = $this->db->prepare('
             SELECT answer
             FROM negative_answers
-            ORDER BY RAND()
+            ORDER BY RANDOM()
             LIMIT 1
         ');
     }
@@ -332,10 +332,11 @@ REGEX;
             && $karma0 < $karma1)
             || ($method == '>'
             && $karma0 > $karma1)) {
-            $replies = $this->fetchPositiveAnswers;
+            $replies = $this->fetchPositiveAnswer;
         } else {
-            $replies = $this->fetchNegativeAnswers;
+            $replies = $this->fetchNegativeAnswer;
         }
+        $replies->execute();
         $reply = $replies->fetchColumn();
 
         if (max($karma0, $karma1) == $karma1) {
