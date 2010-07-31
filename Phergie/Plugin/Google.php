@@ -37,7 +37,6 @@
  */
 class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
 {
-
     /**
      * HTTP plugin
      *
@@ -362,23 +361,15 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $source = $event->getSource();
         $nick = $event->getNick();
         if ($contents) {
-            preg_match(
-                '#<span class=bld>.*? ' . $to . '</span>#im',
-                $contents,
-                $matches
-            );
-            if (!$matches[0]) {
-                $this->doPrivmsg($source, $nick . ', I can\'t do that.');
-            } else {
-                $str = str_replace('<span class=bld>', '', $matches[0]);
-                $str = str_replace($to . '</span>', '', $str);
-                $text
-                    = number_format($value, 2, ',', '.') . ' ' . $from .
-                    ' => ' . number_format($str, 2, ',', '.') . ' ' . $to;
-                $this->doPrivmsg($source, $text);
-            }
-        } else {
-            $this->doPrivmsg($source, $nick . ', we had a problem.');
+            libxml_use_internal_errors(true);
+            $doc = new DOMDocument;
+            $doc->loadHTML($contents);
+            libxml_clear_errors();
+            $xpath = new DOMXPath($doc);
+            $result = $xpath->query('//div[@id="currency_converter_result"]');
+            $div = $result->item(0);
+            $text = rtrim($div->textContent);
+            $this->doPrivmsg($source, $text);
         }
     }
 
