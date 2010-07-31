@@ -243,6 +243,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
             // Parse the command and arguments
             list($cmd, $args) = array_pad(explode(' ', $buffer, 2), 2, null);
+            $hostmask = new Phergie_Hostmask(null, null, $this->connection->getHost());
 
         } else {
             // If the event could be from the server or a user...
