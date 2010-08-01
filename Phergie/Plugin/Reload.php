@@ -79,7 +79,7 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         }
 
         $contents = preg_replace(
-            array('/<\?(?:php)?/', '/class\s+' . $class . '/i'),
+            array('/^<\?(?:php)?/', '/class\s+' . $class . '/i'),
             array('', 'class ' . $newClass),
             $contents
         );
