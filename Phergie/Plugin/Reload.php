@@ -57,6 +57,7 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         if (!$this->plugins->hasPlugin($plugin)) {
             echo 'DEBUG(Reload): ' . ucfirst($plugin) . ' is not loaded yet, loading', PHP_EOL;
             $this->plugins->getPlugin($plugin);
+            $this->plugins->command->populateMethodCache();
             return;
         }
 
@@ -91,6 +92,8 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         $this->plugins
             ->removePlugin($plugin)
             ->addPlugin($instance);
+
+        $this->plugins->command->populateMethodCache();
 
         echo 'DEBUG(Reload): Reloaded ', $class, ' to ', $newClass, PHP_EOL;
     }

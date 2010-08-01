@@ -64,7 +64,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    protected function populateMethodCache()
+    public function populateMethodCache()
     {
         foreach ($this->getPluginHandler() as $plugin) {
             $reflector = new ReflectionClass($plugin);
