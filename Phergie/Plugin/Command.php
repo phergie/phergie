@@ -96,19 +96,26 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             $this->populateMethodCache();
         }
 
+        // Check for a prefixed message
         $msg = $this->plugins->message->getMessage();
-
-        // Prefix condition failed
         if ($msg === false) {
             return;
         }
 
         // Separate the command and arguments
         $parsed = preg_split('/\s+/', $msg, 2);
-        $method = $this->methodPrefix . ucfirst(strtolower(array_shift($parsed)));
+        $command = strtolower(array_shift($parsed));
         $args = count($parsed) ? array_shift($parsed) : '';
 
+        // Resolve aliases to their corresponding commands
+        $aliases = $this->getConfig('command.aliases', array());
+        $result = preg_grep('/^' . $command . '$/i', array_keys($aliases));
+        if ($result) {
+            $command = $aliases[array_shift($result)];
+        }
+
         // Check to ensure the command exists
+        $method = $this->methodPrefix . ucfirst($command);
         if (empty($this->methods[$method])) {
             return;
         }
