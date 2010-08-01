@@ -45,7 +45,7 @@ class Phergie_Plugin_Tea extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Processes requests to serve a user a tea.
+     * Processes requests to serve a user tea.
      *
      * @param string $request Request including the target and an optional
      *        suggestion of what tea to serve
