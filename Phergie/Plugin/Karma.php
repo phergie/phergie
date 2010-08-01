@@ -175,32 +175,29 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
     {
         $message = $this->getEvent()->getText();
 
+        $termPattern = '\S+?|\([^<>]+?\)+';
+        $actionPattern = '(?P<action>\+\+|--)';
+
         $modifyPattern = <<<REGEX
 		{^
 		(?J) # allow overwriting capture names
 		\s*  # ignore leading whitespace
 
 		(?:  # start with ++ or -- before the term
-			(?P<action> \+\+|--)
-			(?:
-				(?P<term>\(.+?\)+)
-            )
+            $actionPattern
+            (?P<term>$termPattern)
 		|   # follow the term with ++ or --
-			(?P<term>
-				\S+?
-			|
-				\(.+?\)+
-			)
-			(?P<action>\+\+|--) # allow no whitespace between the term and the action
+            (?P<term>$termPattern)
+			$actionPattern # allow no whitespace between the term and the action
 		)
 		$}ix
 REGEX;
 
         $versusPattern = <<<REGEX
         {^
-        	(?P<term0>[^><]+)
-        		(?P<method><|>)
-        	(?P<term1>[^><]+)$#
+        	(?P<term0>$termPattern)
+        		\s+(?P<method><|>)\s+
+        	(?P<term1>$termPattern)$#
         $}ix
 REGEX;
 
