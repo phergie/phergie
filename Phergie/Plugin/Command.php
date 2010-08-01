@@ -34,19 +34,19 @@
 class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
 {
     /**
+     * Prefix for command method names
+     *
+     * @var string
+     */
+    const METHOD_PREFIX = 'onCommand';
+
+    /**
      * Cache for command lookups used to confirm that methods exist and
      * parameter counts match
      *
      * @var array
      */
     protected $methods = array();
-
-    /**
-     * Prefix for command method names
-     *
-     * @var string
-     */
-    protected $methodPrefix = 'onCommand';
 
     /**
      * Load the Message plugin
@@ -70,7 +70,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             $reflector = new ReflectionClass($plugin);
             foreach ($reflector->getMethods() as $method) {
                 $name = $method->getName();
-                if (strpos($name, $this->methodPrefix) === 0
+                if (strpos($name, self::METHOD_PREFIX) === 0
                     && !isset($this->methods[$name])
                 ) {
                     $this->methods[$name] = array(
@@ -115,7 +115,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         }
 
         // Check to ensure the command exists
-        $method = $this->methodPrefix . ucfirst($command);
+        $method = self::METHOD_PREFIX . ucfirst($command);
         if (empty($this->methods[$method])) {
             return;
         }

@@ -31,31 +31,32 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Tld
  * @uses     extension PDO
  * @uses     extension pdo_sqlite
- *
- * @pluginDesc Provides information for a top level domain.
  */
 class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
 {
     /**
-     * connection to the database
+     * Connection to the database
+     *
      * @var PDO
      */
     protected $db;
 
     /**
-     * Prepared statement for selecting a single tld
+     * Prepared statement for selecting a single TLD
+     *
      * @var PDOStatement
      */
     protected $select;
 
     /**
-     * Prepared statement for selecting all tlds
+     * Prepared statement for selecting all TLDs
+     *
      * @var PDOStatement
      */
     protected $selectAll;
 
     /**
-     * Checks for dependencies, sets up database and hard coded values
+     * Checks for dependencies and sets up the database and hard-coded values.
      *
      * @return void
      */
@@ -64,9 +65,6 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
         if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
             $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
-
-        $help = $this->getPluginHandler()->getPlugin('Help');
-        $help->register($this);
 
         $dbFile = dirname(__FILE__) . '/Tld/tld.db';
         try {
@@ -93,8 +91,6 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
      * @param string $tld tld to process
      *
      * @return null
-     *
-     * @pluginCmd .[tld] request details about the tld
      */
     public function onCommandTld($tld)
     {

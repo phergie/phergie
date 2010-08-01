@@ -31,9 +31,6 @@
  * @link     http://thefuckingweather.com
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
- *
- * @pluginDesc Detects and responds to requests for current weather 
- *             conditions in a particular location.
  */
 
 class Phergie_Plugin_TheFuckingWeather extends Phergie_Plugin_Abstract
@@ -71,8 +68,6 @@ class Phergie_Plugin_TheFuckingWeather extends Phergie_Plugin_Abstract
      *
      * @return void
      * @todo Implement use of URL shortening here
-     * @pluginCmd [location] Detects and responds to requests for current 
-     *            weather conditions in a particular location.
      */
     public function onCommandThefuckingweather($location)
     {
@@ -92,7 +87,6 @@ class Phergie_Plugin_TheFuckingWeather extends Phergie_Plugin_Abstract
     * @param string $location Location term
     *
     * @return void
-    * @pluginCmd [location] Alias for thefuckingweather command.
     */
     public function onCommandTfw($location)
     {

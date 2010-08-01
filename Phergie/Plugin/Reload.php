@@ -94,6 +94,9 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
             ->addPlugin($instance);
 
         $this->plugins->command->populateMethodCache();
+        if ($this->plugins->hasPlugin('Help')) {
+            $this->plugins->help->populateRegistry();
+        }
 
         echo 'DEBUG(Reload): Reloaded ', $class, ' to ', $newClass, PHP_EOL;
     }
