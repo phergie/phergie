@@ -69,6 +69,14 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
     protected $events;
 
     /**
+     * Iterator used for selectively proxying method calls to contained
+     * plugins
+     *
+     * @var Iterator
+     */
+    protected $iterator;
+
+    /**
      * Constructor to initialize class properties and add the path for core
      * plugins.
      *
@@ -416,26 +424,39 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->plugins);
+        if (empty($this->iterator)) {
+            $this->iterator = new Phergie_Plugin_Iterator(
+                new ArrayIterator($this->plugins)
+            );
+        }
+        return $this->iterator;
     }
 
     /**
-     * Proxies method calls to all plugins containing the called method. An
-     * individual plugin may short-circuit this process by explicitly
-     * returning FALSE.
+     * Sets the iterator for all currently loaded plugin instances.
+     *
+     * @param Iterator $iterator Plugin iterator
+     *
+     * @return Phergie_Plugin_Handler Provides a fluent interface
+     */
+    public function setIterator(Iterator $iterator)
+    {
+        $this->iterator = $iterator;
+        return $this;
+    }
+
+    /**
+     * Proxies method calls to all plugins containing the called method.
      *
      * @param string $name Name of the method called
      * @param array  $args Arguments passed in the method call
      *
-     * @return bool FALSE if a plugin short-circuits processing by returning
-     *         FALSE, TRUE otherwise
+     * @return void
      */
     public function __call($name, array $args)
     {
-        foreach ($this->plugins as $plugin) {
-            if (call_user_func_array(array($plugin, $name), $args) === false) {
-                return false;
-            }
+        foreach ($this->getIterator() as $plugin) {
+            call_user_func_array(array($plugin, $name), $args);
         }
         return true;
     }

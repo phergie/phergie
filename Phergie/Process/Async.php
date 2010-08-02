@@ -117,11 +117,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
             if ($event = $this->driver->getEvent()) {
                 $this->ui->onEvent($event, $connection);
                 $this->plugins->setEvent($event);
-
-                if (!$this->plugins->preEvent()) {
-                    continue;
-                }
-
+                $this->plugins->preEvent();
                 $this->plugins->{'on' . ucfirst($event->getType())}();
             }
 

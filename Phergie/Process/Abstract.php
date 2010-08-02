@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Base class for obtaining and processing incoming events.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -38,9 +38,9 @@ abstract class Phergie_Process_Abstract
     protected $driver;
 
     /**
-     * Current connection handler instance 
+     * Current connection handler instance
      *
-     * @var Phergie_Connection_Handler 
+     * @var Phergie_Connection_Handler
      */
     protected $connections;
 
@@ -75,9 +75,9 @@ abstract class Phergie_Process_Abstract
     /**
      * Gets the required class refences from Phergie_Bot.
      *
-     * @param Phergie_Bot $bot     Current bot instance in use 
+     * @param Phergie_Bot $bot     Current bot instance in use
      * @param array       $options Optional processor arguments
-     *      
+     *
      * @return void
      */
     public function __construct(Phergie_Bot $bot, array $options = array())
@@ -99,8 +99,8 @@ abstract class Phergie_Process_Abstract
      */
     protected function processEvents(Phergie_Connection $connection)
     {
+        $this->plugins->preDispatch();
         if (count($this->events)) {
-            $this->plugins->preDispatch();
             foreach ($this->events as $event) {
                 $this->ui->onCommand($event, $connection);
 
@@ -110,15 +110,15 @@ abstract class Phergie_Process_Abstract
                     $event->getArguments()
                 );
             }
-            $this->plugins->postDispatch();
-
-            if ($this->events->hasEventOfType(Phergie_Event_Request::TYPE_QUIT)) {
-                $this->ui->onQuit($connection);
-                $this->connections->removeConnection($connection);
-            }
-
-            $this->events->clearEvents();
         }
+        $this->plugins->postDispatch();
+
+        if ($this->events->hasEventOfType(Phergie_Event_Request::TYPE_QUIT)) {
+            $this->ui->onQuit($connection);
+            $this->connections->removeConnection($connection);
+        }
+
+        $this->events->clearEvents();
     }
 
     /**
