@@ -336,7 +336,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
 
         $plugins = array();
         foreach ($names as $name) {
-            $plugins[$name] = $this->getPlugin($name);
+            $plugins[strtolower($name)] = $this->getPlugin($name);
         }
         return $plugins;
     }

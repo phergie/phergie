@@ -178,35 +178,11 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests the plugin handler executing a callback on all contained
-     * plugins where one plugin short-circuits the process.
+     * plugins.
      *
      * @return void
      */
-    public function testImplementsCallWithShortCircuit()
-    {
-        $plugin1 = $this->getMockPlugin('TestPlugin1', array('callback'));
-        $plugin1
-            ->expects($this->once())
-            ->method('callback')
-            ->will($this->returnValue(false));
-        $this->handler->addPlugin($plugin1);
-
-        $plugin2 = $this->getMockPlugin('TestPlugin2', array('callback'));
-        $plugin2
-            ->expects($this->exactly(0))
-            ->method('callback');
-        $this->handler->addPlugin($plugin2);
-
-        $this->assertFalse($this->handler->callback());
-    }
-
-    /**
-     * Tests the plugin handler executing a callback on all contained
-     * plugins where no plugins short-circuit the process.
-     *
-     * @return void
-     */
-    public function testImplementsCallWithoutShortCircuit()
+    public function testImplementsCall()
     {
         foreach (range(1, 2) as $index) {
             $plugin = $this->getMockPlugin('TestPlugin' . $index, array('callback'));
@@ -735,5 +711,26 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
 
         $actual = $this->handler->getPlugins(array('testplugin1', 'testplugin2'));
         $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Tests the plugin receiving and using a predefined iterator instance.
+     *
+     * @depends testGetPlugins
+     * @return void
+     */
+    public function testSetIterator()
+    {
+        $plugin = $this->getMockPlugin('TestPlugin');
+        $this->handler->addPlugin($plugin);
+        $plugins = $this->handler->getPlugins();
+        $iterator = new ArrayIterator($plugins);
+        $this->handler->setIterator($iterator);
+        $this->assertSame($this->handler->getIterator(), $iterator);
+        $iterated = array();
+        foreach ($this->handler as $plugin) {
+            $iterated[strtolower($plugin->getName())] = $plugin;
+        }
+        $this->assertEquals($iterated, $plugins);
     }
 }
