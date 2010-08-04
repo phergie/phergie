@@ -254,7 +254,7 @@ class Phergie_Connection
         if (!in_array($this->encoding, mb_list_encodings())) {
             throw new Phergie_Connection_Exception(
                 'Encoding ' . $this->encoding . ' is not supported',
-                Phergie_Connection_Exception::ENCODING_NOT_SUPPORTED
+                Phergie_Connection_Exception::ERR_ENCODING_NOT_SUPPORTED
             );
         }
 

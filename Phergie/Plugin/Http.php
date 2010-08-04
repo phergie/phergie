@@ -259,7 +259,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     public function post($url, array $query = array(),
         array $post = array(), array $context = array()
     ) {
-        if (!empty($params)) {
+        if (!empty($query)) {
             $url .= '?' . http_build_query($query);
         }
 

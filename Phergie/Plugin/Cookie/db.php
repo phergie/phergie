@@ -36,9 +36,6 @@ $cookies = $xpath->query('//table[@width="90%"]/tr/td[1]/a');
 
 foreach ($cookies as $cookie) {
     $name = $cookie->textContent;
-    foreach (range(0, mb_strlen($name) - 1) as $index) {
-        echo mb_strcut($name, $index, 1), PHP_EOL;
-    }
     $name = str_replace(
         array('(',')',"\n", 'cookies'),
         array('','', ' ', 'cookie'),

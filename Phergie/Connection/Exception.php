@@ -41,4 +41,10 @@ class Phergie_Connection_Exception extends Phergie_Exception
      * but that transport is not supported by the current PHP installation
      */
     const ERR_TRANSPORT_NOT_SUPPORTED = 2;
+
+    /**
+     * Error indicating that a connection is configured to use an encoding,
+     * but that encoding is not supported by the current PHP installation
+     */
+    const ERR_ENCODING_NOT_SUPPORTED = 3;
 }
