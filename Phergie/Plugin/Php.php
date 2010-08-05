@@ -53,15 +53,7 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
         }
 
         $this->getPluginHandler()->getPlugin('Command');
-    }
 
-    /**
-     * Initializes the data source. 
-     *
-     * @return void
-     */
-    public function onConnect()
-    {
         $this->source = new Phergie_Plugin_Php_Source_Local;
     }
 
