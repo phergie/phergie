@@ -109,7 +109,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
 
         // Resolve aliases to their corresponding commands
         $aliases = $this->getConfig('command.aliases', array());
-        $result = preg_grep('/^' . $command . '$/i', array_keys($aliases));
+        $result = preg_grep('/^' . preg_quote($command, '/') . '$/i', array_keys($aliases));
         if ($result) {
             $command = $aliases[array_shift($result)];
         }
