@@ -236,7 +236,7 @@ REGEX;
 
         $fixedKarma = $this->fetchFixedKarma($canonicalTerm);
         if ($fixedKarma) {
-            $message = $nick . ': ' . $term . $fixedKarma . '.';
+            $message = $nick . ': ' . $term . ' ' . $fixedKarma . '.';
             $this->doPrivmsg($source, $message);
             return;
         }
