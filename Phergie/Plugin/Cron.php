@@ -110,7 +110,7 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
      */
     public function onTick()
     {
-        $now = time();
+        $time = time();
         foreach ($this->callbacks as $key => &$callback) {
             $callbackString = $this->getCallbackString($callback);
 
