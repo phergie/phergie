@@ -110,4 +110,11 @@ class Phergie_Plugin_Exception extends Phergie_Exception
      * plugin
      */
     const ERR_FATAL_ERROR = 13;
+
+    /**
+     * Error indicating that a class specified to be used for iterating
+     * plugins cannot be found by the autoloader or does not extend
+     * FilterIterator
+     */
+    const ERR_INVALID_ITERATOR_CLASS = 14;
 }

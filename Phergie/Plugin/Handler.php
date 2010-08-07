@@ -69,12 +69,12 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
     protected $events;
 
     /**
-     * Iterator used for selectively proxying method calls to contained
+     * Name of the class to use for iterating over all currently loaded
      * plugins
      *
-     * @var Iterator
+     * @var string
      */
-    protected $iterator;
+    protected $iteratorClass = 'Phergie_Plugin_Iterator';
 
     /**
      * Constructor to initialize class properties and add the path for core
@@ -424,25 +424,40 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      */
     public function getIterator()
     {
-        if (empty($this->iterator)) {
-            $this->iterator = new Phergie_Plugin_Iterator(
-                new ArrayIterator($this->plugins)
-            );
-        }
-        return $this->iterator;
+        return new $this->iteratorClass(
+            new ArrayIterator($this->plugins)
+        );
     }
 
     /**
-     * Sets the iterator for all currently loaded plugin instances.
+     * Sets the iterator class used for all currently loaded plugin
+     * instances.
      *
-     * @param Iterator $iterator Plugin iterator
+     * @param string $class Name of a class that extends FilterIterator
      *
-     * @return Phergie_Plugin_Handler Provides a fluent interface
+     * @return Phergie_Plugin_Handler Provides a fluent API
+     * @throws Phergie_Plugin_Exception Class cannot be found or is not an
+     *         FilterIterator-based class
      */
-    public function setIterator(Iterator $iterator)
+    public function setIteratorClass($class)
     {
-        $this->iterator = $iterator;
-        return $this;
+        $valid = true;
+
+        try {
+            $r = new ReflectionClass($class);
+            $valid = $r->isSubclassOf('FilterIterator');
+        } catch (ReflectionException $e) {
+            $valid = false;
+        }
+
+        if (!$valid) {
+            throw new Phergie_Plugin_Exception(
+                $e->getMessage(),
+                Phergie_Plugin_Exception::ERR_INVALID_ITERATOR_CLASS
+            );
+        }
+
+        $this->iteratorClass = $class;
     }
 
     /**
