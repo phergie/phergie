@@ -714,23 +714,23 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Tests the plugin receiving and using a predefined iterator instance.
+     * Tests that multiple plugin iterators can be used concurrently.
      *
-     * @depends testGetPlugins
      * @return void
      */
-    public function testSetIterator()
+    public function testUseMultiplePluginIteratorsConcurrently()
     {
-        $plugin = $this->getMockPlugin('TestPlugin');
-        $this->handler->addPlugin($plugin);
-        $plugins = $this->handler->getPlugins();
-        $iterator = new ArrayIterator($plugins);
-        $this->handler->setIterator($iterator);
-        $this->assertSame($this->handler->getIterator(), $iterator);
-        $iterated = array();
-        foreach ($this->handler as $plugin) {
-            $iterated[strtolower($plugin->getName())] = $plugin;
-        }
-        $this->assertEquals($iterated, $plugins);
+        $plugin1 = $this->getMockPlugin('TestPlugin1');
+        $this->handler->addPlugin($plugin1);
+
+        $plugin2 = $this->getMockPlugin('TestPlugin2');
+        $this->handler->addPlugin($plugin2);
+
+        $iterator1 = $this->handler->getIterator();
+        $iterator1->next();
+        $this->assertSame($plugin2, $iterator1->current());
+
+        $iterator2 = $this->handler->getIterator();
+        $this->assertSame($plugin1, $iterator2->current());
     }
 }

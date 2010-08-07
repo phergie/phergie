@@ -47,6 +47,22 @@ class Phergie_Plugin_Iterator extends FilterIterator
     protected $methods = array();
 
     /**
+     * Overrides the parent constructor to reset the internal iterator's
+     * pointer to the current item, which the parent class errantly does not
+     * do.
+     *
+     * @param Iterator $iterator Iterator to filter
+     *
+     * @return void
+     * @link http://bugs.php.net/bug.php?id=52560
+     */
+    public function __construct(Iterator $iterator)
+    {
+        parent::__construct($iterator);
+        $this->rewind();
+    }
+
+    /**
      * Adds to a list of plugins to exclude when iterating.
      *
      * @param mixed $plugins String containing the short name of a single
