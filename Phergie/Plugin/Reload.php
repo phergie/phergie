@@ -67,6 +67,7 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
             echo 'DEBUG(Reload): ' . ucfirst($plugin) . ' is not loaded yet, loading', PHP_EOL;
             try {
                 $this->plugins->getPlugin($plugin);
+                $this->plugins->command->populateMethodCache();
             } catch (Phergie_Plugin_Exception $e) {
                 if ($e->getCode() == Phergie_Plugin_Exception::ERR_CLASS_NOT_FOUND) {
                     echo 'DEBUG(Reload): ', $e->getMessage(), PHP_EOL;
@@ -74,7 +75,6 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
                     throw $e;
                 }
             }
-            $this->plugins->command->populateMethodCache();
             return;
         }
 
