@@ -37,12 +37,8 @@ class Phergie_Autoload
      */
     public function __construct()
     {
-        $path = realpath(dirname(__FILE__) . '/..');
-        $includePath = get_include_path();
-        $includePathList = explode(PATH_SEPARATOR, $includePath);
-        if (!in_array($path, $includePathList)) {
-            self::addPath($path);
-        }
+        self::addPath(realpath(dirname(__FILE__) . '/..'));
+
     }
 
     /**
@@ -76,6 +72,10 @@ class Phergie_Autoload
      */
     public static function addPath($path)
     {
-        set_include_path($path . PATH_SEPARATOR . get_include_path());
+        $includePath = get_include_path();
+        $includePathList = explode(PATH_SEPARATOR, $includePath);
+        if (!in_array($path, $includePathList)) {
+            set_include_path($path . PATH_SEPARATOR . get_include_path());
+        }
     }
 }
