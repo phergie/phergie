@@ -31,7 +31,6 @@
  * @uses     extension PDO
  * @uses     extension pdo_sqlite
  * @uses     Phergie_Plugin_Command pear.phergie.org
- * @uses     Phergie_Plugin_Message pear.phergie.org
  */
 class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
 {
@@ -94,11 +93,16 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
     {
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Command');
-        $plugins->getPlugin('Message');
+        $this->getDb();
+    }
 
-        $file = dirname(__FILE__) . '/Karma/karma.db';
-        $this->db = new PDO('sqlite:' . $file);
-
+    /**
+     * Initializes prepared statements used by the plugin.
+     *
+     * @return void
+     */
+    protected function initializePreparedStatements()
+    {
         $this->fetchKarma = $this->db->prepare('
             SELECT karma
             FROM karmas
@@ -137,6 +141,36 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
             ORDER BY RANDOM()
             LIMIT 1
         ');
+    }
+
+    /**
+     * Returns a connection to the plugin database, initializing one if none
+     * is explicitly set.
+     *
+     * @return PDO Database connection
+     */
+    public function getDb()
+    {
+        if (empty($this->db)) {
+            $this->db = new PDO('sqlite:' . dirname(__FILE__) . '/Karma/karma.db');
+            $this->initializePreparedStatements();
+        }
+        return $this->db;
+    }
+
+    /**
+     * Sets the connection to the plugin database, mainly intended for unit
+     * testing.
+     *
+     * @param PDO $db Database connection
+     *
+     * @return Phergie_Plugin_Karma Provides a fluent interface
+     */
+    public function setDb(PDO $db)
+    {
+        $this->db = $db;
+        $this->initializePreparedStatements();
+        return $this;
     }
 
     /**
@@ -228,15 +262,11 @@ REGEX;
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
 
-        if (empty($term)) {
-            return;
-        }
-
         $canonicalTerm = $this->getCanonicalTerm($term);
 
         $fixedKarma = $this->fetchFixedKarma($canonicalTerm);
         if ($fixedKarma) {
-            $message = $nick . ': ' . $term . ' ' . $fixedKarma . '.';
+            $message = $nick . ': ' . $term . ' ' . $fixedKarma;
             $this->doPrivmsg($source, $message);
             return;
         }
@@ -302,33 +332,29 @@ REGEX;
         $fixedKarma0 = $this->fetchFixedKarma($canonicalTerm0);
         $fixedKarma1 = $this->fetchFixedKarma($canonicalTerm1);
 
-        if ($fixedKarma0
-            || $fixedKarma1
-            || empty($canonicalTerm0)
-            || empty($canonicalTerm1)
-        ) {
+        if ($fixedKarma0 || $fixedKarma1) {
             return;
         }
 
         if ($canonicalTerm0 == 'everything') {
             $change = $method == '<' ? '++' : '--';
-            $this->modifyKarma($canonicalTerm1, $change);
             $karma0 = 0;
-            $karma1 = $this->fetchKarma($canonicalTerm1);
+            $karma1 = $this->modifyKarma($canonicalTerm1, $change);
         } elseif ($canonicalTerm1 == 'everything') {
             $change = $method == '<' ? '--' : '++';
-            $this->modifyKarma($canonicalTerm0, $change);
-            $karma0 = $this->fetchKarma($canonicalTerm1);
+            $karma0 = $this->modifyKarma($canonicalTerm0, $change);
             $karma1 = 0;
         } else {
             $karma0 = $this->fetchKarma($canonicalTerm0);
             $karma1 = $this->fetchKarma($canonicalTerm1);
         }
 
-        if (($method == '<'
-            && $karma0 < $karma1)
-            || ($method == '>'
-            && $karma0 > $karma1)) {
+        // Combining the first and second branches here causes an odd
+        // single-line lapse in code coverage, but the lapse disappears if
+        // they're separated
+        if ($method == '<' && $karma0 < $karma1) {
+            $replies = $this->fetchPositiveAnswer;
+        } elseif ($method == '>' && $karma0 > $karma1) {
             $replies = $this->fetchPositiveAnswer;
         } else {
             $replies = $this->fetchNegativeAnswer;
@@ -356,14 +382,10 @@ REGEX;
      * @param string $term   Term to modify
      * @param string $action Karma action (either ++ or --)
      *
-     * @return void
+     * @return int Modified karma rating
      */
     protected function modifyKarma($term, $action)
     {
-        if (empty($term)) {
-            return;
-        }
-
         $karma = $this->fetchKarma($term);
         if ($karma !== false) {
             $statement = $this->updateKarma;
@@ -378,6 +400,8 @@ REGEX;
             ':karma' => $karma
         );
         $statement->execute($args);
+
+        return $karma;
     }
 
     /**

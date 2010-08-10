@@ -12,14 +12,12 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie
+ * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Tests
  */
-
-require_once(dirname(__FILE__) . '/TestCase.php');
 
 /**
  * Unit test suite for Pherge_Plugin_TerryChay.
@@ -28,72 +26,110 @@ require_once(dirname(__FILE__) . '/TestCase.php');
  * @package  Phergie_Tests
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
+ * @link     http://pear.phergie.org/package/Phergie_Tests
  */
 class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
 {
     /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
+     * Chayism used as a consistent response when related events are
+     * triggered
+     *
+     * @var string
      */
-    protected function setUp()
+    private $chayism = 'Terry Chay doesn\'t need a framework; he already knows everyone\'s code';
+
+    /**
+     * Configures the mock plugin handler to return a mock Http plugin with
+     * a mock response object populated with predetermined content.
+     *
+     * @return void
+     */
+    public function setUpHttpClient()
     {
-        $this->setPlugin(new Phergie_Plugin_TerryChay());
-        $config = new Phergie_Config();
-        $handler = new Phergie_Plugin_Handler($config, $this->handler);
-        $this->plugin->setPluginHandler($handler);
-        $handler->addPlugin($this->plugin);
-        $handler->addPlugin(new Phergie_Plugin_Http($config));
-        $this->plugin->setConfig($config);
-        $this->connection->setNick('phergie');
+        $response = $this->getMock('Phergie_Plugin_Http_Response');
+        $response
+            ->expects($this->any())
+            ->method('getContent')
+            ->will($this->returnValue($this->chayism));
+
+        $plugin = $this->getMock('Phergie_Plugin_Http');
+        $plugin
+            ->expects($this->any())
+            ->method('get')
+            ->will($this->returnValue($response));
+
+        $this->getMockPluginHandler()
+            ->expects($this->any())
+            ->method('getPlugin')
+            ->with('Http')
+            ->will($this->returnValue($plugin));
+    }
+
+    /**
+     * Tests that the plugin requires the Http plugin as a dependency.
+     *
+     * @return void
+     */
+    public function testRequiresHttpPlugin()
+    {
+        $this->assertRequiresPlugin('Http');
         $this->plugin->onLoad();
     }
 
     /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #zftalk
-     * @eventArg tychay
+     * Data provider for testPrivmsgTriggerReturnsChayism().
+     *
+     * @return array Enumerated array of enumerated arrays each containing
+     *               a set of parameters for a single call to
+     *               testPrivmsgTriggerReturnsChayism()
      */
-    public function testWithTyChay()
+    public function dataProviderTestPrivmsgTriggerReturnsChayism()
     {
-        $this->plugin->onPrivMsg();
-        $this->assertHasEvent(Phergie_Event_Command::TYPE_PRIVMSG);
+        return array(
+            array('terry chay'),
+            array('terry  chay'),
+            array('tychay'),
+            array('!tychay'),
+            array('! tychay'),
+            array('foo tychay bar'),
+        );
     }
 
     /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #zftalk
-     * @eventArg terrychay
+     * Tests that appropriate triggers result in a response with a Chayism.
+     *
+     * @return void
+     * @dataProvider dataProviderTestPrivmsgTriggerReturnsChayism
      */
-    public function testWithTerryChay()
+    public function testPrivmsgTriggerReturnsChayism($trigger)
     {
-        $this->plugin->onPrivMsg();
-        $this->assertDoesNotHaveEvent(Phergie_Event_Command::TYPE_PRIVMSG,
-                              'string "terrychay" should not invoke a response');
-    }
-    
-    /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #zftalk
-     * @eventArg terry chay
-     */
-    public function testWithTerry_Chay()
-    {
-        $this->plugin->onPrivMsg();
-        $this->assertHasEvent(Phergie_Event_Command::TYPE_PRIVMSG,
-                              'string "terry chay" should invoke a response');
+        $this->setConfig('command.prefix', '!');
+        $this->setUpHttpClient();
+        $args = array(
+            'receiver' => $this->source,
+            'text' => $trigger
+        );
+        $event = $this->getMockEvent('privmsg', $args);
+        $this->plugin->setEvent($event);
+        $this->assertEmitsEvent('privmsg', array($this->source, 'Fact: ' . $this->chayism));
+        $this->plugin->onPrivmsg();
     }
 
     /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #zftalk
-     * @eventArg Elazar is not Mr. Chay
+     * Tests that lack of an appropriate trigger results in no response with
+     * a Chayism.
+     *
+     * @return void
      */
-    public function testWithNoTyChay()
+    public function testNoPrivmsgTriggerDoesNotReturnChayism()
     {
-        $this->plugin->onPrivMsg();
-        $this->assertDoesNotHaveEvent(Phergie_Event_Command::TYPE_PRIVMSG,
-                                      'Failed asserting that elazar is not ' .
-                                      'tychay');
+        $args = array(
+            'receiver' => $this->source,
+            'text' => 'foo bar baz'
+        );
+        $event = $this->getMockEvent('privmsg', $args);
+        $this->plugin->setEvent($event);
+        $this->assertDoesNotEmitEvent('privmsg', array($this->source, 'Fact: ' . $this->chayism));
+        $this->plugin->onPrivmsg();
     }
 }
