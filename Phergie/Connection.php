@@ -141,9 +141,9 @@ class Phergie_Connection
     {
         if (empty($this->hostmask)) {
             $this->hostmask = new Phergie_Hostmask(
-                $this->nick,
-                $this->username,
-                $this->host
+                $this->getNick(),
+                $this->getUsername(),
+                $this->getHost()
             );
         }
 
@@ -223,7 +223,7 @@ class Phergie_Connection
         if (!in_array($this->transport, stream_get_transports())) {
             throw new Phergie_Connection_Exception(
                 'Transport ' . $this->transport . ' is not supported',
-                Phergie_Connection_Exception::TRANSPORT_NOT_SUPPORTED
+                Phergie_Connection_Exception::ERR_TRANSPORT_NOT_SUPPORTED
             );
         }
 
