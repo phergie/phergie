@@ -31,6 +31,20 @@
 class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
 {
     /**
+     * Skips tests if the SQLite PDO driver is not available.
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped('PDO or pdo_sqlite extension is required');
+        }
+
+        parent::setUp();
+    }
+
+    /**
      * Configures the plugin to use a temporary copy of the database.
      *
      * @return PDO Connection to the temporary database
