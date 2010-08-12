@@ -27,6 +27,7 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Ideone
+ * @uses     extension soap
  * @uses     Phergie_Plugin_Command pear.phergie.org
  */
 class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
@@ -38,6 +39,10 @@ class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
+        if (!extension_loaded('soap')) {
+            $this->fail('soap extension is required');
+        }
+
         $this->plugins->getPlugin('Command');
     }
 
