@@ -1,0 +1,105 @@
+<?php
+/**
+ * Phergie
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie
+ * @package   Phergie_Tests
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie_Tests
+ */
+
+define('PHERGIE_BASE_PATH', realpath(dirname(__FILE__) . '/../..'));
+
+require_once PHERGIE_BASE_PATH . '/Phergie/Autoload.php';
+
+/**
+ * Unit test suite for Pherge_Autoload.
+ *
+ * @category Phergie
+ * @package  Phergie_Tests
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Tests
+ */
+class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
+{
+    /**
+     * Undoes effects of the test suite bootstrap that prevent reliable
+     * testing of the autoloader.
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        set_include_path('.');
+        foreach (spl_autoload_functions() as $callback) {
+            spl_autoload_unregister($callback);
+        }
+    }
+
+    /**
+     * Tests that the autoloader adds its containing directory to the
+     * include path.
+     *
+     * @return void
+     */
+    public function testConstructorAddsToIncludePath()
+    {
+        $autoload = new Phergie_Autoload;
+        $paths = explode(PATH_SEPARATOR, get_include_path());
+        $this->assertContains(PHERGIE_BASE_PATH, $paths);
+    }
+
+    /**
+     * Tests that the autoloader can successfully autoload a class.
+     *
+     * @return void
+     */
+    public function testLoad()
+    {
+        $class = 'Phergie_Bot';
+        $this->assertFalse(class_exists($class, false));
+        $autoload = new Phergie_Autoload;
+        $autoload->load($class);
+        $this->assertTrue(class_exists($class, false));
+    }
+
+    /**
+     * Tests that the autoloader can register itself as an autoloader.
+     *
+     * @return void
+     */
+    public function testRegisterAutoloader()
+    {
+        Phergie_Autoload::registerAutoloader();
+        $this->assertEquals(
+            1,
+            count(spl_autoload_functions()),
+            'Autoloader was not registered'
+        );
+    }
+
+    /**
+     * Tests that the autoloader can add a path to the include path.
+     *
+     * @return void
+     */
+    public function testAddPath()
+    {
+        $path = dirname(__FILE__);
+        Phergie_Autoload::addPath($path);
+        $paths = explode(PATH_SEPARATOR, get_include_path());
+        $this->assertContains($path, $paths);
+    }
+}
