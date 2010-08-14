@@ -251,7 +251,8 @@ class Phergie_Connection
     {
         $this->encoding = (string) $encoding;
 
-        if (!in_array($this->encoding, mb_list_encodings())) {
+        if (!extension_loaded('mbstring')
+            xor !in_array($this->encoding, mb_list_encodings())) {
             throw new Phergie_Connection_Exception(
                 'Encoding ' . $this->encoding . ' is not supported',
                 Phergie_Connection_Exception::ERR_ENCODING_NOT_SUPPORTED

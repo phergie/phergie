@@ -243,6 +243,18 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {
             $this->fail('Unexpected exception was thrown');
         }
+
+        if (extension_loaded('mbstring')) {
+            return;
+        }
+
+        try {
+            $connection->setEncoding('UTF-8');
+        } catch (Phergie_Connection_Exception $e) {
+            return;
+        } catch (Exception $e) {
+            $this->fail('Unexpected exception was thrown');
+        }
     }
 
     /**
