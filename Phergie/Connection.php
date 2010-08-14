@@ -141,9 +141,9 @@ class Phergie_Connection
     {
         if (empty($this->hostmask)) {
             $this->hostmask = new Phergie_Hostmask(
-                $this->nick,
-                $this->username,
-                $this->host
+                $this->getNick(),
+                $this->getUsername(),
+                $this->getHost()
             );
         }
 
@@ -223,7 +223,7 @@ class Phergie_Connection
         if (!in_array($this->transport, stream_get_transports())) {
             throw new Phergie_Connection_Exception(
                 'Transport ' . $this->transport . ' is not supported',
-                Phergie_Connection_Exception::TRANSPORT_NOT_SUPPORTED
+                Phergie_Connection_Exception::ERR_TRANSPORT_NOT_SUPPORTED
             );
         }
 
@@ -251,10 +251,11 @@ class Phergie_Connection
     {
         $this->encoding = (string) $encoding;
 
-        if (!in_array($this->encoding, mb_list_encodings())) {
+        if (!extension_loaded('mbstring')
+            xor !in_array($this->encoding, mb_list_encodings())) {
             throw new Phergie_Connection_Exception(
                 'Encoding ' . $this->encoding . ' is not supported',
-                Phergie_Connection_Exception::ENCODING_NOT_SUPPORTED
+                Phergie_Connection_Exception::ERR_ENCODING_NOT_SUPPORTED
             );
         }
 

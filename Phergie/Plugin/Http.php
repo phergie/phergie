@@ -184,7 +184,10 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
             $type = $this->response->getHeaders('content-type');
             foreach ($this->handlers as $expr => $handler) {
                 if (preg_match('#^' . $expr . '$#i', $type)) {
-                    $body = call_user_func($handler, $body);
+                    $handled = call_user_func($handler, $body);
+                    if (!empty($handled)) {
+                        $body = $handled;
+                    }
                 }
             }
 
@@ -256,7 +259,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     public function post($url, array $query = array(),
         array $post = array(), array $context = array()
     ) {
-        if (!empty($params)) {
+        if (!empty($query)) {
             $url .= '?' . http_build_query($query);
         }
 

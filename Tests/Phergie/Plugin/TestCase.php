@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Plugin classes
+ * Unit test suite for plugin classes.
  *
  * @category Phergie
  * @package  Phergie_Tests
@@ -31,177 +31,405 @@
 abstract class Phergie_Plugin_TestCase extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Phergie_Event_Handler
+     * Mock configuration
+     *
+     * @var Phergie_Config
      */
-    protected $handler;
+    protected $config;
 
     /**
+     * Associative array for configuration setting values, accessed by the
+     * mock configuration object using a callback
+     *
+     * @var array
+     */
+    protected $settings = array();
+
+    /**
+     * Mock connection
+     *
      * @var Phergie_Connection
      */
     protected $connection;
 
     /**
-     * @var array
+     * Mock event handler
+     *
+     * @var Phergie_Event_Handler
      */
-    protected $eventArgs;
+    protected $events;
 
     /**
+     * Mock plugin handler
+     *
+     * @var Phergie_Plugin_Handler
+     */
+    protected $plugins;
+
+    /**
+     * Plugin instance being tested
+     *
      * @var Phergie_Plugin_Abstract
      */
     protected $plugin;
 
     /**
-     * @var array
-     */
-    protected $config = array();
-
-    /**
-     * Constructs a test case with the given name.
+     * Full name of the plugin class being tested, may be explicitly
+     * specified in subclasses but is otherwise automatically derived from
+     * the test case class name
      *
-     * @param  string $name
-     * @param  array  $data
-     * @param  string $dataName
+     * @var string
      */
-    public function __construct($name = NULL, array $data = array(), $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-        $this->connection = new Phergie_Connection();
-        $this->handler    = new Phergie_Event_Handler();
-    }
+    protected $pluginClass;
 
     /**
-     * Assert that a given event type exists in the event handler
-     * @param string $event
-     * @param string $message
-     */
-    public function assertHasEvent($event, $message = null)
-    {
-        self::assertTrue($this->handler->hasEventOfType($event), $message);
-    }
-
-    /**
-     * Assert that a given event type DOES NOT exist in the event handler
-     * @param string $event
-     * @param string $message
-     */
-    public function assertDoesNotHaveEvent($event, $message = null)
-    {
-        self::assertFalse($this->handler->hasEventOfType($event), $message);
-    }
-
-    /**
-     * Assert that the emitter of the given command event was the given
-     * plugin
+     * User nick used in any events requiring one
      *
-     * @param Phergie_Event_Command   $event
-     * @param Phergie_Plugin_Abstract $plugin
-     * @param string                  $message
+     * @var string
      */
-    public function assertEventEmitter(Phergie_Event_Command $event,
-                                       Phergie_Plugin_Abstract $plugin,
-                                       $message = null)
-    {
-        $this->assertSame($plugin, $event->getPlugin(), $message);
-    }
+    protected $nick = 'nick';
 
     /**
-     * Gets the events added to the handler by the plugin
-     * @param string $type
-     * @return array | null
+     * Event source used in any events requiring one
+     *
+     * @var string
      */
-    public function getResponseEvents($type = null)
+    protected $source = '#channel';
+
+    /**
+     * Initializes instance properties.
+     *
+     * @return void
+     */
+    public function setUp()
     {
-        if (is_string($type) && strlen($type) > 0) {
-            return $this->handler->getEventsOfType($type);
+        if (empty($this->pluginClass)) {
+            $this->pluginClass = preg_replace('/Test$/', '', get_class($this));
         }
-        return $this->handler->getEvents();
-    }
 
-    /**
-     * Sets the event for the test
-     * @param array $event
-     * @param array $eventArgs
-     */
-    public function setEvent(array $event, array $eventArgs = null)
-    {
-        $eventClass = 'Phergie_Event_Request';
-        if (is_array($event)) {
-            $eventClass = $event[0];
-            $eventType  = $event[1];
-        } else {
-            throw new InvalidArgumentException("Invalid value for \$event");
+        if (empty($this->plugin)) {
+            $this->plugin = new $this->pluginClass;
         }
-        $event = new $eventClass();
-        $event->setType($eventType);
-        $event->setArguments($eventArgs);
-        $this->plugin->setEvent($event);
-        $this->eventArgs = $eventArgs;
+
+        $this->plugin->setConfig($this->getMockConfig());
+        $this->plugin->setConnection($this->getMockConnection());
+        $this->plugin->setEventHandler($this->getMockEventHandler());
+        $this->plugin->setPluginHandler($this->getMockPluginHandler());
     }
 
     /**
-     * Sets the plugin to be tested
-     * If a plugin requries config for testing, an array placed in
-     * $this->config will be parsed into a Phergie_Config object and
-     * attached to the plugin
+     * Destroys all initialized instance properties.
+     *
+     * @return void
      */
-    protected function setPlugin(Phergie_Plugin_Abstract $plugin)
+    public function tearDown()
     {
-        $this->plugin = $plugin;
-        $this->plugin->setEventHandler($this->handler);
-        $this->plugin->setConnection($this->connection);
-        $this->connection->setNick('test');
-        if (!empty($this->config)) {
-            $config = new Phergie_Config();
-            foreach ($this->config as $configKey => $configValue) {
-                $config[$configKey] = $configValue;
-            }
-            $plugin->setConfig($config);
+        unset(
+            $this->plugins,
+            $this->events,
+            $this->connection,
+            $this->config,
+            $this->plugin
+        );
+    }
+
+    /**
+     * Returns a mock configuration object.
+     *
+     * @return Phergie_Config
+     */
+    protected function getMockConfig()
+    {
+        if (empty($this->config)) {
+            $this->config = $this->getMock('Phergie_Config', array('offsetExists', 'offsetGet'));
+            $this->config
+                ->expects($this->any())
+                ->method('offsetExists')
+                ->will($this->returnCallback(array($this, 'configOffsetExists')));
+            $this->config
+                ->expects($this->any())
+                ->method('offsetGet')
+                ->will($this->returnCallback(array($this, 'configOffsetGet')));
         }
+        return $this->config;
     }
 
     /**
-     * Overrides the runTest method to add additional annotations
-     * @return PHPUnit_Framework_TestResult
+     * Returns whether a specific configuration setting has a value. Only
+     * intended for use by this class, but must be public for PHPUnit to
+     * call them.
+     *
+     * @param string $name Name of the setting
+     *
+     * @return boolean TRUE if the setting has a value, FALSE otherwise
      */
-    protected function runTest()
+    public function configOffsetExists($name)
     {
-        if (null === $this->plugin) {
-            throw new RuntimeException(
-                    'Tests cannot be run before plugin is set'
+        return isset($this->settings[$name]);
+    }
+
+    /**
+     * Returns the value of a specific configuration setting. Only intended
+     * for use by this class, but must be public for PHPUnit to call them.
+     *
+     * @param string $name Name of the setting
+     *
+     * @return mixed Value of the setting
+     */
+    public function configOffsetGet($name)
+    {
+        return $this->settings[$name];
+    }
+
+    /**
+     * Returns a mock connection object.
+     *
+     * @return Phergie_Connection
+     */
+    protected function getMockConnection()
+    {
+        if (empty($this->connection)) {
+            $this->connection = $this->getMock('Phergie_Connection');
+            $this->connection
+                ->expects($this->any())
+                ->method('getNick')
+                ->will($this->returnValue($this->nick));
+        }
+        return $this->connection;
+    }
+
+    /**
+     * Returns a mock event handler object.
+     *
+     * @return Phergie_Event_Handler
+     */
+    protected function getMockEventHandler()
+    {
+        if (empty($this->events)) {
+            $this->events = $this->getMock('Phergie_Event_Handler', array('addEvent'));
+        }
+        return $this->events;
+    }
+
+    /**
+     * Returns a mock plugin handler object.
+     *
+     * @return Phergie_Plugin_Handler
+     */
+    protected function getMockPluginHandler()
+    {
+        if (empty($this->plugins)) {
+            $config = $this->getMockConfig();
+            $events = $this->getMockEventHandler();
+            $this->plugins = $this->getMock(
+                'Phergie_Plugin_Handler',
+                array('getIterator', 'getPlugin'),
+                array($config, $events)
             );
         }
-        
-        // Clean the event handler... important!
-        $this->handler->clearEvents();
-
-        $info      = $this->getAnnotations();
-        $event     = null;
-        $eventArgs = array();
-        if (isset($info['method']['event']) && isset($info['method']['event'][0])) {
-            if (!is_string($info['method']['event'][0])) {
-                throw new InvalidArgumentException(
-                        'Only one event may be specified'
-                );
-            }
-            $event = $info['method']['event'][0];
-
-            if (stristr($event, '::')) {
-                $event = explode('::', $event);
-            }
-        }
-        if (isset($info['method']['eventArg'])) {
-            $eventArgs = $info['method']['eventArg'];
-        }
-        if (null !== $event) {
-            $this->setEvent($event, $eventArgs);
-        }
-
-        $testResult = parent::runTest();
-
-        // Clean the event handler again... just incase this time.
-        $this->handler->clearEvents();
-
-        return $testResult;
+        return $this->plugins;
     }
 
+    /**
+     * Returns a mock event object.
+     *
+     * @param string $type   Event type
+     * @param array  $args   Optional associative array of event arguments
+     * @param string $nick   Optional user nick to associate with the event
+     * @param string $source Optional user nick or channel name to associate
+     *        with the event as its source
+     *
+     * @return Phergie_Event_Request
+     */
+    protected function getMockEvent($type, array $args = array(),
+        $nick = null, $source = null
+    ) {
+        $methods = array('getNick', 'getSource');
+        foreach (array_keys($args) as $arg) {
+            if (is_int($arg) || ctype_digit($arg)) {
+                $methods[] = 'getArgument';
+            } else {
+                $methods[] = 'get' . ucfirst($arg);
+            }
+        }
+
+        $event = $this->getMock(
+            'Phergie_Event_Request',
+            $methods
+        );
+
+        $nick = $nick ? $nick : $this->nick;
+        $event
+            ->expects($this->any())
+            ->method('getNick')
+            ->will($this->returnValue($nick));
+
+        $source = $source ? $source : $this->source;
+        $event
+            ->expects($this->any())
+            ->method('getSource')
+            ->will($this->returnValue($source));
+
+        foreach ($args as $key => $value) {
+            if (is_int($key) || ctype_digit($key)) {
+                $event
+                    ->expects($this->any())
+                    ->method('getArgument')
+                    ->with($key)
+                    ->will($this->returnValue($value));
+            } else {
+                $event
+                    ->expects($this->any())
+                    ->method('get' . ucfirst($key))
+                    ->will($this->returnValue($value));
+            }
+        }
+
+        return $event;
+    }
+
+    /**
+     * Sets the value of a configuration setting.
+     *
+     * @param string $setting Name of the setting
+     * @param mixed  $value   Value for the setting
+     *
+     * @return void
+     */
+    protected function setConfig($setting, $value)
+    {
+        $this->settings[$setting] = $value;
+    }
+
+    /**
+     * Returns the absolute path to the Phergie/Plugin directory. Useful in
+     * conjunction with getMockDatabase().
+     *
+     * @param string $subpath Optional path to append to the directory path
+     *
+     * @return string Directory path
+     */
+    protected function getPluginsPath($subpath = null)
+    {
+        $path = realpath(dirname(__FILE__) . '/../../../Phergie/Plugin');
+        if (!empty($subpath)) {
+            $path .= '/' . ltrim($subpath, '/');
+        }
+        return $path;
+    }
+
+    /**
+     * Modifies the event handler to include an expectation of an event
+     * being added by the plugin being tested. Note that this must be called
+     * BEFORE executing the plugin code intended to initiate the event.
+     *
+     * @param string $type Event type
+     * @param array  $args Optional enumerated array of event arguments
+     *
+     * @return void
+     */
+    protected function assertEmitsEvent($type, array $args = array())
+    {
+        $this->events
+            ->expects($this->at(0))
+            ->method('addEvent')
+            ->with($this->plugin, $type, $args);
+    }
+
+    /**
+     * Modifies the event handler to include an expectation of an event NOT
+     * being added by the plugin being tested. Note that this must be called
+     * BEFORE executing plugin code that may initiate the event.
+     *
+     * @param string $type Event type
+     * @param array  $args Optional enumerated array of event arguments
+     *
+     * @return void
+     */
+    protected function assertDoesNotEmitEvent($type, array $args = array())
+    {
+        // Ugly hack to get around an issue in PHPUnit
+        // @link http://github.com/sebastianbergmann/phpunit-mock-objects/issues/issue/5#issue/5/comment/343524
+        $callback = create_function(
+            '$plugin, $type, $args',
+            'if (get_class($plugin) == "' . $this->pluginClass . '"
+            && $type == "' . $type . '"
+            && $args == "' . var_export($args, true) . '") {
+                trigger_error("Instance of ' . $this->pluginClass
+                . ' unexpectedly emitted event of type ' . $type
+                . '", E_USER_ERROR);
+            }'
+        );
+
+        $this->events
+            ->expects($this->any())
+            ->method('addEvent')
+            ->will($this->returnCallback($callback));
+    }
+
+    /**
+     * Modifies the plugin handler to include an expectation of a plugin
+     * being retrieved, indicating a dependency. Note that this must be
+     * called BEFORE executing the plugin code that may load that plugin
+     * dependency, which is usually located in onLoad().
+     *
+     * @param string $name Short name of the plugin required as a dependency
+     *
+     * @return void
+     */
+    public function assertRequiresPlugin($name)
+    {
+        $this->plugins
+            ->expects($this->atLeastOnce())
+            ->method('getPlugin')
+            ->with($name);
+    }
+
+    /**
+     * Creates an in-memory copy of a specified SQLite database file and
+     * returns a connection to it.
+     *
+     * @param string $path Path to the SQLite file to copy
+     *
+     * @return PDO Connection to the database copy
+     */
+    public function getMockDatabase($path)
+    {
+        $original = new PDO('sqlite:' . $path);
+        $copy = new PDO('sqlite::memory:');
+
+        $result = $original->query('SELECT sql FROM sqlite_master');
+        while ($sql = $result->fetchColumn()) {
+            $copy->exec($sql);
+        }
+
+        $tables = array();
+        $result = $original->query('SELECT name FROM sqlite_master WHERE type = "table"');
+        while ($table = $result->fetchColumn()) {
+            $tables[] = $table;
+        }
+
+        foreach ($tables as $table) {
+            $result = $original->query('SELECT * FROM ' . $table);
+            $insert = null;
+            $copy->beginTransaction();
+            while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                $columns = array_keys($row);
+                if (empty($insert)) {
+                    $insert = $copy->prepare(
+                        'INSERT INTO "' . $table . '" (' .
+                        '"' . implode('", "', $columns) . '"' .
+                        ') VALUES (' .
+                        ':' . implode(', :', $columns) .
+                        ')'
+                    );
+                }
+                $insert->execute($row);
+            }
+            $copy->commit();
+            unset($insert);
+        }
+
+        return $copy;
+    }
 }

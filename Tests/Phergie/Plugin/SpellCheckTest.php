@@ -12,14 +12,12 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie
+ * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Tests
  */
-
-require_once dirname(__FILE__) . '/TestCase.php';
 
 /**
  * Unit test suite for Pherge_Plugin_SpellCheck.
@@ -28,178 +26,141 @@ require_once dirname(__FILE__) . '/TestCase.php';
  * @package  Phergie_Tests
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
+ * @link     http://pear.phergie.org/package/Phergie_Tests
  */
 class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
 {
-
     /**
-     * Current SpellCheck plugin instance
+     * Checks for the pspell extension.
      *
-     * @var Phergie_Plugin_SpellCheck
-     */
-    protected $spell;
-
-    /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     * 
      * @return void
      */
-    protected function setUp()
+    public function setUp()
     {
-        $this->config = array('spellcheck.lang' => 'en');
+        parent::setUp();
 
-        $this->spell = new Phergie_Plugin_SpellCheck();
-        $this->setPlugin(new Phergie_Plugin_Command());
-        
-        $config = $this->plugin->getConfig();
-        
-        $handler = new Phergie_Plugin_Handler($config, $this->handler);
-        $this->plugin->setPluginHandler($handler);
-        
-        $handler->addPlugin($this->plugin);
-        $handler->addPlugin($this->spell);
-
-        $this->spell->setEventHandler($this->handler);
-        $this->spell->setConnection($this->connection);
-    }
-
-    /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #zftalk
-     * @eventArg spell
-     */
-    public function testSpell()
-    {
-        $this->spell->onLoad();
-        
-        $this->copyEvent();
-        $this->plugin->onPrivMsg();
-        $this->assertDoesNotHaveEvent(Phergie_Event_Command::TYPE_PRIVMSG);
-    }
-
-    /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #phergie
-     * @eventArg spell test
-     */
-    public function testSpellTest()
-    {
-        $this->spell->onLoad();
-        
-        $this->copyEvent();
-        $this->plugin->onPrivMsg();
-
-        $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PRIVMSG);
-        
-        $this->assertEquals(1, count($events));
-        foreach ($events as $event) {
-            $args = $event->getArguments();
-            
-            $this->assertEquals('#phergie', $args[0]);
-            
-            $this->assertContains('CheckSpellUser:', $args[1]);
-            $this->assertContains('test', $args[1]);
-            $this->assertContains('correct', $args[1]);
-        }            
-    }
-
-    /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #phergie
-     * @eventArg spell testz
-     */
-    public function testSpellTestz()
-    {
-        $this->spell->onLoad();
-        
-        $this->copyEvent();
-        $this->plugin->onPrivMsg();
-        
-        $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PRIVMSG);
-        
-        $this->assertEquals(1, count($events));
-        foreach ($events as $event) {
-            $args = $event->getArguments();
-            
-            $this->assertEquals('#phergie', $args[0]);
-            
-            $this->assertContains('CheckSpellUser:', $args[1]);
-            $this->assertRegExp('/([a-z]+, ){4}/', $args[1]);
-            $this->assertContains('testz', $args[1]);
-            $this->assertContains('test,', $args[1]);
+        if (!extension_loaded('pspell')) {
+            $this->markTestSkipped('pspell extension not available');
         }
     }
 
     /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #phergie
-     * @eventArg spell testz
-     */
-    public function testSpellMoreSuggestions()
-    {
-        $config = $this->spell->getConfig();
-        
-        $this->copyEvent();
-        $config['spellcheck.limit'] = 6;
-        
-        $this->spell->onLoad();
-        $this->plugin->onPrivMsg();
-        
-        $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PRIVMSG);
-        
-        $this->assertEquals(1, count($events));
-        foreach ($events as $event) {
-            $args = $event->getArguments();
-            
-            $this->assertEquals('#phergie', $args[0]);
-            
-            $this->assertContains('CheckSpellUser:', $args[1]);
-            $this->assertRegExp('/([a-z]+, ){5}/', $args[1]);
-            $this->assertContains('testz', $args[1]);
-            $this->assertContains('test,', $args[1]);
-        }
-    }
-
-    /**
-     * @event Phergie_Event_Request::privmsg
-     * @eventArg #phergie
-     * @eventArg spell qwertyuiopasdfghjklzxcvbnm
-     */
-    public function testSpellNoSuggestions()
-    {
-        $this->spell->onLoad();
-        
-        $this->copyEvent();
-        $this->plugin->onPrivMsg();
-        
-        $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PRIVMSG);
-        
-        $this->assertEquals(1, count($events));
-        foreach ($events as $event) {
-            $args = $event->getArguments();
-            
-            $this->assertEquals('#phergie', $args[0]);
-            
-            $this->assertContains('CheckSpellUser:', $args[1]);
-            $this->assertContains('find any suggestions', $args[1]);
-        }
-    }
-    
-    /**
-     * Copy event from command to spell plugin
-     * 
+     * Tests for the plugin failing to load when the language setting is not
+     * specified.
+     *
      * @return void
      */
-    protected function copyEvent()
+    public function testLanguageSettingNotSet()
     {
-        $hostmask = Phergie_Hostmask::fromString('CheckSpellUser!test@testing.org');
-
-        $event = $this->plugin->getEvent();
-        $event->setHostmask($hostmask);
-
-        $this->spell->setEvent($event);
+        try {
+            $this->plugin->onLoad();
+            $this->fail('Expected exception was not thrown');
+        } catch (Phergie_Plugin_Exception $e) {
+            return;
+        }
+        $this->fail('Unexpected exception was thrown');
     }
 
+    /**
+     * Tests for the plugin requiring the Command plugin as a dependency.
+     *
+     * @return void
+     */
+    public function testRequiresCommandPlugin()
+    {
+        $this->setConfig('spellcheck.lang', 'en');
+        $this->assertRequiresPlugin('Command');
+        $this->plugin->onLoad();
+    }
+
+    /**
+     * Tests for the plugin failing to load because of a dictionary error.
+     *
+     * @return void
+     */
+    public function testLoadDictionaryError()
+    {
+        $this->setConfig('spellcheck.lang', 'foo');
+        try {
+            $this->plugin->onLoad();
+            $this->fail('Expected exception not thrown');
+        } catch (Phergie_Plugin_Exception $e) {
+            return;
+        }
+        $this->fail('Unexpected exception was thrown');
+    }
+
+    /**
+     * Initializes a spell check event.
+     *
+     * @param string $word Word to be checked
+     *
+     * @return void
+     */
+    private function initializeSpellCheckEvent($word)
+    {
+        $this->setConfig('spellcheck.lang', 'en');
+        $this->plugin->onLoad();
+        $args = array(
+            'receiver' => $this->source,
+            'text' => 'spell ' . $word
+        );
+        $event = $this->getMockEvent('privmsg', $args);
+        $this->plugin->setEvent($event);
+    }
+
+    /**
+     * Checks for a specified response to a spell check event.
+     *
+     * @param string $word     Work being checked
+     * @param string $response Expected response
+     *
+     * @return void
+     */
+    private function checkForSpellCheckResponse($word, $response)
+    {
+        $this->assertEmitsEvent('privmsg', array($this->source, $response));
+        $this->plugin->onCommandSpell($word);
+    }
+
+    /**
+     * Tests for the plugin returning a response for a correctly spelled word.
+     *
+     * @return void
+     */
+    public function testRespondsForCorrectlySpelledWord()
+    {
+        $word = 'test';
+        $this->initializeSpellCheckEvent($word);
+        $response = $this->nick . ': The word "' . $word . '" seems to be spelled correctly.';
+        $this->checkForSpellCheckResponse($word, $response);
+    }
+
+    /**
+     * Tests for the plugin returning a response when it can't find any
+     * suggestions for a word.
+     *
+     * @return void
+     */
+    public function testRespondsWithoutSuggestions()
+    {
+        $word = 'kjlfljlkjljkljlj';
+        $this->initializeSpellCheckEvent($word);
+        $response = $this->nick . ': I could not find any suggestions for "' . $word . '".';
+        $this->checkForSpellCheckResponse($word, $response);
+    }
+
+    /**
+     * Tests for the plugin returning a response when it is able to find
+     * suggestions for a word.
+     *
+     * @return void
+     */
+    public function testRespondsWithSuggestions()
+    {
+        $word = 'teh';
+        $this->initializeSpellCheckEvent($word);
+        $response = $this->nick . ': Suggestions for "' . $word . '": the, Te, tech, Th, eh.';
+        $this->checkForSpellCheckResponse($word, $response);
+    }
 }

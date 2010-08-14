@@ -69,6 +69,14 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
     protected $events;
 
     /**
+     * Name of the class to use for iterating over all currently loaded
+     * plugins
+     *
+     * @var string
+     */
+    protected $iteratorClass = 'Phergie_Plugin_Iterator';
+
+    /**
      * Constructor to initialize class properties and add the path for core
      * plugins.
      *
@@ -89,6 +97,12 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
         $this->plugins = array();
         $this->paths = array();
         $this->autoload = false;
+
+        if (!empty($config['plugins.paths'])) {
+            foreach ($config['plugins.paths'] as $dir => $prefix) {
+                $this->addPath($dir, $prefix);
+            }
+        }
 
         $this->addPath(dirname(__FILE__), 'Phergie_Plugin_');
     }
@@ -126,6 +140,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      * Returns metadata corresponding to a specified plugin.
      *
      * @param string $plugin Short name of the plugin class
+     *
      * @throws Phergie_Plugin_Exception Class file can't be found
      *
      * @return array|boolean Associative array containing the path to the
@@ -134,7 +149,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      */
     public function getPluginInfo($plugin)
     {
-       foreach (array_reverse($this->paths) as $path) {
+        foreach (array_reverse($this->paths) as $path) {
             $file = $path['path'] . $plugin . '.php';
             if (file_exists($file)) {
                 $path = array(
@@ -328,7 +343,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
 
         $plugins = array();
         foreach ($names as $name) {
-            $plugins[$name] = $this->getPlugin($name);
+            $plugins[strtolower($name)] = $this->getPlugin($name);
         }
         return $plugins;
     }
@@ -416,26 +431,60 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->plugins);
+        return new $this->iteratorClass(
+            new ArrayIterator($this->plugins)
+        );
     }
 
     /**
-     * Proxies method calls to all plugins containing the called method. An
-     * individual plugin may short-circuit this process by explicitly
-     * returning FALSE.
+     * Sets the iterator class used for all currently loaded plugin
+     * instances.
+     *
+     * @param string $class Name of a class that extends FilterIterator
+     *
+     * @return Phergie_Plugin_Handler Provides a fluent API
+     * @throws Phergie_Plugin_Exception Class cannot be found or is not an
+     *         FilterIterator-based class
+     */
+    public function setIteratorClass($class)
+    {
+        $valid = true;
+
+        try {
+            $error_reporting = error_reporting(0); // ignore autoloader errors
+            $r = new ReflectionClass($class);
+            error_reporting($error_reporting);
+            if (!$r->isSubclassOf('FilterIterator')) {
+                $message = 'Class ' . $class . ' is not a subclass of FilterIterator';
+                $valid = false;
+            }
+        } catch (ReflectionException $e) {
+            $message = $e->getMessage();
+            $valid = false;
+        }
+
+        if (!$valid) {
+            throw new Phergie_Plugin_Exception(
+                $message,
+                Phergie_Plugin_Exception::ERR_INVALID_ITERATOR_CLASS
+            );
+        }
+
+        $this->iteratorClass = $class;
+    }
+
+    /**
+     * Proxies method calls to all plugins containing the called method.
      *
      * @param string $name Name of the method called
      * @param array  $args Arguments passed in the method call
      *
-     * @return bool FALSE if a plugin short-circuits processing by returning
-     *         FALSE, TRUE otherwise
+     * @return void
      */
     public function __call($name, array $args)
     {
-        foreach ($this->plugins as $plugin) {
-            if (call_user_func_array(array($plugin, $name), $args) === false) {
-                return false;
-            }
+        foreach ($this->getIterator() as $plugin) {
+            call_user_func_array(array($plugin, $name), $args);
         }
         return true;
     }

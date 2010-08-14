@@ -87,7 +87,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
     {
         $time = time();
         if (!empty($this->lastPing)) {
-            if ($time - $this->lastPing > $this->getConfig('ping.ping', 10)) {
+            if ($time - $this->lastPing > $this->getConfig('ping.ping', 20)) {
                 $this->doQuit();
             }
         } elseif (
@@ -112,7 +112,7 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
     /**
      * Set the last ping time
      * lastPing needs to be exposed for unit testing
-     * 
+     *
      * @param int|null $ping timestamp of last ping
      *
      * @return self

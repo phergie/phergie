@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_TerryChay
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -24,7 +24,7 @@
  * either confirmation of correctly spelled words or potential correct
  * spellings for misspelled words.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_SpellCheck
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -34,7 +34,6 @@
  */
 class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
 {
-
     /**
      * Spell check dictionary handler
      *
@@ -65,7 +64,7 @@ class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
         }
 
         $this->plugins->getPlugin('Command');
-       
+
         set_error_handler(array($this, 'loadDictionaryError'));
         $this->pspell = pspell_new($this->getConfig('spellcheck.lang'));
         restore_error_handler();
@@ -86,11 +85,11 @@ class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
         $target = $this->event->getNick();
 
         $message  = $target . ': The word "' . $word;
-        $message .= '" seems to be spelt correctly.';
+        $message .= '" seems to be spelled correctly.';
         if (!pspell_check($this->pspell, $word)) {
             $suggestions = pspell_suggest($this->pspell, $word);
-           
-            $message  = $target; 
+
+            $message  = $target;
             $message .= ': I could not find any suggestions for "' . $word . '".';
             if (!empty($suggestions)) {
                 $suggestions = array_splice($suggestions, 0, $this->limit);
@@ -98,7 +97,7 @@ class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
                 $message    .= $word . '": ' . implode(', ', $suggestions) . '.';
             }
         }
-         
+
         $this->doPrivmsg($source, $message);
     }
 
@@ -116,5 +115,4 @@ class Phergie_Plugin_SpellCheck extends Phergie_Plugin_Abstract
     {
         $this->fail($errstr);
     }
-
 }

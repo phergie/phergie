@@ -54,13 +54,6 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
     protected $wait = 0;
 
     /**
-     * Records when the application last performed a tick
-     *
-     * @var int
-     */
-    protected $lastTick = 0;
-
-    /**
      * Overrides the parent class to set the poll time.
      *
      * @param Phergie_Bot $bot     Main bot class
@@ -102,7 +95,7 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
      *
      * @return void
      */
-    protected function handleEventsAsync()
+    public function handleEvents()
     {
         $hostmasks = $this->driver->getActiveReadSockets($this->sec, $this->usec);
         if (!$hostmasks) {
@@ -117,45 +110,11 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
             if ($event = $this->driver->getEvent()) {
                 $this->ui->onEvent($event, $connection);
                 $this->plugins->setEvent($event);
-
-                if (!$this->plugins->preEvent()) {
-                    continue;
-                }
-
+                $this->plugins->preEvent();
                 $this->plugins->{'on' . ucfirst($event->getType())}();
             }
 
             $this->processEvents($connection);
         }
-    }
-
-    /**
-     * Perform application tick event on all plugins and connections.
-     *
-     * @return void
-     */
-    protected function doTick()
-    {
-        foreach ($this->connections as $connection) {
-            $this->plugins->setConnection($connection);
-            $this->plugins->onTick();
-            $this->processEvents($connection);
-        }
-    }
-
-    /**
-     * Obtains and processes incoming events, then sends resulting outgoing
-     * events.
-     *
-     * @return void
-     */
-    public function handleEvents()
-    {
-        $time = time();
-        if ($this->lastTick == 0 || ($this->lastTick + $this->wait <= $time)) {
-            $this->doTick();
-            $this->lastTick = $time;
-        }
-        $this->handleEventsAsync();
     }
 }

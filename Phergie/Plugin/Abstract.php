@@ -270,7 +270,7 @@ abstract class Phergie_Plugin_Abstract
      */
     public function getEvent()
     {
-        if (empty($this->connection)) {
+        if (empty($this->event)) {
             throw new Phergie_Plugin_Exception(
                 'Event cannot be accessed before one is set',
                 Phergie_Plugin_Exception::ERR_NO_EVENT

@@ -28,25 +28,15 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Help
  * @uses     Phergie_Plugin_Command pear.phergie.org
- *
- * @pluginDesc Provides access to plugin help information
  */
 class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
 {
-
     /**
-     * Holds the registry of help data indexed by plugin name
+     * Registry of help data indexed by plugin name
      *
      * @var array
      */
     protected $registry;
-
-    /**
-     * Whether the registry has been alpha sorted
-     *
-     * @var bool
-     */
-    protected $registry_sorted = false;
 
     /**
      * Checks for dependencies.
@@ -56,143 +46,175 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $this->getPluginHandler()->getPlugin('Command');
-        $this->register($this);
+    }
+
+    /**
+     * Creates a registry of plugin metadata on connect.
+     *
+     * @return void
+     */
+    public function onConnect()
+    {
+        $this->populateRegistry();
+    }
+
+    /**
+     * Creates a registry of plugin metadata.
+     *
+     * @return void
+     */
+    public function populateRegistry()
+    {
+        $this->registry = array();
+
+        foreach ($this->plugins as $plugin) {
+            $class = new ReflectionClass($plugin);
+            $pluginName = strtolower($plugin->getName());
+
+            // Parse the plugin description
+            $docblock = $class->getDocComment();
+            $annotations = $this->getAnnotations($docblock);
+            if (isset($annotations['pluginDesc'])) {
+                $pluginDesc = implode(' ', $annotations['pluginDesc']);
+            } else {
+                $pluginDesc = $this->parseShortDescription($docblock);
+            }
+            $this->registry[$pluginName] = array(
+                'desc' => $pluginDesc,
+                'cmds' => array()
+            );
+
+            // Parse command method descriptions
+            $methodPrefix = Phergie_Plugin_Command::METHOD_PREFIX;
+            $methodPrefixLength = strlen($methodPrefix);
+            foreach ($class->getMethods() as $method) {
+                if (strpos($method->getName(), $methodPrefix) !== 0) {
+                    continue;
+                }
+
+                $cmd = strtolower(substr($method->getName(), $methodPrefixLength));
+                $docblock = $method->getDocComment();
+                $annotations = $this->getAnnotations($docblock);
+
+                if (isset($annotations['pluginCmd'])) {
+                    $cmdDesc = implode(' ', $annotations['pluginCmd']);
+                } else {
+                    $cmdDesc = $this->parseShortDescription($docblock);
+                }
+
+                $cmdParams = array();
+                if (!empty($annotations['param'])) {
+                    foreach ($annotations['param'] as $param) {
+                        $match = null;
+                        if (preg_match('/\h+\$([^\h]+)\h+/', $param, $match)) {
+                            $cmdParams[] = $match[1];
+                        }
+                    }
+                }
+
+                $this->registry[$pluginName]['cmds'][$cmd] = array(
+                    'desc' => $cmdDesc,
+                    'params' => $cmdParams
+                );
+            }
+
+            if (empty($this->registry[$pluginName]['cmds'])) {
+                unset($this->registry[$pluginName]);
+            }
+        }
     }
 
     /**
      * Displays a list of plugins with help information available or
      * commands available for a specific plugin.
      *
-     * @param string $plugin Short name of the plugin for which commands
-     *        should be returned, else a list of plugins with help
-     *        information available is returned
+     * @param string $query Optional short name of a plugin for which commands
+     *        should be returned or a command; if unspecified, a list of
+     *        plugins with help information available is returned
      *
      * @return void
-     *
-     * @pluginCmd Show all active plugins with help available
-     * @pluginCmd [plugin] Shows commands line for a specific plugin
      */
-    public function onCommandHelp($plugin = null)
+    public function onCommandHelp($query = null)
     {
+        if ($query == 'refresh') {
+            $this->populateRegistry();
+        }
+
         $nick = $this->getEvent()->getNick();
+        $delay = $this->getConfig('help.delay', 2);
 
-        if (!$plugin) {
-            // protect from sorting the registry each time help is called
-            if (!$this->registry_sorted) {
-                asort($this->registry);
-                $this->registry_sorted = true;
-            }
+        // Handle requests for a plugin list
+        if (!$query) {
+            $msg = 'These plugins have help information available: '
+                 . implode(', ', array_keys($this->registry));
+            $this->doPrivmsg($nick, $msg);
+            return;
+        }
 
-            $msg = 'These plugins below have help information available.';
-            $this->doPrivMsg($nick, $msg);
+        // Handle requests for plugin information
+        $query = strtolower($query);
+        if (isset($this->registry[$query])
+            && empty($this->registry[$query]['cmds'][$query])) {
+            $msg = $query . ' - ' . $this->registry[$query]['desc'];
+            $this->doPrivmsg($nick, $msg);
 
-            foreach ($this->registry as $plugin => $data) {
-                $this->doPrivMsg($nick, "{$plugin} - {$data['desc']}");
-            }
-        } else {
-            if (isset($this->getPluginHandler()->{$plugin})
-                && isset($this->registry[strtolower($plugin)]['cmd'])
-            ) {
+            $msg = 'Available commands - '
+                 . implode(', ', array_keys($this->registry[$query]['cmds']));
+            $this->doPrivmsg($nick, $msg);
+
+            if ($this->getConfig('command.prefix')) {
                 $msg
-                    = 'The ' .
-                    $plugin .
-                    ' plugin exposes the commands shown below.';
-                $this->doPrivMsg($nick, $msg);
-                if ($this->getConfig('command.prefix')) {
-                    $msg
-                        = 'Note that these commands must be prefixed with "' .
-                        $this->getConfig('command.prefix') .
-                        '" (without quotes) when issued in a public channel.';
-                    $this->doPrivMsg($nick, $msg);
-                }
-
-                foreach ($this->registry[strtolower($plugin)]['cmd']
-                    as $cmd => $descs
-                ) {
-                    foreach ($descs as $desc) {
-                        $this->doPrivMsg($nick, "{$cmd} {$desc}");
-                    }
-                }
-
-            } else {
-                $this->doPrivMsg($nick, 'That plugin is not loaded.');
+                    = 'Note that these commands must be prefixed with "'
+                    . $this->getConfig('command.prefix')
+                    . '" (without quotes) when issued in a public channel.';
+                $this->doPrivmsg($nick, $msg);
             }
+
+            return;
+        }
+
+        // Handle requests for command information
+        foreach ($this->registry as $plugin => $data) {
+            if (empty($data['cmds'])) {
+                continue;
+            }
+
+            $result = preg_grep('/^' . $query . '$/i', array_keys($data['cmds']));
+            if (!$result) {
+                continue;
+            }
+
+            $cmd = $data['cmds'][array_shift($result)];
+            $msg = $query;
+            if (!empty($cmd['params'])) {
+                $msg .= ' [' . implode('] [', $cmd['params']) . ']';
+            }
+            $msg .= ' - ' . $cmd['desc'];
+            $this->doPrivmsg($nick, $msg);
         }
     }
 
     /**
-     * Sets the description for the plugin instance
+     * Parses and returns the short description from a docblock.
      *
-     * @param Phergie_Plugin_Abstract $plugin      plugin instance
-     * @param string                  $description plugin description
+     * @param string $docblock Docblock comment code
      *
-     * @return void
+     * @return string Short description (i.e. content from the start of the
+     *         docblock up to the first double-newline)
      */
-    public function setPluginDescription(
-        Phergie_Plugin_Abstract $plugin,
-        $description
-    ) {
-        $this->registry[strtolower($plugin->getName())]
-                ['desc'] = $description;
-    }
-
-    /**
-     * Sets the description for the command on the plugin instance
-     *
-     * @param Phergie_Plugin_Abstract $plugin      plugin instance
-     * @param string                  $command     from onCommand method
-     * @param string                  $description command description
-     *
-     * @return void
-     */
-    public function setCommandDescription(
-        Phergie_Plugin_Abstract $plugin,
-        $command,
-        array $description
-    ) {
-        $this->registry[strtolower($plugin->getName())]
-            ['cmd'][$command] = $description;
-    }
-
-    /**
-     * registers the plugin with the help plugin. this will parse the docblocks
-     * for specific annotations that this plugin will respond with when
-     * queried.
-     *
-     * @param Phergie_Plugin_Abstract $plugin plugin instance
-     *
-     * @return void
-     */
-    public function register(Phergie_Plugin_Abstract $plugin)
+    protected function parseShortDescription($docblock)
     {
-        $class = new ReflectionClass($plugin);
-
-        $annotations = self::parseAnnotations($class->getDocComment());
-        if (isset($annotations['pluginDesc'])) {
-            $this->setPluginDescription(
-                $plugin,
-                join(' ', $annotations['pluginDesc'])
-            );
-        }
-
-        foreach ($class->getMethods() as $method) {
-            if (strpos($method->getName(), 'onCommand') !== false) {
-                $annotations = self::parseAnnotations($method->getDocComment());
-                if (isset($annotations['pluginCmd'])) {
-                    $cmd = strtolower(substr($method->getName(), 9));
-                    $this->setCommandDescription(
-                        $plugin,
-                        $cmd,
-                        $annotations['pluginCmd']
-                    );
-                }
-            }
-        }
+        $desc = preg_replace(
+            array('#^\h*\*\h*#m', '#^/\*\*\h*\v+\h*#', '#(?:\r?\n){2,}.*#s', '#\s*\v+\s*#'),
+            array('', '', '', ' '),
+            $docblock
+        );
+        return $desc;
     }
 
     /**
-     * Taken from PHPUnit/Util/Test.php:243 and modified to fix an issue
-     * with tag content spanning multiple lines.
+     * Taken from PHPUnit/Util/Test.php and modified to fix an issue with
+     * tag content spanning multiple lines.
      *
      * PHPUnit
      *
@@ -232,7 +254,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
      *
      * @return array
      */
-    protected static function parseAnnotations($docblock)
+    protected function getAnnotations($docblock)
     {
         $annotations = array();
 

@@ -219,14 +219,16 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function getEvent()
     {
-        // Check for a new event on the current connection
-        $buffer = fgets($this->socket, 512);
-        if ($buffer === false) {
+        // Check the socket is still active
+        if (feof($this->socket)) {
             throw new Phergie_Driver_Exception(
-                'Unable to read from socket',
+                'EOF detected on socket',
                 Phergie_Driver_Exception::ERR_CONNECTION_READ_FAILED
             );
         }
+
+        // Check for a new event on the current connection
+        $buffer = fgets($this->socket, 512);
 
         // If no new event was found, return NULL
         if (empty($buffer)) {
@@ -241,6 +243,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
             // Parse the command and arguments
             list($cmd, $args) = array_pad(explode(' ', $buffer, 2), 2, null);
+            $hostmask = new Phergie_Hostmask(null, null, $this->connection->getHost());
 
         } else {
             // If the event could be from the server or a user...

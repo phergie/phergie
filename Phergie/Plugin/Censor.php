@@ -72,7 +72,19 @@ class Phergie_Plugin_Censor extends Phergie_Plugin_Abstract
             $this->soap = new SoapClient('http://ws.cdyne.com/ProfanityWS/Profanity.asmx?wsdl');
         }
         $params = array('Text' => $string);
-        $response = $this->soap->SimpleProfanityFilter($params);
+        $attempts = 0;
+        while ($attempts < 3) {
+            try {
+                $response = $this->soap->SimpleProfanityFilter($params);
+                break;
+            } catch (SoapFault $e) {
+                $attempts++;
+                sleep(1);
+            }
+        }
+        if ($attempts == 3) {
+            return $string;
+        }
         return $response->SimpleProfanityFilterResult->CleanText;
     }
 

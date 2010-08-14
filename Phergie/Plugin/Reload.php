@@ -54,9 +54,27 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
     {
         $plugin = ucfirst($plugin);
 
+        $evalClass = true;
+        if (strpos($plugin, ' ') !== false) {
+            $args = explode(' ', $plugin);
+            $plugin = $args[0];
+            if (strtolower($args[1]) == 'force') {
+                $evalClass = false;
+            }
+        }
+
         if (!$this->plugins->hasPlugin($plugin)) {
             echo 'DEBUG(Reload): ' . ucfirst($plugin) . ' is not loaded yet, loading', PHP_EOL;
-            $this->plugins->getPlugin($plugin);
+            try {
+                $this->plugins->getPlugin($plugin);
+                $this->plugins->command->populateMethodCache();
+            } catch (Phergie_Plugin_Exception $e) {
+                if ($e->getCode() == Phergie_Plugin_Exception::ERR_CLASS_NOT_FOUND) {
+                    echo 'DEBUG(Reload): ', $e->getMessage(), PHP_EOL;
+                } else {
+                    throw $e;
+                }
+            }
             return;
         }
 
@@ -74,22 +92,30 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         $newClass = $class . '_' . sha1($contents);
 
         if (class_exists($newClass, false)) {
-            echo 'DEBUG(Reload): Class ', $class, ' has not changed since last reload', PHP_EOL;
-            return;
+            if ($evalClass == true) {
+                echo 'DEBUG(Reload): Class ', $class, ' has not changed since last reload', PHP_EOL;
+                return;
+            }
+        } else {
+            $contents = preg_replace(
+                array('/^<\?(?:php)?/', '/class\s+' . $class . '/i'),
+                array('', 'class ' . $newClass),
+                $contents
+            );
+            eval($contents);
         }
-
-        $contents = preg_replace(
-            array('/<\?(?:php)?/', '/class\s+' . $class . '/i'),
-            array('', 'class ' . $newClass),
-            $contents
-        );
-        eval($contents);
 
         $instance = new $newClass;
         $instance->setName($plugin);
+        $instance->setEvent($this->event);
         $this->plugins
             ->removePlugin($plugin)
             ->addPlugin($instance);
+
+        $this->plugins->command->populateMethodCache();
+        if ($this->plugins->hasPlugin('Help')) {
+            $this->plugins->help->populateRegistry();
+        }
 
         echo 'DEBUG(Reload): Reloaded ', $class, ' to ', $newClass, PHP_EOL;
     }

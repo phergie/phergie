@@ -32,24 +32,9 @@
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     Phergie_Plugin_Temperature pear.phergie.org
- *
- * @pluginDesc Provide access to some Google services
  */
 class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
 {
-
-    /**
-     * HTTP plugin
-     *
-     * @var Phergie_Plugin_Http
-     */
-    protected $http;
-
-    /**
-     * Language for Google Services
-     */
-    protected $lang;
-
     /**
      * Checks for dependencies.
      *
@@ -59,11 +44,8 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
     {
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Command');
-        $this->http = $plugins->getPlugin('Http');
-        $plugins->getPlugin('Help')->register($this);
+        $plugins->getPlugin('Http');
         $plugins->getPlugin('Weather');
-
-        $this->lang = $this->getConfig('google.lang', 'en');
     }
 
     /**
@@ -73,8 +55,6 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      *
      * @return void
      * @todo Implement use of URL shortening here
-     *
-     * @pluginCmd [query] do a search on google
      */
     public function onCommandG($query)
     {
@@ -83,7 +63,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             'v' => '1.0',
             'q' => $query
         );
-        $response = $this->http->get($url, $params);
+        $response = $this->plugins->http->get($url, $params);
         $json = $response->getContent()->responseData;
         $event = $this->getEvent();
         $source = $event->getSource();
@@ -110,8 +90,6 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $query Search term
      *
      * @return void
-     *
-     * @pluginCmd [query] Do a search on Google and count the results
      */
     public function onCommandGc($query)
     {
@@ -120,7 +98,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             'v' => '1.0',
             'q' => $query
         );
-        $response = $this->http->get($url, $params);
+        $response = $this->plugins->http->get($url, $params);
         $json = $response->getContent()->responseData->cursor;
         $count = $json->estimatedResultCount;
         $event = $this->getEvent();
@@ -146,8 +124,6 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $query Term to translate
      *
      * @return void
-     *
-     * @pluginCmd [from language] [to language] [text to translate] Do a translation on Google
      */
     public function onCommandGt($from, $to, $query)
     {
@@ -157,7 +133,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             'q' => $query,
             'langpair' => $from . '|' . $to
         );
-        $response = $this->http->get($url, $params);
+        $response = $this->plugins->http->get($url, $params);
         $json = $response->getContent();
         $event = $this->getEvent();
         $source = $event->getSource();
@@ -180,18 +156,16 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      *        between 0 and 3 to get the forecast
      *
      * @return void
-     *
-     * @pluginCmd [location] Show the weather for the specified location
      */
     public function onCommandGw($location, $offset = null)
     {
         $url = 'http://www.google.com/ig/api';
         $params = array(
             'weather' => $location,
-            'hl' => $this->lang,
+            'hl' => $this->getConfig('google.lang', 'en'),
             'oe' => 'UTF-8'
         );
-        $response = $this->http->get($url, $params);
+        $response = $this->plugins->http->get($url, $params);
         $xml = $response->getContent()->weather;
 
         $event = $this->getEvent();
@@ -280,8 +254,6 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $location Location to search for
      *
      * @return void
-     *
-     * @pluginCmd [location] Get the location from Google Maps to the location specified
      */
     public function onCommandGmap($location)
     {
@@ -294,13 +266,13 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $params = array(
             'q' => $location,
             'output' => 'json',
-            'gl' => $this->lang,
+            'gl' => $this->getConfig('google.lang', 'en'),
             'sensor' => 'false',
             'oe' => 'utf8',
             'mrt' => 'all',
             'key' => $this->getConfig('google.key')
         );
-        $response = $this->http->get($url, $params);
+        $response = $this->plugins->http->get($url, $params);
         $json =  $response->getContent();
         if (!empty($json)) {
             $qtd = count($json->Placemark);
@@ -345,8 +317,6 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      * @param string $to    Destination metric
      *
      * @return void
-     *
-     * @pluginCmd [value] [currency from] [currency to] Converts a monetary value from one currency to another
      */
     public function onCommandGconvert($value, $from, $to)
     {
@@ -356,29 +326,21 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             'from' => $from,
             'to' => $to
         );
-        $response = $this->http->get($url, $params);
+        $response = $this->plugins->http->get($url, $params);
         $contents = $response->getContent();
         $event = $this->getEvent();
         $source = $event->getSource();
         $nick = $event->getNick();
         if ($contents) {
-            preg_match(
-                '#<span class=bld>.*? ' . $to . '</span>#im',
-                $contents,
-                $matches
-            );
-            if (!$matches[0]) {
-                $this->doPrivmsg($source, $nick . ', I can\'t do that.');
-            } else {
-                $str = str_replace('<span class=bld>', '', $matches[0]);
-                $str = str_replace($to . '</span>', '', $str);
-                $text
-                    = number_format($value, 2, ',', '.') . ' ' . $from .
-                    ' => ' . number_format($str, 2, ',', '.') . ' ' . $to;
-                $this->doPrivmsg($source, $text);
-            }
-        } else {
-            $this->doPrivmsg($source, $nick . ', we had a problem.');
+            libxml_use_internal_errors(true);
+            $doc = new DOMDocument;
+            $doc->loadHTML($contents);
+            libxml_clear_errors();
+            $xpath = new DOMXPath($doc);
+            $result = $xpath->query('//div[@id="currency_converter_result"]');
+            $div = $result->item(0);
+            $text = rtrim($div->textContent);
+            $this->doPrivmsg($source, $text);
         }
     }
 
@@ -395,7 +357,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
     public function onCommandConvert($query)
     {
         $url = 'http://www.google.com/search?q=' . urlencode($query);
-        $response = $this->http->get($url);
+        $response = $this->plugins->http->get($url);
         $contents = $response->getContent();
         $event = $this->getEvent();
         $source = $event->getSource();
@@ -434,49 +396,61 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
      *
      * @return void
      * @todo Implement use of URL shortening here
-     *
-     * @pluginCmd [query] do a search of a definition on Google Dictionary
      */
     public function onCommandDefine($query)
     {
-        $query = urlencode($query);
-        $url = 'http://www.google.com/dictionary/json?callback=result'.
-               '&q='.$query.'&sl='.$this->lang.'&tl='.$this->lang.
-               '&restrict=pr,de';
-        $json = file_get_contents($url);
+        $lang = $this->getConfig('google.lang', 'en');
+        $url = 'http://www.google.com/dictionary/json';
+        $params = array(
+            'callback' => 'result',
+            'q' => $query,
+            'sl' => $lang,
+            'tl' => $lang,
+            'restrict' => 'pr,de'
+        );
+        $response = $this->plugins->http->get($url, $params);
+        $json = $response->getContent();
 
-        //Remove some garbage from the json
-        $json = str_replace(array("result(", ",200,null)"), "", $json);
-
-        //Awesome workaround to remove a lot of slashes from json
+        // Remove some garbage from the JSON and decode it
+        $json = str_replace(array('result(', ',200,null)'), '', $json);
         $json = str_replace('"', '¿?¿', $json);
         $json = strip_tags(stripcslashes($json));
         $json = str_replace('"', "'", $json);
         $json = str_replace('¿?¿', '"', $json);
-
         $json = json_decode($json);
 
         $event = $this->getEvent();
         $source = $event->getSource();
         $nick = $event->getNick();
-        if (!empty($json->webDefinitions)){
-            $results = count($json->webDefinitions[0]->entries);
-            $more = $results > 1 ? ($results-1).' ' : NULL;
-            $lang_code = substr($this->lang, 0, 2);
-            $msg =
-                $nick . ': ' .
-                $json->webDefinitions[0]->entries[0]->terms[0]->text .
-                ' - You can find more '.$more.'results at '.
-                'http://www.google.com/dictionary?aq=f&langpair='.
-                $lang_code.'%7C'.$lang_code.'&q='.$query.'&hl='.$lang_code;
+        if (!empty($json->webDefinitions)) {
+            $results = 0;
+            foreach ($json->primaries[0]->entries as $entry) {
+                if ($entry->type == 'meaning') {
+                    $results++;
+                    if (empty($text)) {
+                        foreach ($entry->terms as $term) {
+                            if ($term->type == 'text') {
+                                $text = trim($term->text);
+                            }
+                        }
+                    }
+                }
+            }
+            $more = $results > 1 ? ($results - 1) . ' ' : '';
+            $lang_code = substr($lang, 0, 2);
+            $msg = $nick . ': ' . $text
+                 . ' - You can find ' . $more . 'more results at '
+                 . 'http://www.google.com/dictionary'
+                 . '?aq=f'
+                 . '&langpair=' . $lang_code . '%7C' . $lang_code
+                 . '&q=' . $query
+                 . '&hl=' . $lang_code;
             $this->doPrivmsg($source, $msg);
-        }else{
-            if ($this->lang != 'en'){
-               $temp = $this->lang;
-               $this->lang = 'en';
+        } else {
+            if ($lang != 'en'){
+               $lang = 'en';
                $this->onCommandDefine($query);
-               $this->lang = $temp;
-            }else{
+            } else {
                $msg = $nick . ': No results for this query.';
                $this->doPrivmsg($source, $msg);
             }

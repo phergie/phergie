@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Quit
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -22,14 +22,12 @@
 /**
  * Terminates the current connection upon command.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Quit
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Quit
  * @uses     Phergie_Plugin_Command pear.phergie.org
- *
- * @pluginDesc Terminates the current connection upon command.
  */
 class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
 {
@@ -41,17 +39,13 @@ class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $this->getPluginHandler()->getPlugin('Command');
-        $help = $this->getPluginHandler()->getPlugin('Help');
-        $help->register($this);
     }
 
     /**
-     * Issues a quit command when a message is received requesting that the 
+     * Issues a quit command when a message is received requesting that the
      * bot terminate the current connection.
      *
      * @return void
-     *
-     * @pluginCmd terminates the connection
      */
     public function onCommandQuit()
     {

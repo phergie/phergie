@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -23,7 +23,7 @@
  * Connection data processor which reads all connections looking
  * for a response.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -32,7 +32,7 @@
 class Phergie_Process_Standard extends Phergie_Process_Abstract
 {
     /**
-     * Obtains and processes incoming events, then sends resulting outgoing 
+     * Obtains and processes incoming events, then sends resulting outgoing
      * events.
      *
      * @return void
@@ -47,11 +47,7 @@ class Phergie_Process_Standard extends Phergie_Process_Abstract
             if ($event = $this->driver->getEvent()) {
                 $this->ui->onEvent($event, $connection);
                 $this->plugins->setEvent($event);
-
-                if (!$this->plugins->preEvent()) {
-                    continue;
-                }
-
+                $this->plugins->preEvent();
                 $this->plugins->{'on' . ucfirst($event->getType())}();
             }
 

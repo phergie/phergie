@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Event originating from a plugin for the bot.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -53,7 +53,8 @@ class Phergie_Event_Command extends Phergie_Event_Request
     /**
      * Returns a reference to the plugin instance that created the event.
      *
-     * @return Phergie_Plugin_Abstract
+     * @return Phergie_Plugin_Abstract|null Plugin instance or NULL if none
+     *         has been set
      */
     public function getPlugin()
     {

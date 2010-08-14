@@ -79,8 +79,8 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->config = $this->getMock('Phergie_Config');
-        $this->events = $this->getMock('Phergie_Event_Handler');
+        $this->config = $this->getMock('Phergie_Config', array('offsetGet', 'offsetExists'));
+        $this->events = $this->getMock('Phergie_Event_Handler', array('getIterator'));
         $this->handler = new Phergie_Plugin_Handler(
             $this->config,
             $this->events
@@ -106,6 +106,77 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             $this->handler->getIterator(),
             'getIterator() must return an iterator'
         );
+    }
+
+    /**
+     * Tests that a default iterator is returned if none is explicitly set.
+     *
+     * @return void
+     */
+    public function testGetIteratorReturnsDefault()
+    {
+        $this->assertType(
+            'Phergie_Plugin_Iterator',
+            $this->handler->getIterator()
+        );
+    }
+
+    /**
+     * Tests the ability to change the handler's iterator class when a valid
+     * class is specified.
+     *
+     * @return void
+     */
+    public function testSetIteratorClassWithValidClass()
+    {
+        eval('
+            class DummyIterator extends FilterIterator {
+                public function accept() {
+                    return true;
+                }
+            }
+        ');
+
+        $this->handler->setIteratorClass('DummyIterator');
+
+        $this->assertType(
+            'DummyIterator',
+            $this->handler->getIterator()
+        );
+    }
+
+    /**
+     * Tests that a failure occurs when a nonexistent iterator class is
+     * specified.
+     *
+     * @return void
+     */
+    public function testSetIteratorClassWithNonexistentClass()
+    {
+        try {
+            $this->handler->setIteratorClass('FooIterator');
+            $this->fail('Expected exception was not thrown');
+        } catch (Phergie_Plugin_Exception $e) {
+            return;
+        }
+        $this->fail('Unexpected exception was thrown');
+    }
+
+    /**
+     * Tests that a failure occurs when a class that is not a subclass of
+     * FilterIterator is specified.
+     *
+     * @return void
+     */
+    public function testSetIteratorClassWithNonFilterIteratorClass()
+    {
+        try {
+            $this->handler->setIteratorClass('ArrayIterator');
+            $this->fail('Expected exception was not thrown');
+        } catch (Phergie_Plugin_Exception $e) {
+            return;
+        }
+        $this->fail('Unexpected exception was thrown');
     }
 
     /**
@@ -178,35 +249,11 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests the plugin handler executing a callback on all contained
-     * plugins where one plugin short-circuits the process.
+     * plugins.
      *
      * @return void
      */
-    public function testImplementsCallWithShortCircuit()
-    {
-        $plugin1 = $this->getMockPlugin('TestPlugin1', array('callback'));
-        $plugin1
-            ->expects($this->once())
-            ->method('callback')
-            ->will($this->returnValue(false));
-        $this->handler->addPlugin($plugin1);
-
-        $plugin2 = $this->getMockPlugin('TestPlugin2', array('callback'));
-        $plugin2
-            ->expects($this->exactly(0))
-            ->method('callback');
-        $this->handler->addPlugin($plugin2);
-
-        $this->assertFalse($this->handler->callback());
-    }
-
-    /**
-     * Tests the plugin handler executing a callback on all contained
-     * plugins where no plugins short-circuit the process.
-     *
-     * @return void
-     */
-    public function testImplementsCallWithoutShortCircuit()
+    public function testImplementsCall()
     {
         foreach (range(1, 2) as $index) {
             $plugin = $this->getMockPlugin('TestPlugin' . $index, array('callback'));
@@ -735,5 +782,56 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
 
         $actual = $this->handler->getPlugins(array('testplugin1', 'testplugin2'));
         $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Tests that multiple plugin iterators can be used concurrently.
+     *
+     * @return void
+     */
+    public function testUseMultiplePluginIteratorsConcurrently()
+    {
+        $plugin1 = $this->getMockPlugin('TestPlugin1');
+        $this->handler->addPlugin($plugin1);
+
+        $plugin2 = $this->getMockPlugin('TestPlugin2');
+        $this->handler->addPlugin($plugin2);
+
+        $iterator1 = $this->handler->getIterator();
+        $iterator1->next();
+        $this->assertSame($plugin2, $iterator1->current());
+
+        $iterator2 = $this->handler->getIterator();
+        $this->assertSame($plugin1, $iterator2->current());
+    }
+
+    /**
+     * Tests adding plugin paths via configuration.
+     *
+     * @return void
+     */
+    public function testAddPluginPathsViaConfiguration()
+    {
+        $dir = dirname(__FILE__);
+        $prefix = 'Phergie_Plugin_';
+        $paths = array($dir => $prefix);
+        $this->config
+            ->expects($this->any())
+            ->method('offsetExists')
+            ->will($this->returnValue(true));
+        $this->config
+            ->expects($this->any())
+            ->method('offsetGet')
+            ->will($this->returnValue($paths));
+
+        // Reinitialize the handler so the configuration change takes effect
+        // within the constructor
+        $this->handler = new Phergie_Plugin_Handler(
+            $this->config,
+            $this->events
+        );
+
+        $this->handler->setAutoload(true);
+        $this->handler->getPlugin('Mock');
     }
 }

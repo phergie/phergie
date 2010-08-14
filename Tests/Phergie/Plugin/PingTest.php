@@ -12,14 +12,12 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie
+ * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie
+ * @link      http://pear.phergie.org/package/Phergie_Tests
  */
-
-require_once(dirname(__FILE__) . '/TestCase.php');
 
 /**
  * Unit test suite for Pherge_Plugin_Ping.
@@ -28,148 +26,139 @@ require_once(dirname(__FILE__) . '/TestCase.php');
  * @package  Phergie_Tests
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie
+ * @link     http://pear.phergie.org/package/Phergie_Tests
  */
 class Phergie_Plugin_PingTest extends Phergie_Plugin_TestCase
 {
-    protected $config = array('ping.ping'  => 10,
-                              'ping.event' => 300);
-    
     /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     */
-    protected function setUp()
-    {
-        $this->setPlugin(new Phergie_Plugin_Ping);
-    }
-
-    /**
-     * Test the lastEvent setter and getter
-     */
-    public function testSetGetLastEvent()
-    {
-        $expected = rand(100000,200000);
-        $this->plugin->setLastEvent($expected);
-        $this->assertEquals($expected,
-                            $this->plugin->getLastEvent(),
-                            'Assert that the last event was set and gotten ' .
-                            'correctly');
-    }
-
-    /**
-     * Test the lastPing setter and getter
-     */
-    public function testSetGetLastPing()
-    {
-
-        $expected = rand(100000,200000);
-        $this->plugin->setLastPing($expected);
-        $this->assertEquals($expected,
-                            $this->plugin->getLastPing(),
-                            'Assert that the last ping was set and gotten ' .
-                            'correctly');
-    }
-
-    /**
-     * Tests the onConnect hook
+     * Tests that the last ping and event are initialized on connection to
+     * the server.
+     *
+     * @return void
      */
     public function testOnConnect()
     {
-        $time = time() - 1;
-        // We need to make sure time() is going to be creater next time it is called
-        
         $this->plugin->onConnect();
-        $this->assertNull($this->plugin->getLastPing(), 
-                          'onConnect should set last ping to null');
-        $this->assertGreaterThan($time,
-                                 $this->plugin->getLastEvent(),
-                                 'onConnect should update lastEvent with the ' .
-                                 'current timestamp');
-        $this->assertLessThan($time + 2,
-                              $this->plugin->getLastEvent(),
-                              'onConnect should update lastEvent with the ' .
-                              'current timestamp');
+
+        $expected = time();
+        $actual = $this->plugin->getLastEvent();
+        $this->assertEquals($expected, $actual);
+
+        $expected = null;
+        $actual = $this->plugin->getLastPing();
+        $this->assertEquals($expected, $actual);
     }
 
     /**
-     * Test that the preEvent method updates the lastEvent with the current time
+     * Tests that the last event is reset when an event occurs.
+     *
+     * @return void
      */
     public function testPreEvent()
     {
-        $time = time() -1;
         $this->plugin->preEvent();
-        $this->assertGreaterThan($time,
-                                 $this->plugin->getLastEvent(),
-                                 'Last event time was set properly on preEvent');
-        $this->assertLessThan($time +2,
-                              $this->plugin->getLastEvent(),
-                              'Last Event time was set properly on preEvent');
+
+        $expected = time();
+        $actual = $this->plugin->getLastEvent();
+        $this->assertEquals($expected, $actual);
     }
 
     /**
-     * @todo Implement testOnPingResponse().
+     * Tests that the last ping is reset when a ping is received.
+     *
+     * @return void
      */
     public function testOnPingResponse()
     {
-        $this->plugin->setLastPing(time());
         $this->plugin->onPingResponse();
-        $this->assertNull($this->plugin->getLastPing(),
-                          'Last ping time should be null after onPingResponse');
 
+        $expected = null;
+        $actual = $this->plugin->getLastPing();
+        $this->assertEquals($expected, $actual);
     }
 
     /**
-     * Test that the plugin issues a quit when the ping threashold
-     * has been exceeded
+     * Tests that the test suite is able to manipulate the value of the last
+     * event.
+     *
+     * @return void
      */
-    public function testOnTickExceededPingThresholdQuits()
+    public function testSetLastEvent()
     {
-        $this->plugin->setLastPing(1);
-        $this->plugin->onTick();
-        $this->assertHasEvent(Phergie_Event_Command::TYPE_QUIT);
-    }
-    
-    /**
-     * Test that the plugin issues a quit when the ping threashold
-     * has been exceeded
-     */
-    public function testOnTickPingWithinThresholdDoesNotQuits()
-    {
-        $this->plugin->setLastPing(time());
-        $this->plugin->onTick();
-        $this->assertDoesNotHaveEvent(Phergie_Event_Command::TYPE_QUIT);
+        $expected = time() + 1;
+        $this->plugin->setLastEvent($expected);
+        $actual = $this->plugin->getLastEvent();
+        $this->assertEquals($expected, $actual);
+
+        $this->plugin->setLastEvent();
+        $expected = time();
+        $actual = $this->plugin->getLastEvent();
+        $this->assertEquals($expected, $actual);
+
+        try {
+            $this->plugin->setLastEvent('foo');
+            $this->fail('Expected exception was not thrown');
+        } catch (Exception $e) { }
     }
 
     /**
-     * Test that a ping is emitted when the event threashold is exceeded
+     * Tests that the test suite is able to manipulate the value of the last
+     * ping.
+     *
+     * @return void
      */
-    public function testPingEmittedAfterThresholdExceeded()
+    public function testSetLastPing()
     {
-        $this->plugin->setLastEvent(time() - $this->config['ping.event'] - 1);
-        $this->plugin->onTick();
-        $this->assertHasEvent(Phergie_Event_Command::TYPE_PING);
-        $events = $this->getResponseEvents(Phergie_Event_Command::TYPE_PING);
-        foreach ($events as $event) {
-            $this->assertEventEmitter($event,
-                                      $this->plugin,
-                    'Assert that the event was emitted by the tested plugin');
-        }
+        $expected = time() + 1;
+        $this->plugin->setLastPing($expected);
+        $actual = $this->plugin->getLastPing();
+        $this->assertEquals($expected, $actual);
+
+        $this->plugin->setLastPing();
+        $expected = time();
+        $actual = $this->plugin->getLastPing();
+        $this->assertEquals($expected, $actual);
+
+        try {
+            $this->plugin->setLastPing('foo');
+            $this->fail('Expected exception was not thrown');
+        } catch (Exception $e) { }
     }
 
     /**
-     * Test that no ping is emitted when the event thresthold is not exceeded
+     * Tests that a ping event is sent after the appropriate time period has
+     * lapsed since receiving an event.
+     *
+     * @depends testSetLastEvent
+     * @return void
      */
-    public function testNoPingEmittedWhenThresholdNotExceeded()
+    public function testPing()
     {
-        $this->plugin->setLastEvent(time() - $this->config['ping.event'] +1);
+        $pingEvent = 10;
+        $this->setConfig('ping.event', $pingEvent);
+        $lastEvent = time() - ($pingEvent + 1);
+        $this->plugin->setLastEvent($lastEvent);
+        $expected = time();
+        $this->assertEmitsEvent('ping', array($this->nick, $expected));
         $this->plugin->onTick();
-        $this->assertDoesNotHaveEvent(Phergie_Event_Command::TYPE_PING);
+        $actual = $this->plugin->getLastPing();
+        $this->assertEquals($expected, $actual);
     }
 
-    public function tearDown()
+    /**
+     * Tests that a quit event is sent after the appropriate time period has
+     * lapsed since sending a ping event.
+     *
+     * @depends testPing
+     * @return void
+     */
+    public function testQuit()
     {
-        $this->handler->clearEvents();
+        $pingPing = 10;
+        $this->setConfig('ping.ping', $pingPing);
+        $lastPing = time() - ($pingPing + 1);
+        $this->plugin->setLastPing($lastPing);
+        $this->assertEmitsEvent('quit');
+        $this->plugin->onTick();
     }
-
 }

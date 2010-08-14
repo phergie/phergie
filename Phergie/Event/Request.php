@@ -195,7 +195,7 @@ class Phergie_Event_Request
      *
      * @var array
      */
-    protected $arguments;
+    protected $arguments = array();
 
     /**
      * Raw data sent by the server
@@ -224,6 +224,12 @@ class Phergie_Event_Request
      */
     public function getHostmask()
     {
+        if (empty($this->hostmask)) {
+            throw new Phergie_Event_Exception(
+                'Hostmask has not been set',
+                Phergie_Event_Exception::ERR_MISSING_HOSTMASK
+            );
+        }
         return $this->hostmask;
     }
 
@@ -236,7 +242,9 @@ class Phergie_Event_Request
      */
     public function setArguments($arguments)
     {
-        $this->arguments = $arguments;
+        foreach ($arguments as $argument => $value) {
+            $this->setArgument($argument, $value);
+        }
         return $this;
     }
 
@@ -252,9 +260,7 @@ class Phergie_Event_Request
     public function setArgument($argument, $value)
     {
         $argument = $this->resolveArgument($argument);
-        if ($argument !== null) {
-            $this->arguments[$argument] = (string) $value;
-        }
+        $this->arguments[$argument] = (string) $value;
         return $this;
     }
 
@@ -269,27 +275,48 @@ class Phergie_Event_Request
     }
 
     /**
+     * Removes an argument value from the request.
+     *
+     * @param mixed $argument Integer position (starting from 0) or the
+     *        equivalent string name of the argument from self::$map
+     *
+     * @return Phergie_Event_Request Provides a fluent interface
+     */
+    public function removeArgument($argument)
+    {
+        $argument = $this->resolveArgument($argument);
+        unset($this->arguments[$argument]);
+        return $this;
+    }
+
+    /**
      * Resolves an argument specification to an integer position.
      *
      * @param mixed $argument Integer position (starting from 0) or the
      *        equivalent string name of the argument from self::$map
      *
-     * @return int|null Integer position of the argument or NULL if no
-     *         corresponding argument was found
+     * @return int Integer position of the argument
      */
     protected function resolveArgument($argument)
     {
-        if (isset($this->arguments[$argument])) {
-            return $argument;
-        } else {
-            $argument = strtolower($argument);
-            if (isset(self::$map[$this->type][$argument])
-                && isset($this->arguments[self::$map[$this->type][$argument]])
-            ) {
-                return self::$map[$this->type][$argument];
+        if (isset(self::$map[$this->type])) {
+            if (is_string($argument)) {
+                $argument = strtolower($argument);
+                if (isset(self::$map[$this->type][$argument])) {
+                    return self::$map[$this->type][$argument];
+                }
+            } else {
+                if (in_array($argument, self::$map[$this->type])) {
+                    return $argument;
+                }
             }
         }
-        return null;
+
+        throw new Phergie_Event_Exception(
+            'Argument "' . $argument . '" could not be resolved for'
+                . ' event type "' . $this->type . '"',
+            Phergie_Event_Exception::ERR_INVALID_ARGUMENT
+        );
     }
 
     /**
@@ -303,7 +330,7 @@ class Phergie_Event_Request
     public function getArgument($argument)
     {
         $argument = $this->resolveArgument($argument);
-        if ($argument !== null) {
+        if (isset($this->arguments[$argument])) {
             return $this->arguments[$argument];
         }
         return null;
@@ -339,7 +366,7 @@ class Phergie_Event_Request
      */
     public function getNick()
     {
-        return $this->hostmask->getNick();
+        return $this->getHostmask()->getNick();
     }
 
     /**
@@ -354,7 +381,7 @@ class Phergie_Event_Request
         if (substr($this->arguments[0], 0, 1) == '#') {
             return $this->arguments[0];
         }
-        return $this->hostmask->getNick();
+        return $this->getHostmask()->getNick();
     }
 
     /**
@@ -374,10 +401,7 @@ class Phergie_Event_Request
      */
     public function isFromUser()
     {
-        if (empty($this->hostmask)) {
-            return false;
-        }
-        $username = $this->hostmask->getUsername();
+        $username = $this->getHostmask()->getUsername();
         return !empty($username);
     }
 
@@ -388,7 +412,7 @@ class Phergie_Event_Request
      */
     public function isFromServer()
     {
-        $username = $this->hostmask->getUsername();
+        $username = $this->getHostmask()->getUsername();
         return empty($username);
     }
 
@@ -406,6 +430,10 @@ class Phergie_Event_Request
         if (!count($arguments) && substr($name, 0, 3) == 'get') {
             return $this->getArgument(substr($name, 3));
         }
+        throw new Phergie_Event_Exception(
+            'Called invalid method ' . $name . ' in ' . __CLASS__,
+            Phergie_Event_Exception::ERR_INVALID_METHOD_CALL
+        );
     }
 
     /**
@@ -418,7 +446,11 @@ class Phergie_Event_Request
      */
     public function offsetExists($offset)
     {
-        return ($this->resolveArgument($offset) !== null);
+        try {
+            return ($this->getArgument($offset) != null);
+        } catch (Phergie_Event_Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -445,10 +477,7 @@ class Phergie_Event_Request
      */
     public function offsetSet($offset, $value)
     {
-        $offset = $this->resolveArgument($offset);
-        if ($offset !== null) {
-            $this->arguments[$offset] = $value;
-        }
+        $this->setArgument($offset, $value);
     }
 
     /**
@@ -461,8 +490,6 @@ class Phergie_Event_Request
      */
     public function offsetUnset($offset)
     {
-        if ($offset = $this->resolveArgument($offset)) {
-            unset($this->arguments[$offset]);
-        }
+        $this->removeArgument($offset);
     }
 }

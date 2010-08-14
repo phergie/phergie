@@ -148,7 +148,7 @@ class Phergie_Plugin_Youtube extends Phergie_Plugin_Abstract
     {
         switch ($parsed['host']) {
             case 'youtu.be':
-                $v = ltrim('/', $parsed['path']);
+                $v = ltrim($parsed['path'], '/');
                 break;
             case 'youtube.com':
             case 'www.youtube.com':
