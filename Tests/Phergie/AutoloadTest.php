@@ -35,6 +35,20 @@ require_once PHERGIE_BASE_PATH . '/Phergie/Autoload.php';
 class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
 {
     /**
+     * SPL autoloader callbacks
+     *
+     * @var array
+     */
+    private $callbacks;
+
+    /**
+     * Old include path
+     *
+     * @var string
+     */
+    private $includePath;
+
+    /**
      * Undoes effects of the test suite bootstrap that prevent reliable
      * testing of the autoloader.
      *
@@ -42,9 +56,25 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        set_include_path('.');
+        $this->includePath = set_include_path('.');
+        $this->callbacks = array();
         foreach (spl_autoload_functions() as $callback) {
+            $this->callbacks[] = $callback;
             spl_autoload_unregister($callback);
+        }
+    }
+
+    /**
+     * Restores the effects of the test suite bootstrap for other test
+     * suites.
+     *
+     * @return void
+     */
+    public function tearDown()
+    {
+        set_include_path($this->includePath);
+        while ($callback = array_shift($this->callbacks)) {
+            spl_autoload_register($callback);
         }
     }
 
