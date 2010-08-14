@@ -79,8 +79,8 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->config = $this->getMock('Phergie_Config');
-        $this->events = $this->getMock('Phergie_Event_Handler');
+        $this->config = $this->getMock('Phergie_Config', array('offsetGet', 'offsetExists'));
+        $this->events = $this->getMock('Phergie_Event_Handler', array('getIterator'));
         $this->handler = new Phergie_Plugin_Handler(
             $this->config,
             $this->events

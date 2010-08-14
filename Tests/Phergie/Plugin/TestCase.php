@@ -223,7 +223,7 @@ abstract class Phergie_Plugin_TestCase extends PHPUnit_Framework_TestCase
             $events = $this->getMockEventHandler();
             $this->plugins = $this->getMock(
                 'Phergie_Plugin_Handler',
-                array(), // mock everything
+                array('getIterator', 'getPlugin'),
                 array($config, $events)
             );
         }
