@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Plugin_TerryChay.
+ * Unit test suite for Phergie_Plugin_TerryChay.
  *
  * @category Phergie
  * @package  Phergie_Tests

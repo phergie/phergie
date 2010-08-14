@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Plugin_Ping.
+ * Unit test suite for Phergie_Plugin_Ping.
  *
  * @category Phergie
  * @package  Phergie_Tests

@@ -24,7 +24,7 @@ define('PHERGIE_BASE_PATH', realpath(dirname(__FILE__) . '/../..'));
 require_once PHERGIE_BASE_PATH . '/Phergie/Autoload.php';
 
 /**
- * Unit test suite for Pherge_Autoload.
+ * Unit test suite for Phergie_Autoload.
  *
  * @category Phergie
  * @package  Phergie_Tests

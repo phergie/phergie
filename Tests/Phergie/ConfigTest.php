@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Config.
+ * Unit test suite for Phergie_Config.
  *
  * @category Phergie
  * @package  Phergie_Tests
