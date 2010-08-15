@@ -57,6 +57,14 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $mergeLinks = true;
 
     /**
+     * Flag indicating whether URLs in the output of all plugins should be
+     * shortened before being sent
+     *
+     * @var bool
+     */
+    protected $shortenOuput = false;
+
+    /**
      * Max length of the fetched URL title
      *
      * @var int
@@ -144,6 +152,10 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Tld');
+
+        
+        $this->shortenOutput = $this->getConfig('url.shortenOutput', false);
+        
 
         // make the shortener configurable
         $shortener = $this->getConfig('url.shortener', 'Trim');
@@ -635,4 +647,49 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     {
         $this->renderers[spl_object_hash($obj)] = $obj;
     }
+    
+    /**
+     * Processes events before they are dispatched and tries to shorten any
+     * urls in the text
+     *
+     * @return void
+     */
+    public function preDispatch()
+    {
+
+        if( !$this->shortenOutput ) {
+            return;
+        }
+
+        $events = $this->events->getEvents();
+
+        foreach ($events as $event) {
+            switch ($event->getType()) {
+                case Phergie_Event_Request::TYPE_PRIVMSG:
+                case Phergie_Event_Request::TYPE_ACTION:
+                case Phergie_Event_Request::TYPE_NOTICE:
+
+                    $text = $event->getArgument(1);
+                    $urls = $this->findUrls($text);
+
+                    foreach ($urls as $parsed) {
+                        $url = $parsed['glued'];
+
+                        // shorten url
+                        $shortenedUrl = $this->shortener->shorten($url);
+                        if (!$shortenedUrl) {
+                            $this->debug('Invalid Url: Unable to shorten. (' . $url . ')');
+                            $shortenedUrl = $url;
+                        }
+
+                        $text = str_replace($url, $shortenedUrl, $text);
+                    }
+
+                    $event->setArgument(1, $text);
+                    break;
+            }
+        }
+
+    }
+    
 }
