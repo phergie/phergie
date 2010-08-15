@@ -587,6 +587,13 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         );
 
         $response = $http->head($url, array(), $options);
+
+        if ( $response->getCode() == 405 ) { // [Head] request method not allowed
+
+            $response = $http->get($url, array(), $options);
+        }
+
+
         $header = $response->getHeaders('Content-Type');
 
         if (!preg_match('#^(text/x?html|application/xhtml+xml)(?:;.*)?$#', $header)) {
