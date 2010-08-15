@@ -240,7 +240,7 @@ class Phergie_Event_Request
      *
      * @return Phergie_Event_Request Provides a fluent interface
      */
-    public function setArguments($arguments)
+    public function setArguments(array $arguments)
     {
         foreach ($arguments as $argument => $value) {
             $this->setArgument($argument, $value);
@@ -378,7 +378,8 @@ class Phergie_Event_Request
      */
     public function getSource()
     {
-        if (substr($this->arguments[0], 0, 1) == '#') {
+        if (!empty($this->arguments[0])
+            && substr($this->arguments[0], 0, 1) == '#') {
             return $this->arguments[0];
         }
         return $this->getHostmask()->getNick();
