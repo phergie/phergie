@@ -179,7 +179,15 @@ class Phergie_Event_Request
 
         self::TYPE_RAW => array(
             'message' => 0
-        )
+        ),
+
+        self::TYPE_PING => array(
+            'server' => 0
+        ),
+
+        self::TYPE_PONG => array(
+            'server' => 0
+        ),
 
     );
 
@@ -299,6 +307,10 @@ class Phergie_Event_Request
      */
     protected function resolveArgument($argument)
     {
+        if (isset($this->arguments[$argument])) {
+            return $argument;
+        }
+
         if (isset(self::$map[$this->type])) {
             if (is_string($argument)) {
                 $argument = strtolower($argument);
