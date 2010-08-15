@@ -170,7 +170,10 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         if ($includeUrl) {
             $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
         }
-        return $out;
+
+        $encode = $this->getPluginHandler()->getPlugin('Encoding');
+
+        return $encode->decodeEntities($out);
     }
 
     /**
