@@ -30,38 +30,85 @@
  */
 class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * Phergie_Hostmask instance for testing.
+     * 
+     * @var Phergie_Hostmask $hostmask
+     */
     private $hostmask;
     
+    /**
+     * Creates testing instance.
+     * 
+     * @return void
+     */
     public function setUp()
     {
         $this->hostmask = new Phergie_Hostmask('nick', 'username', 'host');
     }
     
+    /**
+     * Tests that static method Phergie_Hostmask::isValid() returns true on a
+     * valid hostmask.
+     *
+     * @return void
+     */
     public function testIsValidPassesOnValidHostmask()
     {
         $this->assertTrue(Phergie_Hostmask::isValid('nick!username@host'));
     }
 
+    /**
+     * Tests that ::isValid() returns false
+     * on an invalid hostmask.
+     * 
+     * @return void
+     */
     public function testIsValidFailsOnInvalidHostmask()
     {
         $this->assertFalse(Phergie_Hostmask::isValid('blech'));
     }
 
+    /**
+     * Tests that ::isValid() returns false on a hostmask
+     * provided that has no nickname component.
+     * 
+     * @return void
+     */
     public function testIsValidFailsOnInvalidHostmaskNoNick()
     {
         $this->assertFalse(Phergie_Hostmask::isValid('!*@*'));
     }
 
+    /**
+     * Tests that ::isValid() returns false on a hostmask
+     * provided that has no username component.
+     *
+     * @return void
+     */
     public function testIsValidFailsOnInvalidHostmaskNoUsername()
     {
         $this->assertFalse(Phergie_Hostmask::isValid('*!@*'));
     }
 
+    /**
+     * Tests that ::isValid() returns falso on a hostmask
+     * provided that has no hostname component
+     * 
+     * @return void
+     */
     public function testIsValidFailsOnInvalidHostmaskNoHost()
     {
         $this->assertFalse(Phergie_Hostmask::isValid('*!*@'));
     }
     
+
+    /**
+     * Tests static function ::fromString() to ensure
+     * Nick, Username and Host properties are set correctly.
+     *
+     * @return voic
+     */
     public function testFromString()
     {
         $hostmask = Phergie_Hostmask::fromString('nick!user@host');
@@ -70,6 +117,12 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('host', $hostmask->getHost());
     }
 
+    /**
+     * Tests static function ::fromString() with invalid hostmask
+     * to ensure proper exception is thrown.
+     *
+     * @return void
+     */
     public function testFromStringWithInvalidHostmask()
     {
         $badstring = 'sdf982u19f92($&#@';
@@ -84,51 +137,93 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * Tests getHost() function for returning correct default value.
+     *
+     * @return void
+     */
     public function testGetHost()
     {
-        
         $this->assertEquals('host', $this->hostmask->getHost());
     }
 
+    /**
+     * Tests setHost() function for correctly setting host property.
+     * 
+     * @return void
+     */
     public function testSetHost()
     {
         $this->hostmask->setHost('newhost');
         $this->assertEquals('newhost', $this->hostmask->getHost());
     }
 
+    /**
+     * Tests getUsername() function for returning correct default value.
+     * 
+     * @return void
+     */
     public function testGetUsername()
     {
         $this->assertEquals('username', $this->hostmask->getUsername());
     }
 
+    /**
+     * Tests setUsername() function for correctly setting username property.
+     * 
+     * @return void
+     */
     public function testSetUsername()
     {
         $this->hostmask->setUsername('newusername');
         $this->assertEquals('newusername', $this->hostmask->getUsername());
     }
 
+    /**
+     * Tests getNick() function for returning default value.
+     */
     public function testGetNick()
     {
         $this->assertEquals('nick', $this->hostmask->getNick());
     }
 
+    /**
+     * Tests setNick() function for correctly setting nick property.
+     * 
+     * @return void
+     */
     public function testSetNick()
     {
         $this->hostmask->setNick('newnickname');
         $this->assertEquals('newnickname', $this->hostmask->getNick());
     }
 
+    /**
+     * Tests magic __toString function for creating valid correct hostmask.
+     * 
+     * @return void
+     */
     public function test__toString()
     {
         $this->assertEquals('nick!username@host', $this->hostmask->__toString());
     }
 
+    /**
+     * Tests matches() function to match a pattern with a default hostmask.
+     * 
+     * @return void
+     */
     public function testMatchesTrueWithDefaultHostmask()
     {
         $myPattern = 'nick!username@host';
         $this->assertTrue($this->hostmask->matches($myPattern));
     }
 
+    /**
+     * Tests matches() function to match a pattern with a hostmask specified.
+     * 
+     * @return void
+     */
     public function testMatchesTrueWithHostmaskSpecified()
     {
         $myPattern = '1nick!1username@1host';
@@ -136,12 +231,24 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->hostmask->matches($myPattern, $myHostmask));
     }
 
+    /**
+     * Tests matches() function for returning false when pattern does not match 
+     * the default hostmask.
+     * 
+     * @return void
+     */
     public function testMatchesFalseWithDefaultHostmask()
     {
         $myPattern = 'safoj!asoj@asfoh';
         $this->assertFalse($this->hostmask->matches($myPattern));
     }
 
+    /**
+     * Tests matches() function for returning false when pattern does not match
+     * a specified hostmask.
+     * 
+     * @return void
+     */
     public function testMatchesFalseWithHostmaskSpecified()
     {
         $myPattern = '1nick!1username@1host';
