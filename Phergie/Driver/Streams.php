@@ -265,6 +265,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         case 'nick':
         case 'quit':
         case 'ping':
+        case 'pong':
         case 'join':
         case 'error':
             $args = array(ltrim($args, ':'));
