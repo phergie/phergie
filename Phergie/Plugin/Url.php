@@ -588,11 +588,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         $response = $http->head($url, array(), $options);
 
-        if ( $response->getCode() == 405 ) { // [Head] request method not allowed
-
+        if ($response->getCode() == 405) { // [Head] request method not allowed
             $response = $http->get($url, array(), $options);
         }
-
 
         $header = $response->getHeaders('Content-Type');
 
@@ -641,5 +639,46 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     public function registerRenderer($obj)
     {
         $this->renderers[spl_object_hash($obj)] = $obj;
+    }
+
+    /**
+     * Processes events before they are dispatched and tries to shorten any
+     * urls in the text
+     *
+     * @return void
+     */
+    public function preDispatch()
+    {
+        if(!$this->getConfig('url.shortenOutput', false)) {
+            return;
+        }
+
+        $events = $this->events->getEvents();
+
+        foreach ($events as $event) {
+            switch ($event->getType()) {
+                case Phergie_Event_Request::TYPE_PRIVMSG:
+                case Phergie_Event_Request::TYPE_ACTION:
+                case Phergie_Event_Request::TYPE_NOTICE:
+                    $text = $event->getArgument(1);
+                    $urls = $this->findUrls($text);
+
+                    foreach ($urls as $parsed) {
+                        $url = $parsed['glued'];
+
+                        // shorten url
+                        $shortenedUrl = $this->shortener->shorten($url);
+                        if (!$shortenedUrl) {
+                            $this->debug('Invalid Url: Unable to shorten. (' . $url . ')');
+                            $shortenedUrl = $url;
+                        }
+
+                        $text = str_replace($url, $shortenedUrl, $text);
+                    }
+
+                    $event->setArgument(1, $text);
+                    break;
+            }
+        }
     }
 }
