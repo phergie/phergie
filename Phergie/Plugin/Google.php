@@ -370,7 +370,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             return;
         }
 
-        $start = strpos($contents, '<h3 class=r>');
+        $start = strpos($contents, '<h2 class=r');
         if ($start !== false) {
             $end = strpos($contents, '</b>', $start);
             $text = strip_tags(substr($contents, $start, $end - $start));
