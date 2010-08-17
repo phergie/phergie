@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Plugin_SpellCheck.
+ * Unit test suite for Phergie_Plugin_SpellCheck.
  *
  * @category Phergie
  * @package  Phergie_Tests

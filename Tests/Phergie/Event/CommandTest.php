@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Event_Command.
+ * Unit test suite for Phergie_Event_Command.
  *
  * @category Phergie
  * @package  Phergie_Tests

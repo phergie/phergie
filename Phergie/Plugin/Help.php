@@ -258,7 +258,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     {
         $annotations = array();
 
-        $regex = '/@(?P<name>[A-Za-z_-]+)(?:[ \t]+(?P<value>.*?))?(?:\*\/|\* @)/ms';
+        $regex = '/@(?P<name>[A-Za-z_-]+)(?:[ \t]+(?P<value>.*?))?(?:\*\/|\* )/ms';
 
         if (preg_match_all($regex, $docblock, $matches)) {
             $numMatches = count($matches[0]);

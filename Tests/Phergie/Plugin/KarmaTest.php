@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Plugin_Karma.
+ * Unit test suite for Phergie_Plugin_Karma.
  *
  * @category Phergie
  * @package  Phergie_Tests

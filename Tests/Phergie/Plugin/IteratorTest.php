@@ -20,7 +20,7 @@
  */
 
 /**
- * Unit test suite for Pherge_Plugin_Iterator.
+ * Unit test suite for Phergie_Plugin_Iterator.
  *
  * @category Phergie
  * @package  Phergie_Tests

@@ -265,6 +265,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         case 'nick':
         case 'quit':
         case 'ping':
+        case 'pong':
         case 'join':
         case 'error':
             $args = array(ltrim($args, ':'));
@@ -277,7 +278,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             if (substr($ctcp, 0, 1) === "\001" && substr($ctcp, -1) === "\001") {
                 $ctcp = substr($ctcp, 1, -1);
                 $reply = ($cmd == 'notice');
-                list($cmd, $args) = array_pad(explode(' ', $ctcp, 2), 2, null);
+                list($cmd, $args) = array_pad(explode(' ', $ctcp, 2), 2, array());
                 $cmd = strtolower($cmd);
                 switch ($cmd) {
                 case 'version':
