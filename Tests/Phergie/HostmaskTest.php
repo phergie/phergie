@@ -46,62 +46,28 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
     {
         $this->hostmask = new Phergie_Hostmask('nick', 'username', 'host');
     }
+
+    public static function isValidProvider()
+    {
+        return array(
+                array('nick!username@host', TRUE),
+                array('blech', FALSE),
+                array('!*@*', FALSE),
+                array('*!@*', FALSE),
+                array('*!*@', FALSE)
+        );
+    }
     
     /**
-     * Tests that static method Phergie_Hostmask::isValid() returns true on a
-     * valid hostmask.
+     * Tests static method Phergie_Hostmask::isValid() with various valid and invalid
+     * hostmasks.
      *
-     * @return void
+     * @dataProvider isValidProvider
      */
-    public function testIsValidPassesOnValidHostmask()
+    public function testIsValid($hostmask, $result)
     {
-        $this->assertTrue(Phergie_Hostmask::isValid('nick!username@host'));
+        $this->assertEquals($result, Phergie_HOstmask::isValid($hostmask));
     }
-
-    /**
-     * Tests that ::isValid() returns false
-     * on an invalid hostmask.
-     * 
-     * @return void
-     */
-    public function testIsValidFailsOnInvalidHostmask()
-    {
-        $this->assertFalse(Phergie_Hostmask::isValid('blech'));
-    }
-
-    /**
-     * Tests that ::isValid() returns false on a hostmask
-     * provided that has no nickname component.
-     * 
-     * @return void
-     */
-    public function testIsValidFailsOnInvalidHostmaskNoNick()
-    {
-        $this->assertFalse(Phergie_Hostmask::isValid('!*@*'));
-    }
-
-    /**
-     * Tests that ::isValid() returns false on a hostmask
-     * provided that has no username component.
-     *
-     * @return void
-     */
-    public function testIsValidFailsOnInvalidHostmaskNoUsername()
-    {
-        $this->assertFalse(Phergie_Hostmask::isValid('*!@*'));
-    }
-
-    /**
-     * Tests that ::isValid() returns falso on a hostmask
-     * provided that has no hostname component
-     * 
-     * @return void
-     */
-    public function testIsValidFailsOnInvalidHostmaskNoHost()
-    {
-        $this->assertFalse(Phergie_Hostmask::isValid('*!*@'));
-    }
-    
 
     /**
      * Tests static function ::fromString() to ensure
