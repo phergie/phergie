@@ -49,6 +49,7 @@ require dirname(__FILE__) . '/Twitter/laconica.class.php';
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Twitter
  * @uses     Phergie_Plugin_Time pear.phergie.org
+ * @uses     Phergie_Plugin_Encoding pear.phergie.org
  */
 class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
 {
@@ -101,6 +102,8 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
             $this->twitterpassword,
             $url
         );
+
+        $this->getPluginHandler()->getPlugin('Encoding');
 
     }
 
@@ -170,7 +173,10 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         if ($includeUrl) {
             $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
         }
-        return $out;
+
+        $encode = $this->getPluginHandler()->getPlugin('Encoding');
+
+        return $encode->decodeEntities($out);
     }
 
     /**
