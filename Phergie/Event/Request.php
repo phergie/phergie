@@ -125,6 +125,10 @@ class Phergie_Event_Request
      */
     protected static $map = array(
 
+        self::TYPE_NICK => array(
+            'nickname' => 0
+        ),
+
         self::TYPE_QUIT => array(
             'message' => 0
         ),
