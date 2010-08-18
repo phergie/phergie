@@ -450,19 +450,56 @@ class Phergie_Event_RequestTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Data provider for testProvidesVirtualGetterMethods().
+     *
+     * @return array Enumerated array of enumerated arrays each containing
+     *         parameter values for a single call to
+     *         testProvidesVirtualGetterMethods()
+     */
+    public function dataProviderTestProvidesVirtualGetterMethods()
+    {
+        $map = Phergie_Event_Request::getArgumentMapping();
+        $data = array();
+        foreach ($map as $command => $params) {
+            $data[] = array($command, $params);
+        }
+        return $data;
+    }
+
+    /**
      * Tests that the event makes virtual "getter" methods available based
      * on the parameters associated with the event type.
      *
+     * @param string $type Event type corresponding to the arguments for
+     *        which to test virtual "getter" methods
+     * @param array  $args Associative array mapping argument name to its
+     *        position starting from 0
+     *
+     * @return void
+     * @dataProvider dataProviderTestProvidesVirtualGetterMethods
+     */
+    public function testProvidesVirtualGetterMethods($type, array $args)
+    {
+        $this->event->setType($type);
+        $this->event->setArguments(array_keys($args));
+        foreach ($args as $name => $position) {
+            $this->assertSame($name, $this->event->{'get' . ucfirst($name)}());
+        }
+    }
+
+    /**
+     * Tests that all event types have a corresponding argument mapping
+     * defined.
+     *
      * @return void
      */
-    public function testProvidesVirtualGetterMethods()
+    public function testAllCommandsHaveArgumentMapping()
     {
-        $receiver = '#channel';
-        $text = 'text';
-        $this->event->setType('privmsg');
-        $this->event->setArguments(array($receiver, $text));
-        $this->assertSame($receiver, $this->event->getReceiver());
-        $this->assertSame($text, $this->event->getText());
+        $reflector = new ReflectionClass('Phergie_Event_Request');
+        $map = array_keys(Phergie_Event_Request::getArgumentMapping());
+        foreach ($reflector->getConstants() as $constant) {
+            $this->assertContains($constant, $map);
+        }
     }
 
     /**
