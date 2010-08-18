@@ -32,6 +32,7 @@
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     Phergie_Plugin_Temperature pear.phergie.org
+ * @uses     Phergie_Plugin_Encoding pear.phergie.org
  */
 class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
 {
@@ -46,6 +47,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Weather');
+        $plugins->getPlugin('Encoding');
     }
 
     /**
@@ -371,6 +373,11 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         }
 
         $start = strpos($contents, '<h3 class=r>');
+
+        if ($start === false) {
+            $start = strpos($contents, '<h2 class=r');
+        }
+
         if ($start !== false) {
             $end = strpos($contents, '</b>', $start);
             $text = strip_tags(substr($contents, $start, $end - $start));
@@ -382,6 +389,9 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         }
 
         if (isset($text)) {
+            $encode = $this->getPluginHandler()->getPlugin('Encoding');
+            $text = $encode->decodeEntities($text);
+            
             $this->doPrivmsg($source, $nick . ': ' . $text);
         } else {
             $this->doNotice($nick, 'Sorry I couldn\'t find an answer.');
