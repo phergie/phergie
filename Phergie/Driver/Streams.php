@@ -228,7 +228,10 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Check for a new event on the current connection
-        $buffer = fgets($this->socket, 512);
+        $buffer = '';
+        do {
+            $buffer .= fgets($this->socket, 512);
+        } while (!empty($buffer) && !preg_match('/\v+$/', $buffer));
 
         // If no new event was found, return NULL
         if (empty($buffer)) {
