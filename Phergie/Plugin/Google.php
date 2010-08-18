@@ -32,6 +32,7 @@
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     Phergie_Plugin_Temperature pear.phergie.org
+ * @uses     Phergie_Plugin_Encoding pear.phergie.org
  */
 class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
 {
@@ -46,6 +47,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Weather');
+        $plugins->getPlugin('Encoding');
     }
 
     /**
