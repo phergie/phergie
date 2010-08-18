@@ -178,7 +178,7 @@ class Phergie_Event_Request
 
         self::TYPE_ACTION => array(
             'target' => 0,
-            'action' => 1
+            'text'   => 1 
         ),
 
         self::TYPE_RAW => array(
