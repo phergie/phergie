@@ -168,16 +168,17 @@ abstract class Phergie_Plugin_TestCase extends Phergie_TestCase
      * being removed. Note that this must be called BEFORE executing the
      * plugin code that may remove that plugin.
      *
-     * @param string $name Short name of the plugin to be removed
+     * @param string|Phergie_Plugin_Abstract $plugin Short name of the plugin
+     *        or the plugin instance to be removed
      *
      * @return void
      */
-    public function assertRemovesPlugin($name)
+    public function assertRemovesPlugin($plugin)
     {
         $this->plugins
             ->expects($this->once())
             ->method('removePlugin')
-            ->with($name);
+            ->with($plugin);
     }
 
     /**
