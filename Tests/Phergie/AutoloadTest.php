@@ -19,7 +19,7 @@
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
 
-define('PHERGIE_BASE_PATH', realpath(dirname(__FILE__) . '/../..'));
+defined('PHERGIE_BASE_PATH') or define('PHERGIE_BASE_PATH', realpath(dirname(__FILE__) . '/../..'));
 
 require_once PHERGIE_BASE_PATH . '/Phergie/Autoload.php';
 
@@ -58,9 +58,12 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     {
         $this->includePath = set_include_path('.');
         $this->callbacks = array();
-        foreach (spl_autoload_functions() as $callback) {
-            $this->callbacks[] = $callback;
-            spl_autoload_unregister($callback);
+        $functions = spl_autoload_functions();
+        if (is_array($functions)) {
+            foreach (spl_autoload_functions() as $callback) {
+                $this->callbacks[] = $callback;
+                spl_autoload_unregister($callback);
+            }
         }
     }
 
@@ -94,6 +97,7 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     /**
      * Tests that the autoloader can successfully autoload a class.
      *
+     * @runInSeparateProcess
      * @return void
      */
     public function testLoad()
@@ -131,5 +135,19 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
         Phergie_Autoload::addPath($path);
         $paths = explode(PATH_SEPARATOR, get_include_path());
         $this->assertContains($path, $paths);
+    }
+
+    /**
+     * Prevents preservation of global state in cases where test methods
+     * must be run in separate processes.
+     *
+     * @param  PHPUnit_Framework_TestResult $result
+     * @return PHPUnit_Framework_TestResult
+     * @throws InvalidArgumentException
+     */
+    public function run(PHPUnit_Framework_TestResult $result = NULL)
+    {
+        $this->setPreserveGlobalState(false);
+        return parent::run($result);
     }
 }
