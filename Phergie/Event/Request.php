@@ -129,6 +129,10 @@ class Phergie_Event_Request
             'nickname' => 0
         ),
 
+        self::TYPE_WHOIS => array(
+            'nickmask' => 0
+        ),
+
         self::TYPE_QUIT => array(
             'message' => 0
         ),
@@ -176,21 +180,25 @@ class Phergie_Event_Request
             'text'     => 1
         ),
 
-        self::TYPE_ACTION => array(
-            'target' => 0,
-            'action' => 1
+        self::TYPE_PONG => array(
+            'server' => 0
         ),
 
-        self::TYPE_RAW => array(
-            'message' => 0
+        self::TYPE_ACTION => array(
+            'target' => 0,
+            'text'   => 1
         ),
 
         self::TYPE_PING => array(
             'server' => 0
         ),
 
-        self::TYPE_PONG => array(
-            'server' => 0
+        self::TYPE_TIME => array(),
+
+        self::TYPE_VERSION => array(),
+
+        self::TYPE_RAW => array(
+            'message' => 0
         ),
 
     );
@@ -508,5 +516,17 @@ class Phergie_Event_Request
     public function offsetUnset($offset)
     {
         $this->removeArgument($offset);
+    }
+
+    /**
+     * Returns a mapping of commands to their respective arguments.
+     *
+     * @return array Associative array keyed by command referencing an
+     *         associative array keyed by argument name referencing its
+     *         position starting from 0
+     */
+    public static function getArgumentMapping()
+    {
+        return self::$map;
     }
 }
