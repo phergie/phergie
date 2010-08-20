@@ -164,6 +164,23 @@ abstract class Phergie_Plugin_TestCase extends Phergie_TestCase
     }
 
     /**
+     * Modifies the plugin handler to include an expectation of a plugin
+     * being removed. Note that this must be called BEFORE executing the
+     * plugin code that may remove that plugin.
+     *
+     * @param string $name Short name of the plugin to be removed
+     *
+     * @return void
+     */
+    public function assertRemovesPlugin($name)
+    {
+        $this->plugins
+            ->expects($this->once())
+            ->method('removePlugin')
+            ->with($name);
+    }
+
+    /**
      * Creates an in-memory copy of a specified SQLite database file and
      * returns a connection to it.
      *
