@@ -54,6 +54,13 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
     protected $connection;
 
     /**
+     * Mock connection handler
+     *
+     * @var Phergie_Connection_Handler
+     */
+    protected $connections;
+
+    /**
      * Mock event handler
      *
      * @var Phergie_Event_Handler
@@ -66,6 +73,27 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
      * @var Phergie_Plugin_Handler
      */
     protected $plugins;
+
+    /**
+     * Mock driver
+     *
+     * @var Phergie_Driver_Abstract
+     */
+    protected $driver;
+
+    /**
+     * Mock end-user interface
+     *
+     * @var Phergie_Ui_Abstract
+     */
+    protected $ui;
+
+    /**
+     * Mock event processor
+     *
+     * @var Phergie_Process_Abstract
+     */
+    protected $processor;
 
     /**
      * User nick used in any events requiring one
@@ -162,6 +190,19 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Returns a mock connection handler object.
+     *
+     * @return Phergie_Connection_Handler
+     */
+    protected function getMockConnectionHandler()
+    {
+        if (empty($this->connections)) {
+            $this->connections = $this->getMock('Phergie_Connection_Handler');
+        }
+        return $this->connections;
+    }
+
+    /**
      * Returns a mock event handler object.
      *
      * @return Phergie_Event_Handler
@@ -169,7 +210,7 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
     protected function getMockEventHandler()
     {
         if (empty($this->events)) {
-            $this->events = $this->getMock('Phergie_Event_Handler', array('addEvent'));
+            $this->events = $this->getMock('Phergie_Event_Handler');
         }
         return $this->events;
     }
@@ -186,7 +227,7 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
             $events = $this->getMockEventHandler();
             $this->plugins = $this->getMock(
                 'Phergie_Plugin_Handler',
-                array('getIterator', 'getPlugin', 'removePlugin'),
+                array(),
                 array($config, $events)
             );
         }
@@ -249,6 +290,69 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
         }
 
         return $event;
+    }
+
+    /**
+     * Returns a mock end-user interface instance.
+     *
+     * @return Phergie_Ui_Abstract
+     */
+    protected function getMockUi()
+    {
+        if (empty($this->ui)) {
+            $this->ui = $this->getMock(
+                'Phergie_Ui_Abstract',
+                array()
+            );
+        }
+        return $this->ui;
+    }
+
+    /**
+     * Returns a mock event processor instance.
+     *
+     * @param Phergie_Bot $bot Bot instance for which events are to be
+     *        processed
+     *
+     * @return Phergie_Process_Abstract
+     */
+    protected function getMockProcessor(Phergie_Bot $bot)
+    {
+        if (empty($this->processor)) {
+            if (!class_exists('Phergie_Process_Mock', false)) {
+                $this->processor = $this->getMock(
+                    'Phergie_Process_Abstract',
+                    array(),
+                    array($bot),
+                    'Phergie_Process_Mock'
+                );
+            } else {
+                $this->processor = new Phergie_Process_Mock($bot);
+            }
+        }
+        return $this->processor;
+    }
+
+    /**
+     * Returns a mock driver instance.
+     *
+     * @return Phergie_Driver_Abstract
+     */
+    protected function getMockDriver()
+    {
+        if (empty($this->driver)) {
+            if (!class_exists('Phergie_Driver_Mock', false)) {
+                $this->driver = $this->getMock(
+                    'Phergie_Driver_Abstract',
+                    array(),
+                    array(),
+                    'Phergie_Driver_Mock'
+                );
+            } else {
+                $this->driver = new Phergie_Driver_Mock;
+            }
+        }
+        return $this->driver;
     }
 
     /**
