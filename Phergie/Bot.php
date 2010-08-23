@@ -255,6 +255,7 @@ class Phergie_Bot
     {
         if (empty($this->ui)) {
             $this->ui = new Phergie_Ui_Console;
+            $this->ui->setEnabled($this->getConfig('ui.enabled'));
         }
         return $this->ui;
     }
@@ -316,19 +317,27 @@ class Phergie_Bot
     protected function loadPlugins()
     {
         $config = $this->getConfig();
-        $plugins = $this->getPluginHandler();
-        $ui = $this->getUi();
+        if (!isset($config['plugins'])
+            || !is_array($config['plugins'])) {
+            return;
+        }
 
-        $plugins->setAutoload($config['plugins.autoload']);
+        if (isset($config['plugins.autoload'])) {
+            $autoload = (bool) $config['plugins.autoload'];
+        } else {
+            $autoload = false;
+        }
+
+        $ui = $this->getUi();
+        $plugins = $this->getPluginHandler();
+        $plugins->setAutoload($autoload);
+
         foreach ($config['plugins'] as $name) {
             try {
                 $plugin = $plugins->addPlugin($name);
                 $ui->onPluginLoad($name);
             } catch (Phergie_Plugin_Exception $e) {
                 $ui->onPluginFailure($name, $e->getMessage());
-                if (!empty($plugin)) {
-                    $plugins->removePlugin($plugin);
-                }
             }
         }
     }
@@ -341,6 +350,11 @@ class Phergie_Bot
     protected function loadConnections()
     {
         $config = $this->getConfig();
+        if (!isset($config['connections'])
+            || !is_array($config['connections'])) {
+            return;
+        }
+
         $driver = $this->getDriver();
         $connections = $this->getConnectionHandler();
         $plugins = $this->getPluginHandler();
@@ -370,9 +384,6 @@ class Phergie_Bot
         $timezone = $this->getConfig('timezone', 'UTC');
         date_default_timezone_set($timezone);
 
-        $ui = $this->getUi();
-        $ui->setEnabled($this->getConfig('ui.enabled'));
-
         $this->loadPlugins();
         $this->loadConnections();
 
@@ -383,7 +394,7 @@ class Phergie_Bot
             $processor->handleEvents();
         }
 
-        $ui->onShutdown();
+        $this->getUi()->onShutdown();
 
         return $this;
     }

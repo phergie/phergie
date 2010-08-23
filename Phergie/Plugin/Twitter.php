@@ -75,8 +75,9 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onConnect()
     {
-        if ($url = $this->getPluginHandler()->getPlugin('Url')) {
-            $url->registerRenderer($this);
+        $plugins = $this->getPluginHandler();
+        if ($plugins->hasPlugin('Url')) {
+            $plugins->getPlugin('Url')->registerRenderer($this);
         }
     }
 
@@ -103,7 +104,9 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
             $url
         );
 
-        $this->getPluginHandler()->getPlugin('Encoding');
+        $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Encoding');
+        $plugins->getPlugin('Time');
 
     }
 

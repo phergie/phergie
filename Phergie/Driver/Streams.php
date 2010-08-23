@@ -70,16 +70,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $connection = $this->getConnection();
         $encoding = $connection->getEncoding();
 
-        // Require an open socket connection to continue
-        if (empty($this->socket)) {
-            throw new Phergie_Driver_Exception(
-                'doConnect() must be called first',
-                Phergie_Driver_Exception::ERR_NO_INITIATED_CONNECTION
-            );
-        }
-
         // Add the command
-        $buffer = strtoupper($command);
+        $buffer = $command;
 
         // Add arguments
         if (!empty($args)) {
@@ -356,9 +348,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function doConnect()
     {
-        // Listen for input indefinitely
-        set_time_limit(0);
-
         // Get connection information
         $connection = $this->getConnection();
         $hostname = $connection->getHost();
@@ -723,6 +712,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function doRaw($command)
     {
-        $this->send('RAW', $command);
+        $this->send($command);
     }
 }

@@ -657,6 +657,34 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests that an added plugin is not added to the plugin handler if an
+     * exception occurs while attempting to add it.
+     *
+     * @return void
+     */
+    public function testAddPluginFailsIfExceptionOccurs()
+    {
+        $plugin = $this->getMock(
+            'Phergie_Plugin_Abstract',
+            array(),
+            array(),
+            'Phergie_Plugin_ThrowsException'
+        );
+        $plugin
+            ->expects($this->once())
+            ->method('onLoad')
+            ->will($this->throwException(new Phergie_Plugin_Exception));
+        try {
+            $this->handler->addPlugin($plugin);
+            $this->fail('Expected exception not thrown');
+        } catch (Phergie_Plugin_Exception $e) {
+            if ($this->handler->hasPlugin('ThrowsException')) {
+                $this->fail('Plugin handler added plugin');
+            }
+        }
+    }
+
+    /**
      * Tests addPlugins() with a plugin short name and no plugin constructor
      * arguments.
      *
