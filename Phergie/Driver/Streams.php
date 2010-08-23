@@ -232,14 +232,12 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         do {
             $buffer .= fgets($this->socket, 512);
         } while (!empty($buffer) && !preg_match('/\v+$/', $buffer));
+        $buffer = trim($buffer);
 
         // If no new event was found, return NULL
         if (empty($buffer)) {
             return null;
         }
-
-        // Strip the trailing newline from the buffer
-        $buffer = rtrim($buffer);
 
         // If the event is from the server...
         if (substr($buffer, 0, 1) != ':') {
@@ -316,9 +314,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         case 'oper':
         case 'topic':
         case 'mode':
-            $args = $this->parseArguments($args);
-            break;
-
         case 'part':
         case 'kill':
         case 'invite':
