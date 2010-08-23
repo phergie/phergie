@@ -51,6 +51,10 @@ class Phergie_Plugin_Join extends Phergie_Plugin_Abstract
      */
     public function onCommandJoin($channels, $keys = null)
     {
-        $this->doJoin($channels, $keys);
+        if ($keys) {
+            $this->doJoin($channels, $keys);
+        } else {
+            $this->doJoin($channels);
+        }
     }
 }
