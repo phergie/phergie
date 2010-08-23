@@ -75,13 +75,6 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
     protected $plugins;
 
     /**
-     * Mock driver
-     *
-     * @var Phergie_Driver_Abstract
-     */
-    protected $driver;
-
-    /**
      * Mock end-user interface
      *
      * @var Phergie_Ui_Abstract
@@ -331,28 +324,6 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
             }
         }
         return $this->processor;
-    }
-
-    /**
-     * Returns a mock driver instance.
-     *
-     * @return Phergie_Driver_Abstract
-     */
-    protected function getMockDriver()
-    {
-        if (empty($this->driver)) {
-            if (!class_exists('Phergie_Driver_Mock', false)) {
-                $this->driver = $this->getMock(
-                    'Phergie_Driver_Abstract',
-                    array(),
-                    array(),
-                    'Phergie_Driver_Mock'
-                );
-            } else {
-                $this->driver = new Phergie_Driver_Mock;
-            }
-        }
-        return $this->driver;
     }
 
     /**

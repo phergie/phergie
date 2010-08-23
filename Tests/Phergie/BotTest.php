@@ -38,6 +38,13 @@ class Phergie_BotTest extends Phergie_TestCase
     private $bot;
 
     /**
+     * Mock driver
+     *
+     * @var Phergie_Driver_Abstract
+     */
+    private $driver;
+
+    /**
      * Instantiates the class to test.
      *
      * @return void
@@ -45,6 +52,28 @@ class Phergie_BotTest extends Phergie_TestCase
     public function setUp()
     {
         $this->bot = new Phergie_Bot;
+    }
+
+    /**
+     * Returns a mock driver instance.
+     *
+     * @return Phergie_Driver_Abstract
+     */
+    private function getMockDriver()
+    {
+        if (empty($this->driver)) {
+            if (!class_exists('Phergie_Driver_Mock', false)) {
+                $this->driver = $this->getMock(
+                    'Phergie_Driver_Abstract',
+                    array(),
+                    array(),
+                    'Phergie_Driver_Mock'
+                );
+            } else {
+                $this->driver = new Phergie_Driver_Mock;
+            }
+        }
+        return $this->driver;
     }
 
     /**
