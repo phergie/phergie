@@ -79,7 +79,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         }
 
         // Add the command
-        $buffer = strtoupper($command);
+        $buffer = $command;
 
         // Add arguments
         if (!empty($args)) {
@@ -728,6 +728,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function doRaw($command)
     {
-        $this->send('RAW', $command);
+        $this->send($command);
     }
 }
