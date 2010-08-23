@@ -35,7 +35,7 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
      *
      * @var array
      */
-    protected $callbacks;
+    protected $callbacks = array();
 
     /**
      * Returns a human-readable representation of a callback for debugging

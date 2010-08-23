@@ -55,7 +55,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $this->handlers = array(
-            '(?:application|text)/xml(?:;.*)?'
+            '(?:text|application)/(?:(?:rss|atom)\+)?xml(?:;.*)?'
                 => 'simplexml_load_string',
             '(?:(?:application|text)/(?:x-)?json)|text/javascript.*'
                 => 'json_decode',
