@@ -36,6 +36,9 @@ $db->beginTransaction();
 foreach ($caffeine as $drink) {
     $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $drink->textContent);
     $name = preg_replace('/\s*\v+\s*/', ' ', $name);
+    if (stripos($name, 'decaf') !== false) {
+        continue;
+    }
     if ($drink->firstChild->nodeName == 'a') {
         $link = 'http://energyfiend.com'
               . $drink->firstChild->getAttribute('href');
