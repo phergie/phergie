@@ -85,7 +85,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 $args = ':' . $args;
             }
 
-            $buffer .= ' ' . $args;
+            $buffer .= ' ' . preg_replace('/\v+/', ' ', $args);
         }
 
         // Transmit the command over the socket connection
