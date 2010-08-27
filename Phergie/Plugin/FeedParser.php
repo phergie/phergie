@@ -27,130 +27,71 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_FeedParser
- * @uses     Phergie_Plugin_Http pear.phergie.org
  * @todo     Remove all debug messages after testing
+ * @todo     Make tests with String content
  */
 class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
 {
-
     /**
      * Feed object
      */
     protected $feed;
 
     /**
-     * Http object
-     */
-    protected $http;
-
-    /**
-     * Checks for dependencies.
-     *
-     * @return void
-     */
-    public function onLoad()
-    {
-        $this->http = $this->getPluginHandler()->getPlugin('Http');
-    }
-
-    /**
-     * Check if the feed is valid, updated, try to discover what kind of feed is it,
+     * Try to discover what kind of feed is it,
      * parse the items and return some informations about it
      *
-     * @param string $url Feed URL
-     * @param string $lastCheck Last time this feed was checked
-     * @param string $etag Last etag of this feed
+     * @param Object/String $content Feed body
+     * @param Object $header Http Header (optional)
      *
      * @return FeedParser
      */
-    public function getFeed($url, $updated=0, $etag='')
+    public function parseFeed($content, $header='')
     {
-        echo 'DEBUG(FeedParser): feed: ' . $url . PHP_EOL;
-        echo 'DEBUG(FeedParser): updated: ' . date("Y-m-d H:i", $updated) . PHP_EOL;
-        echo 'DEBUG(FeedParser): etag: ' . $etag . PHP_EOL . PHP_EOL;
 
-        // If $updated AND $etag are not provide,
-        // don't make the head request and avoid an useless request
-        if (!empty($updated) OR !empty($etag)) {
-            $head = $this->http->head($url);
-
-            if ($head->getCode() == '200') {
-                $headers = $head->getHeaders();
-
-                if (!empty($headers['last-modified'])) {
-                    $lm = strtotime($headers['last-modified']);
-                    if ($lm < $updated) {
-                        echo 'DEBUG(FeedParser): OLD! - last-modified - ' . date("Y-m-d H:i", $lm) . PHP_EOL;
-                        return false;
-                    }
-                    echo 'DEBUG(FeedParser): NEW!' . date("Y-m-d H:i", $lm) . PHP_EOL;
-                } else if ($etag == $headers['etag']) {
-                    echo 'DEBUG(FeedParser): OLD! - etag' . PHP_EOL;
-                    return false;
-                }
-                echo 'DEBUG(FeedParser): NEW!' . $headers['etag'] . PHP_EOL;
-            } else {
-                echo 'ERROR(Feed): ' . $url . ' - ' .
-                    $response->getCode() . ' - ' .
-                    $response->getMessage() . PHP_EOL;
-                return false;
-            }
+        if (!$content instanceof SimpleXMLElement) {
+            $content = simplexml_load_string($content);
         }
 
-        // If the feed is updated, request the content
-        $response = $this->http->get($url);
-        if ($response->getCode() == '200') {
-            $content = $response->getContent();
-            if (!empty($content)) {
-                $headers = $response->getHeaders();
+        if (!empty($content)) {
+            unset($this->feed);
 
-                unset($this->feed);
-                $this->feed->etag = empty($headers['etag']) ? $etag : $headers['etag'];
+            if (isset($content->channel)) { // Try to parse RSS 0.91, 0.92 and 2.0
+                $this->feed->items =        $this->parseItemsRSS($content->channel->item);
+                $this->feed->title =        (String) $content->channel->title;
+                $this->feed->description =  (String) $content->channel->description;
+                $this->feed->link =         (String) $content->channel->link;
+                $this->feed->updated =      strtotime($content->channel->lastBuildDate);
 
-                if (isset($content->channel)) { // Try to parse RSS 0.91, 0.92 and 2.0
-                    $this->feed->items =        $this->parseItemsRSS($content->channel->item);
-                    $this->feed->title =        (String) $content->channel->title;
-                    $this->feed->description =  (String) $content->channel->description;
-                    $this->feed->link =         (String) $content->channel->link;
-                    $this->feed->updated =      strtotime($content->channel->lastBuildDate);
-                    if (empty($this->feed->updated)) {
-                        $this->feed->updated = strtotime($headers['last-modified']);
+            }else if (isset($content->entry)) { // Atom 1.0
+                // Try to get the source of this feed
+                $this->feed->link = NULL;
+                foreach ($content->link as $key => $link) {
+                    if ($link->attributes()->rel != 'self') {
+                        $this->feed->link = $link->attributes()->href;
+                        break;
                     }
-
-                    return $this->feed;
-
-                }else if (isset($content->entry)) { // Atom 1.0
-                    // Try to get the source of this feed
-                    $this->feed->link = NULL;
-                    foreach ($content->link as $key => $link) {
-                        if ($link->attributes()->rel != 'self') {
-                            $this->feed->link = $link->attributes()->href;
-                            break;
-                        }
-                    }
-
-                    $this->feed->items =    $this->parseItemsAtom($content->entry);
-                    $this->feed->title =    (String) $content->title;
-                    $this->feed->updated =  strtotime($content->updated);
-                    if (empty($this->feed->updated)) {
-                        $this->feed->updated = strtotime($headers['last-modified']);
-                    }
-                    echo PHP_EOL.$this->feed->updated.PHP_EOL;
-
-                    return $this->feed;
-
-                } else { // Unknown format
-                    echo 'ERROR(Feed): This Feed is not valid or is not supported: ' . $url . PHP_EOL;
-                    return false;
                 }
-            } else {
-                echo 'DEBUG(FeedParser): The Feed is empty: ' . $url . PHP_EOL;
+
+                $this->feed->items =    $this->parseItemsAtom($content->entry);
+                $this->feed->title =    (String) $content->title;
+                $this->feed->updated =  strtotime($content->updated);
+
+            } else { // Unknown format
+                echo 'ERROR(Feed): This Feed is not valid or is not supported: ' . $url . PHP_EOL;
                 return false;
             }
+
+            if (!empty($header)) {
+                $this->feed->etag = $header['etag'];
+                if (empty($this->feed->updated)) {
+                    $this->feed->updated = strtotime($header['last-modified']);
+                }
+            }
+
+            return $this->feed;
         } else {
-            echo 'ERROR(Feed): ' . $url . ' - ' .
-                $response->getCode() . ' - ' .
-                $response->getMessage() . PHP_EOL;
+            echo 'DEBUG(FeedParser): The Feed is empty: ' . $url . PHP_EOL;
             return false;
         }
     }
