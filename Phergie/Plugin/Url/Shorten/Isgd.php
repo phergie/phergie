@@ -31,6 +31,14 @@
 class Phergie_Plugin_Url_Shorten_Isgd extends Phergie_Plugin_Url_Shorten_Abstract
 {
     /**
+     * is.gd says their URL will most likely never be longer than 18 characters
+     * @link http://is.gd/tech.php
+     *
+     * @var integer
+     */
+    protected $minimumLength = 19;
+
+    /**
      * Returns an array of request parameters given a url to shorten. The
      * following keys are valid request parameters:
      *
