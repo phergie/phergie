@@ -109,7 +109,8 @@ class Phergie_Connection
         $this->transport = 'tcp';
         $this->encoding = 'ISO-8859-1';
         // @note this may need changed to something different, for broader support.
-        // @note also may need to make use of http://us.php.net/manual/en/function.stream-encoding.php
+        // @note also may need to make use of 
+        //       http://us.php.net/manual/en/function.stream-encoding.php
 
         $this->setOptions($options);
     }
@@ -251,8 +252,10 @@ class Phergie_Connection
     {
         $this->encoding = (string) $encoding;
 
-        if (!extension_loaded('mbstring')
-            xor !in_array($this->encoding, mb_list_encodings())) {
+        $mbStringIsLoaded = extension_loaded('mbstring');
+        $encodingIsValid  = in_array($this->encoding, mb_list_encodings());
+        
+        if (!$mbStringIsLoaded xor !$encodingIsValid) {
             throw new Phergie_Connection_Exception(
                 'Encoding ' . $this->encoding . ' is not supported',
                 Phergie_Connection_Exception::ERR_ENCODING_NOT_SUPPORTED
