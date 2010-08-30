@@ -60,11 +60,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        $this->plugins->getPlugin('FeedManager');
-        $this->plugins->getPlugin('FeedParser');
-        $this->plugins->getPlugin('Cron');
-        $this->plugins->getPlugin('Http');
-
         // Database stuff
         if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
             $this->fail('PDO and pdo_sqlite extensions must be installed');
@@ -90,6 +85,10 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
             array(),
             true
         );
+
+        $this->plugins->getPlugin('Http');
+        $this->plugins->getPlugin('FeedManager');
+        $this->plugins->getPlugin('FeedParser');
     }
 
 
