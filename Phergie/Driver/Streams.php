@@ -305,7 +305,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         case 'oper':
         case 'topic':
-        case 'mode':
         case 'part':
         case 'kill':
         case 'invite':
@@ -313,6 +312,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             break;
 
         case 'kick':
+        case 'mode':
             $args = $this->parseArguments($args, 3);
             break;
 
@@ -507,15 +507,20 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @param string $target Channel name or user nick
      * @param string $mode   New mode to assign (optional)
+     * @param string $param  User limit when $mode is 'l', user hostmask
+     *        when $mode is 'b', or user nick when $mode is 'o'
      *
      * @return void
      */
-    public function doMode($target, $mode = null)
-    {
+    public function doMode($target, $mode = null, $param = null) {
         $args = array($target);
 
         if (!empty($mode)) {
             $args[] = $mode;
+        }
+
+        if (!empty($param)) {
+            $args[] = $param;
         }
 
         $this->send('MODE', $args);
