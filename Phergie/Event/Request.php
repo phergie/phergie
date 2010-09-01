@@ -403,7 +403,8 @@ class Phergie_Event_Request
     public function getSource()
     {
         if (!empty($this->arguments[0])
-            && substr($this->arguments[0], 0, 1) == '#') {
+            && substr($this->arguments[0], 0, 1) == '#'
+        ) {
             return $this->arguments[0];
         }
         return $this->getHostmask()->getNick();

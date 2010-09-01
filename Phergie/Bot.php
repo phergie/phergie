@@ -318,7 +318,8 @@ class Phergie_Bot
     {
         $config = $this->getConfig();
         if (!isset($config['plugins'])
-            || !is_array($config['plugins'])) {
+            || !is_array($config['plugins'])
+        ) {
             return;
         }
 
@@ -351,7 +352,8 @@ class Phergie_Bot
     {
         $config = $this->getConfig();
         if (!isset($config['connections'])
-            || !is_array($config['connections'])) {
+            || !is_array($config['connections'])
+        ) {
             return;
         }
 

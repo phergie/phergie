@@ -145,8 +145,8 @@ class Phergie_Plugin_Acl extends Phergie_Plugin_Abstract
         $isOp = $ops
               && $this->event->isInChannel()
               && $this->plugins->userInfo->isOp(
-                $this->event->getNick(),
-                $this->event->getSource()
+                  $this->event->getNick(),
+                  $this->event->getSource()
               );
 
         // Filter whitelisted commands if the user is not on the whitelist

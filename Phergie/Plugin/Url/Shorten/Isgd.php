@@ -20,28 +20,23 @@
  */
 
 /**
- * Shortens urls via the tr.im service
+ * Shortens urls via the is.gd service
  *
- * @deprecated
  * @category Phergie 
  * @package  Phergie_Plugin_Url
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Url
  */
-class Phergie_Plugin_Url_Shorten_Trim extends Phergie_Plugin_Url_Shorten_Abstract
+class Phergie_Plugin_Url_Shorten_Isgd extends Phergie_Plugin_Url_Shorten_Abstract
 {
     /**
-     * Show a notice that this plugin is deprecated and the user should switch
-     * to the is.gd shortener.
+     * is.gd says their URL will most likely never be longer than 18 characters
+     * @link http://is.gd/tech.php
      *
-     * @param Phergie_Plugin_Http $http instance of the http plugin
+     * @var integer
      */
-    public function __construct(Phergie_Plugin_Http $http)
-    {
-        echo '(DEPRECATED:url) The tr.im service is deprecated in favor of the is.gd shortener.' . "\n";
-        parent::__construct($http);
-    }
+    protected $minimumLength = 19;
 
     /**
      * Returns an array of request parameters given a url to shorten. The
@@ -54,7 +49,7 @@ class Phergie_Plugin_Url_Shorten_Trim extends Phergie_Plugin_Url_Shorten_Abstrac
     protected function getRequestParams($url)
     {
         return array(
-            'uri' => 'http://api.tr.im/v1/trim_simple?url=' . rawurlencode($url),
+            'uri' => 'http://is.gd/api.php?longurl=' . rawurlencode($url),
             'callback' => array($this, 'onComplete')
         );
     }

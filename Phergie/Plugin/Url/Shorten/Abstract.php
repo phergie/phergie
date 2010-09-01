@@ -33,6 +33,8 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
 {
     protected $http;
 
+    protected $minimumLength = 0;
+
     /**
      * Constructor
      *
@@ -67,6 +69,17 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
     protected abstract function getRequestParams($url);
 
     /**
+     * Returns the minimum length that a url must be before it is shortened by
+     * the current service.
+     *
+     * @return integer
+     */
+    public function getMinimumLength()
+    {
+        return $this->minimumLength;
+    }
+
+    /**
      * Shortens a given url.
      *
      * @param string $url the url to shorten
@@ -75,6 +88,11 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
      */
     public function shorten($url)
     {
+        // Only urls longer than the minimum length should be shortened
+        if (strlen($url) < $this->getMinimumLength()) {
+            return $url;
+        }
+
         $defaults = array('get' => array(), 'post' => array(), 'callback' => null);
         $options = array('timeout' => 2);
         $params = $this->getRequestParams($url) + $defaults;
