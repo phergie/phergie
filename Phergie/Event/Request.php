@@ -394,6 +394,20 @@ class Phergie_Event_Request
     }
 
     /**
+     * Determines whether a given string is a valid IRC channel name.
+     *
+     * @param string $string String to analyze
+     *
+     * @return bool TRUE if $string contains a valid channel name, FALSE
+     *         otherwise
+     */
+    protected function isChannelName($string)
+    {
+        // Per the 2000 RFCs 2811 and 2812, channels may begin with &, #, +, or !
+        return (strspn($string, '#&+!', 0, 1) >= 1);
+    }
+
+    /**
      * Returns the channel name if the event occurred in a channel or the
      * user nick if the event was a private message directed at the bot by a
      * user.
@@ -403,7 +417,7 @@ class Phergie_Event_Request
     public function getSource()
     {
         if (!empty($this->arguments[0])
-            && substr($this->arguments[0], 0, 1) == '#'
+            && $this->isChannelName($this->arguments[0])
         ) {
             return $this->arguments[0];
         }
@@ -417,7 +431,7 @@ class Phergie_Event_Request
      */
     public function isInChannel()
     {
-        return (substr($this->getSource(), 0, 1) == '#');
+        return $this->isChannelName($this->getSource());
     }
 
     /**

@@ -353,6 +353,9 @@ class Phergie_Event_RequestTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array('#channel', true),
+            array('&channel', true),
+            array('+channel', true),
+            array('!channel', true),
             array('nick', false),
         );
     }
