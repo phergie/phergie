@@ -65,28 +65,31 @@ echo 'Cleaning up', PHP_EOL;
 unlink($file);
 
 // Get and decompress openbeerdb.com data set
-$archive = __DIR__ . '/beers.zip';
+$archive = __DIR__ . '/beers.tar.gz';
 if (!file_exists($archive)) {
-    echo 'Downloading openbeerdb.com data set', PHP_EOL;
-    copy('http://openbeerdb.googlecode.com/files/beers.zip', $archive);
+    echo 'openbeerdb.com data set must be downloaded manually from http://groups.google.com/group/openbeerdb/files', PHP_EOL;
+    exit(1);
 }
 
 echo 'Decompressing openbeerdb.com data set', PHP_EOL;
-$zip = new ZipArchive;
-$zip->open($archive);
-$zip->extractTo(__DIR__, 'beers/beers.csv');
-$zip->close();
-$file = __DIR__ . '/beers/beers.csv';
+require_once 'Archive/Tar.php';
+$tar = new Archive_Tar($archive, 'gz');
+$tar->extractList(array('beers/beers.csv'), __DIR__, 'beers/');
+$file = __DIR__ . '/beers.csv';
 
 // Extract data from data set
 echo 'Processing openbeerdb.com data', PHP_EOL;
 $fp = fopen($file, 'r');
-$columns = fgetcsv($fp, 0, '|');
+$columns = array_slice(fgetcsv($fp), 0, 12);
 $db->beginTransaction();
-while ($line = fgetcsv($fp, 0, '|')) {
-    $line = array_combine($columns, $line);
+while ($line = fgetcsv($fp)) {
+    if (count($line) < 12) {
+        continue;
+    }
+    $line = array_combine($columns, array_slice($line, 0, 12));
     $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $line['name']);
     $name = preg_replace('/\h*\v+\h*/', '', $name);
+    $name = str_replace('\\\'', '\'', $name);
     $link = null;
     $insert->execute(array($name, $link));
 }
@@ -96,5 +99,3 @@ fclose($fp);
 // Clean up
 echo 'Cleaning up', PHP_EOL;
 unlink($file);
-unlink($archive);
-rmdir(__DIR__ . '/beers');
