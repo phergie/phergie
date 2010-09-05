@@ -141,7 +141,6 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
         }
 
         $nick = $this->getEvent()->getNick();
-        $delay = $this->getConfig('help.delay', 2);
 
         // Handle requests for a plugin list
         if (!$query) {
@@ -153,8 +152,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
 
         // Handle requests for plugin information
         $query = strtolower($query);
-        if (isset($this->registry[$query])
-            && empty($this->registry[$query]['cmds'][$query])) {
+        if (isset($this->registry[$query])) {
             $msg = $query . ' - ' . $this->registry[$query]['desc'];
             $this->doPrivmsg($nick, $msg);
 
@@ -169,8 +167,6 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
                     . '" (without quotes) when issued in a public channel.';
                 $this->doPrivmsg($nick, $msg);
             }
-
-            return;
         }
 
         // Handle requests for command information
