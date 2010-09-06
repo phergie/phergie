@@ -594,7 +594,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $args = array($nick, $channel);
 
         if (!empty($reason)) {
-            $args[] = $response;
+            $args[] = $reason;
         }
 
         $this->send('KICK', $args);
