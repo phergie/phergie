@@ -154,11 +154,18 @@ class Phergie_FakeDaemon
     /**
      * Adds an instruction for the daemon to receive input from the client.
      *
+     * @param int $bytes Number of bytes to read, defaults to all available
+     *
      * @return Phergie_FakeDaemon Provides a fluent interface
      */
-    public function get()
+    public function get($bytes = null)
     {
-        $this->commands[] = '$input .= stream_get_contents($client);';
+        if ($bytes !== null) {
+            $command = '$input .= fread($client, ' . $bytes . ');';
+        } else {
+            $command = '$input .= stream_get_contents($client);';
+        }
+        $this->commands[] = $command;
         return $this;
     }
 
@@ -195,6 +202,20 @@ class Phergie_FakeDaemon
     }
 
     /**
+     * Adds an instruction for the daemon to suspend execution for a
+     * specified amount of time.
+     *
+     * @param int $delay Time to suspend execution in seconds
+     *
+     * @return Phergie_FakeDaemon Provides a fluent interface
+     */
+    public function sleep($delay)
+    {
+        $this->commands[] = 'sleep(' . $delay . ');';
+        return $this;
+    }
+
+    /**
      * Spawns the daemon process.
      *
      * @return Phergie_FakeDaemon Provides a fluent interface
@@ -204,11 +225,11 @@ class Phergie_FakeDaemon
         $code = '<?php $input = \'\';'
               . '$server = stream_socket_server(\''
               . $this->transport . '://0.0.0.0:' . $this->port
-              . '\');'
-              . '$client = stream_socket_accept($server);'
-              . implode(' ', $this->commands)
-              . 'fclose($client);'
-              . 'fclose($server);'
+              . '\');' . PHP_EOL
+              . '$client = stream_socket_accept($server);' . PHP_EOL
+              . implode(PHP_EOL, $this->commands) . PHP_EOL
+              . 'fclose($client);' . PHP_EOL
+              . 'fclose($server);' . PHP_EOL
               . 'echo serialize($input);';
 
         $spec = array(

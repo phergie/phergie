@@ -187,11 +187,11 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         $expected =
             'PASS :' . $connection->getPassword() . "\r\n"
             . sprintf(
-                'USER %s %s %s %s',
+                'USER %s %s %s :%s',
                 $connection->getUsername(),
                 $connection->getHost(),
                 $connection->getHost(),
-                ':' . $connection->getRealname()
+                $connection->getRealname()
             ) . "\r\n"
             . 'NICK :' . $connection->getNick() . "\r\n"
             . 'QUIT' . "\r\n";
@@ -222,6 +222,26 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         }
 
         ini_set('default_socket_timeout', $timeout);
+    }
+
+    /**
+     * Tests that the client attempts to recover if a partial command is
+     * sent to the server.
+     *
+     * @return void
+     */
+    public function testSendHandlesPartialWrite()
+    {
+        $this->server->get(4);
+        $this->server->sleep(2);
+        $this->server->get();
+        $this->server->run();
+
+        $connection = $this->getMockConnection();
+        $this->driver->setConnection($connection);
+        $this->driver->doConnect();
+        $this->driver->doQuit();
+        $this->server->close();
     }
 
     /**
