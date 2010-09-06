@@ -32,8 +32,6 @@ require dirname(__FILE__) . '/Twitter/laconica.class.php';
  * Twitter plugin; Allows tweet (if configured) and twitter commands
  *
  * Usage:
- *   tweet text to tweet
- *    (sends a message to twitter and Phergie will give you the link)
  *   twitter username
  *    (fetches and displays the last tweet by @username)
  *   twitter username 3
@@ -132,30 +130,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         }
         if ($tweet) {
             $this->doPrivmsg($source, $this->formatTweet($tweet));
-        }
-    }
-
-    /**
-     * Sends a tweet to Twitter as the configured user
-     *
-     * @param string $txt the text to tweet
-     *
-     * @return void
-     */
-    public function onCommandTweet($txt)
-    {
-        $nick = $this->getEvent()->getNick();
-        if (!$this->twitteruser) {
-            return;
-        }
-        $source = $this->getEvent()->getSource();
-        if ($tweet = $this->twitter->sendTweet($txt)) {
-            $this->doPrivmsg(
-                $source, 'Tweeted: '
-                . $this->twitter->getUrlOutputStatus($tweet)
-            );
-        } else {
-            $this->doNotice($nick, 'Tweet failed');
         }
     }
 
