@@ -91,8 +91,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         // Transmit the command over the socket connection
         $attempts = $written = 0;
         $temp = $buffer . "\r\n";
-        $is_multibyte = !substr($encoding, 0, 8) === 'ISO-8859' 
-                     && $encoding !== 'ASCII' 
+        $is_multibyte = !substr($encoding, 0, 8) === 'ISO-8859'
+                     && $encoding !== 'ASCII'
                      && $encoding !== 'CP1252';
         $length = ($is_multibyte) ? mb_strlen($buffer, '8bit') : strlen($buffer);
         while (true) {
