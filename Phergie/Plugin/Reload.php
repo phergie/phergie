@@ -97,11 +97,26 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
                 return;
             }
         } else {
-            $contents = preg_replace(
-                array('/^<\?(?:php)?/', '/class\s+' . $class . '/i'),
-                array('', 'class ' . $newClass),
-                $contents
-            );
+            $tokens = token_get_all($contents);
+            $contents = '';
+            while ($token = next($tokens)) {
+                if (is_string($token)) {
+                    $contents .= $token;
+                } else {
+                    if ($token[0] == T_CLASS) {
+                        while (!is_array($token) || $token[0] != T_STRING) {
+                            $contents .= (is_array($token) ? $token[1] : $token);
+                            $token = next($tokens);
+                        }
+                        $token[1] = $newClass;
+                    } elseif ($token[0] == T_FILE) {
+                        $token[1] = '\'' . $info['file'] . '\'';
+                    } elseif (defined('T_DIR') && $token[0] == T_DIR) {
+                        $token[1] = '\'' . dirname($info['file']) . '\'';
+                    }
+                    $contents .= $token[1];
+                }
+            }
             eval($contents);
         }
 
