@@ -630,19 +630,14 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Sends a CTCP response to a user.
      *
-     * @param string       $nick    User nick
-     * @param string       $command Command to send
-     * @param string|array $args    String or array of sequential arguments
-     *        (optional)
+     * @param string $nick    User nick
+     * @param string $command Command to send
+     * @param string $args    Sequential arguments (optional)
      *
      * @return void
      */
     protected function doCtcp($nick, $command, $args = null)
     {
-        if (is_array($args)) {
-            $args = implode(' ', $args);
-        }
-
         $buffer = rtrim(strtoupper($command) . ' ' . $args);
 
         $this->doNotice($nick, chr(1) . $buffer . chr(1));
