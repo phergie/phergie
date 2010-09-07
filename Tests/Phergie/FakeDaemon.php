@@ -154,18 +154,11 @@ class Phergie_FakeDaemon
     /**
      * Adds an instruction for the daemon to receive input from the client.
      *
-     * @param int $bytes Number of bytes to read, defaults to all available
-     *
      * @return Phergie_FakeDaemon Provides a fluent interface
      */
-    public function get($bytes = null)
+    public function get()
     {
-        if ($bytes !== null) {
-            $command = '$input .= fread($client, ' . $bytes . ');';
-        } else {
-            $command = '$input .= stream_get_contents($client);';
-        }
-        $this->commands[] = $command;
+        $this->commands[] = '$input .= stream_get_contents($client);';
         return $this;
     }
 
@@ -198,20 +191,6 @@ class Phergie_FakeDaemon
         $path = var_export($path, true);
         $this->commands[] =
             'fwrite($client, file_get_contents(' . $path . '));';
-        return $this;
-    }
-
-    /**
-     * Adds an instruction for the daemon to suspend execution for a
-     * specified amount of time.
-     *
-     * @param int $delay Time to suspend execution in seconds
-     *
-     * @return Phergie_FakeDaemon Provides a fluent interface
-     */
-    public function sleep($delay)
-    {
-        $this->commands[] = 'sleep(' . $delay . ');';
         return $this;
     }
 

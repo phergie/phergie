@@ -55,6 +55,19 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     protected $timeout = 0.1;
 
     /**
+     * Writes data to the socket, separatedly mainly to allow for stubbing
+     * during unit testing.
+     *
+     * @param string $data Data to write to the socket
+     *
+     * @return int Number of bytes successfully written to the socket
+     */
+    protected function write($data)
+    {
+        return (int) fwrite($this->socket, $data);
+    }
+
+    /**
      * Handles construction of command strings and their transmission to the
      * server.
      *
@@ -96,7 +109,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                      && $encoding !== 'CP1252';
         $length = ($is_multibyte) ? mb_strlen($buffer, '8bit') : strlen($buffer);
         while (true) {
-            $written += (int) fwrite($this->socket, $temp);
+            $written += $this->write($temp);
             if ($written < $length) {
                 $temp = substr($temp, $written);
                 $attempts++;

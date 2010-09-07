@@ -225,21 +225,73 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     }
 
     /**
+     * Callback for testSendHandlesPartialWriteWithSuccess() to mock the
+     * write() method of the driver. Uses a public access modifier to be
+     * accessible as a callback.
+     *
+     * @param string $buffer Data to be written to the socket
+     *
+     * @return int Number of bytes written
+     */
+    public function sendHandlesPartialWriteWithSuccessCallback($buffer)
+    {
+        static $invocations = 0;
+
+        if (++$invocations % 2 == 1) {
+            return 4;
+        } else {
+            return strlen($buffer);
+        }
+    }
+
+    /**
      * Tests that the client attempts to recover if a partial command is
      * sent to the server.
      *
      * @return void
      */
-    public function testSendHandlesPartialWrite()
+    public function testSendHandlesPartialWriteWithSuccess()
     {
-        $this->server->get(4);
-        $this->server->sleep(2);
         $this->server->get();
         $this->server->run();
 
+        $this->driver = $this->getMock('Phergie_Driver_Streams', array('write'));
+        $this->driver
+            ->expects($this->any())
+            ->method('write')
+            ->will($this->returnCallback(array($this, 'sendHandlesPartialWriteWithSuccessCallback')));
         $this->driver->setConnection($this->getMockConnection());
         $this->driver->doConnect();
         $this->driver->doQuit();
+        $this->server->close();
+    }
+
+    /**
+     * Tests that the client throws an exception when attempts to recover
+     * when a partial command is sent to the server fail.
+     *
+     * @return void
+     */
+    public function testSendHandlesPartialWriteWithFailure()
+    {
+        $this->server->get();
+        $this->server->run();
+
+        $this->driver = $this->getMock('Phergie_Driver_Streams', array('write'));
+        $this->driver
+            ->expects($this->any())
+            ->method('write')
+            ->will($this->returnValue(0));
+        $this->driver->setConnection($this->getMockConnection());
+        try {
+            $this->driver->doConnect();
+            $this->driver->doQuit();
+            $this->fail('Expected exception was not thrown');
+        } catch (Phergie_Driver_Exception $e) {
+            if ($e->getCode() != Phergie_Driver_Exception::ERR_CONNECTION_WRITE_FAILED) {
+                $this->fail('Unexpected exception code: ' . $e->getCode());
+            }
+        }
         $this->server->close();
     }
 
