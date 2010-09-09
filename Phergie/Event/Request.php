@@ -138,7 +138,8 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_JOIN => array(
-            'channel' => 0
+            'channel' => 0,
+            'keys'    => 1
         ),
 
         self::TYPE_KICK => array(
