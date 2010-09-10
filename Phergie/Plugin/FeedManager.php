@@ -31,7 +31,6 @@
  * @uses     Phergie_Plugin_FeedParser pear.phergie.org
  * @uses     Phergie_Plugin_UserInfo pear.phergie.org
  * @uses     Phergie_Plugin_Cron pear.phergie.org
- * @todo     Remove all debug messages after testing
  */
 class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
 {

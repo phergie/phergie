@@ -32,7 +32,6 @@
  * @uses     Phergie_Plugin_UserInfo pear.phergie.org
  * @uses     Phergie_Plugin_FeedParser pear.phergie.org
  * @uses     Phergie_Plugin_FeedManager pear.phergie.org
- * @todo     Remove all debug messages after testing
  */
 class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 {
@@ -109,25 +108,21 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 
             // Check just active feeds
             if ($f['active'] == 0) {
-                echo 'DEBUG(FeedTicker): Feed disabled...' . PHP_EOL;
                 continue;
             }
 
             // Is time to check this feed again?
             if ($f['updated']+$f['delay'] >= $now) {
-                echo 'DEBUG(FeedTicker): Is not time to check this feed yet...' . PHP_EOL;
                 continue;
             }
 
             // Check if bot is on this channel
             if (!isset($this->channelsStatus[$f['channel']]) AND $smartReader) {
-                echo 'DEBUG(FeedTicker): Im not in this channel or it is inactive...' . PHP_EOL;
                 continue;
             }
 
             // Check if this channel is active
             if ($this->channelsStatus[$f['channel']] < $time AND $smartReader) {
-                echo 'DEBUG(FeedTicker): This channel is inactive...' . PHP_EOL;
                 continue;
             }
 
@@ -153,7 +148,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 
                 // Ignore items if this feed is older than last check
                 if (!empty($ret->updated) AND $ret->updated < $f['updated']) {
-                    echo 'DEBUG(FeedTicker): These items are old!' . PHP_EOL;
                     continue;
                 }
 
@@ -167,7 +161,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         $showDelayTime = intval($this->getConfig('FeedTicker.showDelayTime', 60*3));
         echo date("Y-m-d H:i", $this->lastDeliveryTime + $showDelayTime) . ' - ' . date("Y-m-d H:i", time()). PHP_EOL;
         if (($this->lastDeliveryTime + $showDelayTime) > time()) {
-            echo 'DEBUG(FeedTicker): Is not time to show items yet.' . PHP_EOL;
             return;
         }
 
@@ -198,9 +191,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     public function getFeed($url, $updated=0, $etag='')
     {
         $http = $this->plugins->getPlugin('Http');
-        echo 'DEBUG(FeedParser): feed: ' . $url . PHP_EOL;
-        echo 'DEBUG(FeedParser): updated: ' . date("Y-m-d H:i", $updated) . PHP_EOL;
-        echo 'DEBUG(FeedParser): etag: ' . $etag . PHP_EOL . PHP_EOL;
 
         // If $updated AND $etag are not provide,
         // don't make the head request and avoid an useless request
@@ -213,15 +203,11 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
                 if (!empty($header['last-modified'])) {
                     $lm = strtotime($header['last-modified']);
                     if ($lm < $updated) {
-                        echo 'DEBUG(FeedParser): OLD! - last-modified - ' . date("Y-m-d H:i", $lm) . PHP_EOL;
                         return false;
                     }
-                    echo 'DEBUG(FeedParser): NEW!' . date("Y-m-d H:i", $lm) . PHP_EOL;
                 } else if ($etag == $header['etag']) {
-                    echo 'DEBUG(FeedParser): OLD! - etag' . PHP_EOL;
                     return false;
                 }
-                echo 'DEBUG(FeedParser): NEW!' . $header['etag'] . PHP_EOL;
             } else {
                 echo 'ERROR(Feed): ' . $url . ' - ' .
                     $response->getCode() . ' - ' .
@@ -259,7 +245,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 
         $items = $this->getUnreadItems($channel);
         if (empty($items)) {
-            echo 'DEBUG(FeedTicker): '.$channel.': No items to show.' . PHP_EOL;
             return;
         }
 
@@ -371,10 +356,8 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
             $users = $this->plugins->getPlugin('UserInfo')->getUsers($channel);
             if (count($users) > 1) {
                 $this->channelsStatus[$channel] = time();
-                echo 'DEBUG(FeedTicker): '.$channel.': Is set as active.' . PHP_EOL;
             } else {
                 unset($this->channelsStatus[$channel]);
-                echo 'DEBUG(FeedTicker): '.$channel.': Is set as inactive.' . PHP_EOL;
             }
         }
     }
@@ -417,6 +400,5 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     public function onPrivmsg()
     {
         $this->channelsStatus[$this->event->getSource()] = time();
-        echo 'DEBUG(FeedTicker): '.$this->event->getSource().': Is set as active.' . PHP_EOL;
     }
 }

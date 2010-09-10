@@ -27,7 +27,6 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_FeedParser
- * @todo     Remove all debug messages after testing
  * @todo     Make tests with String content
  */
 class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
@@ -91,7 +90,6 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
 
             return $this->feed;
         } else {
-            echo 'DEBUG(FeedParser): The Feed is empty: ' . $url . PHP_EOL;
             return false;
         }
     }
