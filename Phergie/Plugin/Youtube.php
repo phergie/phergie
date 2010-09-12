@@ -154,7 +154,7 @@ class Phergie_Plugin_Youtube extends Phergie_Plugin_Abstract
             case 'www.youtube.com':
                 parse_str($parsed['query'], $parsed_query);
                 if (!empty($parsed_query['v'])) {
-                    $v = $parsed_query['v'];
+                    $v = '"' . $parsed_query['v'] . '"';
                     break;
                 }
             default:
