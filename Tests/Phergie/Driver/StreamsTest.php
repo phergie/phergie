@@ -38,11 +38,11 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     private $driver;
 
     /**
-     * Fake daemon process acting as an IRC server to test the driver
+     * List of sockets in use by the driver
      *
-     * @var Phergie_FakeDaemon
+     * @var array
      */
-    private $server;
+    protected $sockets;
 
     /**
      * Instantiates the class to test and its mock dependencies.
@@ -51,8 +51,40 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function setUp()
     {
-        $this->server = new Phergie_FakeDaemon;
-        $this->driver = new Phergie_Driver_Streams;
+        $this->sockets = array();
+        $this->driver = $this->getMock('Phergie_Driver_Streams', array('write', 'connect'));
+        $this->driver
+            ->expects($this->any())
+            ->method('connect')
+            ->will($this->returnCallback(array($this, 'createSocket')));
+    }
+
+    /**
+     * Callback for creating a new client socket connection.
+     *
+     * @return resource Stream socket
+     */
+    public function createSocket()
+    {
+        $socket = fopen('php://temp', 'r+');
+        $this->sockets[] = $socket;
+        return $socket;
+    }
+
+    /**
+     * Simulates a server by writing data to a specified socket for the
+     * driver to read.
+     *
+     * @param int    $index  Index of the socket in $this->sockets to
+     *        receive the data
+     * @param string $data   Data to write to the socket
+     *
+     * @return void
+     */
+    protected function writeEventToSocket($index, $data)
+    {
+        fwrite($this->sockets[$index], $data . "\r\n");
+        rewind($this->sockets[$index]);
     }
 
     /**
@@ -64,7 +96,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     {
         $options = array(
             'host'      => '0.0.0.0',
-            'port'      => $this->server->getPort(),
+            'port'      => 6667,
             'username'  => 'username',
             'realname'  => 'realname',
             'transport' => 'tcp'
@@ -132,6 +164,40 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     }
 
     /**
+     * Mocks driver method calls for sending commands.
+     *
+     * @param array $commands Associative array of commands mapping index
+     *        (sequential order of calls beginning from 1) to their
+     *        respective expected command
+     *
+     * @return void
+     */
+    protected function assertSendsCommands(array $commands)
+    {
+        foreach ($commands as $index => $command) {
+            $this->driver
+                ->expects($this->at($index))
+                ->method('write')
+                ->with($command . "\r\n")
+                ->will($this->returnValue(strlen($command) + 2));
+        }
+    }
+
+    /**
+     * Mocks driver method calls to accept all write operations for sending
+     * commands as successes.
+     *
+     * @return void
+     */
+    protected function acceptAllCommands()
+    {
+        $this->driver
+            ->expects($this->any())
+            ->method('write')
+            ->will($this->returnCallback('strlen'));
+    }
+
+    /**
      * Tests connecting to a server without a password.
      *
      * @return void
@@ -139,27 +205,23 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoConnectWithoutPassword()
     {
-        $this->server->get();
-        $this->server->run();
-
         $connection = $this->getMockConnection();
+
+        $this->assertSendsCommands(array(
+            1 => sprintf(
+                    'USER %s %s %s :%s',
+                    $connection->getUsername(),
+                    $connection->getHost(),
+                    $connection->getHost(),
+                    $connection->getRealname()
+                ),
+            2 => 'NICK :' . $connection->getNick(),
+            3 => 'QUIT'
+        ));
+
         $this->driver->setConnection($connection);
         $this->driver->doConnect();
         $this->driver->doQuit();
-        $this->server->close();
-
-        $expected =
-            sprintf(
-                'USER %s %s %s %s',
-                $connection->getUsername(),
-                $connection->getHost(),
-                $connection->getHost(),
-                ':' . $connection->getRealname()
-            ) . "\r\n"
-            . 'NICK :' . $connection->getNick() . "\r\n"
-            . 'QUIT' . "\r\n";
-
-        $this->assertSame($expected, $this->server->getInput());
     }
 
     /**
@@ -170,33 +232,28 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoConnectWithPassword()
     {
-        $this->server->get();
-        $this->server->run();
-
         $connection = $this->getMockConnection();
         $connection
             ->expects($this->any())
             ->method('getPassword')
             ->will($this->returnValue('password'));
 
+        $this->assertSendsCommands(array(
+            1 => 'PASS :' . $connection->getPassword(),
+            2 => sprintf(
+                    'USER %s %s %s :%s',
+                    $connection->getUsername(),
+                    $connection->getHost(),
+                    $connection->getHost(),
+                    $connection->getRealname()
+                ),
+            3 => 'NICK :' . $connection->getNick(),
+            4 => 'QUIT'
+        ));
+
         $this->driver->setConnection($connection);
         $this->driver->doConnect();
         $this->driver->doQuit();
-        $this->server->close();
-
-        $expected =
-            'PASS :' . $connection->getPassword() . "\r\n"
-            . sprintf(
-                'USER %s %s %s :%s',
-                $connection->getUsername(),
-                $connection->getHost(),
-                $connection->getHost(),
-                $connection->getRealname()
-            ) . "\r\n"
-            . 'NICK :' . $connection->getNick() . "\r\n"
-            . 'QUIT' . "\r\n";
-
-        $this->assertSame($expected, $this->server->getInput());
     }
 
     /**
@@ -207,8 +264,11 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoConnectHandlesSocketException()
     {
-        $timeout = ini_get('default_socket_timeout');
-        ini_set('default_socket_timeout', 1);
+        $this->driver = $this->getMock('Phergie_Driver_Streams', array('connect'));
+        $this->driver
+            ->expects($this->any())
+            ->method('connect')
+            ->will($this->returnValue(false));
 
         $this->driver->setConnection($this->getMockConnection());
 
@@ -220,8 +280,6 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
                 $this->fail('Unexpected exception code: ' . $e->getCode());
             }
         }
-
-        ini_set('default_socket_timeout', $timeout);
     }
 
     /**
@@ -252,10 +310,6 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testSendHandlesPartialWriteWithSuccess()
     {
-        $this->server->get();
-        $this->server->run();
-
-        $this->driver = $this->getMock('Phergie_Driver_Streams', array('write'));
         $this->driver
             ->expects($this->any())
             ->method('write')
@@ -263,7 +317,6 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         $this->driver->setConnection($this->getMockConnection());
         $this->driver->doConnect();
         $this->driver->doQuit();
-        $this->server->close();
     }
 
     /**
@@ -274,10 +327,6 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testSendHandlesPartialWriteWithFailure()
     {
-        $this->server->get();
-        $this->server->run();
-
-        $this->driver = $this->getMock('Phergie_Driver_Streams', array('write'));
         $this->driver
             ->expects($this->any())
             ->method('write')
@@ -292,7 +341,6 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
                 $this->fail('Unexpected exception code: ' . $e->getCode());
             }
         }
-        $this->server->close();
     }
 
     /**
@@ -305,15 +353,12 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testSetConnectionWithExistingConnection()
     {
-        $this->server->get();
-        $this->server->run();
-
+        $this->acceptAllCommands();
         $connection = $this->getMockConnection();
         $this->driver->setConnection($connection);
         $this->driver->doConnect();
         $this->driver->setConnection($connection);
         $this->driver->doQuit();
-        $this->server->close();
     }
 
     /**
@@ -324,6 +369,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testSendWithoutConnectionThrowsException()
     {
+        $this->acceptAllCommands();
         try {
             $this->driver->doQuit();
             $this->fail('Expected exception not thrown');
@@ -348,19 +394,15 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     private function doCommandTest($command, $method, array $args = array())
     {
-        $this->server->get();
-        $this->server->run();
-
+        $this->acceptAllCommands();
         $this->driver->setConnection($this->getMockConnection());
         $this->driver->doConnect();
         call_user_func_array(array($this->driver, $method), $args);
         if ($method != 'doQuit') {
             $this->driver->doQuit();
         }
-        $this->server->close();
 
         $expected = "\r\n" . $command . "\r\n";
-        $this->assertContains($expected, $this->server->getInput());
     }
 
     /**
@@ -710,5 +752,184 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoRaw()
     {
         $this->doCommandTest('COMMAND :param', 'doRaw', array('COMMAND :param'));
+    }
+
+    /**
+     * Tests retrieving a list of active sockets when none have data available.
+     *
+     * @return void
+     * @depends testSetConnectionWithNewConnection
+     * @depends testDoConnectWithoutPassword
+     */
+    public function testGetActiveReadSocketsWithNoData()
+    {
+        $this->acceptAllCommands();
+        $connection = $this->getMockConnection();
+        $this->driver->setConnection($connection);
+        $this->driver->doConnect();
+        $this->driver->doQuit();
+        $active = $this->driver->getActiveReadSockets();
+        $this->assertEquals(0, count($active));
+    }
+
+    /**
+     * Tests retrieving a list of active sockets when data is available for
+     * reading.
+     *
+     * @return void
+     * @depends testSetConnectionWithNewConnection
+     * @depends testDoConnectWithoutPassword
+     */
+    public function testGetActiveReadSocketsWithData()
+    {
+        $this->acceptAllCommands();
+        $connection = $this->getMockConnection();
+        $this->driver->setConnection($connection);
+        $this->driver->doConnect();
+        $active = $this->driver->getActiveReadSockets();
+        $this->driver->doQuit();
+        $this->assertEquals(1, count($active));
+    }
+
+    /**
+     * Tests attempting to get a new event on the active connection when no
+     * data is available.
+     *
+     * @return void
+     * @depends testSetConnectionWithNewConnection
+     * @depends testDoConnectWithoutPassword
+     */
+    public function testGetEventWithNoData()
+    {
+        $this->acceptAllCommands();
+        $connection = $this->getMockConnection();
+        $this->driver->setConnection($connection);
+        $this->driver->doConnect();
+        $result = $this->driver->getEvent();
+        $this->driver->doQuit();
+        $this->assertNull($result);
+    }
+
+    /**
+     * Data provider for testGetEventWithUserRequest().
+     *
+     * @return array Enumerated array of enumerated arrays each containing
+     *         argument values for a single call to
+     *         testGetEventWithUserRequest()
+     */
+    public function dataProviderTestGetEventWithUserRequest()
+    {
+        $null = chr(1);
+
+        return array(
+            array('NICK nickname', 'nick', array('nickname')),
+            array('QUIT', 'quit', array()),
+            array('QUIT reason', 'quit', array('reason')),
+            array('PING :verne.freenode.net', 'ping', array('verne.freenode.net')),
+            array('PONG :verne.freenode.net', 'pong', array('verne.freenode.net')),
+            array('ERROR message', 'error', array('message')),
+            array('PRIVMSG #channel :Think I got it.', 'privmsg', array('#channel', 'Think I got it.')),
+            array('NOTICE * :*** Looking up your hostname...', 'notice', array('*', '*** Looking up your hostname...')),
+            array('PRIVMSG #channel :' . $null . 'VERSION' . $null, 'version', array()),
+            array('NOTICE #channel :' . $null . 'VERSION x.y.z' . $null, 'version', array('x.y.z')),
+            array('PRIVMSG #channel :' . $null . 'TIME' . $null, 'time', array()),
+            array('NOTICE #channel :' . $null . 'TIME 12345' . $null, 'time', array('12345')),
+            array('PRIVMSG #channel :' . $null . 'FINGER' . $null, 'finger', array()),
+            array('NOTICE #channel :' . $null . 'FINGER reply' . $null, 'finger', array('reply')),
+            array('PRIVMSG #channel :' . $null . 'PING' . $null, 'ping', array()),
+            array('NOTICE #channel :' . $null . 'PING reply' . $null, 'ping', array('reply')),
+            array('PRIVMSG #channel :' . $null . 'ACTION tests something.' . $null, 'action', array('#channel', 'tests something.')),
+            array('TOPIC #channel', 'topic', array('#channel')),
+            array('TOPIC #channel topic', 'topic', array('#channel', 'topic')),
+            array('PART #channel', 'part', array('#channel')),
+            array('INVITE nickname #channel', 'invite', array('nickname', '#channel')),
+            array('JOIN #channel', 'join', array('#channel')),
+            array('JOIN #channel key', 'join', array('#channel', 'key')),
+            array('KICK #channel user', 'kick', array('#channel', 'user')),
+            array('KICK #channel user comment', 'kick', array('#channel', 'user', 'comment')),
+            array('MODE #channel +i', 'mode', array('#channel', '+i')),
+            array('MODE #channel +l 100', 'mode', array('#channel', '+l', '100')),
+        );
+    }
+
+    /**
+     * Tests reception of a event from a user.
+     *
+     * @param string $event IRC event without the leading prefix
+     * @param string $type  Event type
+     * @param array  $args  Event arguments
+     *
+     * @return void
+     * @depends testSetConnectionWithNewConnection
+     * @depends testDoConnectWithoutPassword
+     * @dataProvider dataProviderTestGetEventWithUserRequest
+     */
+    public function testGetEventWithUserRequest($event, $type, $arguments)
+    {
+        $this->acceptAllCommands();
+        $connection = $this->getMockConnection();
+        $this->driver->setConnection($connection);
+        $this->driver->doConnect();
+        $this->writeEventToSocket(0, ':Elazar!~Elazar@yakko.itrebal.com ' . $event);
+
+        $event = $this->driver->getEvent();
+        $this->assertType('Phergie_Event_Request', $event);
+        $this->assertEquals($type, $event->getType());
+        $this->assertEquals($arguments, $event->getArguments());
+
+        $hostmask = $event->getHostmask();
+        $this->assertType('Phergie_Hostmask', $hostmask);
+        $this->assertEquals('Elazar', $hostmask->getNick());
+        $this->assertEquals('~Elazar', $hostmask->getUsername());
+        $this->assertEquals('yakko.itrebal.com', $hostmask->getHost());
+    }
+
+    /**
+     * Tests reception of a request event from a server.
+     *
+     * @return void
+     * @depends testSetConnectionWithNewConnection
+     * @depends testDoConnectWithoutPassword
+     */
+    public function testGetEventWithServerRequest()
+    {
+        $this->acceptAllCommands();
+        $connection = $this->getMockConnection();
+        $this->driver->setConnection($connection);
+        $this->driver->doConnect();
+        $this->writeEventToSocket(0, ':verne.freenode.net NOTICE * :*** Looking up your hostname...');
+
+        $event = $this->driver->getEvent();
+        $this->assertType('Phergie_Event_Request', $event);
+        $this->assertEquals('notice', $event->getType());
+        $this->assertEquals(array('*', '*** Looking up your hostname...'), $event->getArguments());
+
+        $hostmask = $event->getHostmask();
+        $this->assertType('Phergie_Hostmask', $hostmask);
+        $this->assertNull($hostmask->getNick());
+        $this->assertNull($hostmask->getUsername());
+        $this->assertEquals('verne.freenode.net', $hostmask->getHost());
+    }
+
+    /**
+     * Tests reception of a response event from a server.
+     *
+     * @return void
+     * @depends testSetConnectionWithNewConnection
+     * @depends testDoConnectWithoutPassword
+     */
+    public function testGetEventWithServerResponse()
+    {
+        $this->acceptAllCommands();
+        $connection = $this->getMockConnection();
+        $this->driver->setConnection($connection);
+        $this->driver->doConnect();
+        $this->writeEventToSocket(0, ':verne.freenode.net 376 Phergie :End of /MOTD command.');
+
+        $event = $this->driver->getEvent();
+        $this->assertType('Phergie_Event_Response', $event);
+        $this->assertEquals('response', $event->getType());
+        $this->assertEquals('376', $event->getCode());
+        $this->assertEquals('End of /MOTD command.', $event->getDescription());
     }
 }

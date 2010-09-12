@@ -114,9 +114,14 @@ class Phergie_Event_Request
     const TYPE_VERSION = 'version';
 
     /**
-     * RAW message event type
+     * CTCP FINGER command event type
      */
-    const TYPE_RAW = 'raw';
+    const TYPE_FINGER = 'finger';
+
+    /**
+     * ERROR message type
+     */
+    const TYPE_ERROR = 'error';
 
     /**
      * Mapping of event types to their named parameters
@@ -194,12 +199,20 @@ class Phergie_Event_Request
             'server' => 0
         ),
 
-        self::TYPE_TIME => array(),
-
-        self::TYPE_VERSION => array(),
-
-        self::TYPE_RAW => array(
+        self::TYPE_ERROR => array(
             'message' => 0
+        ),
+
+        self::TYPE_TIME => array(
+            'reply' => 0
+        ),
+
+        self::TYPE_VERSION => array(
+            'reply' => 0
+        ),
+
+        self::TYPE_FINGER => array(
+            'reply' => 0
         ),
 
     );
