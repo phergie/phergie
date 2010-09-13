@@ -32,6 +32,16 @@
  * @uses     Phergie_Plugin_UserInfo pear.phergie.org
  * @uses     Phergie_Plugin_FeedParser pear.phergie.org
  * @uses     Phergie_Plugin_FeedManager pear.phergie.org
+ * @todo     Make Unit tests
+ * @config   'FeedTicker.smartReader'   True to stop to get and syndicating Feeds on inactive channels (default: false)
+ * @config   'FeedTicker.idleTime'      Idle time to mark a channel as inactive (default: 60*60*2 //2 hours)
+ * @config   'FeedTicker.showDelayTime' Time between each delivery (default: 60*3 //3 minutes)
+ * @config   'FeedTicker.defaultDelay'  Default delay time to get items (default: 300 //5 minutes)
+ * @config   'FeedTicker.itemsLimit'    Max number of items should get from the feed source (default: 5)
+ * @config   'FeedTicker.dateLimit'     How old an item should be considered valid (default: 60*60*24*7 //1 week)
+ * @config   'FeedTicker.format'        How items should be displayed (default: '[%source%] %title% [ %link% ] by %author% at %updated%')
+ * @config   'FeedTicker.timeFormat'    How date/time should be displayed (default: 'Y-m-d H:i')
+ * @config   'FeedTicker.showMaxItems'  Max number of items should be displayed in each delivery (default: 2)
  */
 class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 {
@@ -43,7 +53,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     protected $db;
 
     /**
-     * Array with channels's last activitie
+     * Array with channels's last activity
      */
     protected $channelsStatus = array();
 
@@ -104,8 +114,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         $smartReader = (bool) $this->getConfig('FeedTicker.smartReader', false);
 
         foreach ($feeds as $key => $f) {
-            echo PHP_EOL . $f['title'] . PHP_EOL;
-
             // Check just active feeds
             if ($f['active'] == 0) {
                 continue;
@@ -143,8 +151,8 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
                                   'updated' => $ret->updated,
                                   'etag' => $ret->etag));
 
-                // $this->feeds[$key]['etag'] = $ret->etag;
-                // $this->feeds[$key]['updated'] = $ret->updated;
+                $this->feeds[$key]['etag'] = $ret->etag;
+                $this->feeds[$key]['updated'] = $ret->updated;
 
                 // Ignore items if this feed is older than last check
                 if (!empty($ret->updated) AND $ret->updated < $f['updated']) {
@@ -159,7 +167,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 
         // Check if is time to delivery items
         $showDelayTime = intval($this->getConfig('FeedTicker.showDelayTime', 60*3));
-        echo date("Y-m-d H:i", $this->lastDeliveryTime + $showDelayTime) . ' - ' . date("Y-m-d H:i", time()). PHP_EOL;
         if (($this->lastDeliveryTime + $showDelayTime) > time()) {
             return;
         }
@@ -175,8 +182,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 
         $this->lastDeliveryTime = time();
     }
-
-
 
 
     /**
@@ -232,7 +237,6 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     }
 
 
-
     /**
      * Get unread items from the database and delivery then
      *
@@ -249,11 +253,13 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         }
 
         foreach ($items as $i) {
-            $outputFormat = $this->getConfig('FeedTicker.format', "%title% [ %link% ] by %author% at %updated%");
+            $outputFormat = "[%source%] %title% [ %link% ] by %author% at %updated%";
+            $outputFormat = $this->getConfig('FeedTicker.format', $outputFormat);
             $outputTimeFormat = $this->getConfig('FeedTicker.timeFormat', "Y-m-d H:i");
+            $updated = date($outputTimeFormat, $i['updated']);
             $txt = str_replace(
-                array('%title%', '%link%', '%author%', '%updated%'),
-                array($i['title'], $i['link'], $i['author'], date($outputTimeFormat, $i['updated'])),
+                array('%source%', '%title%', '%link%', '%author%', '%updated%'),
+                array($i['source'], $i['title'], $i['link'], $i['author'], $updated),
                 $outputFormat
             );
             $this->doPrivmsg($channel, $txt);
@@ -285,13 +291,15 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 
         $showMaxItems = intval($this->getConfig('FeedTicker.showMaxItems', 2));
 
-        $sql = 'SELECT rowid, feed_id, updated, title, link, author
-                FROM ft_items WHERE read = 0 AND feed_id IN ('.$feed_ids.')
-                ORDER BY updated ASC
+        $sql = 'SELECT I.rowid, I.feed_id, I.updated, I.title, I.link, I.author, F.title as source
+                FROM ft_items as I, ft_feeds as F
+                WHERE I.read = 0 AND I.feed_id IN ('.$feed_ids.') AND I.feed_id = F.rowid
+                ORDER BY I.updated ASC
                 LIMIT '. $showMaxItems;
         $result = $this->db->query($sql);
         return $result->fetchAll();
     }
+
 
     /**
      * Determines if a table exists
@@ -306,6 +314,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
             . $this->db->quote($name);
         return (bool) $this->db->query($sql)->fetchColumn();
     }
+
 
     /**
      * Creates the database table(s) (if they don't exist)
@@ -344,6 +353,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         }
     }
 
+
     /**
      * Check if the bot is not alone in this channel and set new channel Status
      *
@@ -362,6 +372,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         }
     }
 
+
     /**
      * Tracks users joining a channel
      *
@@ -371,6 +382,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     {
         $this->setChannelStatus($this->event->getSource());
     }
+
 
     /**
      * Tracks users leaving a channel
@@ -382,6 +394,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         $this->setChannelStatus($this->event->getSource());
     }
 
+
     /**
      * Tracks users quitting a server
      *
@@ -391,6 +404,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     {
         $this->setChannelStatus($this->event->getSource());
     }
+
 
     /**
      * Tracks channel chat
