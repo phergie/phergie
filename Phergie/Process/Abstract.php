@@ -91,7 +91,7 @@ abstract class Phergie_Process_Abstract
     }
 
     /**
-     * Sends resulting outgoing events from ealier processing in handleEvents.
+     * Sends resulting outgoing events from earlier processing in handleEvents().
      *
      * @param Phergie_Connection $connection Active connection
      *
