@@ -46,7 +46,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
-        $plugins->getPlugin('Weather');
+        $plugins->getPlugin('Temperature');
         $plugins->getPlugin('Encoding');
     }
 
@@ -391,7 +391,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         if (isset($text)) {
             $encode = $this->getPluginHandler()->getPlugin('Encoding');
             $text = $encode->decodeEntities($text);
-            
+
             $this->doPrivmsg($source, $nick . ': ' . $text);
         } else {
             $this->doNotice($nick, 'Sorry I couldn\'t find an answer.');
