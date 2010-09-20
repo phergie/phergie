@@ -396,16 +396,14 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         $cache['url'] = $this->cache->fetch('urlCache');
         $cache['shortened'] = $this->cache->fetch('shortCache');
-
         $expire = $this->expire;
         $this->debug("Cache expire: {$expire}");
+
         /**
          * If cache expiration is enabled, check to see if the given url has expired in the cache
          * If expire is disabled, simply check to see if the url is listed
          */
-        if (($expire > 0 && (($cache['url'] + $expire) > time() || ($cache['shortened'] + $expire) > time()))
-            || ($expire <= 0 && (isset($cache['url']) || isset($cache['shortened'])))
-        ) {
+        if ($expire > 0 && isset($cache['url'][$source], $cache['shortened'][$source])) {
             unset($cache, $url, $shortenedUrl, $expire);
             return true;
         }
