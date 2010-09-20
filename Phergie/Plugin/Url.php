@@ -63,6 +63,15 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     protected $titleLength = 40;
 
+
+    /**
+     *  Cache object to store cached URLs to prevent spamming, especially with more
+     *  than one bot on the same channel.
+     *
+     *  @var Phergie_Plugin_Cache
+     */
+    protected $cache = array();
+
     /**
      * Url cache to prevent spamming, especially with multiple bots on the
      * same channel
@@ -144,6 +153,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Tld');
+        $plugins->getPlugin('Cache');
 
         // make the shortener configurable
         $shortener = $this->getConfig('url.shortener', 'Trim');
@@ -166,9 +176,11 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 'expire' => 'expire',
             ) as $config => $local) {
             if (isset($this->config["url.{$config}"])) {
-                $this->$local = $this->config["uri.{$config}"];
+                $this->$local = $this->config["url.{$config}"];
             }
         }
+
+        $this->cache = $plugins->cache;
     }
 
     /**
@@ -372,6 +384,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     protected function checkUrlCache($url, $shortenedUrl)
     {
+        $cache = array();
         $source = $this->getEvent()->getSource();
 
         /**
@@ -381,10 +394,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $url = $this->getUrlChecksum($url);
         $shortenedUrl = $this->getUrlChecksum($shortenedUrl);
 
-        $cache = array(
-            'url' => isset($this->urlCache[$source][$url]) ? $this->urlCache[$source][$url] : null,
-            'shortened' => isset($this->shortCache[$source][$shortenedUrl]) ? $this->shortCache[$source][$shortenedUrl] : null
-        );
+        $cache['url'] = $this->cache->fetch('urlCache');
+        $cache['shortened'] = $this->cache->fetch('shortCache');
 
         $expire = $this->expire;
         $this->debug("Cache expire: {$expire}");
@@ -413,6 +424,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     protected function updateUrlCache($url, $shortenedUrl)
     {
+        $cache = array();
         $source = $this->getEvent()->getSource();
 
         /**
@@ -424,18 +436,20 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $time = time();
 
         // Handle the URL cache and remove old entries that surpass the limit if enabled
-        $this->urlCache[$source][$url] = $time;
-        if ($this->limit > 0 && count($this->urlCache[$source]) > $this->limit) {
-            asort($this->urlCache[$source], SORT_NUMERIC);
-            array_shift($this->urlCache[$source]);
+        $cache['urlCache'][$source][$url] = $time;
+        if ($this->limit > 0 && count($cache['urlCache'][$source]) > $this->limit) {
+            asort($cache['urlCache'][$source], SORT_NUMERIC);
+            array_shift($cache['urlCache'][$source]);
         }
 
         // Handle the shortened cache and remove old entries that surpass the limit if enabled
-        $this->shortCache[$source][$shortenedUrl] = $time;
-        if ($this->limit > 0 && count($this->shortCache[$source]) > $this->limit) {
-            asort($this->shortCache[$source], SORT_NUMERIC);
-            array_shift($this->shortCache[$source]);
+        $cache['shortCache'][$source][$shortenedUrl] = $time;
+        if ($this->limit > 0 && count($cache['shortCache'][$source]) > $this->limit) {
+            asort($cache['shortCache'][$source], SORT_NUMERIC);
+            array_shift($cache['shortCache'][$source]);
         }
+        $this->cache->store('urlCache', $cache['urlCache'], $this->expire);
+        $this->cache->store('shortCache', $cache['shortCache'], $this->expire);
         unset($url, $shortenedUrl, $time);
     }
 
