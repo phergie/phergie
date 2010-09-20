@@ -73,15 +73,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $cache = array();
 
     /**
-     * Url cache to prevent spamming, especially with multiple bots on the
-     * same channel
-     *
-     * @var array
-     */
-    protected $urlCache = array();
-    protected $shortCache = array();
-
-    /**
      * Time in seconds to store the cached entries
      *
      * Setting it to 0 or below disables the cache expiration
