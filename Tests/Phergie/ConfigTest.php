@@ -163,7 +163,9 @@ class Phergie_ConfigTest extends PHPUnit_Framework_TestCase
     public function testReadThrowsExceptionForUnreadableFile()
     {
         $file = $this->createTempFile();
-        chmod($file, 0000);
+        if (!chmod($file, 0000)) {
+            $this->markTestSkipped('chmod() call to make file unreadable failed');
+        }
         try {
             $this->config->read($file);
             $this->fail('Expected exception for unreadable file was not thrown');
