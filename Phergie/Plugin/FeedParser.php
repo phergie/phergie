@@ -27,8 +27,8 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_FeedParser
- * @todo     Remove all debug messages after testing
  * @todo     Make tests with String content
+ * @todo     Make Unit tests
  */
 class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
 {
@@ -85,13 +85,18 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
             if (!empty($header)) {
                 $this->feed->etag = $header['etag'];
                 if (empty($this->feed->updated)) {
-                    $this->feed->updated = strtotime($header['last-modified']);
+                    // Very dificult to happen, but there are some servers that we can't get any
+                    // kind of "last modified time"
+                    if (empty($header['last-modified'])) {
+                        $this->feed->updated = time();
+                    } else {
+                        $this->feed->updated = strtotime($header['last-modified']);
+                    }
                 }
             }
 
             return $this->feed;
         } else {
-            echo 'DEBUG(FeedParser): The Feed is empty: ' . $url . PHP_EOL;
             return false;
         }
     }
@@ -123,7 +128,7 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
 
             $author = empty($item->author) ? $dc->creator : $item->author;
             if (empty($autor)) {
-                $autor = 'Unknown';
+                $author = 'Unknown';
             }
 
             $pubDate = empty($item->pubDate) ? $dc->date : $item->pubDate;
@@ -156,7 +161,7 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
             $pubDate =  (String) strtotime($item->updated);
             $author =   (String) $item->author->name;
             if (empty($autor)) {
-                $autor = 'Unknown';
+                $author = 'Unknown';
             }
 
             $ret[] = array(

@@ -124,6 +124,11 @@ class Phergie_Event_Request
     const TYPE_ERROR = 'error';
 
     /**
+     * Raw event type
+     */
+    const TYPE_RAW = 'raw';
+
+    /**
      * Mapping of event types to their named parameters
      *
      * @var array
@@ -213,6 +218,10 @@ class Phergie_Event_Request
 
         self::TYPE_FINGER => array(
             'reply' => 0
+        ),
+
+        self::TYPE_RAW => array(
+            'message' => 0
         ),
 
     );
