@@ -31,7 +31,7 @@
  * @uses     Phergie_Plugin_FeedParser pear.phergie.org
  * @uses     Phergie_Plugin_UserInfo pear.phergie.org
  * @uses     Phergie_Plugin_Cron pear.phergie.org
- * @todo     Remove all debug messages after testing
+ * @todo     Make Unit tests
  */
 class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
 {
@@ -198,7 +198,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
                 $outputTimeFormat = $this->getConfig('FeedTicker.timeFormat', "Y-m-d H:i");
                 $time = date($outputTimeFormat, $f['updated']);
                 $txt = sprintf(
-                    'ID: %s - %s - %s - %s last check: %s - %s',
+                    'ID: %s - %s - %s - %s last update: %s - %s',
                     $f['rowid'], $f['channel'], $f['title'], $f['link'], $time, $active
                 );
 
@@ -319,13 +319,14 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         $channel = $this->event->getSource();
         $feeds = $this->getAllFeeds($channel);
         if (empty($feeds)) {
+            $this->doNotice($nick, "I found nothing!");
             return;
         }
 
         $words = explode(" ", trim($query));
         $sql_search = "";
         foreach ($words as $w) {
-            $sql_search .= ' AND LOWER(title) like LOWER('
+            $sql_search .= ' AND LOWER(I.title) like LOWER('
                   . $this->db->quote('%'.$w.'%') .
             ')';
         }
@@ -334,10 +335,10 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         foreach ($feeds as $f) { $feed_ids[] = $f['rowid']; }
         $feed_ids = implode(',', $feed_ids);
 
-        $sql = 'SELECT title, link, author, updated
-                FROM ft_items
-                WHERE feed_id IN ('.$feed_ids.')' . $sql_search . '
-                ORDER BY updated DESC';
+        $sql = 'SELECT I.title, I.link, I.author, I.updated, F.title as source
+                FROM ft_items I, ft_feeds F
+                WHERE I.feed_id IN ('.$feed_ids.')' . $sql_search . ' AND F.rowid = I.feed_id
+                ORDER BY I.updated DESC';
         $result = $this->db->query($sql);
         $items = $result->fetchAll();
         $count = count($items);
@@ -348,11 +349,13 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
             $this->doNotice($nick, "I found {$count} items! Try to be more specific.");
         } else {
             foreach ($items as $i) {
-                $outputFormat = $this->getConfig('FeedTicker.format', "%title% [ %link% ] by %author% at %updated%");
+                $outputFormat = "[%source%] %title% [ %link% ] by %author% at %updated%";
+                $outputFormat = $this->getConfig('FeedTicker.format', $outputFormat);
                 $outputTimeFormat = $this->getConfig('FeedTicker.timeFormat', "Y-m-d H:i");
+                $updated = date($outputTimeFormat, $i['updated']);
                 $txt = str_replace(
-                    array('%title%', '%link%', '%author%', '%updated%'),
-                    array($i['title'], $i['link'], $i['author'], date($outputTimeFormat, $i['updated'])),
+                    array('%source%', '%title%', '%link%', '%author%', '%updated%'),
+                    array($i['source'], $i['title'], $i['link'], $i['author'], $updated),
                     $outputFormat
                 );
                 $this->doPrivmsg($channel, $txt);

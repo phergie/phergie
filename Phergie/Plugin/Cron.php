@@ -130,7 +130,7 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
 
             echo 'DEBUG(Cron): Callback ', $callbackString,
                 ' scheduled for ', date('H:i:s', $scheduled), ',',
-                ' executed at ', date('H:i:s', $now), PHP_EOL;
+                ' executed at ', date('H:i:s', $time), PHP_EOL;
 
             if ($callback['repeat']) {
                 $callback['scheduled'] = $time + $callback['delay'];
