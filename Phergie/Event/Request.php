@@ -201,7 +201,8 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_PING => array(
-            'server' => 0
+            'nick' => 0,
+            'hash' => 1
         ),
 
         self::TYPE_ERROR => array(
