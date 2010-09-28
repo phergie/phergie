@@ -146,7 +146,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Tld');
 
         // make the shortener configurable
-        $shortener = $this->getConfig('url.shortener', 'Trim');
+        $shortener = $this->getConfig('url.shortener', 'Isgd');
         $shortener = "Phergie_Plugin_Url_Shorten_{$shortener}";
         $this->shortener = new $shortener($this->plugins->getPlugin('Http'));
 
