@@ -70,16 +70,16 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
         try {
             $this->db = new PDO('sqlite:' . $dbFile);
 
-            $this->select = $this->db->prepare('
-                SELECT type, description
+            $this->select = $this->db->prepare(
+                'SELECT type, description
                 FROM tld
-                WHERE LOWER(tld) = LOWER(:tld)
-            ');
+                WHERE LOWER(tld) = LOWER(:tld)'
+            );
 
-            $this->selectAll = $this->db->prepare('
-                SELECT tld, type, description
-                FROM btld
-            ');
+            $this->selectAll = $this->db->prepare(
+                'SELECT tld, type, description
+                FROM btld'
+            );
         } catch (PDOException $e) {
             $this->getPluginHandler()->removePlugin($this);
         }

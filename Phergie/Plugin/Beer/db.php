@@ -67,7 +67,8 @@ unlink($file);
 // Get and decompress openbeerdb.com data set
 $archive = __DIR__ . '/beers.tar.gz';
 if (!file_exists($archive)) {
-    echo 'openbeerdb.com data set must be downloaded manually from http://groups.google.com/group/openbeerdb/files', PHP_EOL;
+    echo 'openbeerdb.com data set must be downloaded manually from '
+        . 'http://groups.google.com/group/openbeerdb/files', PHP_EOL;
     exit(1);
 }
 

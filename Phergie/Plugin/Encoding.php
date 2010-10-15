@@ -36,8 +36,8 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
      * html_entity_decode()
      *
      * @var array
-     * @link http://us.php.net/manual/en/function.get-html-translation-table.php#73409
-     * @link http://us.php.net/manual/en/function.get-html-translation-table.php#73410
+     * @link http://php.net/get_html_translation_table#73409
+     * @link http://php.net/get_html_translation_table#73410
      */
     protected static $entities = array(
         '&alpha;' => 913,
@@ -117,6 +117,7 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
      * Converts a given unicode to its UTF-8 equivalent.
      *
      * @param int $code Code to convert
+     *
      * @return string Character corresponding to code
      */
     public function codeToUtf8($code)

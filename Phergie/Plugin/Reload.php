@@ -64,7 +64,8 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         }
 
         if (!$this->plugins->hasPlugin($plugin)) {
-            echo 'DEBUG(Reload): ' . ucfirst($plugin) . ' is not loaded yet, loading', PHP_EOL;
+            echo 'DEBUG(Reload): ' . ucfirst($plugin)
+                . ' is not loaded yet, loading', PHP_EOL;
             try {
                 $this->plugins->getPlugin($plugin);
                 $this->plugins->command->populateMethodCache();
@@ -93,7 +94,8 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
 
         if (class_exists($newClass, false)) {
             if ($evalClass == true) {
-                echo 'DEBUG(Reload): Class ', $class, ' has not changed since last reload', PHP_EOL;
+                echo 'DEBUG(Reload): Class ', $class
+                    , ' has not changed since last reload', PHP_EOL;
                 return;
             }
         } else {

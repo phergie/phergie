@@ -57,11 +57,11 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
             unset($this->feed);
 
             if (isset($content->channel)) { // Try to parse RSS 0.91, 0.92 and 2.0
-                $this->feed->items =        $this->parseItemsRSS($content->channel->item);
-                $this->feed->title =        (String) $content->channel->title;
-                $this->feed->description =  (String) $content->channel->description;
-                $this->feed->link =         (String) $content->channel->link;
-                $this->feed->updated =      strtotime($content->channel->lastBuildDate);
+                $this->feed->items = $this->parseItemsRSS($content->channel->item);
+                $this->feed->title = (String) $content->channel->title;
+                $this->feed->description = (String) $content->channel->description;
+                $this->feed->link = (String) $content->channel->link;
+                $this->feed->updated = strtotime($content->channel->lastBuildDate);
 
             }else if (isset($content->entry)) { // Atom 1.0
                 // Try to get the source of this feed
@@ -122,7 +122,8 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
                 continue;
             }
 
-            //Try to get the author and updated time from dc namespace (Used on Wordpress and others)
+            // Try to get the author and updated time from dc namespace
+            // (Used on Wordpress and others)
             $namespaces = $item->getNameSpaces(true);
             $dc = $item->children($namespaces['dc']);
 

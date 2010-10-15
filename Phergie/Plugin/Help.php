@@ -201,7 +201,8 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     protected function parseShortDescription($docblock)
     {
         $desc = preg_replace(
-            array('#^\h*\*\h*#m', '#^/\*\*\h*\v+\h*#', '#(?:\r?\n){2,}.*#s', '#\s*\v+\s*#'),
+            array('#^\h*\*\h*#m', '#^/\*\*\h*\v+\h*#'
+                , '#(?:\r?\n){2,}.*#s', '#\s*\v+\s*#'),
             array('', '', '', ' '),
             $docblock
         );

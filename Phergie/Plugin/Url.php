@@ -151,7 +151,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $this->shortener = new $shortener($this->plugins->getPlugin('Http'));
 
         if (!$this->shortener instanceof Phergie_Plugin_Url_Shorten_Abstract) {
-            $this->fail("Declared shortener class {$shortener} is not of proper ancestry");
+            $this->fail(
+                "Declared shortener class {$shortener} is not of proper ancestry"
+            );
         }
 
         // load config (a bit ugly, but focusing on porting):
@@ -259,7 +261,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             unset($title, $shortenedUrl, $title);
         }
 
-        // Check to see if there were any URL responses, format them and handle if they
+        // Check to see if there were any URL responses,
+        // format them and handle if they
         // get merged into one message or not
         if (count($responses) > 0) {
             if ($this->mergeLinks) {

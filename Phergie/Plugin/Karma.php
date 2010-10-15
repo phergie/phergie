@@ -103,44 +103,44 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
      */
     protected function initializePreparedStatements()
     {
-        $this->fetchKarma = $this->db->prepare('
-            SELECT karma
+        $this->fetchKarma = $this->db->prepare(
+            'SELECT karma
             FROM karmas
             WHERE term = :term
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
 
-        $this->insertKarma = $this->db->prepare('
-            INSERT INTO karmas (term, karma)
-            VALUES (:term, :karma)
-        ');
+        $this->insertKarma = $this->db->prepare(
+            'INSERT INTO karmas (term, karma)
+            VALUES (:term, :karma)'
+        );
 
-        $this->updateKarma = $this->db->prepare('
-            UPDATE karmas
+        $this->updateKarma = $this->db->prepare(
+            'UPDATE karmas
             SET karma = :karma
-            WHERE term = :term
-        ');
+            WHERE term = :term'
+        );
 
-        $this->fetchFixedKarma = $this->db->prepare('
-            SELECT karma
+        $this->fetchFixedKarma = $this->db->prepare(
+            'SELECT karma
             FROM fixed_karmas
             WHERE term = :term
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
 
-        $this->fetchPositiveAnswer = $this->db->prepare('
-            SELECT answer
+        $this->fetchPositiveAnswer = $this->db->prepare(
+            'SELECT answer
             FROM positive_answers
             ORDER BY RANDOM()
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
 
-        $this->fetchNegativeAnswer = $this->db->prepare('
-            SELECT answer
+        $this->fetchNegativeAnswer = $this->db->prepare(
+            'SELECT answer
             FROM negative_answers
             ORDER BY RANDOM()
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
     }
 
     /**
@@ -363,8 +363,8 @@ REGEX;
         $reply = $replies->fetchColumn();
 
         if (max($karma0, $karma1) == $karma1) {
-            list($canonicalTerm0, $canonicalTerm1) =
-                array($canonicalTerm1, $canonicalTerm0);
+            list($canonicalTerm0, $canonicalTerm1)
+                = array($canonicalTerm1, $canonicalTerm0);
         }
 
         $message = str_replace(

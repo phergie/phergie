@@ -57,7 +57,8 @@ class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
     protected function isError($result)
     {
         if ($result['error'] != 'OK') {
-            $this->doNotice($this->event->getNick(), 'ideone error: ' . $result['error']);
+            $noticemsg = 'ideone error: ' . $result['error'];
+            $this->doNotice($this->event->getNick(), $noticemsg);
             return true;
         }
         return false;
