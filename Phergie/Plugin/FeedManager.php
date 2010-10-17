@@ -81,8 +81,8 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Add a Feed
      *
-     * @param String $feed_url
-     * @param String $channel (optional)
+     * @param String $feed_url ToDo desc
+     * @param String $channel  (optional)
      *
      * @return void
      */
@@ -115,16 +115,20 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         if ($f = $FeedParser->parseFeed($feed['content'], $feed['header'])) {
             try {
 
-                $defaultDelay = intval($this->getConfig('FeedTicker.defaultDelay', 300));
+                $defaultDelay = intval(
+                    $this->getConfig('FeedTicker.defaultDelay', 300)
+                );
                 if ($defaultDelay < 60) {
                     $defaultDelay = 60;
                 }
 
                 $q = $this->db->prepare(
                     'INSERT INTO ft_feeds (
-                        updated, etag, delay, channel, title, description, link, feed_url, active
+                        updated, etag, delay, channel, title,
+                        description, link, feed_url, active
                     ) VALUES (
-                        :updated, :etag, :delay, :channel, :title, :description, :link, :feed_url, :active
+                        :updated, :etag, :delay, :channel,
+                        :title, :description, :link, :feed_url, :active
                     )'
                 );
 
@@ -163,7 +167,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Removes the Feed from the database
      *
-     * @param Integer $feed_id
+     * @param Integer $feed_id ToDo desc
      *
      * @return void
      */
@@ -171,7 +175,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     {
         $nick = $this->event->getNick();
 
-        if ($this->feedExists($feed_id)){
+        if ($this->feedExists($feed_id)) {
             $q = $this->db->prepare('DELETE FROM ft_feeds WHERE rowid = :rowid');
             $q->execute(array('rowid' => $feed_id));
             $q = $this->db->prepare('DELETE FROM ft_items WHERE feed_id = :feed_id');
@@ -195,11 +199,14 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         if (count($this->feeds) > 0) {
             foreach ($this->feeds as $f) {
                 $active = $f['active'] ? "Enabled" : "Disabled";
-                $outputTimeFormat = $this->getConfig('FeedTicker.timeFormat', "Y-m-d H:i");
+                $outputTimeFormat = $this->getConfig(
+                    'FeedTicker.timeFormat', "Y-m-d H:i"
+                );
                 $time = date($outputTimeFormat, $f['updated']);
                 $txt = sprintf(
                     'ID: %s - %s - %s - %s last update: %s - %s',
-                    $f['rowid'], $f['channel'], $f['title'], $f['link'], $time, $active
+                    $f['rowid'], $f['channel'], $f['title'],
+                    $f['link'], $time, $active
                 );
 
                 $this->doNotice($nick, $txt);
@@ -212,8 +219,8 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Set time delay to read this feed
      *
-     * @param Integer $feed_id
-     * @param Integer $delay
+     * @param Integer $feed_id ToDo desc
+     * @param Integer $delay   ToDo desc
      *
      * @return void
      */
@@ -222,13 +229,18 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         $nick = $this->event->getNick();
 
         $delay = intval($delay);
-        if ($delay < 60){
-            $this->doNotice($nick, "Less than a minute to check the feed?! Try at least 60 sec.");
+        if ($delay < 60) {
+            $this->doNotice(
+                $nick,
+                "Less than a minute to check the feed?! Try at least 60 sec."
+            );
             return;
         }
 
-        if ($this->feedExists($feed_id)){
-            $q = $this->db->prepare('UPDATE ft_feeds SET delay = :delay WHERE rowid = :rowid');
+        if ($this->feedExists($feed_id)) {
+            $q = $this->db->prepare(
+                'UPDATE ft_feeds SET delay = :delay WHERE rowid = :rowid'
+            );
             $q->execute(array('rowid' => $feed_id, 'delay' => $delay));
             $this->doNotice($nick, "Done!");
         } else {
@@ -240,7 +252,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Enables the Feed
      *
-     * @param Integer $feed_id
+     * @param Integer $feed_id ToDo desc
      *
      * @return void
      */
@@ -248,8 +260,10 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     {
         $nick = $this->event->getNick();
 
-        if ($this->feedExists($feed_id)){
-            $q = $this->db->prepare('UPDATE ft_feeds SET active = 1 WHERE rowid = :rowid');
+        if ($this->feedExists($feed_id)) {
+            $q = $this->db->prepare(
+                'UPDATE ft_feeds SET active = 1 WHERE rowid = :rowid'
+            );
             $q->execute(array('rowid' => $feed_id));
             $this->doNotice($nick, "Done!");
         } else {
@@ -261,7 +275,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Disables the Feed
      *
-     * @param Integer $feed_id
+     * @param Integer $feed_id ToDo desc
      *
      * @return void
      */
@@ -269,8 +283,10 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     {
         $nick = $this->event->getNick();
 
-        if ($this->feedExists($feed_id)){
-            $q = $this->db->prepare('UPDATE ft_feeds SET active = 0 WHERE rowid = :rowid');
+        if ($this->feedExists($feed_id)) {
+            $q = $this->db->prepare(
+                'UPDATE ft_feeds SET active = 0 WHERE rowid = :rowid'
+            );
             $q->execute(array('rowid' => $feed_id));
             $this->doNotice($nick, "Done!");
         } else {
@@ -295,8 +311,10 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
             $this->db->prepare('DELETE FROM ft_items')->execute();
             $this->doNotice($nick, "Done!");
         } else {
-            if ($this->feedExists($feed_id)){
-                $q = $this->db->prepare('DELETE FROM ft_items WHERE feed_id = :feed_id');
+            if ($this->feedExists($feed_id)) {
+                $q = $this->db->prepare(
+                    'DELETE FROM ft_items WHERE feed_id = :feed_id'
+                );
                 $q->execute(array('feed_id' => $feed_id));
                 $this->doNotice($nick, "Done!");
             } else {
@@ -309,7 +327,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Search items in the database
      *
-     * @param String $query
+     * @param String $query ToDo desc
      *
      * @return void
      */
@@ -332,12 +350,15 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         }
 
         $feed_ids = array();
-        foreach ($feeds as $f) { $feed_ids[] = $f['rowid']; }
+        foreach ($feeds as $f) { 
+            $feed_ids[] = $f['rowid'];
+        }
         $feed_ids = implode(',', $feed_ids);
 
         $sql = 'SELECT I.title, I.link, I.author, I.updated, F.title as source
                 FROM ft_items I, ft_feeds F
-                WHERE I.feed_id IN ('.$feed_ids.')' . $sql_search . ' AND F.rowid = I.feed_id
+                WHERE I.feed_id IN ('.$feed_ids.')' . $sql_search . '
+                    AND F.rowid = I.feed_id
                 ORDER BY I.updated DESC';
         $result = $this->db->query($sql);
         $items = $result->fetchAll();
@@ -346,16 +367,31 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         if ($count == 0) {
             $this->doNotice($nick, "I found nothing!");
         } else if ($count > 3) {
-            $this->doNotice($nick, "I found {$count} items! Try to be more specific.");
+            $this->doNotice(
+                $nick, "I found {$count} items! Try to be more specific."
+            );
         } else {
             foreach ($items as $i) {
-                $outputFormat = "[%source%] %title% [ %link% ] by %author% at %updated%";
+                $outputFormat = "[%source%] %title% [ %link% ] "
+                    . "by %author% at %updated%";
                 $outputFormat = $this->getConfig('FeedTicker.format', $outputFormat);
                 $outputTimeFormat = $this->getConfig('FeedTicker.timeFormat', "Y-m-d H:i");
                 $updated = date($outputTimeFormat, $i['updated']);
                 $txt = str_replace(
-                    array('%source%', '%title%', '%link%', '%author%', '%updated%'),
-                    array($i['source'], $i['title'], $i['link'], $i['author'], $updated),
+                    array(
+                        '%source%',
+                        '%title%',
+                        '%link%',
+                        '%author%',
+                        '%updated%'
+                    ),
+                    array(
+                        $i['source'],
+                        $i['title'],
+                        $i['link'],
+                        $i['author'],
+                        $updated
+                    ),
                     $outputFormat
                 );
                 $this->doPrivmsg($channel, $txt);
@@ -372,7 +408,8 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
      */
     public function getAllFeeds($channel='')
     {
-        $sqlChannel = !empty($channel) ? ' WHERE channel = ' . $this->db->quote($channel) : '';
+        $tmpwhere = ' WHERE channel = ' . $this->db->quote($channel);
+        $sqlChannel = !empty($channel) ? $tmpwhere : '';
         $sql = 'SELECT rowid, etag, channel, title,
                        link, feed_url, active, delay, updated
                   FROM ft_feeds' . $sqlChannel;
@@ -393,7 +430,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Determines if the feed_id exists
      *
-     * @param Integer $feed_id
+     * @param Integer $feed_id ToDo desc
      *
      * @return bool
      */
@@ -407,8 +444,8 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Add items on the database
      *
-     * @param Integer $feed_id
-     * @param Array $items
+     * @param Integer $feed_id ToDo desc
+     * @param Array   $items   ToDo desc
      *
      * @return void
      */
@@ -418,8 +455,12 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
             return;
         }
 
-        $items = array_slice($items, 0, intval($this->getConfig('FeedTicker.itemsLimit', 5)));
-        $dateLimit = time() - intval($this->getConfig('FeedTicker.dateLimit', 60*60*24*7));
+        $items = array_slice(
+            $items, 0, intval($this->getConfig('FeedTicker.itemsLimit', 5))
+        );
+
+        $dli = intval($this->getConfig('FeedTicker.dateLimit', 60*60*24*7));
+        $dateLimit = time() - $dli;
 
         $q = $this->db->prepare(
             'INSERT INTO ft_items (

@@ -652,7 +652,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     public function preDispatch()
     {
-        if(!$this->getConfig('url.shortenOutput', false)) {
+        if (!$this->getConfig('url.shortenOutput', false)) {
             return;
         }
 

@@ -53,7 +53,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
 
         if (empty($this->config['weather.partner_id'])
             || empty($this->config['weather.license_key'])
-            ) {
+        ) {
             $this->fail(
                 'weather.partner_id and weather.license_key must be specified'
             );

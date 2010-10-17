@@ -159,9 +159,9 @@ class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
             $link,
             false, // boolean withSource - FALSE to not return the source code
             false, // boolean withInput - FALSE to not return stdin data
-            true,  // boolean withOutput - TRUE to include output
-            true,  // boolean withStderr - TRUE to return stderr data
-            false  // boolean withCmpinfo - TRUE to return compilation info
+            true, // boolean withOutput - TRUE to include output
+            true, // boolean withStderr - TRUE to return stderr data
+            false // boolean withCmpinfo - TRUE to return compilation info
         );
         if ($this->isError($response)) {
             return;

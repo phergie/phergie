@@ -335,7 +335,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * Establishes a socket connection, separatedly mainly to allow for
      * stubbing during unit testing.
      *
-     * @param string $remote Address to connect the socket to
+     * @param string $remote  Address to connect the socket to
      * @param int    &$errno  System level error number if connection fails
      * @param string &$errstr System level error message if connection fails
      *

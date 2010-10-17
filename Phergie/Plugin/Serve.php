@@ -57,7 +57,8 @@ class Phergie_Plugin_Serve extends Phergie_Plugin_Abstract
     {
         $db = new PDO('sqlite:' . $database);
         if (!empty($request['suggestion'])) {
-            $query = 'SELECT * FROM ' . $table . ' WHERE name LIKE ? ORDER BY RANDOM() LIMIT 1';
+            $query = 'SELECT * FROM ' . $table
+                . ' WHERE name LIKE ? ORDER BY RANDOM() LIMIT 1';
             $stmt = $db->prepare($query);
             $stmt->execute(array('%' . $request['suggestion'] . '%'));
             $item = $stmt->fetchObject();
@@ -77,14 +78,14 @@ class Phergie_Plugin_Serve extends Phergie_Plugin_Abstract
     /**
      * Processes a request to serve a user something.
      *
-     * @param string $database Path to the SQLite database file
-     * @param string $table    Name of the database table
-     * @param string $format   Format of the response where %target%,
+     * @param string  $database Path to the SQLite database file
+     * @param string  $table    Name of the database table
+     * @param string  $format   Format of the response where %target%,
      *        %item%, %article%', and %link will be replaced with their
      *        respective data
-     * @param string $request  Request string including the target and an
+     * @param string  $request  Request string including the target and an
      *        optional suggestion of the item to fetch
-     * @param boolean $censor  TRUE to integrate with the Censor plugin,
+     * @param boolean $censor   TRUE to integrate with the Censor plugin,
      *        defaults to FALSE
      *
      * @return boolean TRUE if the request was processed successfully, FALSE

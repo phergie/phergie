@@ -86,7 +86,8 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
 
         // Prepare the database statement
         $stmt = $this->database->prepare(
-            'SELECT `name`, `description` FROM `functions` WHERE `name` LIKE :function'
+            'SELECT `name`, `description`
+             FROM `functions` WHERE `name` LIKE :function'
         );
 
         $stmt->execute(array(':function' => $function));
@@ -130,7 +131,8 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
         // If the table doesn't exist, create it
         if (!$table) {
                 $this->database->exec(
-                    'CREATE TABLE `functions` (`name` VARCHAR(255), `description` TEXT)'
+                    'CREATE TABLE `functions`
+                     (`name` VARCHAR(255), `description` TEXT)'
                 );
                 $this->database->exec(
                     'CREATE UNIQUE INDEX `functions_name` ON `functions` (`name`)'
@@ -142,8 +144,10 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
             // Get the contents of the source file
             // @todo Handle possible error cases better here; the @ operator 
             //       shouldn't be needed
-            $contents = @file($this->url
-                , FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
+            $contents = @file(
+                $this->url,
+                FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES
+            );
 
             if (!$contents) {
                 return;
@@ -208,7 +212,10 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                         $retval = '';
                     }
                     // Reconstruct the complete function line
-                    $line = trim($retval . ' ' . $name . '(' . $params . ') - ' . $desc);
+                    $line = trim(
+                        $retval . ' ' . $name . '(' . $params . ') - ' . $desc
+                    );
+
                     // Execute the statement
                     $stmt->execute(
                         array(':name' => $name, ':description' => $line)

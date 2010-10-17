@@ -369,8 +369,8 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      * 		$current_nick = $this->getConnection()->getNick();
      * 		$random_user = $this->plugins->getPlugin('UserInfo')->getRandomUser( $chan, array( $current_nick ) );
      *
-     * @param string $chan The channel name
-     * @param array $ignore A list of nicks to ignore in the channel. Useful for excluding the bot itself.
+     * @param string $chan   The channel name
+     * @param array  $ignore A list of nicks to ignore in the channel. Useful for excluding the bot itself.
      *
      * @return string|bool
      */
@@ -379,7 +379,6 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         $chan = trim(strtolower($chan));
 
         if (isset($this->store[$chan])) {
-			
             do {
                 $nick = array_rand($this->store[$chan], 1);
             } while (in_array($nick, $ignore));

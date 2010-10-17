@@ -11,16 +11,18 @@
  * Short license: do whatever you like with this.
  * 
  */
-class Twitter_Laconica extends Twitter {
+class Twitter_Laconica extends Twitter
+{
 
     /**
      * Constructor; sets up configuration.
      * 
-     * @param string $user Laconica user name; null for limited read-only access
-     * @param string $pass Laconica password; null for limited read-only access
+     * @param string $user    Laconica user name; null for limited read-only access
+     * @param string $pass    Laconica password; null for limited read-only access
      * @param string $baseUrl Base URL of Laconica install. Defaults to identi.ca
      */
-    public function __construct($user=null, $pass=null, $baseUrl = 'http://identi.ca/') {
+    public function __construct($user=null, $pass=null, $baseUrl = 'http://identi.ca/')
+    {
         $this->baseUrl = $baseUrl;
         parent::__construct($user, $pass);
     }
@@ -28,14 +30,16 @@ class Twitter_Laconica extends Twitter {
     /**
      * Returns the base API URL
      */
-    protected function getUrlApi() {
+    protected function getUrlApi()
+    {
         return $this->baseUrlFull . 'api/';
     }
     
     /**
      * Output URL: status
      */
-    public function getUrlOutputStatus(StdClass $tweet) {
+    public function getUrlOutputStatus(StdClass $tweet)
+    {
         return $this->baseUrl . 'notice/' . urlencode($tweet->id);
     }
 }

@@ -14,7 +14,8 @@
  *
  * komode: le=unix language=php codepage=utf8 tab=4 notabs indent=4
  */
-class Twitter {
+class Twitter
+{
 
     /**
      * Base URL for Twitter API
@@ -46,15 +47,16 @@ class Twitter {
      * @param string $user Twitter user name; null for limited read-only access
      * @param string $pass Twitter password; null for limited read-only access
      */
-    public function __construct($user=null, $pass=null) {
+    public function __construct($user=null, $pass=null)
+    {
         $this->baseUrlFull = $this->baseUrl;
         if (null !== $user) {
             // user is defined, so use it in the URL
             $this->user = $user;
             $this->pass = $pass;
             $parsed = parse_url($this->baseUrl);
-            $this->baseUrlFull = $parsed['scheme'] . '://' . $this->user . ':' .
-                $this->pass . '@' . $parsed['host'];
+            $this->baseUrlFull = $parsed['scheme'] . '://' . $this->user . ':'
+                    . $this->pass . '@' . $parsed['host'];
             // port (optional)
             if (isset($parsed['port']) && is_numeric($parsed['port'])) {
                 $this->baseUrlFull .= ':' . $parsed['port'];
@@ -74,7 +76,8 @@ class Twitter {
      * @param int $num the tweet id/number
      * @return string (null on failure)
      */
-    public function getTweetByNum($num) {
+    public function getTweetByNum($num)
+    {
         if (!is_numeric($num)) {
             return;
         }
@@ -91,7 +94,9 @@ class Twitter {
      */
     public function getLastTweet($tweeter, $num = 1)
     {
-        $source = json_decode(file_get_contents($this->getUrlUserTimeline($tweeter)));
+        $source = json_decode(
+            file_get_contents($this->getUrlUserTimeline($tweeter))
+        );
         if ($num > count($source)) {
             return false;
         }
@@ -112,14 +117,16 @@ class Twitter {
     /**
      * Fetches followers for a user
      */
-    public function getFollowers($cursor=-1) {
+    public function getFollowers($cursor=-1)
+    {
         return json_decode(file_get_contents($this->getUrlFollowers($cursor)));
     }
     
     /**
      * Follow a userid
      */
-    public function follow($userId) {
+    public function follow($userId)
+    {
         $params = array(
             'http' => array(
                 'method' => 'POST',
@@ -143,15 +150,21 @@ class Twitter {
     /**
      * fetches DMs for a user
      */
-    public function getDMs($sinceId=null, $count=20, $page=1) {
-        return json_decode(file_get_contents($this->getUrlDMs($sinceId, $count, $page)));
+    public function getDMs($sinceId=null, $count=20, $page=1)
+    {
+        return json_decode(
+            file_get_contents($this->getUrlDMs($sinceId, $count, $page))
+        );
     }
     
     /**
      * Send DM
      */
-    public function sendDM($screenName, $text) {
-        $data = http_build_query(array('screen_name'=>$screenName, 'text'=>$text));
+    public function sendDM($screenName, $text)
+    {
+        $data = http_build_query(
+            array('screen_name'=>$screenName, 'text'=>$text)
+        );
         $params = array(
             'http' => array(
                 'method' => 'POST',
@@ -178,7 +191,8 @@ class Twitter {
      * @param string $txt the tweet text to send
      * @return string URL of tweet (or false on failure)
      */
-    public function sendTweet($txt, $limit=true) {
+    public function sendTweet($txt, $limit=true)
+    {
         if ($limit) {
             $txt = substr($txt, 0, 140); // twitter message size limit
         }
@@ -206,7 +220,8 @@ class Twitter {
     /**
      * Returns the base API URL
      */
-    protected function getUrlApi() {
+    protected function getUrlApi()
+    {
         return $this->baseUrlFull;
     }
     
@@ -215,36 +230,45 @@ class Twitter {
      *
      * @param int $num the tweet number
      */
-    protected function getUrlStatus($num) {
-        return $this->getUrlApi() . 'statuses/show/'. urlencode($num) .'.json';
+    protected function getUrlStatus($num)
+    {
+        return $this->getUrlApi() . 'statuses/show/'
+            . urlencode($num) .'.json';
     }
     
     /**
      * Returns the user timeline URL
      */
-    protected function getUrlUserTimeline($user) {
-        return $this->getUrlApi() . 'statuses/user_timeline/'. urlencode($user) .'.json';
+    protected function getUrlUserTimeline($user)
+    {
+        return $this->getUrlApi() . 'statuses/user_timeline/'
+                . urlencode($user) . '.json';
     }
     
     /**
      * Returns the tweet posting URL
      */
-    protected function getUrlTweetPost() {
+    protected function getUrlTweetPost()
+    {
         return $this->getUrlApi() . 'statuses/update.json';
     }
     
     /**
      * Output URL: status
      */
-    public function getUrlOutputStatus(StdClass $tweet) {
-        return $this->baseUrl . urlencode($tweet->user->screen_name) . '/statuses/' . urlencode($tweet->id);
+    public function getUrlOutputStatus(StdClass $tweet)
+    {
+        return $this->baseUrl . urlencode($tweet->user->screen_name)
+            . '/statuses/' . urlencode($tweet->id);
     }
     
     /**
      * Return mentions URL
      */
-    public function getUrlMentions($sinceId=null, $count=20) {
-        $url = $this->baseUrlFull . 'statuses/mentions.json?count=' . urlencode($count);
+    public function getUrlMentions($sinceId=null, $count=20)
+    {
+        $url = $this->baseUrlFull . 'statuses/mentions.json?count='
+            . urlencode($count);
         if ($sinceId !== null) {
             $url .= '&since_id=' . urlencode($sinceId);
         }
@@ -254,21 +278,26 @@ class Twitter {
     /**
      * Returns the followers URL
      */
-    public function getUrlFollowers($cursor=-1) {
-        return $this->baseUrlFull . 'statuses/followers.json?cursor=' . ((int)$cursor);
+    public function getUrlFollowers($cursor=-1)
+    {
+        return $this->baseUrlFull . 'statuses/followers.json?cursor='
+            . ((int)$cursor);
     }
     
     /**
      * Returns the follow-user URL
      */
-    public function getUrlFollow($userid) {
-        return $this->baseUrlFull . 'friendships/create/' . ((int) $userid) . '.json';
+    public function getUrlFollow($userid)
+    {
+        return $this->baseUrlFull . 'friendships/create/'
+            . ((int) $userid) . '.json';
     }
     
     /**
      * Returns the get DMs URL
      */
-    public function getUrlDMs($sinceId=null, $count=20, $page=1) {
+    public function getUrlDMs($sinceId=null, $count=20, $page=1)
+        {
         $url = $this->baseUrlFull . 'direct_messages.json?';
         if ($sinceId !== null) {
             $url .= 'since_id=' . urlencode($sinceId);
@@ -281,7 +310,8 @@ class Twitter {
     /**
      * Returns the send DM URL
      */
-    public function getURLSendDM() {
+    public function getURLSendDM()
+    {
         return $this->baseUrlFull . 'direct_messages/new.json';
     }
 }

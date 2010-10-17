@@ -167,13 +167,19 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
     {
         // @link http://pecl.php.net/package/translit
         if (function_exists('transliterate')) {
-            $string = transliterate($string, array('han_transliterate', 'diacritical_remove'), $charsetFrom, $charsetTo);
+            $string = transliterate(
+                $string,
+                array('han_transliterate', 'diacritical_remove'),
+                $charsetFrom,
+                $charsetTo
+            );
         } elseif (function_exists('iconv')) {
             $string = iconv($charsetFrom, $charsetTo . '//TRANSLIT', $string);
         } else {
             // @link http://stackoverflow.com/questions/1284535/php-transliteration/1285491#1285491
             $string = preg_replace(
-                '~&([a-z]{1,2})(acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i',
+                '~&([a-z]{1,2})'
+                . '(acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i',
                 '$1',
                 htmlentities($string, ENT_COMPAT, $charsetFrom)
             );

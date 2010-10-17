@@ -106,7 +106,8 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function feedCheckingCallback(){
+    public function feedCheckingCallback()
+    {
         $now = time();
         $idleTime = intval($this->getConfig('FeedTicker.idleTime', 60*60*2));
         $time = $now - $idleTime;
@@ -144,12 +145,16 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
             if ($ret = $FeedParser->parseFeed($feed['content'], $feed['header'])) {
 
                 // Set new lastUpdate time and etag for this feed
-                $q = $this->db->prepare('UPDATE ft_feeds
-                                         SET updated = :updated, etag = :etag
-                                         WHERE rowid = :rowid');
-                $q->execute(array('rowid' => $f['rowid'],
-                                  'updated' => $ret->updated,
-                                  'etag' => $ret->etag));
+                $q = $this->db->prepare(
+                    'UPDATE ft_feeds
+                     SET updated = :updated, etag = :etag
+                     WHERE rowid = :rowid'
+                );
+                $q->execute(
+                    array('rowid' => $f['rowid'],
+                        'updated' => $ret->updated,
+                        'etag' => $ret->etag)
+                );
 
                 $this->feeds[$key]['etag'] = $ret->etag;
                 $this->feeds[$key]['updated'] = $ret->updated;
@@ -160,7 +165,8 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
                 }
 
                 // Add new items on database
-                $this->plugins->getPlugin('FeedManager')->addItems($f['rowid'], $ret->items);
+                $this->plugins->getPlugin('FeedManager')
+                    ->addItems($f['rowid'], $ret->items);
             }
 
         }
@@ -187,9 +193,9 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     /**
      * Check if the feed is valid, updated and returns the content + header
      *
-     * @param string $url Feed URL
-     * @param string $lastCheck Last time this feed was checked
-     * @param string $etag Last etag of this feed
+     * @param string $url     Feed URL
+     * @param string $updated Last time this feed was checked
+     * @param string $etag    Last etag of this feed
      *
      * @return FeedParser
      */
@@ -240,7 +246,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     /**
      * Get unread items from the database and delivery then
      *
-     * @param String $channel
+     * @param String $channel ToDo desc
      *
      * @return void
      */
@@ -255,7 +261,9 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         foreach ($items as $i) {
             $outputFormat = "[%source%] %title% [ %link% ] by %author% at %updated%";
             $outputFormat = $this->getConfig('FeedTicker.format', $outputFormat);
-            $outputTimeFormat = $this->getConfig('FeedTicker.timeFormat', "Y-m-d H:i");
+            $outputTimeFormat = $this->getConfig(
+                'FeedTicker.timeFormat', "Y-m-d H:i"
+            );
             $updated = date($outputTimeFormat, $i['updated']);
             $txt = str_replace(
                 array('%source%', '%title%', '%link%', '%author%', '%updated%'),
@@ -265,7 +273,9 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
             $this->doPrivmsg($channel, $txt);
 
             // Mark item as read
-            $q = $this->db->prepare('UPDATE ft_items SET read = 1 WHERE rowid = :rowid');
+            $q = $this->db->prepare(
+                'UPDATE ft_items SET read = 1 WHERE rowid = :rowid'
+            );
             $q->execute(array('rowid' => $i['rowid']));
         }
     }
@@ -274,7 +284,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     /**
      * Get all unread items from this channel
      *
-     * @param String $channel
+     * @param String $channel ToDo desc
      *
      * @return array
      */
@@ -286,14 +296,19 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         }
 
         $feed_ids = array();
-        foreach ($feeds as $f) { $feed_ids[] = $f['rowid']; }
+        foreach ($feeds as $f) {
+            $feed_ids[] = $f['rowid'];
+        }
+
         $feed_ids = implode(',', $feed_ids);
 
         $showMaxItems = intval($this->getConfig('FeedTicker.showMaxItems', 2));
 
-        $sql = 'SELECT I.rowid, I.feed_id, I.updated, I.title, I.link, I.author, F.title as source
+        $sql = 'SELECT I.rowid, I.feed_id, I.updated,
+                    I.title, I.link, I.author, F.title as source
                 FROM ft_items as I, ft_feeds as F
-                WHERE I.read = 0 AND I.feed_id IN ('.$feed_ids.') AND I.feed_id = F.rowid
+                WHERE I.read = 0 AND I.feed_id IN ('.$feed_ids.')
+                    AND I.feed_id = F.rowid
                 ORDER BY I.updated ASC
                 LIMIT '. $showMaxItems;
         $result = $this->db->query($sql);
@@ -357,11 +372,13 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     /**
      * Check if the bot is not alone in this channel and set new channel Status
      *
+     * @param $channel ToDo desc
+     *
      * @return void
      */
     public function setChannelStatus($channel)
     {
-        if ((bool) $this->getConfig('FeedTicker.smartReader', false)){
+        if ((bool) $this->getConfig('FeedTicker.smartReader', false)) {
             $this->plugins->getPlugin('UserInfo');
             $users = $this->plugins->getPlugin('UserInfo')->getUsers($channel);
             if (count($users) > 1) {
