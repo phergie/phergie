@@ -72,6 +72,11 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         }
     }
 
+    /**
+     * TODO: Function Description
+     *
+     * @return void
+     */
     public function onConnect()
     {
         // Get all feed from database
@@ -298,7 +303,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
     /**
      * Cleans items from the database
      *
-     * @param $feed_id (optional)
+     * @param String $feed_id optional
      *
      * @return void
      */
@@ -375,7 +380,9 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
                 $outputFormat = "[%source%] %title% [ %link% ] "
                     . "by %author% at %updated%";
                 $outputFormat = $this->getConfig('FeedTicker.format', $outputFormat);
-                $outputTimeFormat = $this->getConfig('FeedTicker.timeFormat', "Y-m-d H:i");
+                $outputTimeFormat = $this->getConfig(
+                    'FeedTicker.timeFormat', "Y-m-d H:i"
+                );
                 $updated = date($outputTimeFormat, $i['updated']);
                 $txt = str_replace(
                     array(

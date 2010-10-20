@@ -124,29 +124,29 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
     {
         $code = (int) $code;
         switch ($code) {
-            // 1 byte, 7 bits
-            case 0:
-                return chr(0);
-            case ($code & 0x7F):
-                return chr($code);
+        // 1 byte, 7 bits
+        case 0:
+            return chr(0);
+        case ($code & 0x7F):
+            return chr($code);
 
             // 2 bytes, 11 bits
-            case ($code & 0x7FF):
-                return chr(0xC0 | (($code >> 6) & 0x1F)) .
-                       chr(0x80 | ($code & 0x3F));
+        case ($code & 0x7FF):
+            return chr(0xC0 | (($code >> 6) & 0x1F)) .
+                   chr(0x80 | ($code & 0x3F));
 
             // 3 bytes, 16 bits
-            case ($code & 0xFFFF):
-                return chr(0xE0 | (($code >> 12) & 0x0F)) .
-                       chr(0x80 | (($code >> 6) & 0x3F)) .
-                       chr(0x80 | ($code & 0x3F));
+        case ($code & 0xFFFF):
+            return chr(0xE0 | (($code >> 12) & 0x0F)) .
+                   chr(0x80 | (($code >> 6) & 0x3F)) .
+                   chr(0x80 | ($code & 0x3F));
 
             // 4 bytes, 21 bits
-            case ($code & 0x1FFFFF):
-                return chr(0xF0 | ($code >> 18)) .
-                       chr(0x80 | (($code >> 12) & 0x3F)) .
-                       chr(0x80 | (($code >> 6) & 0x3F)) .
-                       chr(0x80 | ($code & 0x3F));
+        case ($code & 0x1FFFFF):
+            return chr(0xF0 | ($code >> 18)) .
+                   chr(0x80 | (($code >> 12) & 0x3F)) .
+                   chr(0x80 | (($code >> 6) & 0x3F)) .
+                   chr(0x80 | ($code & 0x3F));
         }
     }
 
@@ -163,8 +163,9 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
      * @return string String with characters transliterated or the original
      *         string if transliteration was not possible
      */
-    public function transliterate($string, $charsetFrom = 'UTF-8', $charsetTo = 'ISO-8859-1')
-    {
+    public function transliterate($string, $charsetFrom = 'UTF-8', 
+        $charsetTo = 'ISO-8859-1'
+    ) {
         // @link http://pecl.php.net/package/translit
         if (function_exists('transliterate')) {
             $string = transliterate(

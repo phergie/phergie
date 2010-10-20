@@ -372,7 +372,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     /**
      * Check if the bot is not alone in this channel and set new channel Status
      *
-     * @param $channel ToDo desc
+     * @param String $channel TODO desc
      *
      * @return void
      */

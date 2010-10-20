@@ -98,7 +98,9 @@ class Phergie_Plugin_PingTest extends Phergie_Plugin_TestCase
         try {
             $this->plugin->setLastEvent('foo');
             $this->fail('Expected exception was not thrown');
-        } catch (Exception $e) { }
+        } catch (Exception $e) {
+
+        }
     }
 
     /**
@@ -122,7 +124,9 @@ class Phergie_Plugin_PingTest extends Phergie_Plugin_TestCase
         try {
             $this->plugin->setLastPing('foo');
             $this->fail('Expected exception was not thrown');
-        } catch (Exception $e) { }
+        } catch (Exception $e) {
+
+        }
     }
 
     /**

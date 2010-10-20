@@ -77,8 +77,9 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function registerCallback($callback, $delay,
-    array $arguments = array(), $repeat = false) {
+    public function registerCallback($callback, $delay, 
+        array $arguments = array(), $repeat = false
+    ) {
         $callbackString = $this->getCallbackString($callback);
         if ($callbackString === false) {
             echo 'DEBUG(Cron): Invalid callback specified - ',

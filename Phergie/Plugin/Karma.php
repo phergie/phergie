@@ -188,14 +188,14 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
     {
         $canonicalTerm = strtolower(preg_replace('|\s+|', ' ', trim($term, '()')));
         switch ($canonicalTerm) {
-            case 'me':
-                $canonicalTerm = strtolower($this->event->getNick());
-                break;
-            case 'all':
-            case '*':
-            case 'everything':
-                $canonicalTerm = 'everything';
-                break;
+        case 'me':
+            $canonicalTerm = strtolower($this->event->getNick());
+            break;
+        case 'all':
+        case '*':
+        case 'everything':
+            $canonicalTerm = 'everything';
+            break;
         }
         return $canonicalTerm;
     }

@@ -91,12 +91,12 @@ class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
                 $code = '<?php ' . $code;
             }
             switch (substr($code, -1)) {
-                case '}':
-                case ';':
-                    break;
-                default:
-                    $code .= ';';
-                    break;
+            case '}':
+            case ';':
+                break;
+            default:
+                $code .= ';';
+                break;
             }
         }
 

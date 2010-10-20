@@ -59,7 +59,9 @@ class Phergie_Driver_AbstractTest extends Phergie_TestCase
             $this->driver->getConnection();
             $this->fail('Expected exception not thrown');
         } catch (Phergie_Driver_Exception $e) {
-            if ($e->getCode() != Phergie_Driver_Exception::ERR_NO_ACTIVE_CONNECTION) {
+            if (
+                $e->getCode() != Phergie_Driver_Exception::ERR_NO_ACTIVE_CONNECTION
+            ) {
                 $this->fail('Unexpected exception code ' . $e->getCode());
             }
         }

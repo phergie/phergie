@@ -125,7 +125,9 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
     protected function getMockConfig()
     {
         if (empty($this->config)) {
-            $this->config = $this->getMock('Phergie_Config', array('offsetExists', 'offsetGet'));
+            $this->config = $this->getMock(
+                'Phergie_Config', array('offsetExists', 'offsetGet')
+            );
             $this->config
                 ->expects($this->any())
                 ->method('offsetExists')

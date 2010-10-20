@@ -180,8 +180,9 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                     // ... it's the last part of the complete function description
                     $completeLine = $firstPart . ' ' . $line;
                     $firstPart = '';
-                    if (preg_match('{^([^\s]*)[\s]?([^)]*)\(([^\)]*)\)[\sU]+([\sa-zA-Z0-9\.,\-_()]*)$}'
-                        , $completeLine, $matches)) {
+                    $tmpregex = '{^([^\s]*)[\s]?([^)]*)\(([^\)]*)\)[\sU]+'
+                        . '([\sa-zA-Z0-9\.,\-_()]*)$}';
+                    if (preg_match($tmpregex, $completeLine, $matches)) {
                         $valid[] = $matches;
                     }
                 }

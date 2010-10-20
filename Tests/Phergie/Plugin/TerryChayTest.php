@@ -46,7 +46,9 @@ class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
      */
     public function setUpHttpClient()
     {
-        $response = $this->getMock('Phergie_Plugin_Http_Response', array('getContent'));
+        $response = $this->getMock(
+            'Phergie_Plugin_Http_Response', array('getContent')
+        );
         $response
             ->expects($this->any())
             ->method('getContent')
@@ -98,6 +100,8 @@ class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
     /**
      * Tests that appropriate triggers result in a response with a Chayism.
      *
+     * @param String $trigger The trigger to test
+     *
      * @return void
      * @dataProvider dataProviderTestPrivmsgTriggerReturnsChayism
      */
@@ -111,7 +115,9 @@ class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
         );
         $event = $this->getMockEvent('privmsg', $args);
         $this->plugin->setEvent($event);
-        $this->assertEmitsEvent('privmsg', array($this->source, 'Fact: ' . $this->chayism));
+        $this->assertEmitsEvent(
+            'privmsg', array($this->source, 'Fact: ' . $this->chayism)
+        );
         $this->plugin->onPrivmsg();
     }
 
@@ -129,7 +135,9 @@ class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
         );
         $event = $this->getMockEvent('privmsg', $args);
         $this->plugin->setEvent($event);
-        $this->assertDoesNotEmitEvent('privmsg', array($this->source, 'Fact: ' . $this->chayism));
+        $this->assertDoesNotEmitEvent(
+            'privmsg', array($this->source, 'Fact: ' . $this->chayism)
+        );
         $this->plugin->onPrivmsg();
     }
 }

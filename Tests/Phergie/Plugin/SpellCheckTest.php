@@ -132,7 +132,8 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
     {
         $word = 'test';
         $this->initializeSpellCheckEvent($word);
-        $response = $this->nick . ': The word "' . $word . '" seems to be spelled correctly.';
+        $response = $this->nick . ': The word "' . $word
+            . '" seems to be spelled correctly.';
         $this->checkForSpellCheckResponse($word, $response);
     }
 
@@ -146,7 +147,8 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
     {
         $word = 'kjlfljlkjljkljlj';
         $this->initializeSpellCheckEvent($word);
-        $response = $this->nick . ': I could not find any suggestions for "' . $word . '".';
+        $response = $this->nick
+            . ': I could not find any suggestions for "' . $word . '".';
         $this->checkForSpellCheckResponse($word, $response);
     }
 
@@ -160,7 +162,8 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
     {
         $word = 'teh';
         $this->initializeSpellCheckEvent($word);
-        $response = $this->nick . ': Suggestions for "' . $word . '": the, Te, tech, Th, eh.';
+        $response = $this->nick . ': Suggestions for "'
+            . $word . '": the, Te, tech, Th, eh.';
         $this->checkForSpellCheckResponse($word, $response);
     }
 }

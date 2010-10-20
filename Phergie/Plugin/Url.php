@@ -660,27 +660,29 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         foreach ($events as $event) {
             switch ($event->getType()) {
-                case Phergie_Event_Request::TYPE_PRIVMSG:
-                case Phergie_Event_Request::TYPE_ACTION:
-                case Phergie_Event_Request::TYPE_NOTICE:
-                    $text = $event->getArgument(1);
-                    $urls = $this->findUrls($text);
+            case Phergie_Event_Request::TYPE_PRIVMSG:
+            case Phergie_Event_Request::TYPE_ACTION:
+            case Phergie_Event_Request::TYPE_NOTICE:
+                $text = $event->getArgument(1);
+                $urls = $this->findUrls($text);
 
-                    foreach ($urls as $parsed) {
-                        $url = $parsed['glued'];
+                foreach ($urls as $parsed) {
+                    $url = $parsed['glued'];
 
-                        // shorten url
-                        $shortenedUrl = $this->shortener->shorten($url);
-                        if (!$shortenedUrl) {
-                            $this->debug('Invalid Url: Unable to shorten. (' . $url . ')');
-                            $shortenedUrl = $url;
-                        }
-
-                        $text = str_replace($url, $shortenedUrl, $text);
+                    // shorten url
+                    $shortenedUrl = $this->shortener->shorten($url);
+                    if (!$shortenedUrl) {
+                        $this->debug(
+                            'Invalid Url: Unable to shorten. (' . $url . ')'
+                        );
+                        $shortenedUrl = $url;
                     }
 
-                    $event->setArgument(1, $text);
-                    break;
+                    $text = str_replace($url, $shortenedUrl, $text);
+                }
+
+                $event->setArgument(1, $text);
+                break;
             }
         }
     }

@@ -171,7 +171,10 @@ class Phergie_ConfigTest extends PHPUnit_Framework_TestCase
             $this->fail('Expected exception for unreadable file was not thrown');
         } catch (Phergie_Config_Exception $e) {
             if ($e->getCode() != Phergie_Config_Exception::ERR_FILE_NOT_READABLE) {
-                $this->fail('Unexpected ' . get_class($e) . ' thrown with code ' . $e->getCode());
+                $this->fail(
+                    'Unexpected ' . get_class($e)
+                    . ' thrown with code ' . $e->getCode()
+                );
             }
         }
     }
@@ -191,7 +194,10 @@ class Phergie_ConfigTest extends PHPUnit_Framework_TestCase
             $this->fail('Expected exception for nonexistent file was not thrown');
         } catch (Phergie_Config_Exception $e) {
             if ($e->getCode() != Phergie_Config_Exception::ERR_FILE_NOT_FOUND) {
-                $this->fail('Unexpected ' . get_class($e) . ' thrown with code ' . $e->getCode());
+                $this->fail(
+                    'Unexpected ' . get_class($e)
+                    . ' thrown with code ' . $e->getCode()
+                );
             }
         }
     }
@@ -209,7 +215,10 @@ class Phergie_ConfigTest extends PHPUnit_Framework_TestCase
             $this->config->read($file);
         } catch (Phergie_Config_Exception $e) {
             if ($e->getCode() != Phergie_Config_Exception::ERR_ARRAY_NOT_RETURNED) {
-                $this->fail('Unexpected ' . get_class($e) . ' thrown with code ' . $e->getCode());
+                $this->fail(
+                    'Unexpected ' . get_class($e)
+                    . ' thrown with code ' . $e->getCode()
+                );
             }
         }
     }

@@ -59,8 +59,7 @@ class Phergie_Plugin_Temperature extends Phergie_Plugin_Abstract
      * temperature and relative humidity.
      *
      * @param int $temperature Temperature in degrees Fahrenheit
-     * @param int $humidity    Relative humidity (ex: 68)
-     *
+     * @param int $humidity    Relative humidity (ex: 68)     *
      *
      * @return int Heat index in degrees Fahrenheit
      */
