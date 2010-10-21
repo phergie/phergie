@@ -266,10 +266,8 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
         $context['method'] = 'POST';
 
         if (!empty($post)
-            && (
-                !empty($context['header'])
-                xor stripos($context['header'], 'Content-Type')
-            )
+            && (!empty($context['header'])
+            xor stripos($context['header'], 'Content-Type'))
         ) {
             if (!empty($context['header'])) {
                 $context['header'] .= "\r\n";
