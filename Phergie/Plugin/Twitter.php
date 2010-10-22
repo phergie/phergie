@@ -67,6 +67,11 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     protected $twitterpassword = null;
 
     /**
+     *	The twitter class as defined by the configuration
+     */
+    private $_twitterClass;
+
+    /**
      * Register with the URL plugin, if possible
      *
      * @return void
@@ -87,32 +92,65 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         if (!isset($this->config['twitter.class'])
-            || !$twitterClass = $this->config['twitter.class']
+            || !$this->_twitterClass = $this->config['twitter.class']
         ) {
-            $twitterClass = 'Twitter';
+            $this->_twitterClass = 'Twitter';
         }
 
         $this->twitteruser = $this->config['twitter.user'];
         $this->twitterpassword = $this->config['twitter.password'];
         $url = $this->config['twitter.url'];
 
-        $this->twitter = new $twitterClass(
-            $this->twitteruser,
-            $this->twitterpassword,
-            $url
+        $this->setTwitter(
+            new $this->_twitterClass(
+                $this->twitteruser,
+                $this->twitterpassword,
+                $url
+            )
         );
 
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Time');
+    }
 
+    /**
+     *	Sets an instance of a twitter
+     *	@param  twitter        The twitter instance to set
+     *	@return $this          For fluid object handling
+     */
+    public function setTwitter(Twitter $twitter)
+    {
+        if (! ($twitter instanceof $this->_twitterClass) )
+        {
+            require_once 'Phergie/Plugin/Exception.php';
+            throw new Phergie_Plugin_Exception(
+                sprintf(
+                    "%s::%s: Argument twitter `%s' was not an instance of a twitter class.",
+                    __CLASS__,
+                    __FUNCTION__,
+                    get_class($twitter)
+                ),
+                ERR_FATAL_ERROR
+            );
+        }
+        $this->twitter = $twitter;
+    }
+
+    /**
+     *	Gets this instance of the twitter plugin
+     *	@return  Twitter
+     */
+    public function getTwitter()
+    {
+        return $this->twitter;
     }
 
     /**
      * Fetches the associated tweet and relays it to the channel
      *
      * @param string $tweeter if numeric the tweet number/id, otherwise the
-     *  twitter user name (optionally prefixed with @)
+     *  twitter user name (optionally prefixed with @, or a URL to a tweet)
      * @param int    $num     optional tweet number for this user (number of
      *  tweets ago)
      *
@@ -121,15 +159,30 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     public function onCommandTwitter($tweeter = null, $num = 1)
     {
         $source = $this->getEvent()->getSource();
-        if (is_numeric($tweeter)) {
-            $tweet = $this->twitter->getTweetByNum($tweeter);
-        } else if (is_null($tweeter) && $this->twitteruser) {
-            $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
+        $nick = $this->getEvent()->getHostmask()->getNick();
+	    if (is_numeric($tweeter)) {
+	        $tweet = $this->twitter->getTweetByNum($tweeter);
+
+	    } else if (is_null($tweeter) && $this->twitteruser) {
+	        $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
+
+	    } else if (preg_match('/^https?:\/\/(www\.)?twitter\.com/i', $tweeter)) {
+	        if (stripos($tweeter, 'status') !== false) {
+                $tweeter = preg_replace('/[^\d]+([\d]+$)/i', '\1', $tweeter);
+                $tweet = $this->twitter->getTweetByNum($tweeter);
+            } else {
+                $twit = explode('/', rtrim($tweeter, '/'));
+                $tweeter = array_pop($twit);
+                $tweet = $this->twitter->getLastTweet(ltrim($tweeter, '@'), $num);
+            }
         } else {
             $tweet = $this->twitter->getLastTweet(ltrim($tweeter, '@'), $num);
-        }
-        if ($tweet) {
-            $this->doPrivmsg($source, $this->formatTweet($tweet));
+	    }
+
+	    if ($tweet) {
+	        $this->doPrivmsg($source, $this->formatTweet($tweet));
+        } else {
+            $this->doPrivmsg($source, "Sorry, $nick I couldn't get that tweet :-(");
         }
     }
 
