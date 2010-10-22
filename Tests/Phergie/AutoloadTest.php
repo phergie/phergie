@@ -141,11 +141,12 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
      * Prevents preservation of global state in cases where test methods
      * must be run in separate processes.
      *
-     * @param  PHPUnit_Framework_TestResult $result
+     * @param PHPUnit_Framework_TestResult $result TODO desc
+     *
      * @return PHPUnit_Framework_TestResult
      * @throws InvalidArgumentException
      */
-    public function run(PHPUnit_Framework_TestResult $result = NULL)
+    public function run(PHPUnit_Framework_TestResult $result = null)
     {
         $this->setPreserveGlobalState(false);
         return parent::run($result);

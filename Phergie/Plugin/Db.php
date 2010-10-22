@@ -19,11 +19,9 @@
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Db
  */
 
- /**
-  * @todo CREATE CLASS DESCRIPTION
-  */
-
 /**
+ * TODO CREATE CLASS DESCRIPTION
+ *
  * @category Phergie
  * @package  Phergie_Plugin_Db
  * @author   Jared Folkins <jfolkins@gmail.com>
@@ -37,8 +35,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     const DEBUG = true;
 
     /**
-     *  Checks to see if the root rbac user has been set in
-     *  
+     *  Checks to see if the root rbac user has been set in     *  
      *
      *  @return void
      */
@@ -54,15 +51,18 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      */
     private function doesPdoExist()
     {
-        if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite'))
+        if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
             $this->fail('PDO and pdo_sqlite extensions must be installed');
+        }
     }
     
     /**
      *  Initializes database
-     *  @param string plugin name
-     *  @param string database name
-     *  @param string schema filename
+     *
+     *  @param string $directory  plugin name
+     *  @param string $dbFile     database name
+     *  @param string $schemaFile schema filename
+     *
      *  @return object
      */
     public function init($directory, $dbFile, $schemaFile)
@@ -76,58 +76,76 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
 
-        if(!$doesDbFileExist)
+        if (!$doesDbFileExist) {
             $this->createTablesFromSchema($db, $schemaFile);
+        }
         return $db;
     }
 
     /**
-     * fully specified file name as string used to check that the resource directory does exist
+     * fully specified file name as string
+     * used to check that the resource directory does exist
      * 
-     * @param string $directory
+     * @param string $directory Directory to check
+     *
+     * @return void
+     *
      */
     public function isResourceDirectory($directory)
     {
-        if(!is_dir($directory))
+        if (!is_dir($directory)) {
             $this->fail('The Resource directory: ' . $directory . ' does not exist');
+        }
     }
 
     /**
-     *  fully specified file name as string used to check that the schema file does exist
+     * fully specified file name as string
+     * used to check that the schema file does exist
      * 
-     * @param string $file
+     * @param string $file File to check
+     *
+     * @return void
      * 
      */
     public function isSchemaFile($file)
     {
-        if(!is_readable($file))
-            $this->fail('The schema file: ' . $file . ' is not readable or does not exist');
+        if (!is_readable($file)) {
+            $this->fail(
+                'The schema file: ' . $file
+                . ' is not readable or does not exist'
+            );
+        }
     }
 
     /**
-     * Supply sql statement and one word type parameter (IE, create, update, insert, delete)
+     * Supply sql statement and one word type parameter
+     *  (IE, create, update, insert, delete)
      * and the method will validate that the sql contains that syntax
      *
-     * @param string $sql
-     * @param string $type
+     * @param string $sql  TODO Desc
+     * @param string $type TODO Desc
+     *
      * @return bool
      */
     public function validateSqlType($sql, $type)
     {        
-        preg_match('/^'.strtolower($type).'/',strtolower($sql),$matches);
+        preg_match('/^'.strtolower($type).'/', strtolower($sql), $matches);
         return ($matches[0]) ? true : false;
     }
     
     /**
      *  Creates database table
      *
-     *  @param string  create table sql statement
+     *  @param String $db  database reference
+     *  @param String $sql create table sql statement
+     *
      *  @return void
      */
     public function createTable($db, $sql)
     {
-        if(!$this->validateSqlType($sql,'create'))
-                $this->fail('The SQL provided is not a create statement');
+        if (!$this->validateSqlType($sql, 'create')) {
+            $this->fail('The SQL provided is not a create statement');
+        }
 
         try {
             $db->exec($sql);
@@ -137,7 +155,11 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Loads the schema file into array then searches for each table and if not found creates the table
+     * Loads the schema file into array then searches
+     * for each table and if not found creates the table
+     *
+     * @param String $db   Database Table
+     * @param String $file Filename
      *
      * @return void
      */
@@ -147,14 +169,19 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
         $file = strtolower(file_get_contents($file));
         preg_match_all('/create\stable\s([a-z_]+).*;/', $file, $matches);
 
-        if(count($matches[0]) != count($matches[1]))
-            $this->fail('Schema array key value mismatch, the regular expression must not be working correctly');
+        if (count($matches[0]) != count($matches[1])) {
+            $this->fail(
+                'Schema array key value mismatch, '
+                . 'the regular expression must not be working correctly'
+            );
+        }
 
-        $tables = array_combine($matches[1],$matches[0]);
+        $tables = array_combine($matches[1], $matches[0]);
 
-        foreach($tables as $name => $sql) {
-            if(!$this->hasTable($db, $name))
+        foreach ($tables as $name => $sql) {
+            if (!$this->hasTable($db, $name)) {
                 $this->createTable($db, $sql);
+            }
         }
 
     }
@@ -162,7 +189,9 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     /**
      *  Validates that database table exists
      *
-     *  @param  string  table name
+     *  @param String $db   database name
+     *  @param String $name table name
+     *
      *  @return bool
      */
     public function hasTable($db, $name)
@@ -176,16 +205,29 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
         return (bool) $statement->fetchColumn();
     }
 
-    public function dropTable($name){}
+    /**
+     *  TODO Desc
+     *
+     *  @param String $name table name
+     *
+     *  @return bool
+     */
+    public function dropTable($name)
+    {
+    }
    
     /**
-     *  Jared's crap debug method
+     * Jared's crap debug method
+     *
+     * @param String $message TODO Desc
+     *
+     * @return void
      */
-
     private function debug($message)
     {
-        if(self::DEBUG)
+        if (self::DEBUG) {
             echo 'DEBUG: ['. date('c') . '] - '. $message . "\n";
+        }
     }
 }
 ?>

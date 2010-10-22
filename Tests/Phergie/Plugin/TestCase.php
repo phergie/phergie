@@ -134,8 +134,8 @@ abstract class Phergie_Plugin_TestCase extends Phergie_TestCase
             && $type == "' . $type . '"
             && $args == "' . var_export($args, true) . '") {
                 trigger_error("Instance of ' . $this->pluginClass
-                . ' unexpectedly emitted event of type ' . $type
-                . '", E_USER_ERROR);
+            . ' unexpectedly emitted event of type ' . $type
+            . '", E_USER_ERROR);
             }'
         );
 
@@ -200,7 +200,9 @@ abstract class Phergie_Plugin_TestCase extends Phergie_TestCase
         }
 
         $tables = array();
-        $result = $original->query('SELECT name FROM sqlite_master WHERE type = "table"');
+        $result = $original->query(
+            'SELECT name FROM sqlite_master WHERE type = "table"'
+        );
         while ($table = $result->fetchColumn()) {
             $tables[] = $table;
         }

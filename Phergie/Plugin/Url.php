@@ -152,7 +152,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $this->shortener = new $shortener($this->plugins->getPlugin('Http'));
 
         if (!$this->shortener instanceof Phergie_Plugin_Url_Shorten_Abstract) {
-            $this->fail("Declared shortener class {$shortener} is not of proper ancestry");
+            $this->fail(
+                "Declared shortener class {$shortener} is not of proper ancestry"
+            );
         }
 
         // load config (a bit ugly, but focusing on porting):
@@ -262,7 +264,8 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             unset($title, $shortenedUrl, $title);
         }
 
-        // Check to see if there were any URL responses, format them and handle if they
+        // Check to see if there were any URL responses,
+        // format them and handle if they
         // get merged into one message or not
         if (count($responses) > 0) {
             if ($this->mergeLinks) {
@@ -652,7 +655,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     public function preDispatch()
     {
-        if(!$this->getConfig('url.shortenOutput', false)) {
+        if (!$this->getConfig('url.shortenOutput', false)) {
             return;
         }
 
@@ -660,27 +663,29 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         foreach ($events as $event) {
             switch ($event->getType()) {
-                case Phergie_Event_Request::TYPE_PRIVMSG:
-                case Phergie_Event_Request::TYPE_ACTION:
-                case Phergie_Event_Request::TYPE_NOTICE:
-                    $text = $event->getArgument(1);
-                    $urls = $this->findUrls($text);
+            case Phergie_Event_Request::TYPE_PRIVMSG:
+            case Phergie_Event_Request::TYPE_ACTION:
+            case Phergie_Event_Request::TYPE_NOTICE:
+                $text = $event->getArgument(1);
+                $urls = $this->findUrls($text);
 
-                    foreach ($urls as $parsed) {
-                        $url = $parsed['glued'];
+                foreach ($urls as $parsed) {
+                    $url = $parsed['glued'];
 
-                        // shorten url
-                        $shortenedUrl = $this->shortener->shorten($url);
-                        if (!$shortenedUrl) {
-                            $this->debug('Invalid Url: Unable to shorten. (' . $url . ')');
-                            $shortenedUrl = $url;
-                        }
-
-                        $text = str_replace($url, $shortenedUrl, $text);
+                    // shorten url
+                    $shortenedUrl = $this->shortener->shorten($url);
+                    if (!$shortenedUrl) {
+                        $this->debug(
+                            'Invalid Url: Unable to shorten. (' . $url . ')'
+                        );
+                        $shortenedUrl = $url;
                     }
 
-                    $event->setArgument(1, $text);
-                    break;
+                    $text = str_replace($url, $shortenedUrl, $text);
+                }
+
+                $event->setArgument(1, $text);
+                break;
             }
         }
     }

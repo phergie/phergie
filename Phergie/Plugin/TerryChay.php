@@ -86,7 +86,7 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
             '\s*)?.*(terry\s+chay|tychay)}ix';
 
         if (preg_match($pattern, $message)) {
-            if($fact = $this->getChayism()) {
+            if ($fact = $this->getChayism()) {
                 $this->doPrivmsg($source, 'Fact: ' . $fact);
             }
         }

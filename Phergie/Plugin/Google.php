@@ -192,10 +192,12 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         if ($offset !== null) {
             $offset = (int) $offset;
             if ($offset < 0) {
-                $this->doNotice($source, 'Past weather data is not available');
+                $noticemsg = 'Past weather data is not available';
+                $this->doNotice($source, $noticemsg);
                 return;
             } elseif ($offset > 3) {
-                $this->doNotice($source, 'Future weather data is limited to 3 days from today');
+                $noticemsg = 'Future weather data is limited to 3 days from today';
+                $this->doNotice($source, $noticemsg);
                 return;
             }
 
@@ -457,12 +459,12 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
                  . '&hl=' . $lang_code;
             $this->doPrivmsg($source, $msg);
         } else {
-            if ($lang != 'en'){
-               $lang = 'en';
-               $this->onCommandDefine($query);
+            if ($lang != 'en') {
+                $lang = 'en';
+                $this->onCommandDefine($query);
             } else {
-               $msg = $nick . ': No results for this query.';
-               $this->doPrivmsg($source, $msg);
+                $msg = $nick . ': No results for this query.';
+                $this->doPrivmsg($source, $msg);
             }
         }
     }

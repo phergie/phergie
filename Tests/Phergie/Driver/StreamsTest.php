@@ -52,7 +52,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function setUp()
     {
         $this->sockets = array();
-        $this->driver = $this->getMock('Phergie_Driver_Streams', array('write', 'connect'));
+        $this->driver = $this->getMock(
+            'Phergie_Driver_Streams', array('write', 'connect')
+        );
         $this->driver
             ->expects($this->any())
             ->method('connect')
@@ -75,9 +77,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      * Simulates a server by writing data to a specified socket for the
      * driver to read.
      *
-     * @param int    $index  Index of the socket in $this->sockets to
+     * @param int    $index Index of the socket in $this->sockets to
      *        receive the data
-     * @param string $data   Data to write to the socket
+     * @param string $data  Data to write to the socket
      *
      * @return void
      */
@@ -145,7 +147,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
             $this->driver->getConnection();
             $this->fail('Expected exception was not thrown');
         } catch (Phergie_Driver_Exception $e) {
-            if ($e->getCode() != Phergie_Driver_Exception::ERR_NO_ACTIVE_CONNECTION) {
+            if (
+                $e->getCode() != Phergie_Driver_Exception::ERR_NO_ACTIVE_CONNECTION
+            ) {
                 $this->fail('Unexpected exception code: ' . $e->getCode());
             }
         }
@@ -207,17 +211,19 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     {
         $connection = $this->getMockConnection();
 
-        $this->assertSendsCommands(array(
-            1 => sprintf(
+        $this->assertSendsCommands(
+            array(
+                1 => sprintf(
                     'USER %s %s %s :%s',
                     $connection->getUsername(),
                     $connection->getHost(),
                     $connection->getHost(),
                     $connection->getRealname()
                 ),
-            2 => 'NICK :' . $connection->getNick(),
-            3 => 'QUIT'
-        ));
+                2 => 'NICK :' . $connection->getNick(),
+                3 => 'QUIT'
+            )
+        );
 
         $this->driver->setConnection($connection);
         $this->driver->doConnect();
@@ -238,18 +244,20 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
             ->method('getPassword')
             ->will($this->returnValue('password'));
 
-        $this->assertSendsCommands(array(
-            1 => 'PASS :' . $connection->getPassword(),
-            2 => sprintf(
+        $this->assertSendsCommands(
+            array(
+                1 => 'PASS :' . $connection->getPassword(),
+                2 => sprintf(
                     'USER %s %s %s :%s',
                     $connection->getUsername(),
                     $connection->getHost(),
                     $connection->getHost(),
                     $connection->getRealname()
                 ),
-            3 => 'NICK :' . $connection->getNick(),
-            4 => 'QUIT'
-        ));
+                3 => 'NICK :' . $connection->getNick(),
+                4 => 'QUIT'
+            )
+        );
 
         $this->driver->setConnection($connection);
         $this->driver->doConnect();
@@ -276,7 +284,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
             $this->driver->doConnect();
             $this->fail('Expected exception was not thrown');
         } catch (Phergie_Driver_Exception $e) {
-            if ($e->getCode() != Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED) {
+            if (
+                $e->getCode() != Phergie_Driver_Exception::ERR_CONNECTION_ATTEMPT_FAILED
+            ) {
                 $this->fail('Unexpected exception code: ' . $e->getCode());
             }
         }
@@ -313,7 +323,11 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         $this->driver
             ->expects($this->any())
             ->method('write')
-            ->will($this->returnCallback(array($this, 'sendHandlesPartialWriteWithSuccessCallback')));
+            ->will(
+                $this->returnCallback(
+                    array($this, 'sendHandlesPartialWriteWithSuccessCallback')
+                )
+            );
         $this->driver->setConnection($this->getMockConnection());
         $this->driver->doConnect();
         $this->driver->doQuit();
@@ -337,7 +351,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
             $this->driver->doQuit();
             $this->fail('Expected exception was not thrown');
         } catch (Phergie_Driver_Exception $e) {
-            if ($e->getCode() != Phergie_Driver_Exception::ERR_CONNECTION_WRITE_FAILED) {
+            if (
+                $e->getCode() != Phergie_Driver_Exception::ERR_CONNECTION_WRITE_FAILED
+            ) {
                 $this->fail('Unexpected exception code: ' . $e->getCode());
             }
         }
@@ -374,7 +390,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
             $this->driver->doQuit();
             $this->fail('Expected exception not thrown');
         } catch (Phergie_Driver_Exception $e) {
-            if ($e->getCode() != Phergie_Driver_Exception::ERR_NO_ACTIVE_CONNECTION) {
+            if (
+                $e->getCode() != Phergie_Driver_Exception::ERR_NO_ACTIVE_CONNECTION
+            ) {
                 $this->fail('Unexpected exception code: ' . $e->getCode());
             }
         }
@@ -438,7 +456,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoJoinWithKeys()
     {
-        $this->doCommandTest('JOIN #channel :key', 'doJoin', array('#channel', 'key'));
+        $this->doCommandTest(
+            'JOIN #channel :key', 'doJoin', array('#channel', 'key')
+        );
     }
 
     /**
@@ -450,7 +470,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoPart()
     {
-        $this->doCommandTest('PART :#channel', 'doPart', array('#channel'));
+        $this->doCommandTest(
+            'PART :#channel', 'doPart', array('#channel')
+        );
     }
 
     /**
@@ -462,7 +484,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoInvite()
     {
-        $this->doCommandTest('INVITE nick :#channel', 'doInvite', array('nick', '#channel'));
+        $this->doCommandTest(
+            'INVITE nick :#channel', 'doInvite', array('nick', '#channel')
+        );
     }
 
     /**
@@ -522,7 +546,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoTopicWithTopic()
     {
-        $this->doCommandTest('TOPIC #channel :new topic', 'doTopic', array('#channel', 'new topic'));
+        $this->doCommandTest(
+            'TOPIC #channel :new topic', 'doTopic', array('#channel', 'new topic')
+        );
     }
 
     /**
@@ -559,7 +585,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoModeWithTargetModeAndParameter()
     {
-        $this->doCommandTest('MODE nick +i :param', 'doMode', array('nick', '+i', 'param'));
+        $this->doCommandTest(
+            'MODE nick +i :param', 'doMode', array('nick', '+i', 'param')
+        );
     }
 
     /**
@@ -595,7 +623,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoPrivmsg()
     {
-        $this->doCommandTest('PRIVMSG nick :message text', 'doPrivmsg', array('nick', 'message text'));
+        $this->doCommandTest(
+            'PRIVMSG nick :message text', 'doPrivmsg', array('nick', 'message text')
+        );
     }
 
     /**
@@ -607,7 +637,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoNotice()
     {
-        $this->doCommandTest('NOTICE nick :message text', 'doNotice', array('nick', 'message text'));
+        $this->doCommandTest(
+            'NOTICE nick :message text', 'doNotice', array('nick', 'message text')
+        );
     }
 
     /**
@@ -619,7 +651,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoKickWithoutReason()
     {
-        $this->doCommandTest('KICK nick :#channel', 'doKick', array('nick', '#channel'));
+        $this->doCommandTest(
+            'KICK nick :#channel', 'doKick', array('nick', '#channel')
+        );
     }
 
     /**
@@ -631,7 +665,10 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoKickWithReason()
     {
-        $this->doCommandTest('KICK nick #channel :reason text', 'doKick', array('nick', '#channel', 'reason text'));
+        $this->doCommandTest(
+            'KICK nick #channel :reason text', 'doKick',
+            array('nick', '#channel', 'reason text')
+        );
     }
 
     /**
@@ -643,7 +680,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoPong()
     {
-        $this->doCommandTest('PONG :irc.freenode.net', 'doPong', array('irc.freenode.net'));
+        $this->doCommandTest(
+            'PONG :irc.freenode.net', 'doPong', array('irc.freenode.net')
+        );
     }
 
     /**
@@ -655,7 +694,10 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoAction()
     {
-        $this->doCommandTest('PRIVMSG nick :' . chr(1) . 'ACTION action text' . chr(1), 'doAction', array('nick', 'action text'));
+        $this->doCommandTest(
+            'PRIVMSG nick :' . chr(1) . 'ACTION action text'
+            . chr(1), 'doAction', array('nick', 'action text')
+        );
     }
 
     /**
@@ -667,7 +709,10 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoPing()
     {
-        $this->doCommandTest('NOTICE nick :' . chr(1) . 'PING hash' . chr(1), 'doPing', array('nick', 'hash'));
+        $this->doCommandTest(
+            'NOTICE nick :' . chr(1) . 'PING hash' . chr(1),
+            'doPing', array('nick', 'hash')
+        );
     }
 
     /**
@@ -679,7 +724,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoVersionWithoutVersion()
     {
-        $this->doCommandTest('NOTICE nick :' . chr(1) . 'VERSION' . chr(1), 'doVersion', array('nick'));
+        $this->doCommandTest(
+            'NOTICE nick :' . chr(1) . 'VERSION' . chr(1), 'doVersion', array('nick')
+        );
     }
 
     /**
@@ -691,7 +738,10 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoVersionWithVersion()
     {
-        $this->doCommandTest('NOTICE nick :' . chr(1) . 'VERSION version' . chr(1), 'doVersion', array('nick', 'version'));
+        $this->doCommandTest(
+            'NOTICE nick :' . chr(1) . 'VERSION version'
+            . chr(1), 'doVersion', array('nick', 'version')
+        );
     }
 
     /**
@@ -703,7 +753,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoTimeWithoutTime()
     {
-        $this->doCommandTest('NOTICE nick :' . chr(1) . 'TIME' . chr(1), 'doTime', array('nick'));
+        $this->doCommandTest(
+            'NOTICE nick :' . chr(1) . 'TIME' . chr(1), 'doTime', array('nick')
+        );
     }
 
     /**
@@ -715,7 +767,10 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoTimeWithTime()
     {
-        $this->doCommandTest('NOTICE nick :' . chr(1) . 'TIME time' . chr(1), 'doTime', array('nick', 'time'));
+        $this->doCommandTest(
+            'NOTICE nick :' . chr(1) . 'TIME time'
+            . chr(1), 'doTime', array('nick', 'time')
+        );
     }
 
     /**
@@ -727,7 +782,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoFingerWithoutFingerString()
     {
-        $this->doCommandTest('NOTICE nick :' . chr(1) . 'FINGER' . chr(1), 'doFinger', array('nick'));
+        $this->doCommandTest(
+            'NOTICE nick :' . chr(1) . 'FINGER' . chr(1), 'doFinger', array('nick')
+        );
     }
 
     /**
@@ -739,7 +796,10 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
      */
     public function testDoFingerWithFingerString()
     {
-        $this->doCommandTest('NOTICE nick :' . chr(1) . 'FINGER finger string' . chr(1), 'doFinger', array('nick', 'finger string'));
+        $this->doCommandTest(
+            'NOTICE nick :' . chr(1) . 'FINGER finger string'
+            . chr(1), 'doFinger', array('nick', 'finger string')
+        );
     }
 
     /**
@@ -855,9 +915,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     /**
      * Tests reception of a event from a user.
      *
-     * @param string $event IRC event without the leading prefix
-     * @param string $type  Event type
-     * @param array  $args  Event arguments
+     * @param string $event     IRC event without the leading prefix
+     * @param string $type      Event type
+     * @param array  $arguments Event arguments
      *
      * @return void
      * @depends testSetConnectionWithNewConnection
@@ -897,12 +957,16 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         $connection = $this->getMockConnection();
         $this->driver->setConnection($connection);
         $this->driver->doConnect();
-        $this->writeEventToSocket(0, ':verne.freenode.net NOTICE * :*** Looking up your hostname...');
+        $this->writeEventToSocket(
+            0, ':verne.freenode.net NOTICE * :*** Looking up your hostname...'
+        );
 
         $event = $this->driver->getEvent();
         $this->assertType('Phergie_Event_Request', $event);
         $this->assertEquals('notice', $event->getType());
-        $this->assertEquals(array('*', '*** Looking up your hostname...'), $event->getArguments());
+        $this->assertEquals(
+            array('*', '*** Looking up your hostname...'), $event->getArguments()
+        );
 
         $hostmask = $event->getHostmask();
         $this->assertType('Phergie_Hostmask', $hostmask);
@@ -924,7 +988,9 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         $connection = $this->getMockConnection();
         $this->driver->setConnection($connection);
         $this->driver->doConnect();
-        $this->writeEventToSocket(0, ':verne.freenode.net 376 Phergie :End of /MOTD command.');
+        $this->writeEventToSocket(
+            0, ':verne.freenode.net 376 Phergie :End of /MOTD command.'
+        );
 
         $event = $this->driver->getEvent();
         $this->assertType('Phergie_Event_Response', $event);

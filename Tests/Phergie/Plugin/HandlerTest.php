@@ -79,8 +79,12 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->config = $this->getMock('Phergie_Config', array('offsetGet', 'offsetExists'));
-        $this->events = $this->getMock('Phergie_Event_Handler', array('getIterator'));
+        $this->config = $this->getMock(
+            'Phergie_Config', array('offsetGet', 'offsetExists')
+        );
+        $this->events = $this->getMock(
+            'Phergie_Event_Handler', array('getIterator')
+        );
         $this->handler = new Phergie_Plugin_Handler(
             $this->config,
             $this->events
@@ -463,6 +467,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      * Recursively removes all files and subdirectories in a directory.
      *
      * @param string $path Directory path
+     *
      * @return void
      */
     private function removeDirectory($path)
@@ -501,7 +506,9 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
 
         try {
             $this->handler->addPlugin('TestPlugin');
-        } catch(Phergie_Plugin_Exception $e) { }
+        } catch(Phergie_Plugin_Exception $e) {
+
+        }
 
         if (isset($e)) {
             $this->assertEquals(

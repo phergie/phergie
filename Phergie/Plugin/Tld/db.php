@@ -1,4 +1,23 @@
 <?php
+/**
+ * Phergie
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie
+ * @package   Phergie
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie
+ */
 
 $dbFile = 'tld.db';
 
@@ -17,10 +36,10 @@ $query = '
 ';
 $db->exec($query);
 
-$insert = $db->prepare('
-    INSERT INTO tld (tld, type, description)
-    VALUES (:tld, :type, :description)
-');
+$insert = $db->prepare(
+    'INSERT INTO tld (tld, type, description)
+    VALUES (:tld, :type, :description)'
+);
 
 $contents = file_get_contents(
     'http://www.iana.org/domains/root/db/'

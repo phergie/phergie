@@ -85,7 +85,11 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
         $function = (count($split)) ? array_shift($split) : $function;
 
         // Prepare the database statement
-        $stmt = $this->database->prepare('SELECT `name`, `description` FROM `functions` WHERE `name` LIKE :function');
+        $stmt = $this->database->prepare(
+            'SELECT `name`, `description`
+             FROM `functions` WHERE `name` LIKE :function'
+        );
+
         $stmt->execute(array(':function' => $function));
 
         // Check the results
@@ -115,7 +119,10 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
     protected function buildDatabase($rebuild = false)
     {
         // Check to see if the functions table exists
-        $checkstmt = $this->database->query("SELECT COUNT(*) FROM `sqlite_master` WHERE `name` = 'functions'");
+        $checkstmt = $this->database->query(
+            "SELECT COUNT(*) FROM `sqlite_master` WHERE `name` = 'functions'"
+        );
+
         $checkstmt->execute();
         $result = $checkstmt->fetch(PDO::FETCH_ASSOC);
         unset( $checkstmt );
@@ -123,8 +130,13 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
         unset( $result );
         // If the table doesn't exist, create it
         if (!$table) {
-                $this->database->exec('CREATE TABLE `functions` (`name` VARCHAR(255), `description` TEXT)');
-                $this->database->exec('CREATE UNIQUE INDEX `functions_name` ON `functions` (`name`)');
+                $this->database->exec(
+                    'CREATE TABLE `functions`
+                     (`name` VARCHAR(255), `description` TEXT)'
+                );
+                $this->database->exec(
+                    'CREATE UNIQUE INDEX `functions_name` ON `functions` (`name`)'
+                );
         }
 
         // If we created a new table, fill it with data
@@ -132,7 +144,10 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
             // Get the contents of the source file
             // @todo Handle possible error cases better here; the @ operator 
             //       shouldn't be needed
-            $contents = @file($this->url, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
+            $contents = @file(
+                $this->url,
+                FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES
+            );
 
             if (!$contents) {
                 return;
@@ -165,7 +180,9 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                     // ... it's the last part of the complete function description
                     $completeLine = $firstPart . ' ' . $line;
                     $firstPart = '';
-                    if (preg_match('{^([^\s]*)[\s]?([^)]*)\(([^\)]*)\)[\sU]+([\sa-zA-Z0-9\.,\-_()]*)$}', $completeLine, $matches)) {
+                    $tmpregex = '{^([^\s]*)[\s]?([^)]*)\(([^\)]*)\)[\sU]+'
+                        . '([\sa-zA-Z0-9\.,\-_()]*)$}';
+                    if (preg_match($tmpregex, $completeLine, $matches)) {
                         $valid[] = $matches;
                     }
                 }
@@ -181,7 +198,10 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                 $this->database->exec('DELETE * FROM `functions`');
 
                 // Prepare the sql statement
-                $stmt = $this->database->prepare('INSERT INTO `functions` (`name`, `description`) VALUES (:name, :description)');
+                $stmt = $this->database->prepare(
+                    'INSERT INTO `functions` (`name`, `description`)
+                    VALUES (:name, :description)'
+                );
                 $this->database->beginTransaction();
 
                 // Insert the data
@@ -193,9 +213,14 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                         $retval = '';
                     }
                     // Reconstruct the complete function line
-                    $line = trim($retval . ' ' . $name . '(' . $params . ') - ' . $desc);
+                    $line = trim(
+                        $retval . ' ' . $name . '(' . $params . ') - ' . $desc
+                    );
+
                     // Execute the statement
-                    $stmt->execute(array(':name' => $name, ':description' => $line));
+                    $stmt->execute(
+                        array(':name' => $name, ':description' => $line)
+                    );
                 }
                 
                 // Commit the changes to the database

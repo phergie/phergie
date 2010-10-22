@@ -221,23 +221,39 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         list($target, $msg) = array_pad($this->event->getArguments(), 2, null);
 
         if (preg_match('#^ishere (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isIn($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isIn($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isowner (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isOwner($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isOwner($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isadmin (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isAdmin($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isAdmin($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isop (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isOp($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isOp($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^ishop (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isHalfop($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isHalfop($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isvoice (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isVoice($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isVoice($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^channels (\S+)$#', $msg, $m)) {
             $channels = $this->getChannels($m[1]);
-            $this->doPrivmsg($target, $channels ? join(', ', $channels) : 'unable to find nick');
+            $this->doPrivmsg(
+                $target, $channels ? join(', ', $channels) : 'unable to find nick'
+            );
         } elseif (preg_match('#^users (\S+)$#', $msg, $m)) {
             $nicks = $this->getUsers($m[1]);
-            $this->doPrivmsg($target, $nicks ? join(', ', $nicks) : 'unable to find channel');
+            $this->doPrivmsg(
+                $target, $nicks ? join(', ', $nicks) : 'unable to find channel'
+            );
         } elseif (preg_match('#^random (\S+)$#', $msg, $m)) {
             $nick = $this->getrandomuser($m[1]);
             $this->doPrivmsg($target, $nick ? $nick : 'unable to  find channel');
@@ -365,12 +381,14 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      * if the bot is not present in the channel.
      * 
      * To exclude the bot's current nick, for example:
-     * 		$chan = $this->getEvent()->getSource();
-     * 		$current_nick = $this->getConnection()->getNick();
-     * 		$random_user = $this->plugins->getPlugin('UserInfo')->getRandomUser( $chan, array( $current_nick ) );
+     *     $chan = $this->getEvent()->getSource();
+     * 	   $current_nick = $this->getConnection()->getNick();
+     * 	   $random_user = $this->plugins->getPlugin('UserInfo')
+     *          ->getRandomUser( $chan, array( $current_nick ) );
      *
-     * @param string $chan The channel name
-     * @param array $ignore A list of nicks to ignore in the channel. Useful for excluding the bot itself.
+     * @param string $chan   The channel name
+     * @param array  $ignore A list of nicks to ignore in the channel.
+     *                       Useful for excluding the bot itself.
      *
      * @return string|bool
      */
@@ -379,7 +397,6 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         $chan = trim(strtolower($chan));
 
         if (isset($this->store[$chan])) {
-			
             do {
                 $nick = array_rand($this->store[$chan], 1);
             } while (in_array($nick, $ignore));
