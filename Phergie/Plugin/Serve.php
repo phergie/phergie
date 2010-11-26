@@ -95,7 +95,7 @@ class Phergie_Plugin_Serve extends Phergie_Plugin_Abstract
     {
         // Parse the request
         $result = preg_match(
-            '/(?P<target>[^\s]+)(\s+an?\s+)?(?P<suggestion>.*)?/',
+            '/(?P<target>[^\s]+)(\s+an?\s+)?\s*(?P<suggestion>.*)?/',
             $request,
             $match
         );
