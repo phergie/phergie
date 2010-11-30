@@ -38,39 +38,12 @@
 class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 {
     /**
-     * Links output format
+     * Cache object to store cached URLs to prevent spamming, especially with more
+     * than one bot on the same channel.
      *
-     * Can use the variables %nick%, %title% and %link% in it to display
-     * page titles and links
-     *
-     * @var string
+     * @var Phergie_Plugin_Cache
      */
-    protected $baseFormat = '%message%';
-    protected $messageFormat = '[ %link% ] %title%';
-
-    /**
-     * Flag indicating whether a single response should be sent for a single
-     * message containing multiple links
-     *
-     * @var bool
-     */
-    protected $mergeLinks = true;
-
-    /**
-     * Max length of the fetched URL title
-     *
-     * @var int
-     */
-    protected $titleLength = 40;
-
-
-    /**
-     *  Cache object to store cached URLs to prevent spamming, especially with more
-     *  than one bot on the same channel.
-     *
-     *  @var Phergie_Plugin_Cache
-     */
-    protected $cache = array();
+    protected $cache;
 
     /**
      * Time in seconds to store the cached entries
@@ -109,21 +82,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $errorMessage = null;
 
     /**
-     * Flag indicating whether or not to display error messages as the title
-     * if a link posted encounters an error
-     *
-     * @var boolean
-     */
-    protected $showErrors = true;
-
-    /**
-     * Flag indicating whether to detect schemeless URLS (i.e. "example.com")
-     *
-     * @var boolean
-     */
-    protected $detectSchemeless = false;
-
-    /**
      * Shortener object
      */
     protected $shortener;
@@ -157,22 +115,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             );
         }
 
-        // load config (a bit ugly, but focusing on porting):
-        foreach (
-            array(
-                'detect_schemeless' => 'detectSchemeless',
-                'base_format' => 'baseFormat',
-                'message_format' => 'messageFormat',
-                'merge_links' => 'mergeLinks',
-                'title_length' => 'titleLength',
-                'show_errors' => 'showErrors',
-                'expire' => 'expire',
-            ) as $config => $local) {
-            if (isset($this->config["url.{$config}"])) {
-                $this->$local = $this->config["url.{$config}"];
-            }
-        }
-
         $this->cache = $plugins->cache;
     }
 
@@ -181,8 +123,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      * found, responds with its title if it is an HTML document and the
      * shortened equivalent of its original URL if it meets length requirements.
      *
-     * @todo Update this to pull configuration settings from $this->config
-     *       rather than caching them as class properties
      * @return void
      */
     public function onPrivmsg()
@@ -195,8 +135,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      * found, responds with its title if it is an HTML document and the
      * shortened equivalent of its original URL if it meets length requirements.
      *
-     * @todo Update this to pull configuration settings from $this->config
-     *       rather than caching them as class properties
      * @return void
      */
     public function onAction()
@@ -246,16 +184,22 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
             $title = $this->getTitle($url);
             if (!empty($title)) {
+                $messageFormat = $this->getConfig(
+                    'url.messageFormat',
+                    '[ %link% ] %title%'
+                );
                 $responses[] = str_replace(
                     array(
                         '%title%',
                         '%link%',
                         '%nick%'
-                    ), array(
+                    ),
+                    array(
                         $title,
                         $shortenedUrl,
                         $user
-                    ), $this->messageFormat
+                    ),
+                    $messageFormat
                 );
             }
 
@@ -267,8 +211,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         // Check to see if there were any URL responses,
         // format them and handle if they
         // get merged into one message or not
+        $baseFormat = $this->getConfig('url.baseFormat', '%message%');
         if (count($responses) > 0) {
-            if ($this->mergeLinks) {
+            if ($this->getConfig('url.mergeLinks', true)) {
                 $message = str_replace(
                     array(
                         '%message%',
@@ -276,7 +221,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                     ), array(
                         implode('; ', $responses),
                         $user
-                    ), $this->baseFormat
+                    ), $baseFormat
                 );
                 $this->doPrivmsg($source, $message);
             } else {
@@ -288,7 +233,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                         ), array(
                             implode('; ', $responses),
                             $user
-                        ), $this->baseFormat
+                        ), $baseFormat
                     );
                     $this->doPrivmsg($source, $message);
                 }
@@ -305,8 +250,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     public function findUrls($message)
     {
-        $pattern = '#'.($this->detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) | ('
-            .($this->detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis';
+        $detectSchemeless = $this->getConfig('url.detectSchemeless', false);
+        $pattern = '#'.($detectSchemeless ? '' : 'https?://').'(?:([0-9]{1,3}(?:\.[0-9]{1,3}){3})(?![^/]) | ('
+            .($detectSchemeless ? '(?<!http:/|https:/)[@/\\\]' : '').')?(?:(?:[a-z0-9_-]+\.?)+\.[a-z0-9]{1,6}))[^\s]*#xis';
         $urls = array();
 
         // URL Match
@@ -390,7 +336,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         $cache['url'] = $this->cache->fetch('urlCache');
         $cache['shortened'] = $this->cache->fetch('shortCache');
-        $expire = $this->expire;
+        $expire = $this->getConfig('url.expire', 1800);
         $this->debug("Cache expire: {$expire}");
 
         /**
@@ -457,7 +403,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     protected function decode($str, $trim = null)
     {
-        $out = $this->plugins->encoding->transliterate($str);
+        $encoding = $this->plugins->encoding;
+        $out = $encoding->transliterate($str);
+        $out = $encoding->decodeEntities($out);
         if ($trim > 0) {
             $out = substr($out, 0, $trim) . (strlen($out) > $trim ? '...' : '');
         }
@@ -594,7 +542,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         $response = $http->head($url, array(), $options);
 
-        if ($response->getCode() == 405) { // [Head] request method not allowed
+        if ($response->getCode() == 405) { // HEAD request method not allowed
             $response = $http->get($url, array(), $options);
         }
 
@@ -609,11 +557,11 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 $title = preg_replace('/[\s\v]+/', ' ', trim($match[1]));
             }
         }
-        $encoding = $this->plugins->getPlugin('Encoding');
-        $title = $encoding->decodeEntities($title);
+        $titleLength = $this->getConfig('url.titleLength', 40);
+        $title = $this->decode($title, $titleLength);
 
         if (empty($title)) {
-            if ($response->isError()) {
+            if ($response->isError() && $this->getConfig('url.showErrors', true)) {
                 $title = $response->getCodeAsString();
             } else {
                 $title = 'No Title';

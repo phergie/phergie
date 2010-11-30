@@ -29,7 +29,7 @@ require dirname(__FILE__) . '/Twitter/twitter.class.php';
 require dirname(__FILE__) . '/Twitter/laconica.class.php';
 
 /**
- * Twitter plugin; Allows tweet (if configured) and twitter commands
+ * Fetches tweets from Twitter.
  *
  * Usage:
  *   twitter username
@@ -57,21 +57,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     protected $twitter;
 
     /**
-     * Twitter user
-     */
-    protected $twitteruser = null;
-
-    /**
-     * Password
-     */
-    protected $twitterpassword = null;
-
-    /**
-     *	The twitter class as defined by the configuration
-     */
-    private $_twitterClass;
-
-    /**
      * Register with the URL plugin, if possible
      *
      * @return void
@@ -91,21 +76,13 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        if (!isset($this->config['twitter.class'])
-            || !$this->_twitterClass = $this->config['twitter.class']
-        ) {
-            $this->_twitterClass = 'Twitter';
-        }
-
-        $this->twitteruser = $this->config['twitter.user'];
-        $this->twitterpassword = $this->config['twitter.password'];
-        $url = $this->config['twitter.url'];
+        $twitterClass = $this->getConfig('twitter.class', 'Twitter');
 
         $this->setTwitter(
-            new $this->_twitterClass(
-                $this->twitteruser,
-                $this->twitterpassword,
-                $url
+            new $twitterClass(
+                $this->config['twitter.user'],
+                $this->config['twitter.password'],
+                $this->config['twitter.url']
             )
         );
 
@@ -115,31 +92,22 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     }
 
     /**
-     *	Sets an instance of a twitter
-     *	@param  twitter        The twitter instance to set
-     *	@return $this          For fluid object handling
+     * Sets the Twitter client instance to use.
+     *
+     * @param Twitter $twitter Twitter instance to set
+     *
+     * @return Phergie_Plugin_Twitter Provides a fluent interface
      */
     public function setTwitter(Twitter $twitter)
     {
-        if (! ($twitter instanceof $this->_twitterClass) )
-        {
-            require_once 'Phergie/Plugin/Exception.php';
-            throw new Phergie_Plugin_Exception(
-                sprintf(
-                    "%s::%s: Argument twitter `%s' was not an instance of a twitter class.",
-                    __CLASS__,
-                    __FUNCTION__,
-                    get_class($twitter)
-                ),
-                ERR_FATAL_ERROR
-            );
-        }
         $this->twitter = $twitter;
+        return $this;
     }
 
     /**
-     *	Gets this instance of the twitter plugin
-     *	@return  Twitter
+     * Returns the Twitter client instance in use.
+     *
+     * @return Twitter Twitter client instance
      */
     public function getTwitter()
     {
@@ -147,12 +115,13 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Fetches the associated tweet and relays it to the channel
+     * Fetches the associated tweet and relays it to the channel.
      *
      * @param string $tweeter if numeric the tweet number/id, otherwise the
-     *  twitter user name (optionally prefixed with @, or a URL to a tweet)
-     * @param int    $num     optional tweet number for this user (number of
-     *  tweets ago)
+     *        twitter user name (optionally prefixed with @, or a URL to a
+     *        tweet)
+     * @param int    $num     optional offset for this user (number of
+     *        tweets ago)
      *
      * @return void
      */
@@ -187,7 +156,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Formats a Tweet into a message suitable for output
+     * Formats a Tweet into a message suitable for output.
      *
      * @param object $tweet      JSON-decoded tweet object from Twitter
      * @param bool   $includeUrl whether or not to include the URL in the
@@ -211,7 +180,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Renders a URL
+     * Renders Twitter URLs.
      *
      * @param array $parsed parse_url() output for the URL to render
      *

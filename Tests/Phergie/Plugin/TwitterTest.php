@@ -31,48 +31,11 @@
 abstract class Phergie_Plugin_TwitterTest extends Phergie_Plugin_TestCase
 {
     /**
-     * Plugin instance being tested
-     *
-     * @var Phergie_Plugin_Abstract
-     */
-    protected $plugin;
-
-    /**
-     * Full name of the plugin class being tested, may be explicitly
-     * specified in subclasses but is otherwise automatically derived from
-     * the test case class name
-     *
-     * @var string
-     */
-    protected $pluginClass;
-
-    /**
-     * Initializes instance properties.
+     * Tests for appropriate plugin requirements.
      *
      * @return void
      */
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    /**
-     * Destroys all initialized instance properties.
-     *
-     * @return void
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
-        unset($this->plugin);
-    }
-
-    /**
-     *	Tests the requirement of the Url Plugin
-     *	
-     *	@return void
-     */
-    public function testRequiresUrlPlguin()
+    public function testPluginRequirements()
     {
         $this->assertRequiresPlugin('Url');
         $this->assertRequiresPlugin('Encoding');
@@ -81,12 +44,13 @@ abstract class Phergie_Plugin_TwitterTest extends Phergie_Plugin_TestCase
     }
 
     /**
-     *	Verifies the private twitter class is an instance of a twitter class
-     *	@return void
+     * Verifies that the default Twitter client instance is of the proper
+     * class.
+     *
+     * @return void
      */
     public function testTwitterClass()
     {
         $this->assertType('Twitter', $this->plugin->getTwitter());
     }
 }
-
