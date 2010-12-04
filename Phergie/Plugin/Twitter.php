@@ -29,7 +29,7 @@ require dirname(__FILE__) . '/Twitter/twitter.class.php';
 require dirname(__FILE__) . '/Twitter/laconica.class.php';
 
 /**
- * Twitter plugin; Allows tweet (if configured) and twitter commands
+ * Fetches tweets from Twitter.
  *
  * Usage:
  *   twitter username
@@ -57,16 +57,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     protected $twitter;
 
     /**
-     * Twitter user
-     */
-    protected $twitteruser = null;
-
-    /**
-     * Password
-     */
-    protected $twitterpassword = null;
-
-    /**
      * Register with the URL plugin, if possible
      *
      * @return void
@@ -86,55 +76,87 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        if (!isset($this->config['twitter.class'])
-            || !$twitterClass = $this->config['twitter.class']
-        ) {
-            $twitterClass = 'Twitter';
-        }
+        $twitterClass = $this->getConfig('twitter.class', 'Twitter');
 
-        $this->twitteruser = $this->config['twitter.user'];
-        $this->twitterpassword = $this->config['twitter.password'];
-        $url = $this->config['twitter.url'];
-
-        $this->twitter = new $twitterClass(
-            $this->twitteruser,
-            $this->twitterpassword,
-            $url
+        $this->setTwitter(
+            new $twitterClass(
+                $this->config['twitter.user'],
+                $this->config['twitter.password'],
+                $this->config['twitter.url']
+            )
         );
 
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Time');
-
     }
 
     /**
-     * Fetches the associated tweet and relays it to the channel
+     * Sets the Twitter client instance to use.
+     *
+     * @param Twitter $twitter Twitter instance to set
+     *
+     * @return Phergie_Plugin_Twitter Provides a fluent interface
+     */
+    public function setTwitter(Twitter $twitter)
+    {
+        $this->twitter = $twitter;
+        return $this;
+    }
+
+    /**
+     * Returns the Twitter client instance in use.
+     *
+     * @return Twitter Twitter client instance
+     */
+    public function getTwitter()
+    {
+        return $this->twitter;
+    }
+
+    /**
+     * Fetches the associated tweet and relays it to the channel.
      *
      * @param string $tweeter if numeric the tweet number/id, otherwise the
-     *  twitter user name (optionally prefixed with @)
-     * @param int    $num     optional tweet number for this user (number of
-     *  tweets ago)
+     *        twitter user name (optionally prefixed with @, or a URL to a
+     *        tweet)
+     * @param int    $num     optional offset for this user (number of
+     *        tweets ago)
      *
      * @return void
      */
     public function onCommandTwitter($tweeter = null, $num = 1)
     {
         $source = $this->getEvent()->getSource();
-        if (is_numeric($tweeter)) {
-            $tweet = $this->twitter->getTweetByNum($tweeter);
-        } else if (is_null($tweeter) && $this->twitteruser) {
-            $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
+        $nick = $this->getEvent()->getHostmask()->getNick();
+	    if (is_numeric($tweeter)) {
+	        $tweet = $this->twitter->getTweetByNum($tweeter);
+
+	    } else if (is_null($tweeter) && $this->twitteruser) {
+	        $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
+
+	    } else if (preg_match('/^https?:\/\/(www\.)?twitter\.com/i', $tweeter)) {
+	        if (stripos($tweeter, 'status') !== false) {
+                $tweeter = preg_replace('/[^\d]+([\d]+$)/i', '\1', $tweeter);
+                $tweet = $this->twitter->getTweetByNum($tweeter);
+            } else {
+                $twit = explode('/', rtrim($tweeter, '/'));
+                $tweeter = array_pop($twit);
+                $tweet = $this->twitter->getLastTweet(ltrim($tweeter, '@'), $num);
+            }
         } else {
             $tweet = $this->twitter->getLastTweet(ltrim($tweeter, '@'), $num);
-        }
-        if ($tweet) {
-            $this->doPrivmsg($source, $this->formatTweet($tweet));
+	    }
+
+	    if ($tweet) {
+	        $this->doPrivmsg($source, $this->formatTweet($tweet));
+        } else {
+            $this->doPrivmsg($source, "Sorry, $nick I couldn't get that tweet :-(");
         }
     }
 
     /**
-     * Formats a Tweet into a message suitable for output
+     * Formats a Tweet into a message suitable for output.
      *
      * @param object $tweet      JSON-decoded tweet object from Twitter
      * @param bool   $includeUrl whether or not to include the URL in the
@@ -158,7 +180,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Renders a URL
+     * Renders Twitter URLs.
      *
      * @param array $parsed parse_url() output for the URL to render
      *

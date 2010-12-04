@@ -335,9 +335,9 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * Establishes a socket connection, separatedly mainly to allow for
      * stubbing during unit testing.
      *
-     * @param string $remote Address to connect the socket to
-     * @param int    $errno  System level error number if connection fails
-     * @param string $errstr System level error message if connection fails
+     * @param string $remote  Address to connect the socket to
+     * @param int    &$errno  System level error number if connection fails
+     * @param string &$errstr System level error message if connection fails
      *
      * @return resource Established socket
      */
@@ -520,7 +520,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @return void
      */
-    public function doMode($target, $mode = null, $param = null) {
+    public function doMode($target, $mode = null, $param = null)
+    {
         $args = array($target);
 
         if (!empty($mode)) {

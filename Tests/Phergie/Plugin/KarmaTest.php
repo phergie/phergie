@@ -177,6 +177,8 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
      * @param string $operation ++ or --
      * @param int    $karma     Expected karma rating after the change is
      *                          applied
+     *
+     * @return void
      */
     private function checkForKarmaRatingChange($term, $operation, $karma)
     {
@@ -188,7 +190,9 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
         $this->plugin->setEvent($event);
         $this->plugin->onPrivmsg();
         $event = $this->initiateKarmaEvent($term);
-        $this->checkForKarmaResponse($event, $term, $term . ' has karma of ' . $karma . '.');
+        $this->checkForKarmaResponse(
+            $event, $term, $term . ' has karma of ' . $karma . '.'
+        );
     }
 
     /**
@@ -329,7 +333,9 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
                 $karma = ($operator == '>') ? 1 : -1;
             }
             $event = $this->initiateKarmaEvent($term);
-            $this->checkForKarmaResponse($event, $term, $term . ' has karma of ' . $karma . '.');
+            $this->checkForKarmaResponse(
+                $event, $term, $term . ' has karma of ' . $karma . '.'
+            );
         }
     }
 }

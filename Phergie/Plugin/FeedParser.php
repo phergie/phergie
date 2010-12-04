@@ -42,7 +42,7 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
      * parse the items and return some informations about it
      *
      * @param Object/String $content Feed body
-     * @param Object $header Http Header (optional)
+     * @param Object        $header  Http Header (optional)
      *
      * @return FeedParser
      */
@@ -57,15 +57,15 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
             unset($this->feed);
 
             if (isset($content->channel)) { // Try to parse RSS 0.91, 0.92 and 2.0
-                $this->feed->items =        $this->parseItemsRSS($content->channel->item);
-                $this->feed->title =        (String) $content->channel->title;
-                $this->feed->description =  (String) $content->channel->description;
-                $this->feed->link =         (String) $content->channel->link;
-                $this->feed->updated =      strtotime($content->channel->lastBuildDate);
+                $this->feed->items = $this->parseItemsRSS($content->channel->item);
+                $this->feed->title = (String) $content->channel->title;
+                $this->feed->description = (String) $content->channel->description;
+                $this->feed->link = (String) $content->channel->link;
+                $this->feed->updated = strtotime($content->channel->lastBuildDate);
 
-            }else if (isset($content->entry)) { // Atom 1.0
+            } else if (isset($content->entry)) { // Atom 1.0
                 // Try to get the source of this feed
-                $this->feed->link = NULL;
+                $this->feed->link = null;
                 foreach ($content->link as $key => $link) {
                     if ($link->attributes()->rel != 'self') {
                         $this->feed->link = $link->attributes()->href;
@@ -78,14 +78,16 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
                 $this->feed->updated =  strtotime($content->updated);
 
             } else { // Unknown format
-                echo 'ERROR(Feed): This Feed is not valid or is not supported: ' . $url . PHP_EOL;
+                echo 'ERROR(Feed): This Feed is not valid or is not supported: '
+                    . $url . PHP_EOL;
                 return false;
             }
 
             if (!empty($header)) {
                 $this->feed->etag = $header['etag'];
                 if (empty($this->feed->updated)) {
-                    // Very dificult to happen, but there are some servers that we can't get any
+                    // Very dificult to happen,
+                    // but there are some servers that we can't get any
                     // kind of "last modified time"
                     if (empty($header['last-modified'])) {
                         $this->feed->updated = time();
@@ -104,7 +106,7 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
     /**
      * Items parsing logic for RSS
      *
-     * @param string $items
+     * @param string $items TODO description
      *
      * @return Array
      */
@@ -122,7 +124,8 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
                 continue;
             }
 
-            //Try to get the author and updated time from dc namespace (Used on Wordpress and others)
+            // Try to get the author and updated time from dc namespace
+            // (Used on Wordpress and others)
             $namespaces = $item->getNameSpaces(true);
             $dc = $item->children($namespaces['dc']);
 
@@ -148,7 +151,7 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
     /**
      * Items parsing logic for Atom
      *
-     * @param string $items
+     * @param string $items TODO desc
      *
      * @return Array
      */

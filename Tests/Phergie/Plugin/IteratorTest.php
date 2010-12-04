@@ -68,6 +68,8 @@ class Phergie_Plugin_IteratorTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests that all plugins are iterated when no filters are applied.
+     *
+     * @return void
      */
     public function testIteratesAllPluginsWithNoFilters()
     {
@@ -82,6 +84,8 @@ class Phergie_Plugin_IteratorTest extends PHPUnit_Framework_TestCase
     /**
      * Tests that appropriate plugins are iterated when plugin name filters
      * are applied.
+     *
+     * @return void
      */
     public function testIteratesPluginsWithNameFilters()
     {
@@ -110,6 +114,8 @@ class Phergie_Plugin_IteratorTest extends PHPUnit_Framework_TestCase
      * ReflectionClass, so filtering by a method defined in the base plugin
      * class seems the easiest way to test that method filtering really
      * works.
+     *
+     * @return void
      */
     public function testIteratesPluginsWithMethodFilters()
     {
@@ -134,6 +140,8 @@ class Phergie_Plugin_IteratorTest extends PHPUnit_Framework_TestCase
      *
      * @depends testIteratesPluginsWithNameFilters
      * @depends testIteratesPluginsWithMethodFilters
+     *
+     * @return void
      */
     public function testIteratesPluginsAfterClearingFilters()
     {

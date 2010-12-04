@@ -52,8 +52,11 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Temperature');
 
         if (empty($this->config['weather.partner_id'])
-            || empty($this->config['weather.license_key'])) {
-            $this->fail('weather.partner_id and weather.license_key must be specified');
+            || empty($this->config['weather.license_key'])
+        ) {
+            $this->fail(
+                'weather.partner_id and weather.license_key must be specified'
+            );
         }
     }
 
@@ -111,19 +114,20 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $xml = $response->getContent();
         $weather = 'Weather for ' . (string) $xml->loc->dnam . ' - ';
         switch ($xml->head->ut) {
-            case 'F':
-                $tempF = $xml->cc->tmp;
-                $tempC = $temperature->convertFahrenheitToCelsius($tempF);
-                break;
-            case 'C':
-                $tempC = $xml->cc->tmp;
-                $tempF = $temperature->convertCelsiusToFahrenheit($tempC);
-                break;
-            default:
-                $this->doNotice(
-                    $this->event->getNick(),
-                    'ERROR: No scale information given.');
-                break;
+        case 'F':
+            $tempF = $xml->cc->tmp;
+            $tempC = $temperature->convertFahrenheitToCelsius($tempF);
+            break;
+        case 'C':
+            $tempC = $xml->cc->tmp;
+            $tempF = $temperature->convertCelsiusToFahrenheit($tempC);
+            break;
+        default:
+            $this->doNotice(
+                $this->event->getNick(),
+                'ERROR: No scale information given.'
+            );
+            break;
         }
         $r = $xml->cc->hmid;
         $hiF = $temperature->getHeatIndex($tempF, $r);

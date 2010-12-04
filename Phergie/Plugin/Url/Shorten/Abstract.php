@@ -97,13 +97,19 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
         $options = array('timeout' => 2);
         $params = $this->getRequestParams($url) + $defaults;
 
-        // Should some kind of notice be thrown? Maybe just if getRequestParams does not return an array?
+        // Should some kind of notice be thrown?
+        // Maybe just if getRequestParams does not return an array?
         if (!is_array($params) || empty($params['uri'])) {
             return $url;
         }
 
         if (!empty($params['post'])) {
-            $response = $this->http->post($params['uri'], $params['get'], $params['post'], $options);
+            $response = $this->http->post(
+                $params['uri'],
+                $params['get'],
+                $params['post'],
+                $options
+            );
         } else {
             $response = $this->http->get($params['uri'], $params['get'], $options);
         }

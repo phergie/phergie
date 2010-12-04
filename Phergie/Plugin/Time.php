@@ -30,7 +30,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Time
  */
-class Phergie_Plugin_Time extends Phergie_Plugin_Abstract 
+class Phergie_Plugin_Time extends Phergie_Plugin_Abstract
 {
     /**
      * Returns the time interval between the current time and a given 

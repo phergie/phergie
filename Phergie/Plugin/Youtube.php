@@ -147,18 +147,18 @@ class Phergie_Plugin_Youtube extends Phergie_Plugin_Abstract
     public function renderUrl(array $parsed)
     {
         switch ($parsed['host']) {
-            case 'youtu.be':
-                $v = ltrim($parsed['path'], '/');
+        case 'youtu.be':
+            $v = ltrim($parsed['path'], '/');
+            break;
+        case 'youtube.com':
+        case 'www.youtube.com':
+            parse_str($parsed['query'], $parsed_query);
+            if (!empty($parsed_query['v'])) {
+                $v = '"' . $parsed_query['v'] . '"';
                 break;
-            case 'youtube.com':
-            case 'www.youtube.com':
-                parse_str($parsed['query'], $parsed_query);
-                if (!empty($parsed_query['v'])) {
-                    $v = '"' . $parsed_query['v'] . '"';
-                    break;
-                }
-            default:
-                return false;
+            }
+        default:
+            return false;
         }
 
         $this->queryYoutube($v);

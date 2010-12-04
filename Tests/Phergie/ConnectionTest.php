@@ -129,8 +129,9 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
      * @return void
      * @dataProvider dataProviderTestGetHostmaskMissingDataGeneratesException
      */
-    public function testGetHostmaskMissingDataGeneratesException($nick, $username, $host)
-    {
+    public function testGetHostmaskMissingDataGeneratesException(
+        $nick, $username, $host
+    ) {
         $options = array(
             'nick' => $nick,
             'username' => $username,

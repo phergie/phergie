@@ -47,14 +47,19 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
         $this->hostmask = new Phergie_Hostmask('nick', 'username', 'host');
     }
 
+    /**
+     * TODO: Desc
+     *
+     * @return array TODO desc
+     */
     public static function isValidProvider()
     {
         return array(
-                array('nick!username@host', TRUE),
-                array('blech', FALSE),
-                array('!*@*', FALSE),
-                array('*!@*', FALSE),
-                array('*!*@', FALSE)
+                array('nick!username@host', true),
+                array('blech', false),
+                array('!*@*', false),
+                array('*!@*', false),
+                array('*!*@', false)
         );
     }
     
@@ -63,6 +68,8 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
      * hostmasks.
      *
      * @dataProvider isValidProvider
+     *
+     * @return void
      */
     public function testIsValid($hostmask, $result)
     {
@@ -94,12 +101,19 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
         $badstring = 'sdf982u19f92($&#@';
         try {
             $hostmask = Phergie_Hostmask::fromString($badstring);
-            $this->fail('Phergie_Hostmask::fromString didn\'t throw a required exception on a bad hostmask');
+            $this->fail(
+                'Phergie_Hostmask::fromString didn\'t '
+                . 'throw a required exception on a bad hostmask'
+            );
         } catch (Phergie_Hostmask_Exception $phe) {
-            $this->assertEquals(Phergie_Hostmask_Exception::ERR_INVALID_HOSTMASK, $phe->getCode());
+            $this->assertEquals(
+                Phergie_Hostmask_Exception::ERR_INVALID_HOSTMASK, $phe->getCode()
+            );
             $this->assertContains($badstring, $phe->getMessage());
         } catch (Exception $e) {
-            $this->fail('Phergie_Hostmask::fromString didn\'t throw the required exception');
+            $this->fail(
+                'Phergie_Hostmask::fromString didn\'t throw the required exception'
+            );
         }
     }
 
@@ -147,6 +161,8 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests getNick() function for returning default value.
+     *
+     * @return void
      */
     public function testGetNick()
     {

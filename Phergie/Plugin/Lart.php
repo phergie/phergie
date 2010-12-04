@@ -100,40 +100,40 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
         $this->db->sqliteCreateFunction('preg_match', 'preg_match');
 
         if (!$exists) {
-            $this->db->exec('
-                CREATE TABLE lart (
+            $this->db->exec(
+                'CREATE TABLE lart (
                     name VARCHAR(255),
                     definition TEXT,
                     hostmask VARCHAR(50),
                     tstamp VARCHAR(19)
-                )
-            ');
-            $this->db->exec('
-                CREATE UNIQUE INDEX lart_name ON lart (name)
-            ');
+                )'
+            );
+            $this->db->exec(
+                'CREATE UNIQUE INDEX lart_name ON lart (name)'
+            );
         }
 
-        $this->save = $this->db->prepare('
-            REPLACE INTO lart (name, definition, hostmask, tstamp)
-            VALUES (:name, :definition, :hostmask, :tstamp)
-        ');
+        $this->save = $this->db->prepare(
+            'REPLACE INTO lart (name, definition, hostmask, tstamp)
+            VALUES (:name, :definition, :hostmask, :tstamp)'
+        );
 
-        $this->process = $this->db->prepare('
-            SELECT *
+        $this->process = $this->db->prepare(
+            'SELECT *
             FROM lart
-            WHERE preg_match(name, :name)
-        ');
+            WHERE preg_match(name, :name)'
+        );
 
-        $this->select = $this->db->prepare('
-            SELECT *
+        $this->select = $this->db->prepare(
+            'SELECT *
             FROM lart
-            WHERE name = :name
-        ');
+            WHERE name = :name'
+        );
 
-        $this->delete = $this->db->prepare('
-            DELETE FROM lart
-            WHERE name = :name
-        ');
+        $this->delete = $this->db->prepare(
+            'DELETE FROM lart
+            WHERE name = :name'
+        );
     }
 
     /**

@@ -455,7 +455,8 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
             $r = new ReflectionClass($class);
             error_reporting($error_reporting);
             if (!$r->isSubclassOf('FilterIterator')) {
-                $message = 'Class ' . $class . ' is not a subclass of FilterIterator';
+                $message = 'Class ' . $class
+                    . ' is not a subclass of FilterIterator';
                 $valid = false;
             }
         } catch (ReflectionException $e) {

@@ -54,7 +54,9 @@ class Phergie_Connection_HandlerTest extends Phergie_TestCase
      */
     public function testImplementsCountable()
     {
-        $this->assertContains('Countable', class_implements(get_class($this->connections)));
+        $this->assertContains(
+            'Countable', class_implements(get_class($this->connections))
+        );
     }
 
     /**
@@ -64,7 +66,9 @@ class Phergie_Connection_HandlerTest extends Phergie_TestCase
      */
     public function testImplementsIteratorAggregate()
     {
-        $this->assertContains('IteratorAggregate', class_implements(get_class($this->connections)));
+        $this->assertContains(
+            'IteratorAggregate', class_implements(get_class($this->connections))
+        );
     }
 
     /**
@@ -149,7 +153,9 @@ class Phergie_Connection_HandlerTest extends Phergie_TestCase
      */
     protected function getMockHostmask($nick, $username, $host)
     {
-        $hostmask = $this->getMock('Phergie_Hostmask', array('__toString'), array($nick, $username, $host));
+        $hostmask = $this->getMock(
+            'Phergie_Hostmask', array('__toString'), array($nick, $username, $host)
+        );
         $hostmask
             ->expects($this->any())
             ->method('__toString')
@@ -191,7 +197,9 @@ class Phergie_Connection_HandlerTest extends Phergie_TestCase
         $hostmasks = $hostmaskStrings = $connections = array();
         $connection = $this->getMockConnection();
         foreach (range(1, 2) as $index) {
-            $hostmasks[$index] = $this->getMockHostmask('nick' . $index, 'username' . $index, 'host' . $index);
+            $hostmasks[$index] = $this->getMockHostmask(
+                'nick' . $index, 'username' . $index, 'host' . $index
+            );
             $hostmaskStrings[$index] = (string) $hostmasks[$index];
             $connections[$index] = clone $connection;
             $connections[$index]

@@ -1,4 +1,23 @@
 <?php
+/**
+ * Phergie
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie
+ * @package   Phergie
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie
+ */
 
 // Create database schema
 echo 'Creating database', PHP_EOL;
@@ -34,9 +53,12 @@ $zip->close();
 
 // Aggregate data set into the database
 $lcbo = new PDO('sqlite:' . $file);
-$result = $lcbo->query('SELECT product_no, name FROM products WHERE primary_category = "Wine"');
+$result = $lcbo->query(
+    'SELECT product_no, name FROM products WHERE primary_category = "Wine"'
+);
 $wines = $result->fetchAll();
-echo 'Processing lcboapi.com data - ', number_format(count($wines), 0), ' records', PHP_EOL;
+echo 'Processing lcboapi.com data - ', number_format(count($wines), 0), ' records'
+    , PHP_EOL;
 $db->beginTransaction();
 foreach ($wines as $wine) {
     $name = $wine['name'];
