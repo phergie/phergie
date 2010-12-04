@@ -174,8 +174,9 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         }
 
         $source = $this->getEvent()->getSource();
+        $path = $parsed['path'] . $parsed['fragment'];
 
-        if (preg_match('#^/(.*?)/status(es)?/([0-9]+)$#', $parsed['path'], $matches)
+        if (preg_match('#/status(es)?/([0-9]+)$#', $path, $matches)
         ) {
             $tweet = $this->twitter->getTweetByNum($matches[3]);
             if ($tweet) {
