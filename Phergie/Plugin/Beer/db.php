@@ -55,6 +55,9 @@ $db->beginTransaction();
 foreach ($beers as $beer) {
     $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $beer->textContent);
     $name = preg_replace('/\h*\v+\h*/', '', $name);
+    if (stripos($name, 'discontinued') !== false) {
+        continue;
+    }
     $link = 'http://beerme.com' . $beer->childNodes->item(1)->getAttribute('href');
     $insert->execute(array($name, $link));
 }
@@ -65,33 +68,54 @@ echo 'Cleaning up', PHP_EOL;
 unlink($file);
 
 // Get and decompress openbeerdb.com data set
-$archive = __DIR__ . '/beers.tar.gz';
+$archive = __DIR__ . '/beers.zip';
 if (!file_exists($archive)) {
     echo 'openbeerdb.com data set must be downloaded manually from '
-        . 'http://groups.google.com/group/openbeerdb/files', PHP_EOL;
+        . 'http://www.openbeerdb.com/data', PHP_EOL;
     exit(1);
 }
 
 echo 'Decompressing openbeerdb.com data set', PHP_EOL;
-require_once 'Archive/Tar.php';
-$tar = new Archive_Tar($archive, 'gz');
-$tar->extractList(array('beers/beers.csv'), __DIR__, 'beers/');
-$file = __DIR__ . '/beers.csv';
+$zip = new ZipArchive;
+$zip->open(__DIR__ . '/beers.zip');
+$zip->extractTo(__DIR__, 'beers/beers.sql');
+$file = __DIR__ . '/beers/beers.sql';
 
 // Extract data from data set
 echo 'Processing openbeerdb.com data', PHP_EOL;
 $fp = fopen($file, 'r');
-$columns = array_slice(fgetcsv($fp), 0, 12);
 $db->beginTransaction();
-while ($line = fgetcsv($fp)) {
-    if (count($line) < 12) {
+$columns = array();
+$start = false;
+while ($line = fgets($fp)) {
+    if (!$start) {
+        if (strpos($line, 'INSERT INTO `beers`') !== false) {
+            $start = true;
+            $line = rtrim(str_replace(
+                array('INSERT INTO `beers` (`', '`) VALUES'),
+                array('', ''),
+                $line
+            ));
+            $columns = explode('`, `', $line);
+        }
         continue;
     }
-    $line = array_combine($columns, array_slice($line, 0, 12));
+    $line = trim($line, "(),;\r\n");
+
+    $buffer = fopen('php://memory', 'rw');
+    fwrite($buffer, $line);
+    fseek($buffer, 0);
+    $line = array_combine($columns, fgetcsv($buffer, 4096, ',', '\''));
+    fclose($buffer);
+
     $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $line['name']);
     $name = preg_replace('/\h*\v+\h*/', '', $name);
     $name = str_replace('\\\'', '\'', $name);
-    $link = null;
+    if (strpos($name, 'discontinued') !== false) {
+        continue;
+    }
+
+    $link = 'http://www.openbeerdb.com/browse/detail/be_' . $line['id'];
     $insert->execute(array($name, $link));
 }
 $db->commit();
