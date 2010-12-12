@@ -483,6 +483,7 @@ class Phergie_Event_RequestTest extends PHPUnit_Framework_TestCase
      */
     public function testProvidesVirtualGetterMethods($type, array $args)
     {
+        $this->event->setHostmask($this->getMockHostmask());
         $this->event->setType($type);
         $this->event->setArguments(array_keys($args));
         foreach ($args as $name => $position) {

@@ -56,7 +56,10 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->includePath = set_include_path('.');
+        $reflector = new ReflectionClass('PHPUnit_Framework_TestCase');
+        $phpunitPath = realpath(dirname($reflector->getFileName()) . '/../..');
+
+        $this->includePath = set_include_path('.' . PATH_SEPARATOR . $phpunitPath);
         $this->callbacks = array();
         $functions = spl_autoload_functions();
         if (is_array($functions)) {
@@ -95,21 +98,6 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Tests that the autoloader can successfully autoload a class.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testLoad()
-    {
-        $class = 'Phergie_Bot';
-        $this->assertFalse(class_exists($class, false));
-        $autoload = new Phergie_Autoload;
-        $autoload->load($class);
-        $this->assertTrue(class_exists($class, false));
-    }
-
-    /**
      * Tests that the autoloader can register itself as an autoloader.
      *
      * @return void
@@ -122,6 +110,25 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
             count(spl_autoload_functions()),
             'Autoloader was not registered'
         );
+    }
+
+    /**
+     * Tests that the autoloader can successfully autoload a class.
+     *
+     * @runInSeparateProcess
+     * @depends testRegisterAutoloader
+     * @return void
+     */
+    public function testLoad()
+    {
+        // Need this to load PHPUnit classes inside the separate process
+        Phergie_Autoload::registerAutoloader();
+
+        $class = 'Phergie_Bot';
+        $autoload = new Phergie_Autoload;
+        $this->assertFalse(class_exists($class, false));
+        $autoload->load($class);
+        $this->assertTrue(class_exists($class, false));
     }
 
     /**
