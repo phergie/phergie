@@ -35,13 +35,13 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     const DEBUG = true;
 
     /**
-     *  Checks to see if the root rbac user has been set in     *  
+     *  Checks to see if the root rbac user has been set in     *
      *
      *  @return void
      */
     public function onLoad()
     {
-        $this->doesPdoExist();        
+        $this->_doesPdoExist();
     }
 
     /**
@@ -49,13 +49,13 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      *
      *  @return void
      */
-    private function doesPdoExist()
+    private function _doesPdoExist()
     {
         if (!extension_loaded('PDO') || !extension_loaded('pdo_sqlite')) {
             $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
     }
-    
+
     /**
      *  Initializes database
      *
@@ -67,7 +67,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      */
     public function init($directory, $dbFile, $schemaFile)
     {
-        $this->isResourceDirectory($directory);        
+        $this->isResourceDirectory($directory);
         $doesDbFileExist = is_readable($dbFile);
 
         try {
@@ -85,7 +85,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     /**
      * fully specified file name as string
      * used to check that the resource directory does exist
-     * 
+     *
      * @param string $directory Directory to check
      *
      * @return void
@@ -101,11 +101,11 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     /**
      * fully specified file name as string
      * used to check that the schema file does exist
-     * 
+     *
      * @param string $file File to check
      *
      * @return void
-     * 
+     *
      */
     public function isSchemaFile($file)
     {
@@ -128,11 +128,11 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      * @return bool
      */
     public function validateSqlType($sql, $type)
-    {        
+    {
         preg_match('/^'.strtolower($type).'/', strtolower($sql), $matches);
         return ($matches[0]) ? true : false;
     }
-    
+
     /**
      *  Creates database table
      *
@@ -183,9 +183,8 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
                 $this->createTable($db, $sql);
             }
         }
-
     }
-    
+
     /**
      *  Validates that database table exists
      *
@@ -215,7 +214,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     public function dropTable($name)
     {
     }
-   
+
     /**
      * Jared's crap debug method
      *
@@ -223,7 +222,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    private function debug($message)
+    private function _debug($message)
     {
         if (self::DEBUG) {
             echo 'DEBUG: ['. date('c') . '] - '. $message . "\n";

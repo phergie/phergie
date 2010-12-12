@@ -91,11 +91,13 @@ while ($line = fgets($fp)) {
     if (!$start) {
         if (strpos($line, 'INSERT INTO `beers`') !== false) {
             $start = true;
-            $line = rtrim(str_replace(
-                array('INSERT INTO `beers` (`', '`) VALUES'),
-                array('', ''),
-                $line
-            ));
+            $line = rtrim(
+                str_replace(
+                    array('INSERT INTO `beers` (`', '`) VALUES'),
+                    array('', ''),
+                    $line
+                )
+            );
             $columns = explode('`, `', $line);
         }
         continue;

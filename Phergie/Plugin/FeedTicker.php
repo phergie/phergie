@@ -33,15 +33,25 @@
  * @uses     Phergie_Plugin_FeedParser pear.phergie.org
  * @uses     Phergie_Plugin_FeedManager pear.phergie.org
  * @todo     Make Unit tests
- * @config   'FeedTicker.smartReader'   True to stop to get and syndicating Feeds on inactive channels (default: false)
- * @config   'FeedTicker.idleTime'      Idle time to mark a channel as inactive (default: 60*60*2 //2 hours)
- * @config   'FeedTicker.showDelayTime' Time between each delivery (default: 60*3 //3 minutes)
- * @config   'FeedTicker.defaultDelay'  Default delay time to get items (default: 300 //5 minutes)
- * @config   'FeedTicker.itemsLimit'    Max number of items should get from the feed source (default: 5)
- * @config   'FeedTicker.dateLimit'     How old an item should be considered valid (default: 60*60*24*7 //1 week)
- * @config   'FeedTicker.format'        How items should be displayed (default: '[%source%] %title% [ %link% ] by %author% at %updated%')
- * @config   'FeedTicker.timeFormat'    How date/time should be displayed (default: 'Y-m-d H:i')
- * @config   'FeedTicker.showMaxItems'  Max number of items should be displayed in each delivery (default: 2)
+ * @config   'FeedTicker.smartReader'   True to stop to get and syndicating
+ *                                      Feeds on inactive channels (default: false)
+ * @config   'FeedTicker.idleTime'      Idle time to mark a channel as
+ *                                      inactive (default: 60*60*2 //2 hours)
+ * @config   'FeedTicker.showDelayTime' Time between each delivery (default:
+ *                                      60*3 //3 minutes)
+ * @config   'FeedTicker.defaultDelay'  Default delay time to get items
+ *                                      (default: 300 //5 minutes)
+ * @config   'FeedTicker.itemsLimit'    Max number of items should get from
+ *                                      the feed source (default: 5)
+ * @config   'FeedTicker.dateLimit'     How old an item should be considered
+ *                                      valid (default: 60*60*24*7 //1 week)
+ * @config   'FeedTicker.format'        How items should be displayed
+ *                                      (default: '[%source%] %title%
+ *                                      [ %link% ] by %author% at %updated%')
+ * @config   'FeedTicker.timeFormat'    How date/time should be displayed
+ *                                      (default: 'Y-m-d H:i')
+ * @config   'FeedTicker.showMaxItems'  Max number of items should be
+ *                                      displayed in each delivery (default: 2)
  */
 class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 {

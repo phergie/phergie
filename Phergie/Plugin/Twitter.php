@@ -129,14 +129,14 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getHostmask()->getNick();
-	    if (is_numeric($tweeter)) {
-	        $tweet = $this->twitter->getTweetByNum($tweeter);
+        if (is_numeric($tweeter)) {
+            $tweet = $this->twitter->getTweetByNum($tweeter);
 
-	    } else if (is_null($tweeter) && $this->twitteruser) {
-	        $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
+        } else if (is_null($tweeter) && $this->twitteruser) {
+            $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
 
-	    } else if (preg_match('/^https?:\/\/(www\.)?twitter\.com/i', $tweeter)) {
-	        if (stripos($tweeter, 'status') !== false) {
+        } else if (preg_match('/^https?:\/\/(www\.)?twitter\.com/i', $tweeter)) {
+            if (stripos($tweeter, 'status') !== false) {
                 $tweeter = preg_replace('/[^\d]+([\d]+$)/i', '\1', $tweeter);
                 $tweet = $this->twitter->getTweetByNum($tweeter);
             } else {
@@ -146,10 +146,10 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
             }
         } else {
             $tweet = $this->twitter->getLastTweet(ltrim($tweeter, '@'), $num);
-	    }
+        }
 
-	    if ($tweet) {
-	        $this->doPrivmsg($source, $this->formatTweet($tweet));
+        if ($tweet) {
+            $this->doPrivmsg($source, $this->formatTweet($tweet));
         } else {
             $this->doPrivmsg($source, "Sorry, $nick I couldn't get that tweet :-(");
         }

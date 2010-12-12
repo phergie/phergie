@@ -2,9 +2,11 @@
 /**
  * Phergie
  *
- * Sean's Simple Twitter Library
+ * PHP version 5
  *
- * Probably a little more or a little less than you need.
+ * LICENSE
+ *
+ * Sean's Simple Twitter Library
  *
  * Copyright 2008, Sean Coates
  * Usage of the works is permitted provided that this instrument is retained
@@ -13,10 +15,6 @@
  * DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
  * ( Fair License - http://www.opensource.org/licenses/fair.php )
  * Short license: do whatever you like with this.
- *
- * PHP version 5
- *
- * LICENSE
  *
  * This source file is subject to the new BSD license that is bundled
  * with this package in the file LICENSE.
@@ -30,9 +28,18 @@
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Php
  */
+
+/**
+ * Supporting Twitter client library for the Twitter plugin.
+ *
+ * @category Phergie
+ * @package  Phergie_Plugin_Twitter
+ * @author   Phergie Development Team <team@phergie.org>
+ * @license  http://phergie.org/license New BSD License
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Twitter
+ */
 class Twitter
 {
-
     /**
      * Base URL for Twitter API
      *
@@ -133,8 +140,13 @@ class Twitter
      *
      * @return TODO desc
      */
-    public function getMentions($sinceId=null, $count=20) {
-        return json_decode(file_get_contents($this->getUrlMentions($sinceId, $count)));
+    public function getMentions($sinceId=null, $count=20)
+    {
+        return json_decode(
+            file_get_contents(
+                $this->getUrlMentions($sinceId, $count)
+            )
+        );
     }
 
     /**
@@ -146,7 +158,11 @@ class Twitter
      */
     public function getFollowers($cursor=-1)
     {
-        return json_decode(file_get_contents($this->getUrlFollowers($cursor)));
+        return json_decode(
+            file_get_contents(
+                $this->getUrlFollowers($cursor)
+            )
+        );
     }
 
     /**
@@ -374,7 +390,7 @@ class Twitter
      * @return TODO desc
      */
     public function getUrlDMs($sinceId=null, $count=20, $page=1)
-        {
+    {
         $url = $this->baseUrlFull . 'direct_messages.json?';
         if ($sinceId !== null) {
             $url .= 'since_id=' . urlencode($sinceId);
