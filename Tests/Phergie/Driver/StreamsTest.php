@@ -414,13 +414,16 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     {
         $this->acceptAllCommands();
         $this->driver->setConnection($this->getMockConnection());
+
+        $this->assertSendsCommands(array(
+            3 => $command
+        ));
+
         $this->driver->doConnect();
         call_user_func_array(array($this->driver, $method), $args);
         if ($method != 'doQuit') {
             $this->driver->doQuit();
         }
-
-        $expected = "\r\n" . $command . "\r\n";
     }
 
     /**
