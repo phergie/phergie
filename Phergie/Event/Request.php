@@ -329,15 +329,18 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_TIME => array(
-            'reply' => 0
+            'target' => 0,
+            'reply'  => 1
         ),
 
         self::TYPE_VERSION => array(
-            'reply' => 0
+            'target' => 0,
+            'reply'  => 1
         ),
 
         self::TYPE_FINGER => array(
-            'reply' => 0
+            'target' => 0,
+            'reply'  => 1
         ),
 
         self::TYPE_RAW => array(
