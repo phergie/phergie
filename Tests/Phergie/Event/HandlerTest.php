@@ -86,25 +86,92 @@ class Phergie_Event_HandlerTest extends PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    private function addMockEvent()
+    private function addMockEvent($type = null, $args = null)
     {
-        $this->events->addEvent($this->plugin, $this->type, $this->args);
+        if (!$type) {
+            $type = $this->type;
+            $args = $this->args;
+        }
+        $this->events->addEvent($this->plugin, $type, $args);
+    }
+
+    /**
+     * Data provider for methods requiring a valid event type and a
+     * corresponding set of arguments.
+     *
+     * @return array Enumerated array of enumerated arrays each containing
+     *         a string for an event type and an enumerated array of
+     *         arguments for that event type
+     */
+    public function dataProviderEventTypesAndArguments()
+    {
+        return array(
+            array('nick', array('nickname')),
+            array('oper', array('username', 'password')),
+            array('quit', array()),
+            array('quit', array('message')),
+            array('join', array('#channel1,#channel2')),
+            array('join', array('#channel1,#channel2', 'key1,key2')),
+            array('part', array('#channel1,#channel2')),
+            array('mode', array('#channel', '-l', '20')),
+            array('topic', array('#channel', 'message')),
+            array('names', array('#channel1,#channel2')),
+            array('list', array('#channel1,#channel2')),
+            array('invite', array('nickname', '#channel')),
+            array('kick', array('#channel', 'username1,username2')),
+            array('kick', array('#channel', 'username', 'comment')),
+            array('version', array()),
+            array('version', array('server')),
+            array('stats', array('c')),
+            array('stats', array('c', 'server')),
+            array('links', array('mask')),
+            array('links', array('server', 'mask')),
+            array('time', array()),
+            array('time', array('server')),
+            array('connect', array('server')),
+            array('connect', array('server', '6667')),
+            array('connect', array('target', '6667', 'remote')),
+            array('trace', array()),
+            array('trace', array('server')),
+            array('admin', array()),
+            array('admin', array('server')),
+            array('info', array()),
+            array('info', array('server')),
+            array('privmsg', array('receiver1,receiver2', 'text')),
+            array('notice', array('nickname', 'text')),
+            array('who', array('name')),
+            array('who', array('name', 'o')),
+            array('whois', array('mask1,mask2')),
+            array('whois', array('server', 'mask')),
+            array('whowas', array('nickname')),
+            array('whowas', array('nickname', '9')),
+            array('whowas', array('nickname', '9', 'server')),
+            array('kill', array('nickname', 'comment')),
+            array('ping', array('server1')),
+            array('ping', array('server1', 'server2')),
+            array('pong', array('daemon')),
+            array('pong', array('daemon', 'daemon2')),
+            array('error', array('message')),
+        );
     }
 
     /**
      * Tests that the handler can receive a new event.
      *
+     * @param string $type Event type
+     * @param array  $args Event arguments
+     * @dataProvider dataProviderEventTypesAndArguments
      * @return void
      */
-    public function testAddEventWithValidData()
+    public function testAddEventWithValidData($type, array $args)
     {
-        $this->addMockEvent();
+        $this->addMockEvent($type, $args);
         $events = $this->events->getEvents();
         $event = array_shift($events);
         $this->assertType('Phergie_Event_Command', $event);
         $this->assertSame($this->plugin, $event->getPlugin());
-        $this->assertSame($this->type, $event->getType());
-        $this->assertSame($this->args, $event->getArguments());
+        $this->assertSame($type, $event->getType());
+        $this->assertSame($args, $event->getArguments());
     }
 
     /**

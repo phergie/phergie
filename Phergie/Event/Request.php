@@ -94,6 +94,66 @@ class Phergie_Event_Request
     const TYPE_PONG = 'pong';
 
     /**
+     * Operator message event type
+     */
+    const TYPE_OPER = 'oper';
+
+    /**
+     * Names message event type
+     */
+    const TYPE_NAMES = 'names';
+
+    /**
+     * List message event type
+     */
+    const TYPE_LIST = 'list';
+
+    /**
+     * Stats message event type
+     */
+    const TYPE_STATS = 'stats';
+
+    /**
+     * Links message event type
+     */
+    const TYPE_LINKS = 'links';
+
+    /**
+     * Connect message event type
+     */
+    const TYPE_CONNECT = 'connect';
+
+    /**
+     * Trace message event type
+     */
+    const TYPE_TRACE = 'trace';
+
+    /**
+     * Admin message event type
+     */
+    const TYPE_ADMIN = 'admin';
+
+    /**
+     * Info message event type
+     */
+    const TYPE_INFO = 'info';
+
+    /**
+     * Who message event type
+     */
+    const TYPE_WHO = 'who';
+
+    /**
+     * Whowas message event type
+     */
+    const TYPE_WHOWAS = 'whowas';
+
+    /**
+     * Kill message event type
+     */
+    const TYPE_KILL = 'kill';
+
+    /**
      * CTCP ACTION command event type
      */
     const TYPE_ACTION = 'action';
@@ -140,7 +200,8 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_WHOIS => array(
-            'nickmask' => 0
+            'server'   => 0,
+            'nickmask' => 1
         ),
 
         self::TYPE_QUIT => array(
@@ -192,7 +253,8 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_PONG => array(
-            'server' => 0
+            'server'  => 0,
+            'server2' => 1
         ),
 
         self::TYPE_ACTION => array(
@@ -203,6 +265,63 @@ class Phergie_Event_Request
         self::TYPE_PING => array(
             'nick' => 0,
             'hash' => 1
+        ),
+
+        self::TYPE_OPER => array(
+            'username' => 0,
+            'password' => 1
+        ),
+
+        self::TYPE_NAMES => array(
+            'channels' => 0
+        ),
+
+        self::TYPE_LIST => array(
+            'channels' => 0
+        ),
+
+        self::TYPE_STATS => array(
+            'query'  => 0,
+            'server' => 1
+        ),
+
+        self::TYPE_LINKS => array(
+            'server' => 0,
+            'mask'   => 1
+        ),
+
+        self::TYPE_CONNECT => array(
+            'target' => 0,
+            'port'   => 1,
+            'remote' => 2
+        ),
+
+        self::TYPE_TRACE => array(
+            'server' => 0
+        ),
+
+        self::TYPE_ADMIN => array(
+            'server' => 0
+        ),
+
+        self::TYPE_INFO => array(
+            'server' => 0
+        ),
+
+        self::TYPE_WHO => array(
+            'name' => 0,
+            'o'    => 1
+        ),
+
+        self::TYPE_WHOWAS => array(
+            'nickname' => 0,
+            'count'    => 1,
+            'server'   => 2
+        ),
+
+        self::TYPE_KILL => array(
+            'nickname' => 0,
+            'comment'  => 1
         ),
 
         self::TYPE_ERROR => array(

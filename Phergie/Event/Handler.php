@@ -60,7 +60,7 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
     public function addEvent(Phergie_Plugin_Abstract $plugin, $type,
         array $args = array()
     ) {
-        if (!defined('Phergie_Event_Command::TYPE_' . strtoupper($type))) {
+        if (!defined('Phergie_Event_Request::TYPE_' . strtoupper($type))) {
             throw new Phergie_Event_Exception(
                 'Unknown event type "' . $type . '"',
                 Phergie_Event_Exception::ERR_UNKNOWN_EVENT_TYPE
