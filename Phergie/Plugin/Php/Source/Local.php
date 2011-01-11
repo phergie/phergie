@@ -48,7 +48,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
      *
      * @var string
      */
-    protected $url = 'http://cvs.php.net/viewvc.cgi/phpdoc/funcsummary.txt?revision=HEAD';
+    protected $url = 'http://svn.php.net/repository/phpdoc/doc-base/trunk/funcsummary.txt?revision=HEAD';
 
     /**
      * Constructor to initialize the data source.
