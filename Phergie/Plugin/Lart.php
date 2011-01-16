@@ -151,7 +151,7 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
         
         $term = str_ireplace($connection->getNick(),'$nick', $term);
         if (substr($term,0,1) != '/') {
-            $term = '/'.preg_quote($term,'/').'/';
+            $term = '/^'.preg_quote($term,'$/i').'/';
         }
         $this->process->execute(array(':name' => $term));
         $row = $this->process->fetchObject();
@@ -185,7 +185,7 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
      */
     protected function deleteLart($term)
     {
-        $this->delete->execute(array(':name' => $term));
+        $this->delete->execute(array(':name' => strtolower($term)));
         return ($this->delete->rowCount() > 0);
     }
 
@@ -202,7 +202,7 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
     protected function saveLart($term, $definition)
     {
         $data = array(
-            ':name' => $term,
+            ':name' => strtolower($term),
             ':definition' => $definition,
             ':hostmask' => (string) $this->getEvent()->getHostmask(),
             ':tstamp' => time()
