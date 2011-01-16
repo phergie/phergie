@@ -149,7 +149,7 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
         
         $connection = $this->getConnection();
         
-        $term = str_replace($connection->getNick(),'$nick', $term);
+        $term = str_ireplace($connection->getNick(),'$nick', $term);
         if (substr($term,0,1) != '/') {
             $term = '/'.preg_quote($term,'/').'/';
         }
