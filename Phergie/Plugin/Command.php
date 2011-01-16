@@ -136,7 +136,28 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             // If arguments are passed...
 
             // Parse the arguments
-            $args = preg_split('/\s+/', $args, $this->methods[$method]['total']);
+           if ('"' == substr($args,0,1)) {
+                preg_match_all('/("[^"]*")|(\S+)/', $args, $args);
+                $argsIn = $args[0];
+                $i = 1;
+                $args = array();
+                $methodArgsTotal = $this->methods[$method]['total'];
+                foreach($argsIn as $arg) {
+                    if ($i < $methodArgsTotal) {
+                        $args[] = $arg;
+                        $i++;
+                    } else {
+                        if (empty($args[$methodArgsTotal])) {
+                            $args[$methodArgsTotal] = $arg;
+                        } else {
+                            $args[$methodArgsTotal] .= ' '.$arg;
+                        }
+                    }
+                }
+                $args = array_values($args);
+            } else {
+                 $args = preg_split('/\s+/', $args, $this->methods[$method]['total']);
+            }
 
             // If the minimum arguments are passed, call the method
             if ($this->methods[$method]['required'] <= count($args)) {
