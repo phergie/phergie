@@ -525,7 +525,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                         : '//'
                         )
                      : '');
-                $uri .= !empty($parsed['user']
+                $uri .= !empty($parsed['user'])
                      ? $parsed['user'] .
                         (!empty($parsed['pass'])
                         ? ':' . $parsed['pass']
