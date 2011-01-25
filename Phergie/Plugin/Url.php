@@ -529,7 +529,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                      ? $parsed['user'] .
                         (!empty($parsed['pass'])
                         ? ':' . $parsed['pass']
-                        : '') . '@' : '');
+                        : '') . '@' : '';
             }
             if ($base && !empty($parsed['host'])) {
                 $parsed['host'] = trim($parsed['host']);
