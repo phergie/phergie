@@ -47,7 +47,7 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
      * @var array
      */
     protected $methods = array();
-
+    
     /**
      * Load the Message plugin
      *
@@ -59,6 +59,15 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Message');
     }
 
+    public function getMethods()
+    {
+        if (empty($this->methods)) {
+            $this->populateMethodCache();
+        }
+
+        return array_keys($this->methods);
+    }
+    
     /**
      * Populates the methods cache.
      *
@@ -121,9 +130,9 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
         // Check to ensure the command exists
         $method = self::METHOD_PREFIX . ucfirst($command);
         if (empty($this->methods[$method])) {
-            return;
+            return; /** @todo would be nice if we could trigger something here, like a help page. */
         }
-
+        
         // If no arguments are passed...
         if (empty($args)) {
 
@@ -146,5 +155,6 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
                 );
             }
         }
+        
     }
 }
