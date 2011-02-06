@@ -63,7 +63,7 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
         $this->callbacks = array();
         $functions = spl_autoload_functions();
         if (is_array($functions)) {
-            foreach (spl_autoload_functions() as $callback) {
+            foreach ($functions as $callback) {
                 $this->callbacks[] = $callback;
                 spl_autoload_unregister($callback);
             }
