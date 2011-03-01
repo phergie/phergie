@@ -130,7 +130,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             break;
         }
         $r = $xml->cc->hmid;
-        $hiF = $temperature->getHeatIndex($tempF, $r);
+        $hiF = $temperature->getHeatIndex($tempF, $r/100);
         $hiC = $temperature->convertFahrenheitToCelsius($hiF);
         $weather .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
         $weather .= ', Humidity: ' . (string) $xml->cc->hmid . '%';

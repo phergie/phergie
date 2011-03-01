@@ -45,10 +45,14 @@ class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
      * Issues a quit command when a message is received requesting that the
      * bot terminate the current connection.
      *
+     * @param string $message Optional message to emit when quitting
      * @return void
      */
-    public function onCommandQuit()
+    public function onCommandQuit($message = null)
     {
-        $this->doQuit('Requested by ' . $this->getEvent()->getNick());
+        if ($message === null) {
+            $message = 'Requested by ' . $this->getEvent()->getNick();
+        }
+        $this->doQuit($message);
     }
 }
