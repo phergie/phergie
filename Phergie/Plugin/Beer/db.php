@@ -19,13 +19,9 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
-if (!defined('__DIR__')) {
-    define('__DIR__', dirname(__FILE__));
-}
-
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = __DIR__ . '/beer.db';
+$file = dirname(__FILE__) . '/beer.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -36,7 +32,7 @@ $insert = $db->prepare('INSERT INTO beer (name, link) VALUES (:name, :link)');
 
 // Get raw beerme.com data set
 echo 'Downloading beerme.com data set', PHP_EOL;
-$file = __DIR__ . '/beerlist.txt';
+$file = dirname(__FILE__) . '/beerlist.txt';
 if (!file_exists($file)) {
     copy('http://beerme.com/beerlist.php', $file);
 }
@@ -68,7 +64,7 @@ echo 'Cleaning up', PHP_EOL;
 unlink($file);
 
 // Get and decompress openbeerdb.com data set
-$archive = __DIR__ . '/beers.zip';
+$archive = dirname(__FILE__) . '/beers.zip';
 if (!file_exists($archive)) {
     echo 'openbeerdb.com data set must be downloaded manually from '
         . 'http://www.openbeerdb.com/data', PHP_EOL;
@@ -77,9 +73,9 @@ if (!file_exists($archive)) {
 
 echo 'Decompressing openbeerdb.com data set', PHP_EOL;
 $zip = new ZipArchive;
-$zip->open(__DIR__ . '/beers.zip');
-$zip->extractTo(__DIR__, 'beers/beers.sql');
-$file = __DIR__ . '/beers/beers.sql';
+$zip->open(dirname(__FILE__) . '/beers.zip');
+$zip->extractTo(dirname(__FILE__), 'beers/beers.sql');
+$file = dirname(__FILE__) . '/beers/beers.sql';
 
 // Extract data from data set
 echo 'Processing openbeerdb.com data', PHP_EOL;

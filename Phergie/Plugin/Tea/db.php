@@ -19,13 +19,9 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
-if (!defined('__DIR__')) {
-    define('__DIR__', dirname(__FILE__));
-}
-
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = __DIR__ . '/tea.db';
+$file = dirname(__FILE__) . '/tea.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -36,7 +32,7 @@ $insert = $db->prepare('INSERT INTO tea (name, link) VALUES (:name, :link)');
 
 // Get raw teacuppa.com data set
 echo 'Downloading teacuppa.com data set', PHP_EOL;
-$file = __DIR__ . '/tea-list.html';
+$file = dirname(__FILE__) . '/tea-list.html';
 if (!file_exists($file)) {
     copy('http://www.teacuppa.com/tea-list.asp', $file);
 }

@@ -19,13 +19,9 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
-if (!defined('__DIR__')) {
-    define('__DIR__', dirname(__FILE__));
-}
-
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = __DIR__ . '/cookie.db';
+$file = dirname(__FILE__) . '/cookie.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -36,7 +32,7 @@ $insert = $db->prepare('INSERT INTO cookies (name, link) VALUES (:name, :link)')
 
 // Get Cookies list from http://en.wikipedia.org/wiki/List_of_cookies
 echo 'Downloading data from Wikipedia', PHP_EOL;
-$file = __DIR__ . '/cookieslist.txt';
+$file = dirname(__FILE__) . '/cookieslist.txt';
 if (!file_exists($file)) {
     copy('http://en.wikipedia.org/wiki/List_of_cookies', $file);
 }
