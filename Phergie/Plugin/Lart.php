@@ -151,7 +151,7 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
 
         $term = str_ireplace($connection->getNick(), '$nick', $term);
         if (substr($term, 0, 1) != '/') {
-            $term = '/^' . preg_quote($term, '$/i') . '/';
+            $term = '/^' . preg_quote($term, '/') . '$/i';
         }
         $this->process->execute(array(':name' => $term));
         $row = $this->process->fetchObject();
