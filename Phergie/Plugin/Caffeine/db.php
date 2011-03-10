@@ -19,13 +19,9 @@
  * @link      http://pear.phergie.org/package/Phergie
  */
 
-if (!defined('__DIR__')) {
-    define('__DIR__', dirname(__FILE__));
-}
-
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = __DIR__ . '/caffeine.db';
+$file = dirname(__FILE__) . '/caffeine.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -36,7 +32,7 @@ $insert = $db->prepare('INSERT INTO caffeine (name, link) VALUES (:name, :link)'
 
 // Get raw energyfiend.com data set
 echo 'Downloading energyfiend.com data set', PHP_EOL;
-$file = __DIR__ . '/the-caffeine-database.html';
+$file = dirname(__FILE__) . '/the-caffeine-database.html';
 if (!file_exists($file)) {
     copy('http://www.energyfiend.com/the-caffeine-database', $file);
 }

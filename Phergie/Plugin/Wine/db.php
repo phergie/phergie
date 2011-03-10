@@ -21,7 +21,7 @@
 
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = __DIR__ . '/wine.db';
+$file = dirname(__FILE__) . '/wine.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -31,7 +31,7 @@ $db->exec('CREATE UNIQUE INDEX wine_name ON wine (name)');
 $insert = $db->prepare('INSERT INTO wine (name, link) VALUES (:name, :link)');
 
 // Get and decompress lcboapi.com data set
-$outer = __DIR__ . '/current.zip';
+$outer = dirname(__FILE__) . '/current.zip';
 if (!file_exists($outer)) {
     echo 'Downloading lcboapi.com data set', PHP_EOL;
     copy('http://lcboapi.com/download/current.zip', $outer);
@@ -41,14 +41,14 @@ echo 'Decompressing lcboapi.com data set', PHP_EOL;
 $zip = new ZipArchive;
 $zip->open($outer);
 $stat = $zip->statIndex(0);
-$inner = __DIR__ . '/' . $stat['name'];
-$zip->extractTo(__DIR__);
+$inner = dirname(__FILE__) . '/' . $stat['name'];
+$zip->extractTo(dirname(__FILE__));
 $zip->close();
 $zip = new ZipArchive;
 $zip->open($inner);
 $stat = $zip->statIndex(0);
-$file = __DIR__ . '/' . $stat['name'];
-$zip->extractTo(__DIR__);
+$file = dirname(__FILE__) . '/' . $stat['name'];
+$zip->extractTo(dirname(__FILE__));
 $zip->close();
 
 // Aggregate data set into the database
