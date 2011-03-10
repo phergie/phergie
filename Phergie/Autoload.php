@@ -37,7 +37,7 @@ class Phergie_Autoload
      */
     public function __construct()
     {
-        self::addPath(realpath(dirname(__FILE__) . '/..'));
+        self::addPath(dirname(dirname(__FILE__)));
     }
 
     /**

@@ -19,7 +19,7 @@
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
 
-defined('PHERGIE_BASE_PATH') or define('PHERGIE_BASE_PATH', realpath(dirname(__FILE__) . '/../..'));
+defined('PHERGIE_BASE_PATH') or define('PHERGIE_BASE_PATH', dirname(dirname(dirname(__FILE__))));
 
 require_once PHERGIE_BASE_PATH . '/Phergie/Autoload.php';
 
@@ -57,7 +57,7 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $reflector = new ReflectionClass('PHPUnit_Framework_TestCase');
-        $phpunitPath = realpath(dirname($reflector->getFileName()) . '/../..');
+        $phpunitPath = dirname(dirname(dirname($reflector->getFileName())));
 
         $this->includePath = set_include_path('.' . PATH_SEPARATOR . $phpunitPath);
         $this->callbacks = array();

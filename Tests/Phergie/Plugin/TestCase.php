@@ -89,7 +89,7 @@ abstract class Phergie_Plugin_TestCase extends Phergie_TestCase
      */
     protected function getPluginsPath($subpath = null)
     {
-        $path = realpath(dirname(__FILE__) . '/../../../Phergie/Plugin');
+        $path = dirname(dirname(dirname(dirname(__FILE__)))) . '/Phergie/Plugin';
         if (!empty($subpath)) {
             $path .= '/' . ltrim($subpath, '/');
         }
