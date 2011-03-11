@@ -33,7 +33,7 @@ class Phergie_Bot
     /**
      * Current version of Phergie
      */
-    const VERSION = '2.0.1';
+    const VERSION = '2.0.5';
 
     /**
      * Current driver instance
