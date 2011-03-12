@@ -21,8 +21,8 @@
                 <property file="./build.properties" />
             </then>
             <else>
-                <input propertyname="build.srcdir" defaultvalue="./" message="Source directory" /> 
-                <input propertyname="build.dstdir" defaultvalue="./" message="Destination directory" /> 
+                <input propertyname="build.srcdir" defaultvalue="./" message="Source directory" />
+                <input propertyname="build.dstdir" defaultvalue="./" message="Destination directory" />
                 <input propertyname="build.version.release" message="Release version" />
                 <input propertyname="build.version.api" message="API version" />
                 <input propertyname="build.stability.release" defaultvalue="stable" message="Release stability" validArgs="snapshot,devel,alpha,beta,stable" />
@@ -175,7 +175,7 @@
     </target>
 
     <target name="plugin" depends="input">
-        
+
         <if>
             <equals arg1="${have_properties_file}" arg2="true" />
             <then>
@@ -230,7 +230,7 @@
     </target>
 
     <target name="docs" depends="input">
-        
+
         <property name="build.tmpdir" value="Phergie_Docs-${build.version.release}" />
         <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
 
