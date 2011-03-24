@@ -170,7 +170,7 @@ class Phergie_Event_HandlerTest extends PHPUnit_Framework_TestCase
         $this->addMockEvent($type, $args);
         $events = $this->events->getEvents();
         $event = array_shift($events);
-        $this->assertType('Phergie_Event_Command', $event);
+        $this->assertInstanceOf('Phergie_Event_Command', $event);
         $this->assertSame($this->plugin, $event->getPlugin());
         $this->assertSame($type, $event->getType());
         $this->assertSame($args, $event->getArguments());

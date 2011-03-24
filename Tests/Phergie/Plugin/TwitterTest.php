@@ -51,6 +51,6 @@ abstract class Phergie_Plugin_TwitterTest extends Phergie_Plugin_TestCase
      */
     public function testTwitterClass()
     {
-        $this->assertType('Twitter', $this->plugin->getTwitter());
+        $this->assertInstanceOf('Twitter', $this->plugin->getTwitter());
     }
 }

@@ -166,7 +166,7 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
 
         $connection = new Phergie_Connection($options);
         $hostmask = $connection->getHostmask();
-        $this->assertType('Phergie_Hostmask', $hostmask);
+        $this->assertInstanceOf('Phergie_Hostmask', $hostmask);
     }
 
     /**

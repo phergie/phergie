@@ -85,7 +85,7 @@ class Phergie_BotTest extends Phergie_TestCase
     {
         file_put_contents('Settings.php', '<?php return array();');
         $config = $this->bot->getConfig();
-        $this->assertType('Phergie_Config', $config);
+        $this->assertInstanceOf('Phergie_Config', $config);
         unlink('Settings.php');
     }
 
@@ -135,7 +135,7 @@ class Phergie_BotTest extends Phergie_TestCase
     public function testGetDriverReturnsDefault()
     {
         $this->bot->setConfig($this->getMockConfig());
-        $this->assertType('Phergie_Driver_Streams', $this->bot->getDriver());
+        $this->assertInstanceOf('Phergie_Driver_Streams', $this->bot->getDriver());
     }
 
     /**
@@ -149,7 +149,7 @@ class Phergie_BotTest extends Phergie_TestCase
         $this->getMockDriver();
         $this->bot->setConfig($this->getMockConfig());
         $this->setConfig('driver', 'Mock');
-        $this->assertType('Phergie_Driver_Mock', $this->bot->getDriver());
+        $this->assertInstanceOf('Phergie_Driver_Mock', $this->bot->getDriver());
     }
 
     /**
@@ -174,7 +174,7 @@ class Phergie_BotTest extends Phergie_TestCase
         $config = $this->getMockConfig();
         $this->bot->setConfig($config);
         $plugins = $this->bot->getPluginHandler();
-        $this->assertType('Phergie_Plugin_Handler', $plugins);
+        $this->assertInstanceOf('Phergie_Plugin_Handler', $plugins);
     }
 
     /**
@@ -197,7 +197,7 @@ class Phergie_BotTest extends Phergie_TestCase
     public function testGetEventHandler()
     {
         $events = $this->bot->getEventHandler();
-        $this->assertType('Phergie_Event_Handler', $events);
+        $this->assertInstanceOf('Phergie_Event_Handler', $events);
     }
 
     /**
@@ -220,7 +220,7 @@ class Phergie_BotTest extends Phergie_TestCase
     public function testGetConnectionHandler()
     {
         $connections = $this->bot->getConnectionHandler();
-        $this->assertType('Phergie_Connection_Handler', $connections);
+        $this->assertInstanceOf('Phergie_Connection_Handler', $connections);
     }
 
     /**
@@ -244,7 +244,7 @@ class Phergie_BotTest extends Phergie_TestCase
     {
         $this->bot->setConfig($this->getMockConfig());
         $ui = $this->bot->getUi();
-        $this->assertType('Phergie_Ui_Console', $ui);
+        $this->assertInstanceOf('Phergie_Ui_Console', $ui);
     }
 
     /**
@@ -270,7 +270,7 @@ class Phergie_BotTest extends Phergie_TestCase
         $config = $this->getMockConfig();
         $this->bot->setConfig($config);
         $processor = $this->bot->getProcessor();
-        $this->assertType('Phergie_Process_Standard', $processor);
+        $this->assertInstanceOf('Phergie_Process_Standard', $processor);
     }
 
     /**
@@ -288,7 +288,7 @@ class Phergie_BotTest extends Phergie_TestCase
             array($this->bot),
             'Phergie_Process_Mock'
         );
-        $this->assertType('Phergie_Process_Mock', $this->bot->getProcessor());
+        $this->assertInstanceOf('Phergie_Process_Mock', $this->bot->getProcessor());
     }
 
     /**

@@ -113,7 +113,7 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
     public function testGetDb()
     {
         $db = $this->plugin->getDb();
-        $this->assertType('PDO', $db);
+        $this->assertInstanceOf('PDO', $db);
     }
 
     /**
