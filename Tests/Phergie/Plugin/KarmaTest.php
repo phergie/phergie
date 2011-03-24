@@ -166,7 +166,7 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
         $term = 'phergie';
         $this->createMockDatabase();
         $event = $this->initiateKarmaEvent($term);
-        $this->checkForKarmaResponse($event, $term, 'phergie has karma of awesome.');
+        $this->checkForKarmaResponse($event, $term, 'phergie has karma of awesome');
     }
 
     /**
