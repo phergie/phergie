@@ -936,12 +936,12 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         $this->writeEventToSocket(0, ':Elazar!~Elazar@yakko.itrebal.com ' . $event);
 
         $event = $this->driver->getEvent();
-        $this->assertType('Phergie_Event_Request', $event);
+        $this->assertInstanceOf('Phergie_Event_Request', $event);
         $this->assertEquals($type, $event->getType());
         $this->assertEquals($arguments, $event->getArguments());
 
         $hostmask = $event->getHostmask();
-        $this->assertType('Phergie_Hostmask', $hostmask);
+        $this->assertInstanceOf('Phergie_Hostmask', $hostmask);
         $this->assertEquals('Elazar', $hostmask->getNick());
         $this->assertEquals('~Elazar', $hostmask->getUsername());
         $this->assertEquals('yakko.itrebal.com', $hostmask->getHost());
@@ -965,14 +965,14 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         );
 
         $event = $this->driver->getEvent();
-        $this->assertType('Phergie_Event_Request', $event);
+        $this->assertInstanceOf('Phergie_Event_Request', $event);
         $this->assertEquals('notice', $event->getType());
         $this->assertEquals(
             array('*', '*** Looking up your hostname...'), $event->getArguments()
         );
 
         $hostmask = $event->getHostmask();
-        $this->assertType('Phergie_Hostmask', $hostmask);
+        $this->assertInstanceOf('Phergie_Hostmask', $hostmask);
         $this->assertNull($hostmask->getNick());
         $this->assertNull($hostmask->getUsername());
         $this->assertEquals('verne.freenode.net', $hostmask->getHost());
@@ -996,7 +996,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
         );
 
         $event = $this->driver->getEvent();
-        $this->assertType('Phergie_Event_Response', $event);
+        $this->assertInstanceOf('Phergie_Event_Response', $event);
         $this->assertEquals('response', $event->getType());
         $this->assertEquals('376', $event->getCode());
         $this->assertEquals('End of /MOTD command.', $event->getDescription());
