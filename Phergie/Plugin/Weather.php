@@ -140,13 +140,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $weather .=
             ', Conditions: ' . (string) $xml->cc->t .
             ', Updated: ' . (string) $xml->cc->lsup .
-            ' [ http://weather.com/weather/today/' .
-            str_replace(
-                array('(', ')', ',', ' '),
-                array('', '', '', '+'),
-                (string) $xml->loc->dnam
-            ) .
-            ' ]';
+            ' [ http://weather.com/weather/today/' . $where . ']';
 
         $this->doPrivmsg($this->event->getSource(), $nick . ': ' . $weather);
     }
