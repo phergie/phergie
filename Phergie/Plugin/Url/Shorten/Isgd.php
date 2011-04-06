@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Php
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Shortens urls via the is.gd service
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Url
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -32,7 +32,7 @@ class Phergie_Plugin_Url_Shorten_Isgd extends Phergie_Plugin_Url_Shorten_Abstrac
 {
     /**
      * is.gd says their URL will most likely never be longer than 18 characters
-     * @link http://is.gd/tech.php
+     * @link http://is.gd/faq.php#length
      *
      * @var integer
      */
