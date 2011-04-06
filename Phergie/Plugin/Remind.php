@@ -226,7 +226,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     protected function deliverReminders($channel, $nick)
     {
-        if ($channel[0] != '#') {
+        if (!$this->getEvent()->isInChannel()) {
             // private message, not a channel, so don't check
             return;
         }
