@@ -57,7 +57,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             $this->fail(
                 'weather.partner_id and weather.license_key must be specified'
             );
-        }
+        } 
     }
 
     /**
@@ -69,30 +69,89 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
      */
     public function onCommandWeather($location)
     {
-        $response = $this->plugins->http->get(
+		try
+		{	
+			$this->doPrivmsg($this->event->getSource(), $this->event->getNick() . ': ' . $this->getWeatherReport($location));
+		}
+		catch(Exception $e)
+		{
+			$this->doNotice(
+				$this->event->getNick(),
+				$e->getMessage()
+			);	
+		}
+    }
+
+	/**
+	 * Generates a weather report for a specified location
+	 *
+	 * @return void
+	 */
+	protected function getWeatherReport($location)
+	{
+		$conditions = $this->getWeatherData($location);
+ 
+		$report = 'Weather for ' . $conditions['cityName'] . ' - ';
+
+		$temperature = $this->getPluginHandler()->getPlugin('Temperature');
+        switch ($conditions['tempUnit']) 
+		{
+        case 'F':
+        	$tempF = $conditions['temp'];
+            $tempC = $temperature->convertFahrenheitToCelsius($tempF);
+            break;
+        case 'C':
+            $tempC = $conditions['temp'];
+            $tempF = $temperature->convertCelsiusToFahrenheit($tempC);
+            break;
+        default:
+            throw new Exception('ERROR: No scale information given.');
+            break;
+        }
+
+        $hiF = $temperature->getHeatIndex($tempF, $conditions['relativeHumidity']/100);
+        $hiC = $temperature->convertFahrenheitToCelsius($hiF);
+        $report .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
+        $report .= ', Humidity: ' . $conditions['relativeHumidity'] . '%';
+        if ($hiF > $tempF || $hiC > $tempC) {
+            $weather .= ', Heat Index: ' . $hiF . 'F/' . $hiC . 'C';
+        }
+        $report .=
+            ', Conditions: ' . (string) $conditions['weatherDescriptionPhrase'] .
+            ', Updated: ' . (string) $conditions['observationDateTime'] .
+            ' [ http://weather.com/weather/today/' . $conditions['locationCode'] . ']';
+
+		return $report;
+	}
+
+	/**
+	 * Retrieve TWCi Content
+	 *
+	 * @return array weather conditions
+	 */
+	public function getWeatherData($location)
+	{
+		$response = $this->getPluginHandler()->getPlugin('Http')->get(
             'http://xoap.weather.com/search/search',
             array('where' => $location)
         );
-
-        if ($response->isError()) {
-            $this->doNotice(
-                $this->event->getNick(),
-                'ERROR: ' . $response->getCode() . ' ' . $response->getMessage()
-            );
-            return;
+        
+		if ($response->isError()) {
+			throw new Exception('ERROR: ' . $response->getMessage() . ' ' . $response->getCode());
         }
 
-        $nick = $this->event->getNick();
+		$xml = $response->getContent();
 
-        $xml = $response->getContent();
         if (count($xml->loc) == 0) {
-            $this->doNotice($nick, 'No results for that location.');
-            return;
+			throw new Exception('No results for that location');
         }
 
-        $where = (string) $xml->loc[0]['id'];
-        $response = $this->plugins->http->get(
-            'http://xoap.weather.com/weather/local/' . $where,
+        $locId = (string) $xml->loc[0]['id'];
+
+        $response = $this->getPluginHandler()
+						 ->getPlugin('Http')
+						 ->get(
+			'http://xoap.weather.com/weather/local/' . $locId,
             array(
                 'cc' => '*',
                 'link' => 'xoap',
@@ -103,45 +162,33 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         );
 
         if ($response->isError()) {
-            $this->doNotice(
-                $this->event->getNick(),
-                'ERROR: ' . $response->getCode() . ' ' . $response->getMessage()
-            );
-            return;
+            throw new Exception('ERROR: ' . $response->getMessage() . ' ' . $response->getCode());
         }
 
-        $temperature = $this->plugins->getPlugin('Temperature');
-        $xml = $response->getContent();
-        $weather = 'Weather for ' . (string) $xml->loc->dnam . ' - ';
-        switch ($xml->head->ut) {
-        case 'F':
-            $tempF = $xml->cc->tmp;
-            $tempC = $temperature->convertFahrenheitToCelsius($tempF);
-            break;
-        case 'C':
-            $tempC = $xml->cc->tmp;
-            $tempF = $temperature->convertCelsiusToFahrenheit($tempC);
-            break;
-        default:
-            $this->doNotice(
-                $this->event->getNick(),
-                'ERROR: No scale information given.'
-            );
-            break;
-        }
-        $r = $xml->cc->hmid;
-        $hiF = $temperature->getHeatIndex($tempF, $r/100);
-        $hiC = $temperature->convertFahrenheitToCelsius($hiF);
-        $weather .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
-        $weather .= ', Humidity: ' . (string) $xml->cc->hmid . '%';
-        if ($hiF > $tempF || $hiC > $tempC) {
-            $weather .= ', Heat Index: ' . $hiF . 'F/' . $hiC . 'C';
-        }
-        $weather .=
-            ', Conditions: ' . (string) $xml->cc->t .
-            ', Updated: ' . (string) $xml->cc->lsup .
-            ' [ http://weather.com/weather/today/' . $where . ']';
-
-        $this->doPrivmsg($this->event->getSource(), $nick . ': ' . $weather);
-    }
+		$data = $response->getContent();
+        return array(
+            'locationCode'=>"{$locId}",
+            'cityName'=>"{$data->loc->dnam}",
+            'observationDateTime'=>"{$data->cc->lsup}",
+            'observationPoint'=>"{$data->cc->obst}",
+            'temp'=>"{$data->cc->tmp}",
+            'feelsLikeTemp'=>"{$data->cc->flik}",
+            'tempUnit'=>"{$data->head->ut}",
+            'weatherDescriptionPhrase'=>"{$data->cc->t}",
+            'barometricPressure'=>"{$data->cc->bar->r}",
+            'barometricTrend'=>"{$data->cc->bar->d}",
+            'windSpeed'=>"{$data->cc->wind->s}",
+            'windGust'=>"{$data->cc->wind->gust}",
+            'windDirection'=>"{$data->cc->wind->d}",
+            'windDirectionPhrase'=>"{$data->cc->wind->t}",
+            'relativeHumidity'=>"{$data->cc->hmid}",
+            'visibility'=>"{$data->cc->vis}",
+            'uvIndex'=>"{$data->cc->uv->i}",
+            'uvIndexDescription'=>"{$data->cc->uv->t}",
+            'dewPoint'=>"{$data->cc->dewp}",
+            'sunrise'=>"{$data->loc->sunr}",
+            'sunset'=>"{$data->loc->suns}",
+            'moonPhaseDescription'=>"{$data->cc->moon->t}",
+        );
+	}
 }
