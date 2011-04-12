@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This document is intended only for use by authorized licensees of The  -->
+<!-- Weather Channel. Unauthorized use is prohibited.  Copyright 1995-2011, -->
+<!-- The Weather Channel Interactive, Inc.  All Rights Reserved.            -->
+<weather ver="2.0">
+  <head>
+	<locale>en_US</locale>
+	<form>MEDIUM</form>
+	<ut>F</ut>
+	<ud>mi</ud>
+
+	<us>mph</us>
+	<up>in</up>
+	<ur>in</ur>
+  </head>
+  <loc id="USGA0028">
+	<dnam>Atlanta, GA</dnam>
+	<tm>1:37 PM</tm>
+
+	<lat>33.75</lat>
+	<lon>-84.39</lon>
+	<sunr>7:32 AM</sunr>
+	<suns>7:54 PM</suns>
+	<zone>-5</zone>
+  </loc>
+
+  <lnks type="prmo">
+	<link pos="1">
+	  <l>http://www.weather.com/allergies?par=xoap&amp;site=textlink&amp;cm_ven=XOAP&amp;cm_cat=TextLink&amp;cm_pla=Link1&amp;cm_ite=Allergies</l>
+	  <t>Local Pollen Reports</t>
+	</link>
+
+	<link pos="2">
+	  <l>http://www.weather.com/flights?par=xoap&amp;site=textlink&amp;cm_ven=XOAP&amp;cm_cat=TextLink&amp;cm_pla=Link2&amp;cm_ite=BusinessTraveler</l>
+	  <t>Airport Conditions</t>
+	</link>
+	<link pos="3">
+
+	  <l>http://www.weather.com/garden?par=xoap&amp;site=textlink&amp;cm_ven=XOAP&amp;cm_cat=TextLink&amp;cm_pla=Link3&amp;cm_ite=Garden</l>
+	  <t>Lawn and Garden Weather</t>
+	</link>
+	<link pos="4">
+	  <l>http://www.weather.com/traffic?par=xoap&amp;site=textlink&amp;cm_ven=XOAP&amp;cm_cat=TextLink&amp;cm_pla=Link4&amp;cm_ite=Traffic</l>
+
+	  <t>Rush Hour Traffic</t>
+	</link>
+  </lnks>
+  <cc>
+	<lsup>3/27/11 12:52 PM EDT</lsup>
+	<obst>Hartsfield-Jackson Atlanta International, GA</obst>
+	<tmp>51</tmp>
+
+	<flik>51</flik>
+	<t>Fog</t>
+	<icon>20</icon>
+	<bar>
+	  <r>29.89</r>
+	  <d>rising</d>
+
+	</bar>
+	<wind>
+	  <s>5</s>
+	  <gust>N/A</gust>
+	  <d>260</d>
+	  <t>W</t>
+	</wind>
+
+	<hmid>96</hmid>
+	<vis>2.5</vis>
+	<uv>
+	  <i>1</i>
+	  <t>Low</t>
+	</uv>
+	<dewp>50</dewp>
+
+	<moon>
+	  <icon>23</icon>
+	  <t>Waning Crescent</t>
+	</moon>
+  </cc>
+</weather>
