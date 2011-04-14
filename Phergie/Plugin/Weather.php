@@ -54,9 +54,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         if (empty($this->config['weather.partner_id'])
             || empty($this->config['weather.license_key'])
         ) {
-            $this->fail(
-                'weather.partner_id and weather.license_key must be specified'
-            );
+            $this->fail('weather.partner_id and weather.license_key must be specified');
         } 
     }
 
@@ -69,35 +67,34 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
      */
     public function onCommandWeather($location)
     {
-		try
-		{	
-			$this->doPrivmsg($this->event->getSource(), $this->event->getNick() . ': ' . $this->getWeatherReport($location));
-		}
-		catch(Exception $e)
-		{
-			$this->doNotice(
-				$this->event->getNick(),
-				$e->getMessage()
-			);	
-		}
+        try
+        {
+            $this->doPrivmsg($this->event->getSource(), $this->event->getNick() . ': ' . $this->getWeatherReport($location));
+        }
+        catch(Exception $e)
+        {
+            $this->doNotice($this->event->getNick(), $e->getMessage());	
+        }
     }
 
-	/**
-	 * Generates a weather report for a specified location
-	 *
-	 * @return void
-	 */
-	protected function getWeatherReport($location)
-	{
-		$conditions = $this->getWeatherData($location);
+    /**
+     *  Generates a weather report for a specified location
+     *
+     *  @param string $location name of place to retrieve weather report for
+     *
+     *  @return void
+     */
+    protected function getWeatherReport($location)
+    {
+        $conditions = $this->getWeatherData($location);
  
-		$report = 'Weather for ' . $conditions['cityName'] . ' - ';
+        $report = 'Weather for ' . $conditions['cityName'] . ' - ';
 
-		$temperature = $this->getPluginHandler()->getPlugin('Temperature');
+        $temperature = $this->getPluginHandler()->getPlugin('Temperature');
         switch ($conditions['tempUnit']) 
-		{
+        {
         case 'F':
-        	$tempF = $conditions['temp'];
+            $tempF = $conditions['temp'];
             $tempC = $temperature->convertFahrenheitToCelsius($tempF);
             break;
         case 'C':
@@ -109,8 +106,8 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             break;
         }
 
-        $hiF = $temperature->getHeatIndex($tempF, $conditions['relativeHumidity']/100);
-        $hiC = $temperature->convertFahrenheitToCelsius($hiF);
+        $hiF     = $temperature->getHeatIndex($tempF, $conditions['relativeHumidity']/100);
+        $hiC     = $temperature->convertFahrenheitToCelsius($hiF);
         $report .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
         $report .= ', Humidity: ' . $conditions['relativeHumidity'] . '%';
         if ($hiF > $tempF || $hiC > $tempC) {
@@ -121,51 +118,51 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             ', Updated: ' . (string) $conditions['observationDateTime'] .
             ' [ http://weather.com/weather/today/' . $conditions['locationCode'] . ']';
 
-		return $report;
-	}
+        return $report;
+    }
 
-	/**
-	 * Retrieve TWCi Content
-	 *
-	 * @return array weather conditions
-	 */
-	public function getWeatherData($location)
-	{
-		$response = $this->getPluginHandler()->getPlugin('Http')->get(
-            'http://xoap.weather.com/search/search',
-            array('where' => $location)
-        );
+    /**
+     * Retrieve TWCi Content
+     *
+     * @param string $location place to retrieve weather data for
+     *
+     * @return array weather conditions
+     */
+    public function getWeatherData($location)
+    {
+        $response = $this->getPluginHandler()
+                         ->getPlugin('Http')
+                         ->get('http://xoap.weather.com/search/search',
+                                array('where' => $location));
         
-		if ($response->isError()) {
-			throw new Exception('ERROR: ' . $response->getMessage() . ' ' . $response->getCode());
+        if ($response->isError()) {
+            throw new Exception('ERROR: ' . $response->getMessage() . ' ' . $response->getCode());
         }
 
-		$xml = $response->getContent();
+        $xml = $response->getContent();
 
         if (count($xml->loc) == 0) {
-			throw new Exception('No results for that location');
+            throw new Exception('No results for that location');
         }
 
         $locId = (string) $xml->loc[0]['id'];
 
         $response = $this->getPluginHandler()
-						 ->getPlugin('Http')
-						 ->get(
-			'http://xoap.weather.com/weather/local/' . $locId,
-            array(
-                'cc' => '*',
-                'link' => 'xoap',
-                'prod' => 'xoap',
-                'par' => $this->config['weather.partner_id'],
-                'key' => $this->config['weather.license_key'],
-            )
-        );
+                         ->getPlugin('Http')
+                         ->get('http://xoap.weather.com/weather/local/' . $locId,
+                                array(
+                                    'cc' => '*',
+                                    'link' => 'xoap',
+                                    'prod' => 'xoap',
+                                    'par' => $this->config['weather.partner_id'],
+                                    'key' => $this->config['weather.license_key'],
+                                ));
 
         if ($response->isError()) {
             throw new Exception('ERROR: ' . $response->getMessage() . ' ' . $response->getCode());
         }
 
-		$data = $response->getContent();
+        $data = $response->getContent();
         return array(
             'locationCode'=>"{$locId}",
             'cityName'=>"{$data->loc->dnam}",
@@ -190,5 +187,5 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             'sunset'=>"{$data->loc->suns}",
             'moonPhaseDescription'=>"{$data->cc->moon->t}",
         );
-	}
+    }
 }
