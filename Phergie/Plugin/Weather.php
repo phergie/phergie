@@ -54,7 +54,9 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         if (empty($this->config['weather.partner_id'])
             || empty($this->config['weather.license_key'])
         ) {
-            $this->fail('weather.partner_id and weather.license_key must be specified');
+            $this->fail(
+                'weather.partner_id and weather.license_key must be specified'
+            );
         } 
     }
 
@@ -69,7 +71,10 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     {
         try
         {
-            $this->doPrivmsg($this->event->getSource(), $this->event->getNick() . ': ' . $this->getWeatherReport($location));
+            $this->doPrivmsg(
+                $this->event->getSource(), 
+                $this->event->getNick() . ': ' . $this->getWeatherReport($location)
+            );
         }
         catch(Exception $e)
         {
@@ -116,7 +121,8 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $report .=
             ', Conditions: ' . (string) $conditions['weatherDescriptionPhrase'] .
             ', Updated: ' . (string) $conditions['observationDateTime'] .
-            ' [ http://weather.com/weather/today/' . $conditions['locationCode'] . ']';
+            ' [ http://weather.com/weather/today/' . 
+            $conditions['locationCode'] . ']';
 
         return $report;
     }
@@ -131,12 +137,16 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     public function getWeatherData($location)
     {
         $response = $this->getPluginHandler()
-                         ->getPlugin('Http')
-                         ->get('http://xoap.weather.com/search/search',
-                                array('where' => $location));
+            ->getPlugin('Http')
+            ->get(
+                'http://xoap.weather.com/search/search', 
+                array('where' => $location)
+            );
         
         if ($response->isError()) {
-            throw new Exception('ERROR: ' . $response->getMessage() . ' ' . $response->getCode());
+            throw new Exception(
+                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
+            );
         }
 
         $xml = $response->getContent();
@@ -148,18 +158,22 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $locId = (string) $xml->loc[0]['id'];
 
         $response = $this->getPluginHandler()
-                         ->getPlugin('Http')
-                         ->get('http://xoap.weather.com/weather/local/' . $locId,
-                                array(
-                                    'cc' => '*',
-                                    'link' => 'xoap',
-                                    'prod' => 'xoap',
-                                    'par' => $this->config['weather.partner_id'],
-                                    'key' => $this->config['weather.license_key'],
-                                ));
+            ->getPlugin('Http')
+            ->get(
+                'http://xoap.weather.com/weather/local/' . $locId,
+                array(
+                    'cc' => '*',
+                    'link' => 'xoap',
+                    'prod' => 'xoap',
+                    'par' => $this->config['weather.partner_id'],
+                    'key' => $this->config['weather.license_key'],
+                )
+            );
 
         if ($response->isError()) {
-            throw new Exception('ERROR: ' . $response->getMessage() . ' ' . $response->getCode());
+            throw new Exception(
+                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
+            );
         }
 
         $data = $response->getContent();

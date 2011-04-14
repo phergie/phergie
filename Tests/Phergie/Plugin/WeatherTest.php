@@ -79,14 +79,14 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
                   ->method('getContent')
                   ->will($this->returnValue(simplexml_load_file(dirname(__FILE__) . '/Weather/_files/conditions.xml')));
 
-        $this->data = $this->getMock("Phergie_Plugin_Http", array('get'));
+        $this->_data = $this->getMock("Phergie_Plugin_Http", array('get'));
 
-        $this->data->expects($this->any())
+        $this->_data->expects($this->any())
                    ->method("get")
                    ->will($this->onConsecutiveCalls($response1, $response2));
 
-        $this->temperature = $this->getMock('Phergie_Plugin_Temperature');
-        $this->temperature->expects($this->any())
+        $this->_temperature = $this->getMock('Phergie_Plugin_Temperature');
+        $this->_temperature->expects($this->any())
                           ->method('convertFahrenheitToCelsius')
                           ->will($this->returnValue(10.5));
 
@@ -107,9 +107,9 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
         $args = func_get_args();
 
         if ($args[0] == 'Http') {
-            return $this->data;
+            return $this->_data;
         } else {
-            return $this->temperature;
+            return $this->_temperature;
         }
     }
 
@@ -159,7 +159,7 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
 
         $this->assertEmitsEvent('privmsg', 
                                 array($this->source, 
-                                $this->weatherReport));
+                                $this->_weatherReport));
 
         $report = $this->plugin->onCommandWeather('atlanta');
     }
