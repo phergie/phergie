@@ -111,7 +111,9 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             break;
         }
 
-        $hiF     = $temperature->getHeatIndex($tempF, $conditions['relativeHumidity']/100);
+        $hiF     = $temperature->getHeatIndex(
+            $tempF, $conditions['relativeHumidity']/100
+        );
         $hiC     = $temperature->convertFahrenheitToCelsius($hiF);
         $report .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
         $report .= ', Humidity: ' . $conditions['relativeHumidity'] . '%';
