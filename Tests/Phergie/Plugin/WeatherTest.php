@@ -62,38 +62,38 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
         $response1 = $this->getMock('Phergie_Plugin_Http_Response');
 
         $response1->expects($this->any())
-                  ->method('isError')
-                  ->will($this->returnValue(false));
+            ->method('isError')
+            ->will($this->returnValue(false));
 
         $response1->expects($this->any())
-                  ->method('getContent')
-                  ->will($this->returnValue(simplexml_load_file(dirname(__FILE__) . '/Weather/_files/location.xml')));
+            ->method('getContent')
+            ->will($this->returnValue(simplexml_load_file(dirname(__FILE__) . '/Weather/_files/location.xml')));
 
         $response2 = $this->getMock('Phergie_Plugin_Http_Response');
 
         $response2->expects($this->any())
-                  ->method('isError')
-                  ->will($this->returnValue(false));
+            ->method('isError')
+            ->will($this->returnValue(false));
 
         $response2->expects($this->any())
-                  ->method('getContent')
-                  ->will($this->returnValue(simplexml_load_file(dirname(__FILE__) . '/Weather/_files/conditions.xml')));
+            ->method('getContent')
+            ->will($this->returnValue(simplexml_load_file(dirname(__FILE__) . '/Weather/_files/conditions.xml')));
 
         $this->_data = $this->getMock("Phergie_Plugin_Http", array('get'));
 
         $this->_data->expects($this->any())
-                   ->method("get")
-                   ->will($this->onConsecutiveCalls($response1, $response2));
+            ->method("get")
+            ->will($this->onConsecutiveCalls($response1, $response2));
 
         $this->_temperature = $this->getMock('Phergie_Plugin_Temperature');
         $this->_temperature->expects($this->any())
-                          ->method('convertFahrenheitToCelsius')
-                          ->will($this->returnValue(10.5));
+            ->method('convertFahrenheitToCelsius')
+            ->will($this->returnValue(10.5));
 
         $this->getMockPluginHandler()
-             ->expects($this->any())
-             ->method('getPlugin')
-             ->will($this->returnCallback(array($this,'callback')));
+            ->expects($this->any())
+            ->method('getPlugin')
+            ->will($this->returnCallback(array($this,'callback')));
     }
 
     /**
@@ -157,9 +157,11 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
         $event = $this->getMockEvent('weathercommand');
         $this->plugin->setEvent($event);
 
-        $this->assertEmitsEvent('privmsg', 
-                                array($this->source, 
-                                $this->_weatherReport));
+        $this->assertEmitsEvent(
+            'privmsg', 
+            array($this->source, 
+            $this->_weatherReport)
+        );
 
         $report = $this->plugin->onCommandWeather('atlanta');
     }
