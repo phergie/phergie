@@ -69,15 +69,12 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
      */
     public function onCommandWeather($location)
     {
-        try
-        {
+        try {
             $this->doPrivmsg(
                 $this->event->getSource(),
                 $this->event->getNick() . ': ' . $this->getWeatherReport($location)
             );
-        }
-        catch(Exception $e)
-        {
+        } catch(Phergie_Exception $e) {
             $this->doNotice($this->event->getNick(), $e->getMessage());
         }
     }
@@ -107,7 +104,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             $tempF = $temperature->convertCelsiusToFahrenheit($tempC);
             break;
         default:
-            throw new Exception('ERROR: No scale information given.');
+            throw new Phergie_Exception('ERROR: No scale information given.');
             break;
         }
 
@@ -146,7 +143,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             );
 
         if ($response->isError()) {
-            throw new Exception(
+            throw new Phergie_Exception(
                 'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
             );
         }
@@ -154,7 +151,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $xml = $response->getContent();
 
         if (count($xml->loc) == 0) {
-            throw new Exception('No results for that location');
+            throw new Phergie_Exception('No results for that location');
         }
 
         $locId = (string) $xml->loc[0]['id'];
@@ -173,7 +170,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             );
 
         if ($response->isError()) {
-            throw new Exception(
+            throw new Phergie_Exception(
                 'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
             );
         }
