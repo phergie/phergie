@@ -78,7 +78,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         }
         catch(Exception $e)
         {
-            $this->doNotice($this->event->getNick(), $e->getMessage());	
+            $this->doNotice($this->event->getNick(), $e->getMessage());
         }
     }
 
@@ -92,11 +92,11 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     protected function getWeatherReport($location)
     {
         $conditions = $this->getWeatherData($location);
- 
+
         $report = 'Weather for ' . $conditions['cityName'] . ' - ';
 
         $temperature = $this->getPluginHandler()->getPlugin('Temperature');
-        switch ($conditions['tempUnit']) 
+        switch ($conditions['tempUnit'])
         {
         case 'F':
             $tempF = $conditions['temp'];
@@ -123,7 +123,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $report .=
             ', Conditions: ' . (string) $conditions['weatherDescriptionPhrase'] .
             ', Updated: ' . (string) $conditions['observationDateTime'] .
-            ' [ http://weather.com/weather/today/' . 
+            ' [ http://weather.com/weather/today/' .
             $conditions['locationCode'] . ' ]';
 
         return $report;
@@ -141,7 +141,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $response = $this->getPluginHandler()
             ->getPlugin('Http')
             ->get(
-                'http://xoap.weather.com/search/search', 
+                'http://xoap.weather.com/search/search',
                 array('where' => $location)
             );
 

@@ -54,17 +54,11 @@ class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
             ->method('getContent')
             ->will($this->returnValue($this->chayism));
 
-        $plugin = $this->getMock('Phergie_Plugin_Http', array('get'));
+        $plugin = $this->requirePlugin('Http');
         $plugin
             ->expects($this->any())
             ->method('get')
             ->will($this->returnValue($response));
-
-        $this->getMockPluginHandler()
-            ->expects($this->any())
-            ->method('getPlugin')
-            ->with('Http')
-            ->will($this->returnValue($plugin));
     }
 
     /**
