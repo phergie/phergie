@@ -151,7 +151,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $xml = $response->getContent();
 
         if (count($xml->loc) == 0) {
-            throw new Phergie_Exception('No results for that location');
+            throw new Phergie_Exception('No results for that location.');
         }
 
         $locId = (string) $xml->loc[0]['id'];
