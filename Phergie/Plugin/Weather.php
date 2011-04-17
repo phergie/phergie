@@ -57,7 +57,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             $this->fail(
                 'weather.partner_id and weather.license_key must be specified'
             );
-        } 
+        }
     }
 
     /**
@@ -72,7 +72,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         try
         {
             $this->doPrivmsg(
-                $this->event->getSource(), 
+                $this->event->getSource(),
                 $this->event->getNick() . ': ' . $this->getWeatherReport($location)
             );
         }
@@ -124,7 +124,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             ', Conditions: ' . (string) $conditions['weatherDescriptionPhrase'] .
             ', Updated: ' . (string) $conditions['observationDateTime'] .
             ' [ http://weather.com/weather/today/' . 
-            $conditions['locationCode'] . ']';
+            $conditions['locationCode'] . ' ]';
 
         return $report;
     }
@@ -144,7 +144,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
                 'http://xoap.weather.com/search/search', 
                 array('where' => $location)
             );
-        
+
         if ($response->isError()) {
             throw new Exception(
                 'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()

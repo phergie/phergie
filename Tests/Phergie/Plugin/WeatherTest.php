@@ -47,7 +47,7 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
      * Expected weather report
      * @var string
      */
-    private $_weatherReport = 'nick: Weather for Atlanta, GA - Temperature: 51F/10.5C, Humidity: 96%, Conditions: Fog, Updated: 3/27/11 12:52 PM EDT [ http://weather.com/weather/today/USGA0028]';
+    private $_weatherReport = 'nick: Weather for Atlanta, GA - Temperature: 51F/10.5C, Humidity: 96%, Conditions: Fog, Updated: 3/27/11 12:52 PM EDT [ http://weather.com/weather/today/USGA0028 ]';
 
     /**
      * Mock a HTTP Plugin and prime it with response data
