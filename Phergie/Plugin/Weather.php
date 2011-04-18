@@ -32,6 +32,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Weather
  * @link     http://www.weather.com/services/xmloap.html
+ * @uses     Phergie_Plugin_Cache pear.phergie.org
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     Phergie_Plugin_Temperature pear.phergie.org
@@ -54,6 +55,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Cache');
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Temperature');
@@ -147,6 +149,16 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     {
         $locId = $this->getWeatherLocation($location);
 
+        // If the location was reliable, maybe also the weather data
+        if ($this->isLocationReliable) {
+            $data = $this->getPluginHandler()->getPlugin('cache')
+                ->fetch('WeatherData_' . $locId);
+
+            if (is_array($data)) {
+                return $data;
+            }
+        }
+
         $response = $this->getPluginHandler()
             ->getPlugin('Http')
             ->get(
@@ -166,8 +178,37 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             );
         }
 
-        $data = $response->getContent();
-        return array(
+        $cache = $this->getPluginHandler()->getPlugin('cache');
+        $data  = $response->getContent();
+
+        // Retrieve the right location data (small hack, but blame the api)
+        if (!$this->isLocationReliable) {
+            $rightLocation = str_replace(
+                array('(', ')', ',', ' '),
+                array('', '', '', '+'),
+                (string) $data->loc->dnam
+            );
+
+            try {
+                $result = $this->getWeatherLocation($rightLocation);
+
+                // Cache the location data, by default for 1 day
+                $expires = 86400;
+                if (isset($this->config['weather.cache_locations'])) {
+                    $expires = $this->config['weather.cache_locations'];
+                }
+                $cache->store('WeatherLocation_' . $locId,    $result, $expires);
+                $cache->store('WeatherLocation_' . $location, $result, $expires);
+                $cache->store('WeatherLocation_' . $result,   $result, $expires);
+
+                // Actually fix the location
+                $locId = $result;
+            } catch (Phergie_Exception $e) {
+                // Do nothing when fail
+            }
+        }
+
+        $data = array(
             'locationCode'=>"{$locId}",
             'cityName'=>"{$data->loc->dnam}",
             'observationDateTime'=>"{$data->cc->lsup}",
@@ -191,6 +232,15 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             'sunset'=>"{$data->loc->suns}",
             'moonPhaseDescription'=>"{$data->cc->moon->t}",
         );
+
+        // Cache the weather data, by default for 30 minutes
+        $expires = 1800;
+        if (isset($this->config['weather.cache_data'])) {
+            $expires = $this->config['weather.cache_data'];
+        }
+        $cache->store('WeatherData_' . $locId, $data, $expires);
+
+        return $data;
     }
 
     /**
@@ -210,6 +260,15 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     {
         // By default, we can't rely anything
         $this->isLocationReliable = false;
+
+        // Try to get a hit from the cache
+        $cached = $this->getPluginHandler()->getPlugin('cache')
+            ->fetch('WeatherLocation_' . $location);
+
+        if ($cached) {
+            $this->isLocationReliable = true;
+            return $cached;
+        }
 
         $response = $this->getPluginHandler()
             ->getPlugin('Http')

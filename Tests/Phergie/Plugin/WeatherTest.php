@@ -83,7 +83,7 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
 
         $this->_data->expects($this->any())
             ->method('get')
-            ->will($this->onConsecutiveCalls($response1, $response2));
+            ->will($this->onConsecutiveCalls($response1, $response2, $response1));
 
         $this->_temperature = $this->requirePlugin('Temperature');
         $this->_temperature->expects($this->any())
