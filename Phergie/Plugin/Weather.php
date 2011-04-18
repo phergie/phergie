@@ -40,6 +40,13 @@
 class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
 {
     /**
+     * True if the last fetched location was reliable
+     *
+     * @var bool
+     */
+    protected $isLocationReliable = false;
+
+    /**
      * Checks for dependencies.
      *
      * @return void
@@ -131,30 +138,14 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
      *
      * @param string $location place to retrieve weather data for
      *
+     * @throws Phergie_Exception When no location can be returned
+     *                           (unexpected error or location not found)
+     *
      * @return array weather conditions
      */
     public function getWeatherData($location)
     {
-        $response = $this->getPluginHandler()
-            ->getPlugin('Http')
-            ->get(
-                'http://xoap.weather.com/search/search',
-                array('where' => $location)
-            );
-
-        if ($response->isError()) {
-            throw new Phergie_Exception(
-                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
-            );
-        }
-
-        $xml = $response->getContent();
-
-        if (count($xml->loc) == 0) {
-            throw new Phergie_Exception('No results for that location.');
-        }
-
-        $locId = (string) $xml->loc[0]['id'];
+        $locId = $this->getWeatherLocation($location);
 
         $response = $this->getPluginHandler()
             ->getPlugin('Http')
@@ -200,5 +191,45 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             'sunset'=>"{$data->loc->suns}",
             'moonPhaseDescription'=>"{$data->cc->moon->t}",
         );
+    }
+
+    /**
+     * Tries to find the api-readable id of the given location
+     *
+     * It also sets $this->isReliable, which is set to false
+     * when the current location isn't verfied yet
+     *
+     * @param string $location Location to search
+     *
+     * @throws Phergie_Exception When no location can be returned
+     *                           (unexpected error or location not found)
+     *
+     * @return string
+     */
+    public function getWeatherLocation($location)
+    {
+        // By default, we can't rely anything
+        $this->isLocationReliable = false;
+
+        $response = $this->getPluginHandler()
+            ->getPlugin('Http')
+            ->get(
+                'http://xoap.weather.com/search/search',
+                array('where' => $location)
+            );
+
+        if ($response->isError()) {
+            throw new Phergie_Exception(
+                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
+            );
+        }
+
+        $xml = $response->getContent();
+
+        if (count($xml->loc) == 0) {
+            throw new Phergie_Exception('No results for that location.');
+        }
+
+        return (string) $xml->loc[0]['id'];
     }
 }
