@@ -149,6 +149,10 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     {
         $locId = $this->getWeatherLocation($location);
 
+        if ($locId === false) {
+            throw new Phergie_Exception('No results for that location.');
+        }
+
         // If the location was reliable, maybe also the weather data
         if ($this->isLocationReliable) {
             $data = $this->getPluginHandler()->getPlugin('cache')
@@ -197,9 +201,12 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
                 if (isset($this->config['weather.cache_locations'])) {
                     $expires = $this->config['weather.cache_locations'];
                 }
-                $cache->store('WeatherLocation_' . $locId,    $result, $expires);
-                $cache->store('WeatherLocation_' . $location, $result, $expires);
-                $cache->store('WeatherLocation_' . $result,   $result, $expires);
+
+                if ($result !== false) {
+                    $cache->store('WeatherLocation_' . $locId,    $result, $expires);
+                    $cache->store('WeatherLocation_' . $location, $result, $expires);
+                    $cache->store('WeatherLocation_' . $result,   $result, $expires);
+                }
 
                 // Actually fix the location
                 $locId = $result;
@@ -245,16 +252,16 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
 
     /**
      * Tries to find the api-readable id of the given location
+     * returns the location if found, false if not found
      *
      * It also sets $this->isReliable, which is set to false
      * when the current location isn't verfied yet
      *
      * @param string $location Location to search
      *
-     * @throws Phergie_Exception When no location can be returned
-     *                           (unexpected error or location not found)
+     * @throws Phergie_Exception When error occurs while fetching data
      *
-     * @return string
+     * @return string|bool
      */
     public function getWeatherLocation($location)
     {
@@ -286,7 +293,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
         $xml = $response->getContent();
 
         if (count($xml->loc) == 0) {
-            throw new Phergie_Exception('No results for that location.');
+            return false;
         }
 
         return (string) $xml->loc[0]['id'];
