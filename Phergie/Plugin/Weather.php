@@ -32,6 +32,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Weather
  * @link     http://www.weather.com/services/xmloap.html
+ * @uses     Phergie_Plugin_Cache pear.phergie.org
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     Phergie_Plugin_Temperature pear.phergie.org
@@ -40,6 +41,13 @@
 class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
 {
     /**
+     * True if the last fetched location was reliable
+     *
+     * @var bool
+     */
+    protected $isLocationReliable = false;
+
+    /**
      * Checks for dependencies.
      *
      * @return void
@@ -47,6 +55,7 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Cache');
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Temperature');
@@ -131,30 +140,28 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
      *
      * @param string $location place to retrieve weather data for
      *
+     * @throws Phergie_Exception When no location can be returned
+     *                           (unexpected error or location not found)
+     *
      * @return array weather conditions
      */
     public function getWeatherData($location)
     {
-        $response = $this->getPluginHandler()
-            ->getPlugin('Http')
-            ->get(
-                'http://xoap.weather.com/search/search',
-                array('where' => $location)
-            );
+        $locId = $this->getWeatherLocation($location);
 
-        if ($response->isError()) {
-            throw new Phergie_Exception(
-                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
-            );
-        }
-
-        $xml = $response->getContent();
-
-        if (count($xml->loc) == 0) {
+        if ($locId === false) {
             throw new Phergie_Exception('No results for that location.');
         }
 
-        $locId = (string) $xml->loc[0]['id'];
+        // If the location was reliable, maybe also the weather data
+        if ($this->isLocationReliable) {
+            $data = $this->getPluginHandler()->getPlugin('cache')
+                ->fetch('WeatherData_' . $locId);
+
+            if (is_array($data)) {
+                return $data;
+            }
+        }
 
         $response = $this->getPluginHandler()
             ->getPlugin('Http')
@@ -175,8 +182,40 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             );
         }
 
-        $data = $response->getContent();
-        return array(
+        $cache = $this->getPluginHandler()->getPlugin('cache');
+        $data  = $response->getContent();
+
+        // Retrieve the right location data (small hack, but blame the api)
+        if (!$this->isLocationReliable) {
+            $rightLocation = str_replace(
+                array('(', ')', ',', ' '),
+                array('', '', '', '+'),
+                (string) $data->loc->dnam
+            );
+
+            try {
+                $result = $this->getWeatherLocation($rightLocation);
+
+                // Cache the location data, by default for 1 day
+                $expires = 86400;
+                if (isset($this->config['weather.cache_locations'])) {
+                    $expires = $this->config['weather.cache_locations'];
+                }
+
+                if ($result !== false) {
+                    $cache->store('WeatherLocation_' . $locId,    $result, $expires);
+                    $cache->store('WeatherLocation_' . $location, $result, $expires);
+                    $cache->store('WeatherLocation_' . $result,   $result, $expires);
+                }
+
+                // Actually fix the location
+                $locId = $result;
+            } catch (Phergie_Exception $e) {
+                // Do nothing when fail
+            }
+        }
+
+        $data = array(
             'locationCode'=>"{$locId}",
             'cityName'=>"{$data->loc->dnam}",
             'observationDateTime'=>"{$data->cc->lsup}",
@@ -200,5 +239,63 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
             'sunset'=>"{$data->loc->suns}",
             'moonPhaseDescription'=>"{$data->cc->moon->t}",
         );
+
+        // Cache the weather data, by default for 30 minutes
+        $expires = 1800;
+        if (isset($this->config['weather.cache_data'])) {
+            $expires = $this->config['weather.cache_data'];
+        }
+        $cache->store('WeatherData_' . $locId, $data, $expires);
+
+        return $data;
+    }
+
+    /**
+     * Tries to find the api-readable id of the given location
+     * returns the location if found, false if not found
+     *
+     * It also sets $this->isReliable, which is set to false
+     * when the current location isn't verfied yet
+     *
+     * @param string $location Location to search
+     *
+     * @throws Phergie_Exception When error occurs while fetching data
+     *
+     * @return string|bool
+     */
+    public function getWeatherLocation($location)
+    {
+        // By default, we can't rely anything
+        $this->isLocationReliable = false;
+
+        // Try to get a hit from the cache
+        $cached = $this->getPluginHandler()->getPlugin('cache')
+            ->fetch('WeatherLocation_' . $location);
+
+        if ($cached) {
+            $this->isLocationReliable = true;
+            return $cached;
+        }
+
+        $response = $this->getPluginHandler()
+            ->getPlugin('Http')
+            ->get(
+                'http://xoap.weather.com/search/search',
+                array('where' => $location)
+            );
+
+        if ($response->isError()) {
+            throw new Phergie_Exception(
+                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
+            );
+        }
+
+        $xml = $response->getContent();
+
+        if (count($xml->loc) == 0) {
+            return false;
+        }
+
+        return (string) $xml->loc[0]['id'];
     }
 }
