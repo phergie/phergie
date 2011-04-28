@@ -98,7 +98,7 @@ class Phergie_Plugin_Cache extends Phergie_Plugin_Abstract
      *
      * @return bool
      */
-    protected function expire($key)
+    public function expire($key)
     {
         if (!isset($this->cache[$key])) {
             return false;
