@@ -85,4 +85,10 @@ class Phergie_Plugin_CacheTest extends Phergie_Plugin_TestCase
         $this->plugin->store('bar', 'foo');
         $this->assertEquals('foo', $this->plugin->fetch('bar'));
     }
+
+    public function testExpireNonexistentKey()
+    {
+        $this->assertFalse($this->plugin->fetch('bar'));
+        $this->assertFalse($this->plugin->expire('bar'));
+    }
 }
