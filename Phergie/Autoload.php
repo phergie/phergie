@@ -49,7 +49,10 @@ class Phergie_Autoload
      */
     public function load($class)
     {
-        include str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+        $fileName = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php'; 
+        if (file_exists($fileName)) {
+            include $fileName;
+        }
     }
 
     /**
