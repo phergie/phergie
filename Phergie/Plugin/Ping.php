@@ -58,22 +58,13 @@ class Phergie_Plugin_Ping extends Phergie_Plugin_Abstract
 
     /**
      * Updates the timestamp since the last received event when a new event
-     * arrives.
+     * arrives. Also, clears the ping time as well.
      *
      * @return void
      */
     public function preEvent()
     {
         $this->lastEvent = time();
-    }
-
-    /**
-     * Clears the ping time if a reply is received.
-     *
-     * @return void
-     */
-    public function onPingResponse()
-    {
         $this->lastPing = null;
     }
 
