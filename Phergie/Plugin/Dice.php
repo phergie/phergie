@@ -58,8 +58,10 @@ class Phergie_Plugin_Dice extends Phergie_Plugin_Abstract
     {
         if (preg_match('/(\d+)\s*d\s*(\d+)(\s*[-+]\s*\d+)?(.*)/i', $message, $matches)) {
             list (, $num, $die, $mod, $rest) = $matches;
-            $roll = $num;
-            $roll += mt_rand(0, $num * ($die - 1));
+            $roll = 0;
+            if ($die) {
+                $roll = $num + mt_rand(0, $num * ($die - 1));
+            }
             if (!empty($mod)) {
                 $roll += intval(preg_replace('/\s+/', '', $mod));
             }

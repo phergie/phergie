@@ -137,6 +137,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
     {
         $this->assertRoll('0d0', 'roll for nick: 0d0 --> 0');
         $this->assertRoll('0d1', 'roll for nick: 0d1 --> 0');
+        $this->assertRoll('1d0', 'roll for nick: 1d0 --> 0');
         $this->assertRoll('1d1', 'roll for nick: 1d1 --> 1');
         $this->assertRoll('1d2', '/roll for nick: 1d2 --> (1|2)/');
     }
