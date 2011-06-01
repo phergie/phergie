@@ -44,7 +44,10 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
     {
         $event = $this->getEvent();
 
-        $self = preg_quote($this->connection->getNick());
+        $me = preg_quote($this->connection->getNick());
+        $aliases = $this->getConfig('message.aliases');
+        $self = '(?:' . implode('|',
+            array_merge((array) $me, (array) $aliases)) . ')';
 
         $targetPattern = <<<REGEX
         {^
@@ -67,7 +70,10 @@ REGEX;
         $event = $this->getEvent();
 
         $prefix = preg_quote($this->getConfig('command.prefix'));
-        $self = preg_quote($this->connection->getNick());
+        $me = preg_quote($this->connection->getNick());
+        $aliases = $this->getConfig('message.aliases');
+        $self = '(?:' . implode('|',
+            array_merge((array) $me, (array) $aliases)) . ')';
         $message = $event->getText();
 
         // $prefixPattern matches : Phergie, do command <parameters>
