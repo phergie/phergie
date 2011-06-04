@@ -113,7 +113,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
     {
         $this->initializeRollEvent('');
         $this->assertDoesNotEmitEvent('privmsg');
-        $this->plugin->onCommandSpell('');
+        $this->plugin->onCommandRoll('');
     }
 
     /**
@@ -125,7 +125,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
     {
         $this->initializeRollEvent('x');
         $this->assertDoesNotEmitEvent('privmsg');
-        $this->plugin->onCommandSpell('x');
+        $this->plugin->onCommandRoll('x');
     }
 
     /**
