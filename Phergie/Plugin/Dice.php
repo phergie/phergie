@@ -27,9 +27,8 @@
  * @package  Phergie_Plugin_Dice
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
- * @link     http://pear.phergie.org/package/Phergie_Plugin_Command
- * @uses     extension reflection
- * @uses     Phergie_Plugin_Message pear.phergie.org
+ * @link     http://pear.phergie.org/package/Phergie_Plugin_Dice
+ * @uses     Phergie_Plugin_Command pear.phergie.org
  */
 class Phergie_Plugin_Dice extends Phergie_Plugin_Abstract
 {
@@ -44,13 +43,11 @@ class Phergie_Plugin_Dice extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Handles a request for the bot to repeat a given message in a specified
-     * channel.
+     * Handles a request for the bot to perform a dice roll.
      *
-     * <code>say #chan message</code>
+     * <code>roll 3d6 + 2</code>
      *
-     * @param string $channel Name of the channel
-     * @param string $message Message to repeat
+     * @param string $message Dice roll to perform
      *
      * @return void
      */
