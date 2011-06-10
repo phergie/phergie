@@ -97,23 +97,36 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
      */
     public function handleEvents()
     {
+        /**
+         * Find out which connections have data waiting.
+         */
         $hostmasks = $this->driver->getActiveReadSockets($this->sec, $this->usec);
-        if (!$hostmasks) {
-            return;
-        }
-        $connections = $this->connections->getConnections($hostmasks);
+
+        $connections = $this->connections->getConnections();
         foreach ($connections as $connection) {
             $this->driver->setConnection($connection);
             $this->plugins->setConnection($connection);
+
+            /**
+             * We need to generate a tick no matter what.
+             */
             $this->plugins->onTick();
 
-            if ($event = $this->driver->getEvent()) {
-                $this->ui->onEvent($event, $connection);
-                $this->plugins->setEvent($event);
-                $this->plugins->preEvent();
-                $this->plugins->{'on' . ucfirst($event->getType())}();
+            /**
+             * If we have data waiting on this connection, handle it.
+             */
+            if (in_array((string) $connection->getHostmask(), $hostmasks)) {
+                if ($event = $this->driver->getEvent()) {
+                    $this->ui->onEvent($event, $connection);
+                    $this->plugins->setEvent($event);
+                    $this->plugins->preEvent();
+                    $this->plugins->{'on' . ucfirst($event->getType())}();
+                }
             }
 
+            /**
+             * Handle any outgoing events for this connection.
+             */
             $this->processEvents($connection);
         }
     }
