@@ -50,7 +50,10 @@ class Phergie_Plugin_Cache extends Phergie_Plugin_Abstract
      */
     public function store($key, $data, $ttl = 3600, $overwrite = true)
     {
-        if (!$overwrite && isset($this->cache[$key])) {
+        if (!$overwrite
+            && isset($this->cache[$key])
+            && $this->cache[$key]['expires'] > time()
+        ) {
             return false;
         }
 
@@ -95,7 +98,7 @@ class Phergie_Plugin_Cache extends Phergie_Plugin_Abstract
      *
      * @return bool
      */
-    protected function expire($key)
+    public function expire($key)
     {
         if (!isset($this->cache[$key])) {
             return false;
