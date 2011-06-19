@@ -374,10 +374,10 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             return;
         }
 
-        $start = strpos($contents, '<h3 class=r>');
+        $start = strpos($contents, '<h2 class=r');
 
         if ($start === false) {
-            $start = strpos($contents, '<h2 class=r');
+            $start = strpos($contents, '<h3 class="r">');
         }
 
         if ($start !== false) {
