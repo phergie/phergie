@@ -84,15 +84,23 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
 
         $this->plugins->getPlugin('Command');
 
-        $dir = dirname(__FILE__) . '/' . $this->getName();
-        $path = $dir . '/lart.db';
-        $exists = file_exists($path);
-        if (!file_exists(dirname($path))) {
-            mkdir($dir);
+        $defaultDbLocation = dirname(__FILE__) . '/' . $this->getName() . '/lart.db';
+
+        $fileName = $this->getConfig('lart.sqlite_db', $defaultDbLocation);
+        $dirName = dirname($fileName);
+
+        $exists = file_exists($fileName);
+        if (!file_exists($dirName)) {
+            mkdir($dirName);
+        }
+
+        if ((file_exists($fileName) && !is_writable($fileName)) ||
+                (!file_exists($fileName) && !is_writable($dirName))) {
+            throw new Phergie_Plugin_Exception('SQLite DB file exists and cannot be written, OR does not exist and cannot be created: ' . $fileName);
         }
 
         try {
-            $this->db = new PDO('sqlite:' . $path);
+            $this->db = new PDO('sqlite:' . $fileName);
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
