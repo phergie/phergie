@@ -108,7 +108,7 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     public function testRegisterAutoloader()
     {
         $preRegisterCount = count(spl_autoload_functions());
-        
+
         Phergie_Autoload::registerAutoloader();
         $this->assertEquals(
                 $preRegisterCount + 1, count(spl_autoload_functions()),
