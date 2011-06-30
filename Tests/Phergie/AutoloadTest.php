@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Phergie
  *
@@ -18,8 +19,8 @@
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
-
-defined('PHERGIE_BASE_PATH') or define('PHERGIE_BASE_PATH', dirname(dirname(dirname(__FILE__))));
+defined('PHERGIE_BASE_PATH') or define('PHERGIE_BASE_PATH',
+                dirname(dirname(dirname(__FILE__))));
 
 require_once PHERGIE_BASE_PATH . '/Phergie/Autoload.php';
 
@@ -34,13 +35,13 @@ require_once PHERGIE_BASE_PATH . '/Phergie/Autoload.php';
  */
 class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
 {
+
     /**
      * SPL autoloader callbacks
      *
      * @var array
      */
     private $callbacks;
-
     /**
      * Old include path
      *
@@ -64,8 +65,10 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
         $functions = spl_autoload_functions();
         if (is_array($functions)) {
             foreach ($functions as $callback) {
-                $this->callbacks[] = $callback;
-                spl_autoload_unregister($callback);
+                if ($callback !== 'phpunit_autoload') {
+                    $this->callbacks[] = $callback;
+                    spl_autoload_unregister($callback);
+                }
             }
         }
     }
@@ -104,11 +107,12 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
      */
     public function testRegisterAutoloader()
     {
+        $preRegisterCount = count(spl_autoload_functions());
+        
         Phergie_Autoload::registerAutoloader();
         $this->assertEquals(
-            1,
-            count(spl_autoload_functions()),
-            'Autoloader was not registered'
+                $preRegisterCount + 1, count(spl_autoload_functions()),
+                'Autoloader was not registered'
         );
     }
 
@@ -158,4 +162,5 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
         $this->setPreserveGlobalState(false);
         return parent::run($result);
     }
+
 }
