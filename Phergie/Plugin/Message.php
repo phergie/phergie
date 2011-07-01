@@ -31,6 +31,19 @@
  */
 class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
 {
+    /**
+     * Returns a regular expression that matches the bot's nick or aliases.
+     *
+     * @return string
+     */
+    private function getSelfRegex()
+    {
+        $me = preg_quote($this->connection->getNick());
+        $aliases = $this->getConfig('message.aliases');
+        $self = '(?:' . implode('|',
+            array_merge((array) $me, (array) $aliases)) . ')';
+        return $self;
+    }
 
     /**
      * Check whether a message is specifically targeted at the bot.
@@ -44,10 +57,7 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
     {
         $event = $this->getEvent();
 
-        $me = preg_quote($this->connection->getNick());
-        $aliases = $this->getConfig('message.aliases');
-        $self = '(?:' . implode('|',
-            array_merge((array) $me, (array) $aliases)) . ')';
+        $self = $this->getSelfRegex();
 
         $targetPattern = <<<REGEX
         {^
@@ -55,14 +65,14 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
         $}ix
 REGEX;
 
-        return !$event->isInChannel() 
+        return !$event->isInChannel()
             || preg_match($targetPattern, $event->getText()) > 0;
     }
 
     /**
      * Allow for prefix and bot name aware extraction of a message
      *
-     * @return string|bool $message The message, which is possibly targeted at the 
+     * @return string|bool $message The message, which is possibly targeted at the
      *                              bot or false if a prefix requirement failed
      */
     public function getMessage()
@@ -70,10 +80,7 @@ REGEX;
         $event = $this->getEvent();
 
         $prefix = preg_quote($this->getConfig('command.prefix'));
-        $me = preg_quote($this->connection->getNick());
-        $aliases = $this->getConfig('message.aliases');
-        $self = '(?:' . implode('|',
-            array_merge((array) $me, (array) $aliases)) . ')';
+        $self = $this->getSelfRegex();
         $message = $event->getText();
 
         // $prefixPattern matches : Phergie, do command <parameters>
