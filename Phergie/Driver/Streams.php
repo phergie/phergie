@@ -162,7 +162,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     public function getActiveReadSockets($sec = 0, $usec = 200000)
     {
         $read = $this->sockets;
-        $write = $except = $sec = $usec = null;
+        $write = $except = null;
         $active = array();
 
         if (count($this->sockets) > 0) {
