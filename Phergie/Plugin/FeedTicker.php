@@ -101,6 +101,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
 
         try {
             $this->db = new PDO('sqlite:' . $fileName);
+            $this->createTables();
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
