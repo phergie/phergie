@@ -63,7 +63,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
             $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
 
-        $defaultDbLocation = dirname(__FILE__) . '/' . $this->getName() . '/feedmanager.db';
+        $defaultDbLocation = dirname(__FILE__) . '/FeedTicker/feedticker.db';
 
         $fileName = $this->getConfig('feedmanager.sqlite_db', $defaultDbLocation);
         $dirName = dirname($fileName);
