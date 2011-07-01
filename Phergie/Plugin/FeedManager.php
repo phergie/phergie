@@ -65,7 +65,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
 
         $defaultDbLocation = dirname(__FILE__) . '/FeedTicker/feedticker.db';
 
-        $fileName = $this->getConfig('feedmanager.sqlite_db', $defaultDbLocation);
+        $fileName = $this->getConfig('feedticker.sqlite_db', $defaultDbLocation);
         $dirName = dirname($fileName);
 
         $exists = file_exists($fileName);
