@@ -49,6 +49,7 @@ class Phergie_Plugin_AutoJoin extends Phergie_Plugin_Abstract
         switch ($this->getEvent()->getCode()) {
         case Phergie_Event_Response::RPL_ENDOFMOTD:
         case Phergie_Event_Response::ERR_NOMOTD:
+            $keys = null;
             if ($channels = $this->config['autojoin.channels']) {
                 if (is_array($channels)) {
                     // Support autojoin.channels being in these formats:
@@ -60,8 +61,11 @@ class Phergie_Plugin_AutoJoin extends Phergie_Plugin_Abstract
                     if (is_array($channels)) {
                         $channels = implode(',', $channels);
                     }
+                } elseif (strpos($channels, ' ') !== false) {
+                        list($channels, $keys) = explode(' ', $channels);
                 }
-                $this->doJoin($channels);
+
+                $this->doJoin($channels, $keys);
             }
             $this->getPluginHandler()->removePlugin($this);
         }
