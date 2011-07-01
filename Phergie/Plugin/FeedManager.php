@@ -63,10 +63,23 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
             $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
 
-        $path = dirname(__FILE__) . '/FeedTicker/feedticker.db';
+        $defaultDbLocation = dirname(__FILE__) . '/' . $this->getName() . '/feedmanager.db';
+
+        $fileName = $this->getConfig('feedmanager.sqlite_db', $defaultDbLocation);
+        $dirName = dirname($fileName);
+
+        $exists = file_exists($fileName);
+        if (!file_exists($dirName)) {
+            mkdir($dirName);
+        }
+
+        if ((file_exists($fileName) && !is_writable($fileName)) ||
+                (!file_exists($fileName) && !is_writable($dirName))) {
+            throw new Phergie_Plugin_Exception('SQLite DB file exists and cannot be written, OR does not exist and cannot be created: ' . $fileName);
+        }
 
         try {
-            $this->db = new PDO('sqlite:' . $path);
+            $this->db = new PDO('sqlite:' . $fileName);
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
