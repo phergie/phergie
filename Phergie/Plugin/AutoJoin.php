@@ -62,7 +62,7 @@ class Phergie_Plugin_AutoJoin extends Phergie_Plugin_Abstract
                         $channels = implode(',', $channels);
                     }
                 } elseif (strpos($channels, ' ') !== false) {
-                        list($channels, $keys) = explode(' ', $channels);
+                    list($channels, $keys) = explode(' ', $channels);
                 }
 
                 $this->doJoin($channels, $keys);
