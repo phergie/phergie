@@ -20,7 +20,7 @@
  */
 
 /**
- * TODO CREATE CLASS DESCRIPTION
+ * Provides an easy to use database wrapper that simplifies creation and creates
  *
  * @category Phergie
  * @package  Phergie_Plugin_Db
@@ -57,7 +57,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     }
 
     /**
-     *  Initializes database
+     *  Initializes database and creates directories if needed
      *
      *  @param string $directory  plugin name
      *  @param string $dbFile     database name
@@ -67,18 +67,33 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      */
     public function init($directory, $dbFile, $schemaFile)
     {
-        $this->isResourceDirectory($directory);
-        $doesDbFileExist = is_readable($dbFile);
+        // We set the directory to the current path.
+        $resource_directory = dirname(__FILE__) . '/' . $directory;
+        if ($this->getConfig('dbpath')) {
+            echo "DEBUG: Switching to alternate DB path - $directory\n";
 
+            if (is_dir($this->getConfig('dbpath'))) {
+                $directory = $this->getConfig('dbpath') . $directory;
+
+                if (!is_dir($directory)) {
+                    mkdir($directory); // make directory
+                }
+            } else {
+                $this->fail('Unable to create Database(s)');
+            }
+        } else {
+            $directory = $resource_directory;
+        }
+        $this->isResourceDirectory($directory);
+        $dbFile = $directory . $dbFile; // Add the directory path
+        $schemaFile = $resource_directory . $schemaFile; // Add path 
         try {
             $db = new PDO('sqlite:' . $dbFile);
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
 
-        if (!$doesDbFileExist) {
-            $this->createTablesFromSchema($db, $schemaFile);
-        }
+        $this->createTablesFromSchema($db, $schemaFile);
         return $db;
     }
 
@@ -167,7 +182,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     {
         $this->isSchemaFile($file);
         $file = strtolower(file_get_contents($file));
-        preg_match_all('/create\stable\s([a-z_]+).*;/', $file, $matches);
+        preg_match_all('/create\stable\s([a-z_]+)[^;.]+/s', $file, $matches);
 
         if (count($matches[0]) != count($matches[1])) {
             $this->fail(
@@ -211,8 +226,11 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      *
      *  @return bool
      */
-    public function dropTable($name)
+    public function dropTable($db,$name)
     {
+		$sql = 'DROP TABLE :name;'; //not very smart
+		$statement = $db->prepare($sql);
+		return (bool) $statement->execute(array(':name' => $db->quote($name)));
     }
 
     /**
