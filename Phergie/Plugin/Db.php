@@ -68,7 +68,12 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     public function init($directory, $dbFile, $schemaFile)
     {
         // We set the directory to the current path.
-        $resource_directory = dirname(__FILE__) . '/' . $directory;
+        if(substr(dirname(__FILE__),-1) == '/'){
+                $resource_directory = dirname(__FILE__) . $directory;
+        } else {
+                $resource_directory = dirname(__FILE__) . '/' . $directory;
+        }
+        // Support alternate path for centralized db storage
         if ($this->getConfig('dbpath')) {
             echo "DEBUG: Switching to alternate DB path - $directory\n";
 
@@ -144,7 +149,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      */
     public function validateSqlType($sql, $type)
     {
-        preg_match('/^'.strtolower($type).'/', strtolower($sql), $matches);
+        preg_match('/^'.$type.'/i', $sql, $matches);
         return ($matches[0]) ? true : false;
     }
 
