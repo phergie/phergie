@@ -149,6 +149,17 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test that loading an unexisting class doesn't result into a crash
+     *
+     * @return void
+     */
+    public function testUnexistingClass()
+    {
+        Phergie_Autoload::registerAutoloader();
+        $this->assertFalse(class_exists('Phergie_Unexisting_Class', true));
+    }
+
+    /**
      * Prevents preservation of global state in cases where test methods
      * must be run in separate processes.
      *
