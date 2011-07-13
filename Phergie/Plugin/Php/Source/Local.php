@@ -65,7 +65,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
             // @todo Modify this to be rethrown as an appropriate 
             //       Phergie_Plugin_Exception and handled in Phergie_Plugin_Php
         } catch (PDOException $e) {
-            echo 'PDO failure: '.$e->getMessage();
+            throw new Phergie_Plugin_Php_Source_Exception('PDO failure: ' . $e->getMessage());
         } 
     }
 
@@ -222,7 +222,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
                         array(':name' => $name, ':description' => $line)
                     );
                 }
-                
+
                 // Commit the changes to the database
                 $this->database->commit();
             }
