@@ -21,6 +21,12 @@
 
 error_reporting(E_ALL | E_STRICT);
 
+// Phergie's test suite depends on PHPUnit 3.5+, because of assertInstanceOf.
+$version = PHPUnit_Runner_Version::id();
+if (version_compare($version, '3.5.0', '<')) {
+    trigger_error("Requires PHPUnit 3.5+ to run the test suite", E_USER_ERROR);
+}
+
 // Phergie components require Phergie_Autoload to function correctly.
 require_once dirname(__FILE__) . '/../Phergie/Autoload.php';
 Phergie_Autoload::registerAutoloader();
