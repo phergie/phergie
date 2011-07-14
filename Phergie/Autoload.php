@@ -49,9 +49,19 @@ class Phergie_Autoload
      */
     public function load($class)
     {
-        $fileName = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php'; 
-        if (file_exists($fileName)) {
-            include $fileName;
+        $paths = explode(PATH_SEPARATOR, get_include_path());
+
+        foreach ($paths as $path) {
+            $fileName = $path . DIRECTORY_SEPARATOR
+                . str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php'; 
+
+            if (file_exists($fileName)) {
+                include $fileName;
+
+                if (class_exists($class, false)) {
+                    return;
+                }
+            }
         }
     }
 
