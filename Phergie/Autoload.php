@@ -61,6 +61,9 @@ class Phergie_Autoload
                 if (class_exists($class, false)) {
                     return;
                 }
+
+                throw new Phergie_Exception('Expected class '
+                    . $class . ' in ' .  $fileName . ' not found');
             }
         }
     }
