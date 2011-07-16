@@ -149,6 +149,21 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests that classes and interfaces are loaded without problems
+     *
+     */
+    public function testExistingClassAndInterface()
+    {
+        // Fake environment and register autoloader
+        $path = dirname(__FILE__) . '/Autoload/_ExistingClassesTest';
+        set_include_path($path . PATH_SEPARATOR . get_include_path());
+        Phergie_Autoload::registerAutoloader();
+
+        class_exists('Phergie_Valid_Class', true);
+        interface_exists('Phergie_Valid_Interface', true);
+    }
+
+    /**
      * Tests that loading an non existing class doesn't result into a crash
      *
      * @return void
