@@ -159,8 +159,8 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
         set_include_path($path . PATH_SEPARATOR . get_include_path());
         Phergie_Autoload::registerAutoloader();
 
-        class_exists('Phergie_Valid_Class', true);
-        interface_exists('Phergie_Valid_Interface', true);
+        $this->assertTrue(class_exists('Phergie_Valid_Class', true));
+        $this->assertTrue(interface_exists('Phergie_Valid_Interface', true));
     }
 
     /**

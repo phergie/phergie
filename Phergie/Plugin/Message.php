@@ -38,11 +38,10 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
      */
     private function getSelfRegex()
     {
-        $me = preg_quote($this->connection->getNick());
+        $me      = preg_quote($this->connection->getNick());
         $aliases = $this->getConfig('message.aliases');
-        $self = '(?:' . implode('|',
-            array_merge((array) $me, (array) $aliases)) . ')';
-        return $self;
+
+        return '(?:' . implode('|', array_merge((array) $me, (array) $aliases)) . ')';
     }
 
     /**
