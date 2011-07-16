@@ -46,6 +46,7 @@ class Phergie_Plugin_Quit extends Phergie_Plugin_Abstract
      * bot terminate the current connection.
      *
      * @param string $message Optional message to emit when quitting
+     *
      * @return void
      */
     public function onCommandQuit($message = null)

@@ -53,7 +53,10 @@ class Phergie_Plugin_Dice extends Phergie_Plugin_Abstract
      */
     public function onCommandRoll($message)
     {
-        if (preg_match('/(\d+)\s*d\s*(\d+)(\s*[-+]\s*\d+)?(.*)/i', $message, $matches)) {
+        if (preg_match(
+            '/(\d+)\s*d\s*(\d+)(\s*[-+]\s*\d+)?(.*)/i',
+            $message, $matches
+        )) {
             list (, $num, $die, $mod, $rest) = $matches;
             $roll = 0;
             if ($die) {
@@ -63,7 +66,11 @@ class Phergie_Plugin_Dice extends Phergie_Plugin_Abstract
                 $roll += intval(preg_replace('/\s+/', '', $mod));
             }
 
-            $this->doPrivmsg($this->getEvent()->getSource(), 'roll for ' . $this->getEvent()->getNick() . ': ' . $num . 'd' . $die . $mod . $rest . ' --> ' . $roll);
+            $this->doPrivmsg(
+                $this->getEvent()->getSource(),
+                'roll for ' . $this->getEvent()->getNick() . ': '
+                . $num . 'd' . $die . $mod . $rest . ' --> ' . $roll
+            );
         }
     }
 }

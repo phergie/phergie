@@ -73,9 +73,14 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
             mkdir($dirName);
         }
 
-        if ((file_exists($fileName) && !is_writable($fileName)) ||
-                (!file_exists($fileName) && !is_writable($dirName))) {
-            throw new Phergie_Plugin_Exception('SQLite DB file exists and cannot be written, OR does not exist and cannot be created: ' . $fileName);
+        if ((file_exists($fileName) && !is_writable($fileName))
+            || (!file_exists($fileName) && !is_writable($dirName))
+        ) {
+            throw new Phergie_Plugin_Exception(
+                'SQLite DB file exists and cannot be written,'
+                . ' OR does not exist and cannot be created: '
+                . $fileName
+            );
         }
 
         try {
