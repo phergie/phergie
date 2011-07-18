@@ -181,7 +181,7 @@ class Phergie_Connection_HandlerTest extends Phergie_TestCase
 
         $this->connections->addConnection($connection);
         $connections = $this->connections->getConnections($hostmaskString);
-        $this->assertTrue(is_array($connections));
+        $this->assertInternalType('array', $connections);
         $this->assertSame(1, count($connections));
         $this->assertArrayHasKey($hostmaskString, $connections);
         $this->assertSame($connection, $connections[$hostmaskString]);
@@ -209,7 +209,7 @@ class Phergie_Connection_HandlerTest extends Phergie_TestCase
             $this->connections->addConnection($connections[$index]);
         }
         $returned = $this->connections->getConnections($hostmaskStrings);
-        $this->assertTrue(is_array($returned));
+        $this->assertInternalType('array', $returned);
         $this->assertEquals(2, count($returned));
         foreach ($hostmaskStrings as $index => $hostmaskString) {
             $this->assertArrayHasKey($hostmaskString, $returned);

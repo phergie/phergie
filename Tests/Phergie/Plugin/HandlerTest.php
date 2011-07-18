@@ -197,8 +197,9 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
             'Handler does not implement Countable'
         );
 
-        $this->assertTrue(
-            is_int(count($this->handler)),
+        $this->assertInternalType(
+            'int',
+            count($this->handler),
             'count() must return an integer'
         );
     }
