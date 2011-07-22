@@ -37,7 +37,10 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     const ADMIN   = 16;
     const OWNER   = 32;
 
-    /**
+
+	
+	
+	/**
      * An array containing all the user information for a given channel
      *
      * @var array
@@ -52,7 +55,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     public function onMode()
     {
         $args = $this->event->getArguments();
-
+		print_r($args);
         if (count($args) != 3) {
             return;
         }
@@ -62,7 +65,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         if (!preg_match('/(?:\+|-)[hovaq+-]+/i', $modes)) {
             return;
         }
-
+		
         $chan = trim(strtolower($chan));
         $modes = str_split(trim(strtolower($modes)), 1);
         $nicks = explode(' ', trim(strtolower($nicks)));
@@ -105,13 +108,14 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      *
      * @return void
      */
+	
     public function onJoin()
     {
         $chan = trim(strtolower($this->event->getArgument(0)));
         $nick = trim(strtolower($this->event->getNick()));
 
         $this->store[$chan][$nick] = self::REGULAR;
-    }
+		    }
 
     /**
      * Tracks users leaving a channel
@@ -122,8 +126,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     {
         $chan = trim(strtolower($this->event->getArgument(0)));
         $nick = trim(strtolower($this->event->getNick()));
-
-        if (isset($this->store[$chan][$nick])) {
+		if (isset($this->store[$chan][$nick])) {
             unset($this->store[$chan][$nick]);
         }
     }
@@ -169,34 +172,36 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onResponse()
     {
-        if ($this->event->getCode() != Phergie_Event_Response::RPL_NAMREPLY) {
+	    if ($this->event->getCode() != Phergie_Event_Response::RPL_NAMREPLY) {
             return;
         }
+ 		$array = explode(' ',$this->event->getDescription());
+		$chan = $array[1];
+		$count = count($array);
+		for ($i = 3; $i < $count; $i++) {
 
-        $desc = preg_split('/[@*=]\s*/', $this->event->getDescription(), 2);
-        list($chan, $users) = array_pad(explode(' :', trim($desc[1])), 2, null);
-        $users = explode(' ', trim($users));
-
-        $chan = trim(strtolower($chan));
-
-        foreach ($users as $user) {
-            if (empty($user)) {
+            if (empty($array[$i])) {
                 continue;
             }
 
-            $user = trim(strtolower($user));
+            $user = trim(strtolower($array[$i]));
+		
             $flag = self::REGULAR;
-
             if ($user[0] == '~') {
                 $flag |= self::OWNER;
+				//echo "Debug:" . $user . " is owner \n";
             } else if ($user[0] == '&') {
                 $flag |= self::ADMIN;
+				//echo "Debug:" . $user . " is admin\n";
             } else if ($user[0] == '@') {
                 $flag |= self::OP;
+				//echo "Debug:" . $user . " is Op\n";
             } else if ($user[0] == '%') {
                 $flag |= self::HALFOP;
+				//echo "Debug:" . $user . " is Half Op\n";
             } else if ($user[0] == '+') {
                 $flag |= self::VOICE;
+				//echo "Debug:" . $user . " is Voiced\n";
             }
 
             if ($flag != self::REGULAR) {
@@ -204,6 +209,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             }
 
             $this->store[$chan][$user] = $flag;
+			
         }
     }
 
@@ -329,7 +335,8 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      * @return bool
      */
     public function isHalfop($nick, $chan)
-    {
+    {	
+		
         return $this->is(self::HALFOP, $nick, $chan);
     }
 
