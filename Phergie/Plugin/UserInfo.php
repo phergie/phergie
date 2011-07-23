@@ -173,20 +173,19 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             return;
         }
 
-        $desc = preg_split('/[@*=]\s*/', $this->event->getDescription(), 2);
-        list($chan, $users) = array_pad(explode(' :', trim($desc[1])), 2, null);
-        $users = explode(' ', trim($users));
+        $array = explode(' ', $this->event->getDescription());
+        $chan  = $array[1];
+        $count = count($array);
 
-        $chan = trim(strtolower($chan));
+        for ($i = 3; $i < $count; $i++) {
 
-        foreach ($users as $user) {
-            if (empty($user)) {
+            if (empty($array[$i])) {
                 continue;
             }
 
-            $user = trim(strtolower($user));
-            $flag = self::REGULAR;
+            $user = trim(strtolower($array[$i]));
 
+            $flag = self::REGULAR;
             if ($user[0] == '~') {
                 $flag |= self::OWNER;
             } else if ($user[0] == '&') {
