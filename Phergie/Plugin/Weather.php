@@ -203,13 +203,13 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
                 }
 
                 if ($result !== false) {
-                    $cache->store('WeatherLocation_' . $locId,    $result, $expires);
-                    $cache->store('WeatherLocation_' . $location, $result, $expires);
-                    $cache->store('WeatherLocation_' . $result,   $result, $expires);
+                    $cache->store('WeatherLocation_' . $locId, $result, $expires);
+                    $locId = $result; // Actually fix the location
                 }
 
-                // Actually fix the location
-                $locId = $result;
+                $cache->store('WeatherLocation_' . $location, $locId, $expires);
+                $cache->store('WeatherLocation_' . $result,   $locId, $expires);
+
             } catch (Phergie_Exception $e) {
                 // Do nothing when fail
             }
