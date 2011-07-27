@@ -91,6 +91,12 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             }
 
             if (!empty($mode)) {
+
+                // Unknow users - temp fix
+                if (!isset($this->store[$chan][$nick])) {
+                    $this->store[$chan][$nick] = self::REGULAR;
+                }
+
                 if ($operation == '+') {
                     $this->store[$chan][$nick] |= $mode;
                 } else if ($operation == '-') {
