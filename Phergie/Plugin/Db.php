@@ -68,7 +68,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     public function init($directory, $dbFile, $schemaFile)
     {
         // We set the directory to the current path.
-        if(substr(dirname(__FILE__),-1) == '/'){
+        if (substr(dirname(__FILE__), -1) == '/') {
                 $resource_directory = dirname(__FILE__) . $directory;
         } else {
                 $resource_directory = dirname(__FILE__) . '/' . $directory;
@@ -225,17 +225,19 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     }
 
     /**
+     * Drops a table
+     *
      *  TODO Desc
      *
-     *  @param String $name table name
+     * @param string $db   Database name
+     * @param string $name Table name
      *
-     *  @return bool
+     * @return bool True on success
      */
-    public function dropTable($db,$name)
+    public function dropTable($db, $name)
     {
-		$sql = 'DROP TABLE :name;'; //not very smart
-		$statement = $db->prepare($sql);
-		return (bool) $statement->execute(array(':name' => $db->quote($name)));
+        $statement = $db->prepare('DROP TABLE :name;');
+        return (bool) $statement->execute(array(':name' => $db->quote($name)));
     }
 
     /**
@@ -252,4 +254,3 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
         }
     }
 }
-?>
