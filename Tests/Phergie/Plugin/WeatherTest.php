@@ -201,6 +201,7 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
     {
         return array(
             array('atlanta',      'atlanta'),
+            array('silverSpring', '20904'),
         );
     }
 }
