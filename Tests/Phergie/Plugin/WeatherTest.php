@@ -50,45 +50,85 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
      *
      * @return void
      */
-    public function setUpWeatherResponse()
+    public function setUpWeatherResponse($dataSet)
     {
         $this->setConfig('weather.partner_id', '1111');
         $this->setConfig('weather.license_key', '1111');
 
-        $dir = dirname(__FILE__) . '/Weather/_files';
+        $dir = dirname(__FILE__) . '/Weather/_files/' . $dataSet;
 
-        $response1 = $this->getMock('Phergie_Plugin_Http_Response');
+        $config = require $dir . '/config.php';
 
-        $response1->expects($this->any())
-            ->method('isError')
-            ->will($this->returnValue(false));
+        $response1 = $this->getHttpMock
+        (
+            $dir . '/location1.xml',
+            $config['response'][0]['isError']
+        );
 
-        $contents = simplexml_load_file($dir . '/location.xml');
-        $response1->expects($this->any())
-            ->method('getContent')
-            ->will($this->returnValue($contents));
+        $response2 = $this->getHttpMock
+        (
+            $dir . '/conditions.xml',
+            $config['response'][1]['isError']
+        );
 
-        $response2 = $this->getMock('Phergie_Plugin_Http_Response');
-
-        $response2->expects($this->any())
-            ->method('isError')
-            ->will($this->returnValue(false));
-
-        $contents = simplexml_load_file($dir . '/conditions.xml');
-        $response2->expects($this->any())
-            ->method('getContent')
-            ->will($this->returnValue($contents));
+        $response3 = $this->getHttpMock
+        (
+            $dir . '/location2.xml',
+            $config['response'][2]['isError']
+        );
 
         $this->_data = $this->requirePlugin('Http');
 
         $this->_data->expects($this->any())
             ->method('get')
-            ->will($this->onConsecutiveCalls($response1, $response2, $response1));
+            ->will($this->onConsecutiveCalls($response1, $response2, $response3));
+
+        switch ($config['unit']) {
+        case 'f':
+        case 'fahrenheit':
+            $method = 'convertFahrenheitToCelsius';
+            break;
+
+        case 'c':
+        case 'celsius':
+            $method = 'convertCelsiusToFahrenheit';
+            break;
+
+        default:
+            $this->fail(
+                'Error with dataset ' . $dataSet . ': $config[\'unit\'] '
+                . 'was ' . $config['unit'] . ', but expected the values '
+                . '"f", "fahrenheit", "c" or "celsius"'
+            );
+        }
 
         $this->_temperature = $this->requirePlugin('Temperature');
         $this->_temperature->expects($this->any())
-            ->method('convertFahrenheitToCelsius')
-            ->will($this->returnValue(10.5));
+            ->method($method)
+            ->will($this->returnValue($config['temperature']));
+
+        return $config;
+    }
+
+    /**
+     * Creates a HTTP mock
+     *
+     * @return PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getHttpMock($response, $isError = false)
+    {
+        $http = $this->getMock('Phergie_Plugin_Http_Response');
+
+        $http->expects($this->any())
+            ->method('isError')
+            ->will($this->returnValue($isError));
+
+        $content = simplexml_load_file($response);
+        $http->expects($this->any())
+            ->method('getContent')
+            ->will($this->returnValue($content));
+
+        return $http;
     }
 
     /**
@@ -123,26 +163,24 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
     /**
      * Tests output of Weather command
      *
+     * @dataProvider dataProviderWeatherReports
+     *
      * @return void
      */
-    public function testGetWeatherReport()
+    public function testGetWeatherReport($test, $location)
     {
-        $this->setUpWeatherResponse();
+        $config = $this->setUpWeatherResponse($test);
 
         $event = $this->getMockEvent('weathercommand');
         $this->plugin->setEvent($event);
 
-        $weatherReport = 'nick: Weather for Atlanta, GA - Temperature: 51F/10.5C, ' .
-            'Humidity: 96%, Conditions: Fog, Updated: 3/27/11 12:52 PM EDT [ ' .
-            'http://weather.com/weather/today/USGA0028 ]';
-
         $this->assertEmitsEvent(
             'privmsg',
             array($this->source,
-            $weatherReport)
+            $config['weatherReport'])
         );
 
-        $report = $this->plugin->onCommandWeather('atlanta');
+        $report = $this->plugin->onCommandWeather($location);
     }
 
     /**
@@ -152,10 +190,18 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
      */
     public function testGetWeatherData()
     {
-        $this->setUpWeatherResponse();
+        $this->setUpWeatherResponse('atlanta');
 
         $weatherData = $this->plugin->getWeatherData('atlanta');
 
         $this->assertEquals($weatherData['temp'], 51);
+    }
+
+    public function dataProviderWeatherReports()
+    {
+        return array(
+            array('atlanta',      'atlanta'),
+            array('silverSpring', '20904'),
+        );
     }
 }
