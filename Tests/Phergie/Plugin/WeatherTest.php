@@ -57,27 +57,8 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
 
         $dir = dirname(__FILE__) . '/Weather/_files';
 
-        $response1 = $this->getMock('Phergie_Plugin_Http_Response');
-
-        $response1->expects($this->any())
-            ->method('isError')
-            ->will($this->returnValue(false));
-
-        $contents = simplexml_load_file($dir . '/location.xml');
-        $response1->expects($this->any())
-            ->method('getContent')
-            ->will($this->returnValue($contents));
-
-        $response2 = $this->getMock('Phergie_Plugin_Http_Response');
-
-        $response2->expects($this->any())
-            ->method('isError')
-            ->will($this->returnValue(false));
-
-        $contents = simplexml_load_file($dir . '/conditions.xml');
-        $response2->expects($this->any())
-            ->method('getContent')
-            ->will($this->returnValue($contents));
+        $response1 = $this->getHttpMock($dir . '/location.xml');
+        $response2 = $this->getHttpMock($dir . '/conditions.xml');
 
         $this->_data = $this->requirePlugin('Http');
 
@@ -89,6 +70,27 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
         $this->_temperature->expects($this->any())
             ->method('convertFahrenheitToCelsius')
             ->will($this->returnValue(10.5));
+    }
+
+    /**
+     * Creates a HTTP mock
+     *
+     * @return PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getHttpMock($response, $isError = false)
+    {
+        $http = $this->getMock('Phergie_Plugin_Http_Response');
+
+        $http->expects($this->any())
+            ->method('isError')
+            ->will($this->returnValue($isError));
+
+        $content = simplexml_load_file($response);
+        $http->expects($this->any())
+            ->method('getContent')
+            ->will($this->returnValue($content));
+
+        return $http;
     }
 
     /**
