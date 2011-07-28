@@ -76,7 +76,7 @@ class PandoraBots {
 		$result = $this->sanitize($matches[1]);
 		/* Simple Sanity Check  - Null */
 			if($result == FALSE OR empty($result)){
-				return $this->default_responce();
+				return $this->default_response();
 			} else {
 				return $result; // Return valid string.
 			}

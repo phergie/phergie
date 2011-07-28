@@ -54,7 +54,7 @@ class Phergie_Plugin_Ai extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        $this->setAi();
+        $this->setAiMethod();
         $this->getPluginHandler()->getPlugin('Message');
     }
 
@@ -93,16 +93,18 @@ class Phergie_Plugin_Ai extends Phergie_Plugin_Abstract
      */
 
     public function onPrivmsg(){
-        $source = $this->getEvent()->getSource();
-        $nick = $this->getEvent()->getHostmask()->getNick();
+	$event = $this->event;
+        $source = $event->getSource();
+        $nick = $event->getHostmask()->getNick();
         $msg = $this->plugins->message->getMessage();
         $ai = $this->getAiMethod();
-
+        $nick = $event->getNick();
+        
         if($msg != false){  
 		$response = $ai->say($msg);
 		var_dump($msg);
-                if(count(explode("\n",$response)) > 2){
-                        $this->doPrivmsg($source, var_return($msg));
+                if(count(explode("\n",$response)) < 2){
+                        $this->doPrivmsg($source, $nick.": ".trim($response));
                 } else {
                         $this->doPrivmsg($source, 'Probably');
                 }	
