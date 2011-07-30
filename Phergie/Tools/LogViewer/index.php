@@ -308,7 +308,7 @@ function nick_color($user)
  *
  * Just a quick wrapper around htmlspecialchars
  *
- * @param string $string The UTF8 string to escape
+ * @param string $string The UTF-8 string to escape
  *
  * @return string An escaped and ready for HTML use string
  * @author Eli White <eli@eliw.com>

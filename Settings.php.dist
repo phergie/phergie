@@ -13,7 +13,7 @@ return array(
             'nick' => 'Phergie2',
             // 'password' => 'password goes here if needed',
             // 'transport' => 'ssl', // uncomment to connect using SSL
-            // 'encoding' => 'UTF8', // uncomment if using UTF8
+            // 'encoding' => 'UTF-8', // uncomment if using UTF-8
         )
     ),
 

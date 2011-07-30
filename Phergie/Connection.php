@@ -55,7 +55,7 @@ class Phergie_Connection
 
     /**
      * Encoding method for the connection, defaults to ISO-8859-1 but can
-     * be set to UTF8 if necessary
+     * be set to UTF-8 if necessary
      *
      * @var strng
      */
@@ -244,7 +244,7 @@ class Phergie_Connection
     /**
      * Sets the encoding for the connection to use.
      *
-     * @param string $encoding Encoding to use (ex: ASCII, ISO-8859-1, UTF8, etc.)
+     * @param string $encoding Encoding to use (ex: ASCII, ISO-8859-1, UTF-8, etc.)
      *
      * @return Phergie_Connection Provides a fluent interface
      */
@@ -268,7 +268,7 @@ class Phergie_Connection
     /**
      * Returns the encoding in use by the connection.
      *
-     * @return string Encoding (ex: ASCII, ISO-8859-1, UTF8, etc.)
+     * @return string Encoding (ex: ASCII, ISO-8859-1, UTF-8, etc.)
      */
     public function getEncoding()
     {
