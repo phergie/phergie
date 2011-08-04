@@ -37,34 +37,55 @@ class Phergie_Plugin_MessageTest extends Phergie_Plugin_TestCase
      *
      * @return void
      */
-    private function initializeMessageEvent($message)
+    private function initializeMessageEvent($message, $inChannel = true)
     {
+        $source = ((bool) $inChannel) ? '#channel' : 'private';
+
         $this->plugin->onLoad();
         $args = array(
-            'receiver' => $this->source,
+            'receiver' => $source,
             'text' => $message
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent('privmsg', $args, $this->nick, $source);
         $this->plugin->setEvent($event);
     }
 
-    public function testGetMessageWithoutAliases()
+    /**
+     * @dataProvider dataProviderMessages
+     */
+    public function testMessages($expected, $input, $inChannel, $prefix)
     {
-        $this->initializeMessageEvent($this->connection->getNick() . ', hello');
-        $this->assertEquals('hello', $this->plugin->getMessage());
+        $this->setConfig('command.prefix',   $prefix);
+        $this->setConfig('message.aliases', 'alias');
+        $this->initializeMessageEvent($input, $inChannel);
+        $this->assertEquals($expected, $this->plugin->getMessage());
+    }
+
+    public function dataProviderMessages()
+    {
+        $nick          = $this->nick;
+        $withPrefix    = '!';
+        $withoutPrefix = null;
+
+        return array(
+            array('hello',    $nick . ', hello', true,  $withoutPrefix),
+            array('hello',    $nick . ', hello', false, $withoutPrefix),
+            array('hi',       $nick . ': hi',    true,  $withPrefix),
+            array('hi',       $nick . '> hi',    false, $withPrefix),
+            array('hi',       $nick . ' hi',     true,  $withoutPrefix),
+            array(false,      'random messages', true,  $withPrefix),
+            array('foo bar',  'foo bar',         true,  $withoutPrefix),
+            array('bar foo',  'bar foo',         false, $withPrefix),
+            array('foo',      '!foo',            true,  $withPrefix),
+            array('!foo',     '!foo',            true,  $withoutPrefix),
+            array('hey',      'alias> hey',      true,  $withPrefix),
+        );
     }
 
     public function testIsTargetedMessageWithoutAliases()
     {
         $this->initializeMessageEvent($this->connection->getNick() . ', hello');
         $this->assertTrue($this->plugin->isTargetedMessage());
-    }
-
-    public function testGetMessageWithAlias()
-    {
-        $this->setConfig('message.aliases', array('alias'));
-        $this->initializeMessageEvent('alias, hello');
-        $this->assertEquals('hello', $this->plugin->getMessage());
     }
 
     public function testIsTargetedMessageWithAlias()

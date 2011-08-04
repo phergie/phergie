@@ -32,19 +32,6 @@
 class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
 {
     /**
-     * Returns a regular expression that matches the bot's nick or aliases.
-     *
-     * @return string
-     */
-    private function getSelfRegex()
-    {
-        $me      = preg_quote($this->connection->getNick());
-        $aliases = $this->getConfig('message.aliases');
-
-        return '(?:' . implode('|', array_merge((array) $me, (array) $aliases)) . ')';
-    }
-
-    /**
      * Check whether a message is specifically targeted at the bot.
      * This is the case when the message starts with the bot's name
      * followed by [,:>] or when it is a private message.
@@ -54,18 +41,7 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
      */
     public function isTargetedMessage()
     {
-        $event = $this->getEvent();
-
-        $self = $this->getSelfRegex();
-
-        $targetPattern = <<<REGEX
-        {^
-        \s*{$self}\s*[:>,].* # expect the bots name, followed by a [:>,]
-        $}ix
-REGEX;
-
-        return !$event->isInChannel()
-            || preg_match($targetPattern, $event->getText()) > 0;
+        return $this->getMessage() !== false;
     }
 
     /**
@@ -76,49 +52,36 @@ REGEX;
      */
     public function getMessage()
     {
-        $event = $this->getEvent();
-
-        $prefix = preg_quote($this->getConfig('command.prefix'));
-        $self = $this->getSelfRegex();
+        $event   = $this->getEvent();
         $message = $event->getText();
+        $prefix  = $this->getConfig('command.prefix');
+        $symbols = array(':', ' ', ',', '>');
+        $nicks   = array_merge(
+            (array) $this->connection->getNick(),
+            (array) $this->getConfig('message.aliases')
+        );
 
-        // $prefixPattern matches : Phergie, do command <parameters>
-        // where $prefix = 'do'   : do command <parameters>
-        //                        : Phergie, command <parameters>
-        $prefixPattern = <<<REGEX
-        {^
-        (?:
-        	\s*{$self}\s*[:>,]\s* # start with bot name
-			(?:{$prefix})?        # which is optionally followed by the prefix
-        |
-        	\s*{$prefix}          # or start with the prefix
-        )
-        \s*(.*)                   # always end with the message
-        $}ix
-REGEX;
-
-        // $noPrefixPattern matches : Phergie, command <parameters>
-        //                          : command <parameters>
-        $noPrefixPattern = <<<REGEX
-        {^
-        \s*(?:{$self}\s*[:>,]\s*)? # optionally start with the bot name
-        (.*?)                      # always end with the message
-        $}ix
-REGEX;
-
-        $pattern = $noPrefixPattern;
-
-        // If a prefix is set, force it as a requirement
-        if ($prefix && $event->isInChannel()) {
-            $pattern = $prefixPattern;
+        // Format '<nick>[:|,|>|<space>] <message>'
+        foreach ($nicks as $nick) {
+            $length = strlen($nick);
+            if (substr($message, 0, $length) == $nick
+                && in_array(substr($message, $length, 1), $symbols)
+            ) {
+                return trim(substr($message, $length + 1));
+            }
         }
 
-        $match = null;
-
-        if (!preg_match($pattern, $message, $match)) {
-            return false;
+        // Format '<prefix><message>' (note that $prefix could be null)
+        $length = strlen($prefix);
+        if (substr($message, 0, $length) === $prefix) {
+            return trim(substr($message, $length));
         }
 
-        return $match[1];
+        // Private message or without configured prefix
+        if (!$event->isInChannel() || $prefix === null) {
+            return trim($message);
+        }
+
+        return false;
     }
 }
