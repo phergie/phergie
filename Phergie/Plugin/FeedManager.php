@@ -373,7 +373,7 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         }
 
         $feed_ids = array();
-        foreach ($feeds as $f) { 
+        foreach ($feeds as $f) {
             $feed_ids[] = $f['rowid'];
         }
         $feed_ids = implode(',', $feed_ids);

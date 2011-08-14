@@ -43,7 +43,7 @@ class PhergiePackageTask extends PearPackage2Task
             'lead', 'team', 'Phergie Development Team', 'team@phergie.org'
         );
 
-        $path = str_replace('_', '/', $this->package) . '.php'; 
+        $path = str_replace('_', '/', $this->package) . '.php';
         if (file_exists($path)) {
             $contents = file_get_contents($path);
             preg_match_all('#/\*\*(.*)\*/#Ums', $contents, $matches, PREG_SET_ORDER);

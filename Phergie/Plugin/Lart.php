@@ -98,9 +98,8 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
             || (!file_exists($fileName) && !is_writable($dirName))
         ) {
             throw new Phergie_Plugin_Exception(
-                'SQLite DB file exists and cannot be written,'
-                . ' OR does not exist and cannot be created: '
-                . $fileName
+                'SQLite file exists and cannot be written or does not exist '
+                . ' and cannot be created: ' . $fileName
             );
         }
 
@@ -159,7 +158,6 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
      */
     protected function getLart($term)
     {
-
         $connection = $this->getConnection();
 
         $term = str_ireplace($connection->getNick(), '$nick', $term);

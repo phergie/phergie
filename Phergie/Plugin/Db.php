@@ -20,14 +20,15 @@
  */
 
 /**
- * Provides an easy to use database wrapper that simplifies creation and creates
+ * Helper plugin for common database operations.
  *
  * @category Phergie
  * @package  Phergie_Plugin_Db
- * @author   Jared Folkins <jfolkins@gmail.com>
+ * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Db
- * @uses     Phergie_Plugin_UserInfo pear.phergie.org
+ * @uses     extension PDO
+ * @uses     extension pdo_sqlite
  */
 
 class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
@@ -35,7 +36,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     const DEBUG = true;
 
     /**
-     *  Checks to see if the root rbac user has been set in     *
+     *  Checks to see if the necessary extensions are loaded.
      *
      *  @return void
      */
@@ -91,7 +92,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
         }
         $this->isResourceDirectory($directory);
         $dbFile = $directory . $dbFile; // Add the directory path
-        $schemaFile = $resource_directory . $schemaFile; // Add path 
+        $schemaFile = $resource_directory . $schemaFile; // Add path
         try {
             $db = new PDO('sqlite:' . $dbFile);
         } catch (PDO_Exception $e) {

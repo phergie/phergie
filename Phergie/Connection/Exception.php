@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Exception related to a connection to an IRC server.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -31,13 +31,13 @@
 class Phergie_Connection_Exception extends Phergie_Exception
 {
     /**
-     * Error indicating that an operation was attempted requiring a value 
+     * Error indicating that an operation was attempted requiring a value
      * for a specific configuration setting, but none was set
      */
     const ERR_REQUIRED_SETTING_MISSING = 1;
 
     /**
-     * Error indicating that a connection is configured to use a transport, 
+     * Error indicating that a connection is configured to use a transport,
      * but that transport is not supported by the current PHP installation
      */
     const ERR_TRANSPORT_NOT_SUPPORTED = 2;

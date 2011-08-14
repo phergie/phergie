@@ -31,19 +31,19 @@
 class Phergie_Plugin_Cache extends Phergie_Plugin_Abstract
 {
     /**
-     * Key-value data storage for the cache 
-     * 
-     * @var array 
+     * Key-value data storage for the cache
+     *
+     * @var array
      */
     protected $cache = array();
 
     /**
-     * Stores a value in the cache. 
+     * Stores a value in the cache.
      *
-     * @param string   $key       Key to associate with the value 
+     * @param string   $key       Key to associate with the value
      * @param mixed    $data      Data to be stored
      * @param int|null $ttl       Time to live in seconds or NULL for forever
-     * @param bool     $overwrite TRUE to overwrite any existing value 
+     * @param bool     $overwrite TRUE to overwrite any existing value
      *        associated with the specified key
      *
      * @return bool
@@ -69,12 +69,12 @@ class Phergie_Plugin_Cache extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Fetches a previously stored value. 
+     * Fetches a previously stored value.
      *
-     * @param string $key Key associated with the value 
+     * @param string $key Key associated with the value
      *
-     * @return mixed Stored value or FALSE if no value or an expired value 
-     *         is associated with the specified key 
+     * @return mixed Stored value or FALSE if no value or an expired value
+     *         is associated with the specified key
      */
     public function fetch($key)
     {
@@ -94,7 +94,7 @@ class Phergie_Plugin_Cache extends Phergie_Plugin_Abstract
     /**
      * Expires a value that has exceeded its time to live.
      *
-     * @param string $key Key associated with the value to expire 
+     * @param string $key Key associated with the value to expire
      *
      * @return bool
      */

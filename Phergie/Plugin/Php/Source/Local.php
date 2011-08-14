@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Php
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -20,18 +20,18 @@
  */
 
 /**
- * Data source for {@see Phergie_Plugin_Php}. This source reads function 
- * descriptions from a file and stores them in a SQLite database. When a 
- * function description is requested, the function is retrieved from the 
+ * Data source for {@see Phergie_Plugin_Php}. This source reads function
+ * descriptions from a file and stores them in a SQLite database. When a
+ * function description is requested, the function is retrieved from the
  * local database.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Php
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Php
- * @uses     extension pdo 
- * @uses     extension pdo_sqlite 
+ * @uses     extension pdo
+ * @uses     extension pdo_sqlite
  * @uses     Phergie_Plugin_Command pear.phergie.org
  */
 class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
@@ -39,7 +39,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
     /**
      * Local database for storage
      *
-     * @var PDO 
+     * @var PDO
      */
     protected $database;
 
@@ -62,20 +62,22 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
         try {
             $this->database = new PDO('sqlite:' . $path . '/functions.db');
             $this->buildDatabase();
-            // @todo Modify this to be rethrown as an appropriate 
+            // @todo Modify this to be rethrown as an appropriate
             //       Phergie_Plugin_Exception and handled in Phergie_Plugin_Php
         } catch (PDOException $e) {
-            throw new Phergie_Plugin_Php_Source_Exception('PDO failure: ' . $e->getMessage());
-        } 
+            throw new Phergie_Plugin_Php_Source_Exception(
+                'PDO failure: ' . $e->getMessage()
+            );
+        }
     }
 
     /**
      * Searches for a description of the function.
-     * 
-     * @param string $function Search pattern to match against the function 
+     *
+     * @param string $function Search pattern to match against the function
      *        name, wildcards supported using %
      *
-     * @return array|null Associative array containing the function name and 
+     * @return array|null Associative array containing the function name and
      *         description or NULL if no results are found
      */
     public function findFunction($function)
@@ -111,7 +113,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
     /**
      * Build the database and parses the function summary file into it.
      *
-     * @param bool $rebuild TRUE to force a rebuild of the table used to 
+     * @param bool $rebuild TRUE to force a rebuild of the table used to
      *        house function information, FALSE otherwise, defaults to FALSE
      *
      * @return void
@@ -142,7 +144,7 @@ class Phergie_Plugin_Php_Source_Local implements Phergie_Plugin_Php_Source
         // If we created a new table, fill it with data
         if (!$table || $rebuild) {
             // Get the contents of the source file
-            // @todo Handle possible error cases better here; the @ operator 
+            // @todo Handle possible error cases better here; the @ operator
             //       shouldn't be needed
             $contents = @file(
                 $this->url,

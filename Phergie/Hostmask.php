@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Data structure for a hostmask.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -79,7 +79,7 @@ class Phergie_Hostmask
      *
      * @param string $string Alleged hostmask string
      *
-     * @return bool TRUE if the string appears to be a valid hostmask, FALSE 
+     * @return bool TRUE if the string appears to be a valid hostmask, FALSE
      *         otherwise
      */
     public static function isValid($string)
@@ -88,20 +88,20 @@ class Phergie_Hostmask
     }
 
     /**
-     * Parses a string containing the entire hostmask into a new instance of 
+     * Parses a string containing the entire hostmask into a new instance of
      * this class.
      *
-     * @param string $hostmask Entire hostmask including the nick, username, 
+     * @param string $hostmask Entire hostmask including the nick, username,
      *        and host components
      *
-     * @return Phergie_Hostmask New instance populated with data parsed from 
+     * @return Phergie_Hostmask New instance populated with data parsed from
      *         the provided hostmask string
      * @throws Phergie_Hostmask_Exception
      */
     public static function fromString($hostmask)
     {
         if (preg_match(self::$regex, $hostmask, $match)) {
-            list(, $nick, $username, $host) = $match; 
+            list(, $nick, $username, $host) = $match;
             return new self($nick, $username, $host);
         }
 
@@ -196,9 +196,9 @@ class Phergie_Hostmask
     /**
      * Returns whether a given hostmask matches a given pattern.
      *
-     * @param string $pattern  Pattern using conventions of a ban mask where 
+     * @param string $pattern  Pattern using conventions of a ban mask where
      *        represents a wildcard
-     * @param string $hostmask Optional hostmask to match against, if not 
+     * @param string $hostmask Optional hostmask to match against, if not
      *        the current hostmask instance
      *
      * @return bool TRUE if the hostmask matches the pattern, FALSE otherwise

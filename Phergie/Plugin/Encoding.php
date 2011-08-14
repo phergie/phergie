@@ -163,7 +163,7 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
      * @return string String with characters transliterated or the original
      *         string if transliteration was not possible
      */
-    public function transliterate($string, $charsetFrom = 'UTF-8', 
+    public function transliterate($string, $charsetFrom = 'UTF-8',
         $charsetTo = 'ISO-8859-1'
     ) {
         // @link http://pecl.php.net/package/translit

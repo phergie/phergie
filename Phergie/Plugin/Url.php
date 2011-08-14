@@ -34,6 +34,7 @@
  * @uses     Phergie_Plugin_Encoding pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     Phergie_Plugin_Tld pear.phergie.org
+ * @uses     Phergie_Plugin_Cache pear.phergie.org
  */
 class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 {
@@ -52,7 +53,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      *
      * @var int
      */
-    protected $expire = 1800;
+    protected $expire = 300;
 
     /**
      * Number of entries to keep in the cache at one time per channel

@@ -482,9 +482,11 @@ class Phergie_Event_Request
             }
         }
 
+        $message = 'Argument "' . $argument . '" could not be resolved for' .
+            ' event type "' . $this->type . '"';
+
         throw new Phergie_Event_Exception(
-            'Argument "' . $argument . '" could not be resolved for'
-            . ' event type "' . $this->type . '"',
+            $message,
             Phergie_Event_Exception::ERR_INVALID_ARGUMENT
         );
     }

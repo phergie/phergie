@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Join
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -22,7 +22,7 @@
 /**
  * Joins a specified channel on command from a user.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Join
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License

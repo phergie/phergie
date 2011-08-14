@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_AltNick
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -20,22 +20,22 @@
  */
 
 /**
- * Handles switching to alternate nicks in cases where the primary nick is 
+ * Handles switching to alternate nicks in cases where the primary nick is
  * not available for use.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_AltNick
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_AltNick
- * @uses     extension spl 
+ * @uses     extension spl
  */
 class Phergie_Plugin_AltNick extends Phergie_Plugin_Abstract
 {
     /**
      * Iterator for the alternate nick list
      *
-     * @var ArrayIterator 
+     * @var ArrayIterator
      */
     protected $iterator;
 
@@ -48,7 +48,7 @@ class Phergie_Plugin_AltNick extends Phergie_Plugin_Abstract
     {
         if ($this->config['altnick.nicks']) {
             if (is_string($this->config['altnick.nicks'])) {
-                $this->config['altnick.nicks'] 
+                $this->config['altnick.nicks']
                     = array($this->config['altnick.nicks']);
             }
             $this->iterator = new ArrayIterator($this->config['altnick.nicks']);
@@ -76,7 +76,7 @@ class Phergie_Plugin_AltNick extends Phergie_Plugin_Abstract
 
             // If another nick is available...
             if ($this->iterator->valid()) {
-                
+
                 // Switch to the new nick
                 $altNick = $this->iterator->current();
                 $this->doNick($altNick);
