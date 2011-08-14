@@ -115,13 +115,13 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
             /**
              * If we have data waiting on this connection, handle it.
              */
-            if (in_array((string) $connection->getHostmask(), $hostmasks)) {
-                if ($event = $this->driver->getEvent()) {
-                    $this->ui->onEvent($event, $connection);
-                    $this->plugins->setEvent($event);
-                    $this->plugins->preEvent();
-                    $this->plugins->{'on' . ucfirst($event->getType())}();
-                }
+            if (in_array((string) $connection->getHostmask(), $hostmasks)
+                && $event = $this->driver->getEvent()
+            ) {
+                $this->ui->onEvent($event, $connection);
+                $this->plugins->setEvent($event);
+                $this->plugins->preEvent();
+                $this->plugins->{'on' . ucfirst($event->getType())}();
             }
 
             /**
