@@ -77,7 +77,7 @@ class Phergie_Plugin_Cron extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function registerCallback($callback, $delay, 
+    public function registerCallback($callback, $delay,
         array $arguments = array(), $repeat = false
     ) {
         $callbackString = $this->getCallbackString($callback);

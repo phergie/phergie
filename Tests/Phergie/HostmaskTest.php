@@ -32,14 +32,14 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Phergie_Hostmask instance for testing.
-     * 
+     *
      * @var Phergie_Hostmask $hostmask
      */
     private $hostmask;
-    
+
     /**
      * Creates testing instance.
-     * 
+     *
      * @return void
      */
     public function setUp()
@@ -62,7 +62,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
                 array('*!*@', false)
         );
     }
-    
+
     /**
      * Tests static method Phergie_Hostmask::isValid() with various valid and invalid
      * hostmasks.
@@ -129,7 +129,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests setHost() function for correctly setting host property.
-     * 
+     *
      * @return void
      */
     public function testSetHost()
@@ -140,7 +140,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests getUsername() function for returning correct default value.
-     * 
+     *
      * @return void
      */
     public function testGetUsername()
@@ -150,7 +150,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests setUsername() function for correctly setting username property.
-     * 
+     *
      * @return void
      */
     public function testSetUsername()
@@ -171,7 +171,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests setNick() function for correctly setting nick property.
-     * 
+     *
      * @return void
      */
     public function testSetNick()
@@ -182,7 +182,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests magic __toString function for creating valid correct hostmask.
-     * 
+     *
      * @return void
      */
     public function test__toString()
@@ -192,7 +192,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests matches() function to match a pattern with a default hostmask.
-     * 
+     *
      * @return void
      */
     public function testMatchesTrueWithDefaultHostmask()
@@ -203,7 +203,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
 
     /**
      * Tests matches() function to match a pattern with a hostmask specified.
-     * 
+     *
      * @return void
      */
     public function testMatchesTrueWithHostmaskSpecified()
@@ -214,9 +214,9 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Tests matches() function for returning false when pattern does not match 
+     * Tests matches() function for returning false when pattern does not match
      * the default hostmask.
-     * 
+     *
      * @return void
      */
     public function testMatchesFalseWithDefaultHostmask()
@@ -228,7 +228,7 @@ class Phergie_HostmaskTest extends PHPUnit_Framework_TestCase
     /**
      * Tests matches() function for returning false when pattern does not match
      * a specified hostmask.
-     * 
+     *
      * @return void
      */
     public function testMatchesFalseWithHostmaskSpecified()

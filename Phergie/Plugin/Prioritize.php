@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Prioritize
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -20,10 +20,10 @@
  */
 
 /**
- * Prioritizes events such that they are executed in order from least to most 
+ * Prioritizes events such that they are executed in order from least to most
  * destructive.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Prioritize
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -31,7 +31,7 @@
  */
 class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
 {
-    /** 
+    /**
      * Event types ordered by priority of execution
      *
      * @var array
@@ -65,12 +65,12 @@ class Phergie_Plugin_Prioritize extends Phergie_Plugin_Abstract
         'kill',
         'part',
         'quit'
-    );  
+    );
 
     /**
-     * Prioritizes events from least to most destructive. 
+     * Prioritizes events from least to most destructive.
      *
-     * @return void 
+     * @return void
      */
     public function preDispatch()
     {

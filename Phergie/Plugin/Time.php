@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Time
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -33,8 +33,8 @@
 class Phergie_Plugin_Time extends Phergie_Plugin_Abstract
 {
     /**
-     * Returns the time interval between the current time and a given 
-     * timestamp. 
+     * Returns the time interval between the current time and a given
+     * timestamp.
      *
      * @param string $timestamp Timestamp compatible with strtotime()
      *
@@ -42,7 +42,7 @@ class Phergie_Plugin_Time extends Phergie_Plugin_Abstract
      */
     public function getCountdown($timestamp)
     {
-        $time = time() - strtotime($timestamp); 
+        $time = time() - strtotime($timestamp);
         $return = array();
 
         $days = floor($time / 86400);

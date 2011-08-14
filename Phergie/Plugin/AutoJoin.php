@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,7 +11,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_AutoJoin
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
@@ -23,14 +23,14 @@
  * Automates the process of having the bot join one or more channels upon
  * connection to the server.
  *
- * The configuration setting autojoin.channels is used to determine which 
- * channels to join. This setting can point to a comma-delimited string or 
- * enumerated array containing a single list of channels or an associative 
- * array keyed by hostname where each value is a comma-delimited string or  
- * enumerated array containing a list of channels to join on the server  
+ * The configuration setting autojoin.channels is used to determine which
+ * channels to join. This setting can point to a comma-delimited string or
+ * enumerated array containing a single list of channels or an associative
+ * array keyed by hostname where each value is a comma-delimited string or
+ * enumerated array containing a list of channels to join on the server
  * corresponding to that hostname.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_AutoJoin
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License

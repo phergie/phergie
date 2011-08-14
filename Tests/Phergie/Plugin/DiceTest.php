@@ -40,7 +40,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
         $this->assertRequiresPlugin('Command');
         $this->plugin->onLoad();
     }
-    
+
     /**
      * Initialize a die roll event.
      *
@@ -49,7 +49,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
      * @return void
      */
     private function initializeRollEvent($roll)
-    {  
+    {
         $this->plugin->onLoad();
         $args = array(
             'receiver' => $this->source,
@@ -89,7 +89,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
         }
         $this->plugin->onCommandRoll($roll);
     }
-    
+
     /**
      * Assertion that checks the response to a specific dice roll.
      *
@@ -99,7 +99,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
      * @return void
      */
     private function assertRoll($roll, $expected)
-    {  
+    {
         $this->initializeRollEvent($roll);
         $this->checkForRollResponse($roll, $expected);
     }

@@ -53,7 +53,7 @@ class Phergie_Autoload
 
         foreach ($paths as $path) {
             $fileName = $path . DIRECTORY_SEPARATOR
-                . str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php'; 
+                . str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
 
             if (file_exists($fileName)) {
                 include $fileName;

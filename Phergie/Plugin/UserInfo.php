@@ -384,7 +384,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     /**
      * Returns the nick of a random user present in a given channel or false
      * if the bot is not present in the channel.
-     * 
+     *
      * To exclude the bot's current nick, for example:
      *     $chan = $this->getEvent()->getSource();
      * 	   $current_nick = $this->getConnection()->getNick();

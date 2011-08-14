@@ -23,14 +23,14 @@
  * Phergie Log Viewer ... Currently designed as a single PHP file in order to make
  * it easy to 'install' this.  Just drop the index.php (or whatever name you wish
  * to rename it to) wherever you wish, and it will simply work.  Sure, it would be
- * nice to structure some of this stuff into various include files/etc.  But right 
+ * nice to structure some of this stuff into various include files/etc.  But right
  * now this is simple enough of a quick log viewer, that it's just one file.
  *
  */
 
 /********** SETUP **********/
 
-// (Change any of these if/as needed for your setup) 
+// (Change any of these if/as needed for your setup)
 ini_set('default_charset', 'UTF-8');
 date_default_timezone_set('UTC');
 $log = "/PATH/AND/FILENAME/TO/YOUR/LOGFILE/PLEASE.db";
@@ -97,7 +97,7 @@ function show_channels(PDO $db)
     foreach ($channels as $row) {
         $html = utf8specialchars($row['c']);
         $url = urlencode($row['c']);
-        echo "<li><a href=\"?m=channel&w={$url}\">{$html}</a></li>\n";        
+        echo "<li><a href=\"?m=channel&w={$url}\">{$html}</a></li>\n";
     }
 
     // Finish off the page:
@@ -109,7 +109,7 @@ function show_channels(PDO $db)
  * show_days
  *
  * Create a calendar view of all days available for this particular channel
- * 
+ *
  * NOTE: May get unwieldy if large log files.  Perhaps consider in the future
  *  making a paginated version of this?  by year?  Or a separate 'which year' page
  *  before this?  Not to worry about now.
@@ -176,7 +176,7 @@ EOTABLE;
                     echo '&nbsp;';
                 } elseif (isset($days[$d])) {
                     // Make a link to the day's log:
-                    echo "<a href=\"?m=day&w={$url}&d={$days[$d]}\">{$d}</a>";            
+                    echo "<a href=\"?m=day&w={$url}&d={$days[$d]}\">{$d}</a>";
                 } else {
                     // Just a dead number:
                     echo $d;
@@ -193,7 +193,7 @@ EOTABLE;
 
     // Finish off the page:
     echo "\n</ul>\n";
-    template_footer();    
+    template_footer();
 }
 
 /**
@@ -241,7 +241,7 @@ function show_log(PDO $db)
         $msg = utf8specialchars($row['message']);
         $nick = utf8specialchars($row['nick']);
         $type = false;
-        
+
         // Now change the format of the line based upon the type:
         switch ($row['type']) {
         case 4: // PRIVMSG (A Regular Message)
@@ -274,7 +274,7 @@ function show_log(PDO $db)
             echo "[$time] -> {$nick}: :{$type}: {$msg}<br />\n";
         }
     }
-        
+
     // Finish up the page:
     template_footer();
 }
@@ -295,7 +295,7 @@ function show_log(PDO $db)
 function nick_color($user)
 {
     static $colors = array();
-    
+
     if (!isset($colors[$user])) {
         $colors[$user] = substr(md5($user), 0, 6);
     }
@@ -327,7 +327,7 @@ function utf8specialchars($string)
  * Echo out the header for each HTML page
  *
  * @param String $title The title to be used for this page.
- * 
+ *
  * @return void
  * @author Eli White <eli@eliw.com>
  **/
@@ -335,7 +335,7 @@ function template_header($title)
 {
     $css = template_css();
     echo <<<EOHTML
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
