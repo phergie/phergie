@@ -27,6 +27,8 @@
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Db
+ * @uses     extension PDO
+ * @uses     extension pdo_sqlite
  */
 
 class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
@@ -34,7 +36,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     const DEBUG = true;
 
     /**
-     *  Checks to see if the root rbac user has been set in     *
+     *  Checks to see if the necessary extensions are loaded.
      *
      *  @return void
      */
@@ -56,7 +58,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     }
 
     /**
-     *  Initializes database
+     *  Initializes database and creates directories if needed
      *
      *  @param string $directory  plugin name
      *  @param string $dbFile     database name
@@ -66,18 +68,38 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      */
     public function init($directory, $dbFile, $schemaFile)
     {
-        $this->isResourceDirectory($directory);
-        $doesDbFileExist = is_readable($dbFile);
+        // We set the directory to the current path.
+        if (substr(dirname(__FILE__), -1) == '/') {
+                $resource_directory = dirname(__FILE__) . $directory;
+        } else {
+                $resource_directory = dirname(__FILE__) . '/' . $directory;
+        }
+        // Support alternate path for centralized db storage
+        if ($this->getConfig('dbpath')) {
+            echo "DEBUG: Switching to alternate DB path - $directory\n";
 
+            if (is_dir($this->getConfig('dbpath'))) {
+                $directory = $this->getConfig('dbpath') . $directory;
+
+                if (!is_dir($directory)) {
+                    mkdir($directory); // make directory
+                }
+            } else {
+                $this->fail('Unable to create Database(s)');
+            }
+        } else {
+            $directory = $resource_directory;
+        }
+        $this->isResourceDirectory($directory);
+        $dbFile = $directory . $dbFile; // Add the directory path
+        $schemaFile = $resource_directory . $schemaFile; // Add path
         try {
             $db = new PDO('sqlite:' . $dbFile);
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
 
-        if (!$doesDbFileExist) {
-            $this->createTablesFromSchema($db, $schemaFile);
-        }
+        $this->createTablesFromSchema($db, $schemaFile);
         return $db;
     }
 
@@ -128,7 +150,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
      */
     public function validateSqlType($sql, $type)
     {
-        preg_match('/^'.strtolower($type).'/', strtolower($sql), $matches);
+        preg_match('/^'.$type.'/i', $sql, $matches);
         return ($matches[0]) ? true : false;
     }
 
@@ -166,7 +188,7 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     {
         $this->isSchemaFile($file);
         $file = strtolower(file_get_contents($file));
-        preg_match_all('/create\stable\s([a-z_]+).*;/', $file, $matches);
+        preg_match_all('/create\stable\s([a-z_]+)[^;.]+/s', $file, $matches);
 
         if (count($matches[0]) != count($matches[1])) {
             $this->fail(
@@ -204,14 +226,19 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
     }
 
     /**
+     * Drops a table
+     *
      *  TODO Desc
      *
-     *  @param String $name table name
+     * @param string $db   Database name
+     * @param string $name Table name
      *
-     *  @return bool
+     * @return bool True on success
      */
-    public function dropTable($name)
+    public function dropTable($db, $name)
     {
+        $statement = $db->prepare('DROP TABLE :name;');
+        return (bool) $statement->execute(array(':name' => $db->quote($name)));
     }
 
     /**
@@ -228,4 +255,3 @@ class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
         }
     }
 }
-?>

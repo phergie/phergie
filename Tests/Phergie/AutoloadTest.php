@@ -149,6 +149,56 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests that classes and interfaces are loaded without problems
+     *
+     */
+    public function testExistingClassAndInterface()
+    {
+        // Fake environment and register autoloader
+        $path = dirname(__FILE__) . '/Autoload/_ExistingClassesTest';
+        set_include_path($path . PATH_SEPARATOR . get_include_path());
+        Phergie_Autoload::registerAutoloader();
+
+        $this->assertTrue(class_exists('Phergie_Valid_Class', true));
+        $this->assertTrue(interface_exists('Phergie_Valid_Interface', true));
+    }
+
+    /**
+     * Tests that loading an non existing class doesn't result into a crash
+     *
+     * @return void
+     */
+    public function testNonExistingClass()
+    {
+        Phergie_Autoload::registerAutoloader();
+        $this->assertFalse(class_exists('Phergie_Unexisting_Class', true));
+    }
+
+    /**
+     * Tests that expects an error if an expected class wasn't found in a file
+     *
+     * @return void
+     */
+    public function testClassNotInFile()
+    {
+        // Fake environment and register autoloader
+        $path = dirname(__FILE__) . '/Autoload/_ClassNotInFileTest';
+        set_include_path($path . PATH_SEPARATOR . get_include_path());
+        Phergie_Autoload::registerAutoloader();
+
+        try {
+            class_exists('Phergie_Missing_Class', true);
+            $this->fail('Expected exception not throwen');
+        } catch (Phergie_Exception $e) {
+            $this->assertEquals(
+                'Expected class Phergie_Missing_Class in '
+                . $path . '/Phergie/Missing/Class.php not found',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
      * Prevents preservation of global state in cases where test methods
      * must be run in separate processes.
      *

@@ -158,7 +158,6 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
      */
     protected function getLart($term)
     {
-
         $connection = $this->getConnection();
 
         $term = str_ireplace($connection->getNick(), '$nick', $term);

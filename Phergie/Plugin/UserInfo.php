@@ -65,7 +65,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
 
         $chan = trim(strtolower($chan));
         $modes = str_split(trim(strtolower($modes)), 1);
-        $nicks = explode(' ', trim(strtolower($nicks)));
+        $nicks = explode(' ', trim($nicks));
         $operation = array_shift($modes); // + or -
 
         while ($char = array_shift($modes)) {
@@ -91,6 +91,12 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             }
 
             if (!empty($mode)) {
+
+                // Unknow users - temp fix
+                if (!isset($this->store[$chan][$nick])) {
+                    $this->store[$chan][$nick] = self::REGULAR;
+                }
+
                 if ($operation == '+') {
                     $this->store[$chan][$nick] |= $mode;
                 } else if ($operation == '-') {
@@ -108,7 +114,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     public function onJoin()
     {
         $chan = trim(strtolower($this->event->getArgument(0)));
-        $nick = trim(strtolower($this->event->getNick()));
+        $nick = trim($this->event->getNick());
 
         $this->store[$chan][$nick] = self::REGULAR;
     }
@@ -121,7 +127,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     public function onPart()
     {
         $chan = trim(strtolower($this->event->getArgument(0)));
-        $nick = trim(strtolower($this->event->getNick()));
+        $nick = trim($this->event->getNick());
 
         if (isset($this->store[$chan][$nick])) {
             unset($this->store[$chan][$nick]);
@@ -135,7 +141,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onQuit()
     {
-        $nick = trim(strtolower($this->event->getNick()));
+        $nick = trim($this->event->getNick());
 
         foreach ($this->store as $chan => $store) {
             if (isset($store[$nick])) {
@@ -151,8 +157,8 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onNick()
     {
-        $nick = trim(strtolower($this->event->getNick()));
-        $newNick = trim(strtolower($this->event->getArgument(0)));
+        $nick = trim($this->event->getNick());
+        $newNick = trim($this->event->getArgument(0));
 
         foreach ($this->store as $chan => $store) {
             if (isset($store[$nick])) {
@@ -173,20 +179,19 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             return;
         }
 
-        $desc = preg_split('/[@*=]\s*/', $this->event->getDescription(), 2);
-        list($chan, $users) = array_pad(explode(' :', trim($desc[1])), 2, null);
-        $users = explode(' ', trim($users));
+        $array = explode(' ', $this->event->getDescription());
+        $chan  = $array[1];
+        $count = count($array);
 
-        $chan = trim(strtolower($chan));
+        for ($i = 3; $i < $count; $i++) {
 
-        foreach ($users as $user) {
-            if (empty($user)) {
+            if (empty($array[$i])) {
                 continue;
             }
 
-            $user = trim(strtolower($user));
-            $flag = self::REGULAR;
+            $user = trim($array[$i]);
 
+            $flag = self::REGULAR;
             if ($user[0] == '~') {
                 $flag |= self::OWNER;
             } else if ($user[0] == '&') {
@@ -272,7 +277,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     public function is($mode, $nick, $chan)
     {
         $chan = trim(strtolower($chan));
-        $nick = trim(strtolower($nick));
+        $nick = trim($nick);
 
         if (!isset($this->store[$chan][$nick])) {
             return false;
@@ -421,7 +426,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             $nick = $this->connection->getNick();
         }
 
-        $nick = trim(strtolower($nick));
+        $nick = trim($nick);
         $channels = array();
 
         foreach ($this->store as $chan => $store) {

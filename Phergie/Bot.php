@@ -149,7 +149,7 @@ class Phergie_Bot
     {
         if (empty($this->config)) {
             $this->config = new Phergie_Config;
-            $this->config->read('Settings.php');
+            $this->config->read(dirname(__FILE__) . '/../Settings.php');
         }
         if ($index !== null) {
             if (isset($this->config[$index])) {

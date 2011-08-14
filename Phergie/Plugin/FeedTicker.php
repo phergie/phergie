@@ -98,8 +98,9 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
             || (!file_exists($fileName) && !is_writable($dirName))
         ) {
             throw new Phergie_Plugin_Exception(
-                'SQLite file exists and cannot be written or does not exist '
-                . ' and cannot be created: ' . $fileName
+                'SQLite DB file exists and cannot be written,'
+                . ' OR does not exist and cannot be created: '
+                . $fileName
             );
         }
 
