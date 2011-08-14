@@ -36,12 +36,11 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
      *
      * @return string
      */
-    private function getSelfRegex()
+    private function _getSelfRegex()
     {
-        $me = preg_quote($this->connection->getNick());
-        $aliases = $this->getConfig('message.aliases');
-        $self = '(?:' . implode('|',
-            array_merge((array) $me, (array) $aliases)) . ')';
+        $me = (array) preg_quote($this->connection->getNick());
+        $aliases = (array) $this->getConfig('message.aliases');
+        $self = '(?:' . implode('|', array_merge($me, $aliases)) . ')';
         return $self;
     }
 
@@ -57,7 +56,7 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
     {
         $event = $this->getEvent();
 
-        $self = $this->getSelfRegex();
+        $self = $this->_getSelfRegex();
 
         $targetPattern = <<<REGEX
         {^
@@ -80,7 +79,7 @@ REGEX;
         $event = $this->getEvent();
 
         $prefix = preg_quote($this->getConfig('command.prefix'));
-        $self = $this->getSelfRegex();
+        $self = $this->_getSelfRegex();
         $message = $event->getText();
 
         // $prefixPattern matches : Phergie, do command <parameters>

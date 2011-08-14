@@ -94,9 +94,13 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
             mkdir($dirName);
         }
 
-        if ((file_exists($fileName) && !is_writable($fileName)) ||
-                (!file_exists($fileName) && !is_writable($dirName))) {
-            throw new Phergie_Plugin_Exception('SQLite DB file exists and cannot be written, OR does not exist and cannot be created: ' . $fileName);
+        if ((file_exists($fileName) && !is_writable($fileName))
+            || (!file_exists($fileName) && !is_writable($dirName))
+        ) {
+            throw new Phergie_Plugin_Exception(
+                'SQLite file exists and cannot be written or does not exist '
+                . ' and cannot be created: ' . $fileName
+            );
         }
 
         try {
@@ -105,7 +109,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
-        
+
         // Registering a Cron Callback
         $this->plugins->getPlugin('Cron')->registerCallback(
             array($this, 'feedCheckingCallback'),

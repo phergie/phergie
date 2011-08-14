@@ -156,10 +156,10 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
             $fileName = $this->getConfig('karma.sqlite_db', $defaultFileName);
 
             if (!is_writable($fileName)) {
-                throw new Phergie_Plugin_Exception('Cannot open the Karma SQLite DB: '
-                        . $fileName . '. '
-                        . 'Set this option with karma.sqlite_db. '
-                        . 'Also available on GitHub: https://github.com/elazar/phergie/tree/master/Phergie/Plugin/Karma');
+                throw new Phergie_Plugin_Exception(
+                    'Cannot open the Karma SQLite DB: ' . $fileName . '. '
+                    . 'Set this option with karma.sqlite_db.'
+                );
             }
 
             $this->db = new PDO('sqlite:' . $fileName);
