@@ -20,14 +20,13 @@
  */
 
 /**
- * TODO CREATE CLASS DESCRIPTION
+ * Helper plugin for common database operations.
  *
  * @category Phergie
  * @package  Phergie_Plugin_Db
- * @author   Jared Folkins <jfolkins@gmail.com>
+ * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Db
- * @uses     Phergie_Plugin_UserInfo pear.phergie.org
  */
 
 class Phergie_Plugin_Db extends Phergie_Plugin_Abstract
