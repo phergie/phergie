@@ -57,7 +57,7 @@ class Phergie_Connection
      * Encoding method for the connection, defaults to ISO-8859-1 but can
      * be set to UTF-8 if necessary
      *
-     * @var strng
+     * @var string
      */
     protected $encoding;
 
