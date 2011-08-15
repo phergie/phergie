@@ -60,6 +60,7 @@
             <include name="Phergie/Plugin/Abstract.php" />
             <include name="Phergie/Plugin/Exception.php" />
             <include name="Phergie/Plugin/Handler.php" />
+            <include name="Phergie/Plugin/Iterator.php" />
             <include name="Phergie/Process/Abstract.php" />
             <include name="Phergie/Process/Async.php" />
             <include name="Phergie/Process/Exception.php" />
