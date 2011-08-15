@@ -22,7 +22,6 @@
 /**
  * These requires are for library code, so they don't fit Autoload's normal
  * conventions.
- *
  */
 require dirname(__FILE__) . '/Ai/Pandora.class.php';
 require dirname(__FILE__) . '/Ai/Markov.class.php';
@@ -43,12 +42,12 @@ require dirname(__FILE__) . '/Ai/Multi.class.php';
 class Phergie_Plugin_Ai extends Phergie_Plugin_Abstract
 {
     /**
-     * Ai object 
+     * Ai object
      */
     protected $Ai;
 
     /**
-     * Initialize 
+     * Initialize
      *
      * @return void
      */
@@ -61,12 +60,12 @@ class Phergie_Plugin_Ai extends Phergie_Plugin_Abstract
     /**
      * Sets the class to use for AI (pandora,markov,multi)
      *
-     * @return this?
+     * @return Phergie_Plugin_Ai Implements a fluent interface
      */
     public function setAiMethod()
     {
         $aiMethod = $this->getConfig('ai.method', 'PandoraBots');
-        $this->ai = new $aiMethod ();
+        $this->ai = new $aiMethod();
         return $this;
     }
 
@@ -91,23 +90,22 @@ class Phergie_Plugin_Ai extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-
-    public function onPrivmsg(){
-	$event = $this->event;
+    public function onPrivmsg()
+    {
+        $event = $this->event;
         $source = $event->getSource();
         $nick = $event->getHostmask()->getNick();
         $msg = $this->plugins->message->getMessage();
         $ai = $this->getAiMethod();
         $nick = $event->getNick();
-        
-        if($msg != false){  
-		$response = $ai->say($msg);
-		var_dump($msg);
-                if(count(explode("\n",$response)) < 2){
-                        $this->doPrivmsg($source, $nick.": ".trim($response));
-                } else {
-                        $this->doPrivmsg($source, 'Probably');
-                }	
+
+        if($msg != false) {
+            $response = $ai->say($msg);
+            if(count(explode("\n",$response)) < 2){
+                $this->doPrivmsg($source, $nick.": ".trim($response));
+            } else {
+                $this->doPrivmsg($source, 'Probably');
+            }
         }
     }
 }

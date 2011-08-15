@@ -47,7 +47,11 @@ class PhergiePackageTask extends PearPackage2Task
         if (file_exists($path)) {
             $contents = file_get_contents($path);
             preg_match_all('#/\*\*(.*)\*/#Ums', $contents, $matches, PREG_SET_ORDER);
-            $doc = $matches[1][1];
+            foreach ($matches as $match) {
+                if (strpos($match[1], '@author') !== false) {
+                    $doc = $match[1];
+                }
+            }
 
             $have_summary = false;
             $have_description = false;
