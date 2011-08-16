@@ -157,6 +157,10 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
             $this->fail('Exception should have been thrown');
         } catch( Exception $e) {
             $this->assertInstanceOf('Phergie_Plugin_Exception', $e);
+            $this->assertEquals(
+                'weather.partner_id and weather.license_key must be specified',
+                $e->getMessage()
+            );
         }
     }
 
