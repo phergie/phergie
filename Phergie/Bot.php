@@ -135,6 +135,27 @@ class Phergie_Bot
     }
 
     /**
+     * Tries to locate the default configuration file
+     *
+     * @return string|bool Returns false when no file was found
+     */
+    public function getDefaultConfiguration()
+    {
+        $paths = array(
+            dirname(__FILE__) . '/../Settings.php',
+            dirname(__FILE__) . '/Settings.php'
+        );
+
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the entire configuration in use or the value of a specific
      * configuration setting.
      *
@@ -148,9 +169,18 @@ class Phergie_Bot
     public function getConfig($index = null, $default = null)
     {
         if (empty($this->config)) {
+            $config = $this->getDefaultConfiguration();
+            if (false === $config) {
+                throw new Exception(
+                    'Phergie could not locate file Settings.php, '
+                    . 'try "phergie path/to/file/Settings.php"'
+                );
+            }
+
             $this->config = new Phergie_Config;
-            $this->config->read(dirname(__FILE__) . '/../Settings.php');
+            $this->config->read($config);
         }
+
         if ($index !== null) {
             if (isset($this->config[$index])) {
                 return $this->config[$index];
