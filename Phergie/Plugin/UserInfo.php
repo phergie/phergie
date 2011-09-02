@@ -180,7 +180,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         }
 
         $array = explode(' ', $this->event->getDescription());
-        $chan  = $array[1];
+        $chan  = trim(strtolower($array[1]));
         $count = count($array);
 
         for ($i = 3; $i < $count; $i++) {
