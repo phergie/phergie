@@ -113,7 +113,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onJoin()
     {
-        $chan = trim(strtolower($this->event->getArgument(0)));
+        $chan = ltrim(trim(strtolower($this->event->getArgument(0))), ":");
         $nick = trim($this->event->getNick());
 
         $this->store[$chan][$nick] = self::REGULAR;
