@@ -113,7 +113,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onJoin()
     {
-        $chan = trim(strtolower($this->event->getArgument(0)));
+        $chan = ltrim(trim(strtolower($this->event->getArgument(0))), ":");
         $nick = trim($this->event->getNick());
 
         $this->store[$chan][$nick] = self::REGULAR;
@@ -180,7 +180,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         }
 
         $array = explode(' ', $this->event->getDescription());
-        $chan  = $array[1];
+        $chan  = trim(strtolower($array[1]));
         $count = count($array);
 
         for ($i = 3; $i < $count; $i++) {
