@@ -294,6 +294,10 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                     break;
                 }
             }
+            // This fixes the issue that seems to occur, but why does it?
+            if (!is_array($args)) {
+                  $args = array($args);
+            }
             break;
 
         case 'topic':
@@ -645,7 +649,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     {
         $buffer = rtrim(strtoupper($command) . ' ' . $args);
 
-        $this->doNotice($nick, chr(1) . $buffer . chr(1));
+        $this->doPrivmsg($nick, chr(1) . $buffer . chr(1));
     }
 
     /**
@@ -724,3 +728,4 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $this->send($command);
     }
 }
+
