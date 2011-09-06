@@ -713,7 +713,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoPing()
     {
         $this->doCommandTest(
-            'NOTICE nick :' . chr(1) . 'PING hash' . chr(1),
+            'PRIVMSG nick :' . chr(1) . 'PING hash' . chr(1),
             'doPing', array('nick', 'hash')
         );
     }
@@ -728,7 +728,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoVersionWithoutVersion()
     {
         $this->doCommandTest(
-            'NOTICE nick :' . chr(1) . 'VERSION' . chr(1), 'doVersion', array('nick')
+            'PRIVMSG nick :' . chr(1) . 'VERSION' . chr(1), 'doVersion', array('nick')
         );
     }
 
@@ -742,7 +742,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoVersionWithVersion()
     {
         $this->doCommandTest(
-            'NOTICE nick :' . chr(1) . 'VERSION version'
+            'PRIVMSG nick :' . chr(1) . 'VERSION version'
             . chr(1), 'doVersion', array('nick', 'version')
         );
     }
@@ -757,7 +757,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoTimeWithoutTime()
     {
         $this->doCommandTest(
-            'NOTICE nick :' . chr(1) . 'TIME' . chr(1), 'doTime', array('nick')
+            'PRIVMSG nick :' . chr(1) . 'TIME' . chr(1), 'doTime', array('nick')
         );
     }
 
@@ -771,7 +771,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoTimeWithTime()
     {
         $this->doCommandTest(
-            'NOTICE nick :' . chr(1) . 'TIME time'
+            'PRIVMSG nick :' . chr(1) . 'TIME time'
             . chr(1), 'doTime', array('nick', 'time')
         );
     }
@@ -786,7 +786,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoFingerWithoutFingerString()
     {
         $this->doCommandTest(
-            'NOTICE nick :' . chr(1) . 'FINGER' . chr(1), 'doFinger', array('nick')
+            'PRIVMSG nick :' . chr(1) . 'FINGER' . chr(1), 'doFinger', array('nick')
         );
     }
 
@@ -800,7 +800,7 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
     public function testDoFingerWithFingerString()
     {
         $this->doCommandTest(
-            'NOTICE nick :' . chr(1) . 'FINGER finger string'
+            'PRIVMSG nick :' . chr(1) . 'FINGER finger string'
             . chr(1), 'doFinger', array('nick', 'finger string')
         );
     }
