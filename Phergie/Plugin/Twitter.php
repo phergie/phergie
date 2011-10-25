@@ -158,26 +158,34 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     /**
      * Formats a Tweet into a message suitable for output.
      *
-     * @param object $tweet      JSON-decoded tweet object from Twitter
-     * @param bool   $includeUrl whether or not to include the URL in the
-     *  formatted output
+     * @param object $tweet JSON-decoded tweet object from Twitter
      *
      * @return string
      */
-    protected function formatTweet(StdClass $tweet, $includeUrl = true)
+    protected function formatTweet(StdClass $tweet)
     {
-        $ts = $this->plugins->time->getCountDown($tweet->created_at);
-        $out =  '<@' . $tweet->user->screen_name .'> '
-            . preg_replace('/\s+/', ' ', $tweet->text)
-            . ' - ' . $ts . ' ago';
-        if ($includeUrl) {
-            $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
-        }
+        $format = $this->getConfig('twitter.format', '<@{screen_name}> {text} - '
+            . '{countdown} ago ({url})');
+
+        $out = str_replace(array(
+            '{screen_name}',
+            '{text}',
+            '{time}',
+            '{countdown}',
+            '{url}',
+        ), array(
+            $tweet->user->screen_name,
+            $tweet->text,
+            $tweet->created_at,
+            $this->plugins->time->getCountDown($tweet->created_at),
+            $this->twitter->getUrlOutputStatus($tweet),
+        ), $format);
 
         $encode = $this->getPluginHandler()->getPlugin('Encoding');
 
         return $encode->decodeEntities($out);
     }
+
 
     /**
      * Renders Twitter URLs.
