@@ -186,7 +186,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         return $encode->decodeEntities($out);
     }
 
-
     /**
      * Renders Twitter URLs.
      *
