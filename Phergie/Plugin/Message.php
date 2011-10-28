@@ -60,7 +60,7 @@ class Phergie_Plugin_Message extends Phergie_Plugin_Abstract
 
         $targetPattern = <<<REGEX
         {^
-        \s*{$self}\s*[:>,].* # expect the bots name, followed by a [:>,]
+        \s*{$self}\s*[:>,\s].* # expect the bots name, followed by a [:>,\s]
         $}ix
 REGEX;
 
@@ -88,7 +88,7 @@ REGEX;
         $prefixPattern = <<<REGEX
         {^
         (?:
-        	\s*{$self}\s*[:>,]\s* # start with bot name
+        	\s*{$self}\s*[:>,\s]\s* # start with bot name
 			(?:{$prefix})?        # which is optionally followed by the prefix
         |
         	\s*{$prefix}          # or start with the prefix
@@ -101,7 +101,7 @@ REGEX;
         //                          : command <parameters>
         $noPrefixPattern = <<<REGEX
         {^
-        \s*(?:{$self}\s*[:>,]\s*)? # optionally start with the bot name
+        \s*(?:{$self}\s*[:>,\s]\s*)? # optionally start with the bot name
         (.*?)                      # always end with the message
         $}ix
 REGEX;
