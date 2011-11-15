@@ -136,7 +136,7 @@ class Phergie_Plugin_Http_Response
         $code = $this->code;
 
         if (!isset(self::$codeStrings[$code])) {
-            return 'Unkown HTTP Status';
+            return 'Unknown HTTP Status';
         }
 
         return self::$codeStrings[$code];
