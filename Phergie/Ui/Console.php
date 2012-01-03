@@ -54,7 +54,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     public function __construct()
     {
         $this->enabled = true;
-        $this->format = 'H:i:s';
+        $this->format = '[Y-m-d/H:i:s] ';
     }
 
     /**

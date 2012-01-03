@@ -256,7 +256,9 @@ class Phergie_Bot
         if (empty($this->ui)) {
             $this->ui = new Phergie_Ui_Console;
             $this->ui->setEnabled($this->getConfig('ui.enabled'));
+            $this->getConfig('ui.format', false) && $this->ui->setFormat($this->getConfig('ui.format'));
         }
+
         return $this->ui;
     }
 
