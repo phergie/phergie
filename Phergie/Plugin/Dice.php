@@ -60,7 +60,9 @@ class Phergie_Plugin_Dice extends Phergie_Plugin_Abstract
             list (, $num, $die, $mod, $rest) = $matches;
             $roll = 0;
             for ($i = 0; $i < $num; $i++) {
-                $roll += mt_rand(1, $die);
+                if ($die >= 1) { //BUGFIX: mt_rand issues E_WARNING (since PHP5.3) if max is lower than min (which is hardcoded to 1)
+                    $roll += mt_rand(1, $die);
+                }
             }
             $roll = min($roll, $num * $die);
             if (!empty($mod)) {
