@@ -60,7 +60,7 @@ class Phergie_Plugin_Cookie extends Phergie_Plugin_Abstract
         );
 
         $this->plugins->getPlugin('Serve')->serve(
-            dirname(__FILE__) . '/Cookie/cookie.db',
+            $this->findDataFile('cookie.db'),
             'cookies',
             $format,
             $request

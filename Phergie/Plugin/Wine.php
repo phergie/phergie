@@ -60,7 +60,7 @@ class Phergie_Plugin_Wine extends Phergie_Plugin_Abstract
         );
 
         $this->plugins->getPlugin('Serve')->serve(
-            dirname(__FILE__) . '/Wine/wine.db',
+            $this->findDataFile('wine.db'),
             'wine',
             $format,
             $request

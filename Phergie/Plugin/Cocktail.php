@@ -60,7 +60,7 @@ class Phergie_Plugin_Cocktail extends Phergie_Plugin_Abstract
         );
 
         $this->plugins->getPlugin('Serve')->serve(
-            dirname(__FILE__) . '/Cocktail/cocktail.db',
+            $this->findDataFile('cocktail.db'),
             'cocktail',
             $format,
             $request,

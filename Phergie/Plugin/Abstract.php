@@ -280,6 +280,35 @@ abstract class Phergie_Plugin_Abstract
     }
 
     /**
+     * Locates a given data file used by this plugin and returns the path to
+     * it. This is currently used mainly for compatibility with PEAR packaging.
+     *
+     * @param string $filename Name of the file
+     * @return string|null File path or NULL if the file cannot be found 
+     */
+    public function findDataFile($filename)
+    {
+        $class = get_class($this);
+
+        if (class_exists('PEAR_Config')) {
+            $config = new PEAR_Config();
+            $dataDir = $config->get('data_dir');
+            $path = rtrim($dataDir, '\\/') . '/' . $class . '/' . str_replace('_', '/', $class) . '/' . $filename;
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        $r = new ReflectionClass($class);
+        $path = dirname($r->getFilename()) . '/' . $this->getName() . '/' . $filename;
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        return null;
+    }
+
+    /**
      * Provides do* methods with signatures identical to those of
      * Phergie_Driver_Abstract but that queue up events to be dispatched
      * later.

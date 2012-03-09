@@ -66,7 +66,7 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
             $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
 
-        $dbFile = dirname(__FILE__) . '/Tld/tld.db';
+        $dbFile = $this->findDataFile('tld.db');
         try {
             $this->db = new PDO('sqlite:' . $dbFile);
 

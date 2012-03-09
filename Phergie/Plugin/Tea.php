@@ -60,7 +60,7 @@ class Phergie_Plugin_Tea extends Phergie_Plugin_Abstract
         );
 
         $this->plugins->getPlugin('Serve')->serve(
-            dirname(__FILE__) . '/Tea/tea.db',
+            $this->findDataFile('tea.db'),
             'tea',
             $format,
             $request

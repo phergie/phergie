@@ -152,7 +152,7 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
     public function getDb()
     {
         if (empty($this->db)) {
-            $defaultFileName = dirname(__FILE__) . '/Karma/karma.db';
+            $defaultFileName = $this->findDataFile('karma.db');
             $fileName = $this->getConfig('karma.sqlite_db', $defaultFileName);
 
             if (!is_writable($fileName)) {

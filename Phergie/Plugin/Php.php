@@ -55,7 +55,8 @@ class Phergie_Plugin_Php extends Phergie_Plugin_Abstract
         $this->getPluginHandler()->getPlugin('Command');
 
         try {
-            $this->source = new Phergie_Plugin_Php_Source_Local;
+            $db = $this->findDataFile('functions.db');
+            $this->source = new Phergie_Plugin_Php_Source_Local($db);
         } catch (Phergie_Plugin_Source_Local_Exception $e) {
             $this->fail($e->getMessage());
         }

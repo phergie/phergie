@@ -60,7 +60,7 @@ class Phergie_Plugin_Beer extends Phergie_Plugin_Abstract
         );
 
         $this->plugins->getPlugin('Serve')->serve(
-            dirname(__FILE__) . '/Beer/beer.db',
+            $this->findDataFile('beer.db'),
             'beer',
             $format,
             $request
