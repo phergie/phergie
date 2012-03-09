@@ -117,4 +117,4 @@ fclose($fp);
 
 // Clean up
 echo 'Cleaning up', PHP_EOL;
-unlink($file);
+unlink($file, $archive);
