@@ -22,11 +22,11 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie_Plugin_Php
+ * @package   Phergie_Plugin_Twitter
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Plugin_Php
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Twitter
  */
 
 /**
@@ -45,7 +45,7 @@ class Twitter
      *
      * Do not specify user/password in URL
      */
-    protected $baseUrl = 'http://twitter.com/';
+    protected $baseUrl = 'https://twitter.com/';
 
     /**
      * Full base URL (includes user/pass)
@@ -332,7 +332,7 @@ class Twitter
      */
     public function getUrlOutputStatus(StdClass $tweet)
     {
-        return $this->baseUrl . urlencode($tweet->user->screen_name)
+        return $this->baseUrl . '#!/' . urlencode($tweet->user->screen_name)
             . '/statuses/' . urlencode($tweet->id_str);
     }
 
