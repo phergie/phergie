@@ -21,7 +21,7 @@
 
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = dirname(__FILE__) . '/beer.db';
+$file = 'beer.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -32,7 +32,7 @@ $insert = $db->prepare('INSERT INTO beer (name, link) VALUES (:name, :link)');
 
 // Get raw beerme.com data set
 echo 'Downloading beerme.com data set', PHP_EOL;
-$file = dirname(__FILE__) . '/beerlist.txt';
+$file = 'beerlist.txt';
 if (!file_exists($file)) {
     copy('http://beerme.com/beerlist.php', $file);
 }
@@ -64,57 +64,53 @@ echo 'Cleaning up', PHP_EOL;
 unlink($file);
 
 // Get and decompress openbeerdb.com data set
-$archive = dirname(__FILE__) . '/beers.zip';
+$archive = 'beers.zip';
 if (!file_exists($archive)) {
-    echo 'openbeerdb.com data set must be downloaded manually from '
-        . 'http://www.openbeerdb.com/data', PHP_EOL;
-    exit(1);
+    copy('http://www.openbeerdb.com/data_files/beers.zip', $archive);
 }
 
 echo 'Decompressing openbeerdb.com data set', PHP_EOL;
 $zip = new ZipArchive;
-$zip->open(dirname(__FILE__) . '/beers.zip');
-$zip->extractTo(dirname(__FILE__), 'beers/beers.sql');
-$file = dirname(__FILE__) . '/beers/beers.sql';
+$zip->open($archive);
+$zip->extractTo(getcwd(), 'beers/beers.sql');
+$file = 'beers/beers.sql';
 
 // Extract data from data set
 echo 'Processing openbeerdb.com data', PHP_EOL;
 $fp = fopen($file, 'r');
 $db->beginTransaction();
-$columns = array();
-$start = false;
+$columns = array('id', 'brewery_id', 'name', 'cat_id', 'style_id', 'abv', 'ibu', 'srm', 'upc', 'filepath', 'descript', 'add_user', 'last_mod');
 while ($line = fgets($fp)) {
-    if (!$start) {
-        if (strpos($line, 'INSERT INTO `beers`') !== false) {
-            $start = true;
-            $line = rtrim(
-                str_replace(
-                    array('INSERT INTO `beers` (`', '`) VALUES'),
-                    array('', ''),
-                    $line
-                )
-            );
-            $columns = explode('`, `', $line);
+    if (strpos($line, 'INSERT') !== 0) {
+        continue;
+    }
+
+    $line = rtrim(
+        str_replace(
+            array('INSERT INTO `beers` VALUES (', ');'),
+            array('', ''),
+            $line
+        )
+    );
+    $lines = explode('),(', $line);
+
+    foreach ($lines as $line) {
+        $buffer = fopen('php://memory', 'rw');
+        fwrite($buffer, $line);
+        fseek($buffer, 0);
+        $values = fgetcsv($buffer, 4096, ',', '\'');
+        $line = array_combine($columns, $values);
+        fclose($buffer);
+
+        $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $line['name']);
+        $name = preg_replace('/\h*\v+\h*/', '', $name);
+        $name = str_replace('\\\'', '\'', $name);
+        if (strpos($name, 'discontinued') !== false) {
+            continue;
         }
-        continue;
+
+        $insert->execute(array($name, null));
     }
-    $line = trim($line, "(),;\r\n");
-
-    $buffer = fopen('php://memory', 'rw');
-    fwrite($buffer, $line);
-    fseek($buffer, 0);
-    $line = array_combine($columns, fgetcsv($buffer, 4096, ',', '\''));
-    fclose($buffer);
-
-    $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $line['name']);
-    $name = preg_replace('/\h*\v+\h*/', '', $name);
-    $name = str_replace('\\\'', '\'', $name);
-    if (strpos($name, 'discontinued') !== false) {
-        continue;
-    }
-
-    $link = 'http://www.openbeerdb.com/browse/detail/be_' . $line['id'];
-    $insert->execute(array($name, $link));
 }
 $db->commit();
 fclose($fp);
