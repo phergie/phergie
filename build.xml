@@ -222,6 +222,7 @@
             <option name="license" value="http://phergie.org/license New BSD License"/>
             <option name="packagetype" value="php"/>
             <option name="notes" value="${build.notes}"/>
+            <role extension="db" role="data"/>
         </phergiepkg>
 
         <phingcall target="build" />
