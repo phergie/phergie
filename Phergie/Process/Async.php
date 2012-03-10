@@ -47,13 +47,6 @@ class Phergie_Process_Async extends Phergie_Process_Abstract
     protected $usec = 200000;
 
     /**
-     * Length of time to wait between ticks.
-     *
-     * @var int
-     */
-    protected $wait = 0;
-
-    /**
      * Overrides the parent class to set the poll time.
      *
      * @param Phergie_Bot $bot     Main bot class

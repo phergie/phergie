@@ -158,26 +158,22 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     /**
      * Formats a Tweet into a message suitable for output.
      *
-     * @param object $tweet      JSON-decoded tweet object from Twitter
+     * @param object $tweet JSON-decoded tweet object from Twitter
      *
      * @return string
      */
     protected function formatTweet(StdClass $tweet)
     {
-        $format = $this->getConfig(
-            'twitter.format',
-            '<@{username}> {text} - {countdown} ago ({url})'
-        );
+        $format = $this->getConfig('twitter.format', '<@{screen_name}> {text} - '
+            . '{countdown} ago ({url})');
 
         $out = str_replace(array(
-            '{username}',
             '{screen_name}',
             '{text}',
             '{time}',
             '{countdown}',
             '{url}',
         ), array(
-            $tweet->user->username,
             $tweet->user->screen_name,
             $tweet->text,
             $tweet->created_at,

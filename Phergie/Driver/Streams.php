@@ -100,7 +100,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 $args = ':' . $args;
             }
 
-            $buffer .= ' ' . preg_replace('/\v+/', ' ', $args);
+            $buffer .= ' ' . preg_replace('/\v+/u', ' ', $args);
         }
 
         // Transmit the command over the socket connection
@@ -293,6 +293,10 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                     $args = array($source, $args);
                     break;
                 }
+            }
+            // This fixes the issue that seems to occur, but why does it?
+            if (!is_array($args)) {
+                  $args = array($args);
             }
             break;
 
@@ -645,7 +649,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     {
         $buffer = rtrim(strtoupper($command) . ' ' . $args);
 
-        $this->doNotice($nick, chr(1) . $buffer . chr(1));
+        $this->doPrivmsg($nick, chr(1) . $buffer . chr(1));
     }
 
     /**
@@ -724,3 +728,4 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $this->send($command);
     }
 }
+
