@@ -216,7 +216,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     protected function parseArguments($args, $count = -1)
     {
-        return preg_split('/ :?/S', $args, $count);
+        return preg_split('/ :?/S', ltrim($args, ':'), $count);
     }
 
     /**
@@ -268,6 +268,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         case 'ping':
         case 'pong':
         case 'error':
+        case 'part':
             $args = array_filter(array(ltrim($args, ':')));
             break;
 
@@ -301,7 +302,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             break;
 
         case 'topic':
-        case 'part':
         case 'invite':
         case 'join':
             $args = $this->parseArguments($args, 2);

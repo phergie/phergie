@@ -220,8 +220,7 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_PART => array(
-            'channel' => 0,
-            'message' => 1
+            'channel' => 0
         ),
 
         self::TYPE_INVITE => array(
