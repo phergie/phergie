@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,19 +11,19 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
 
 /**
- * End-user interface that produces console output when running the bot from 
+ * End-user interface that produces console output when running the bot from
  * a shell.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -54,10 +54,10 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     public function __construct()
     {
         $this->enabled = true;
-        $this->format = 'H:i:s';
+        $this->format = '[Y-m-d/H:i:s] ';
     }
 
-    /** 
+    /**
      * Outputs a timestamped line to the console if console output is enabled.
      *
      * @param string $line Line to output
@@ -84,7 +84,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     /**
      * Sets whether console output is enabled.
      *
-     * @param bool $enabled TRUE to enable console output, FALSE otherwise, 
+     * @param bool $enabled TRUE to enable console output, FALSE otherwise,
      *        defaults to TRUE
      *
      * @return Phergie_Ui_Console Provides a fluent interface
@@ -107,7 +107,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     }
 
     /**
-     * Sets the format used for timestamps in console output, overwriting 
+     * Sets the format used for timestamps in console output, overwriting
      * any previous format used.
      *
      * @param string $format Timestamp format
@@ -126,7 +126,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      *
      * @param string $host Server hostname
      *
-     * @return void 
+     * @return void
      */
     public function onConnect($host)
     {
@@ -134,11 +134,11 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     }
 
     /**
-     * Outputs a prompt when a plugin is loaded successfully. 
+     * Outputs a prompt when a plugin is loaded successfully.
      *
      * @param string $plugin Short name of the plugin
      *
-     * @return void 
+     * @return void
      */
     public function onPluginLoad($plugin)
     {
@@ -151,7 +151,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
      * @param string $plugin  Short name of the plugin
      * @param string $message Message describing the reason for the failure
      *
-     * @return void 
+     * @return void
      */
     public function onPluginFailure($plugin, $message)
     {
@@ -159,15 +159,15 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     }
 
     /**
-     * Outputs a prompt when the bot receives an IRC event. 
+     * Outputs a prompt when the bot receives an IRC event.
      *
      * @param Phergie_Event_Abstract $event      Received event
-     * @param Phergie_Connection     $connection Connection on which the 
+     * @param Phergie_Connection     $connection Connection on which the
      *        event was received
      *
      * @return void
      */
-    public function onEvent(Phergie_Event_Abstract $event, 
+    public function onEvent(Phergie_Event_Abstract $event,
         Phergie_Connection $connection
     ) {
         $host = $connection->getHostmask()->getHost();
@@ -177,14 +177,14 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     /**
      * Outputs a prompt when the bot sends a command to a server.
      *
-     * @param Phergie_Event_Command $event      Event representing the 
+     * @param Phergie_Event_Command $event      Event representing the
      *        command being sent
-     * @param Phergie_Connection    $connection Connection on which the 
-     *        command is being sent 
+     * @param Phergie_Connection    $connection Connection on which the
+     *        command is being sent
      *
      * @return void
      */
-    public function onCommand(Phergie_Event_Command $event, 
+    public function onCommand(Phergie_Event_Command $event,
         Phergie_Connection $connection
     ) {
         $plugin = $event->getPlugin()->getName();
@@ -192,15 +192,15 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
         $type = strtoupper($event->getType());
         $args = implode(' ', $event->getArguments());
         $this->console(
-            $plugin . ' plugin: ' . 
+            $plugin . ' plugin: ' .
             $host . ' -> ' . $type . ' ' . $args
-        ); 
+        );
     }
 
     /**
      * Outputs a prompt when the bot terminates a connection to a server.
      *
-     * @param Phergie_Connection $connection Terminated connection 
+     * @param Phergie_Connection $connection Terminated connection
      *
      * @return void
      */
@@ -211,7 +211,7 @@ class Phergie_Ui_Console extends Phergie_Ui_Abstract
     }
 
     /**
-     * Outputs a prompt when the bot shuts down after terminating all server 
+     * Outputs a prompt when the bot shuts down after terminating all server
      * connections.
      *
      * @return void

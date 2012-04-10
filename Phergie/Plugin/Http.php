@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Http
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Http
  */
@@ -55,7 +55,7 @@ class Phergie_Plugin_Http extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $this->handlers = array(
-            '(?:application|text)/xml(?:;.*)?'
+            '(?:text|application)/(?:(?:rss|atom)\+)?xml(?:;.*)?'
                 => 'simplexml_load_string',
             '(?:(?:application|text)/(?:x-)?json)|text/javascript.*'
                 => 'json_decode',

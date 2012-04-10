@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Encoding
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Encoding
  */
@@ -36,8 +36,8 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
      * html_entity_decode()
      *
      * @var array
-     * @link http://us.php.net/manual/en/function.get-html-translation-table.php#73409
-     * @link http://us.php.net/manual/en/function.get-html-translation-table.php#73410
+     * @link http://php.net/get_html_translation_table#73409
+     * @link http://php.net/get_html_translation_table#73410
      */
     protected static $entities = array(
         '&alpha;' => 913,
@@ -117,35 +117,36 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
      * Converts a given unicode to its UTF-8 equivalent.
      *
      * @param int $code Code to convert
+     *
      * @return string Character corresponding to code
      */
     public function codeToUtf8($code)
     {
         $code = (int) $code;
         switch ($code) {
-            // 1 byte, 7 bits
-            case 0:
-                return chr(0);
-            case ($code & 0x7F):
-                return chr($code);
+        // 1 byte, 7 bits
+        case 0:
+            return chr(0);
+        case ($code & 0x7F):
+            return chr($code);
 
             // 2 bytes, 11 bits
-            case ($code & 0x7FF):
-                return chr(0xC0 | (($code >> 6) & 0x1F)) .
-                       chr(0x80 | ($code & 0x3F));
+        case ($code & 0x7FF):
+            return chr(0xC0 | (($code >> 6) & 0x1F)) .
+                   chr(0x80 | ($code & 0x3F));
 
             // 3 bytes, 16 bits
-            case ($code & 0xFFFF):
-                return chr(0xE0 | (($code >> 12) & 0x0F)) .
-                       chr(0x80 | (($code >> 6) & 0x3F)) .
-                       chr(0x80 | ($code & 0x3F));
+        case ($code & 0xFFFF):
+            return chr(0xE0 | (($code >> 12) & 0x0F)) .
+                   chr(0x80 | (($code >> 6) & 0x3F)) .
+                   chr(0x80 | ($code & 0x3F));
 
             // 4 bytes, 21 bits
-            case ($code & 0x1FFFFF):
-                return chr(0xF0 | ($code >> 18)) .
-                       chr(0x80 | (($code >> 12) & 0x3F)) .
-                       chr(0x80 | (($code >> 6) & 0x3F)) .
-                       chr(0x80 | ($code & 0x3F));
+        case ($code & 0x1FFFFF):
+            return chr(0xF0 | ($code >> 18)) .
+                   chr(0x80 | (($code >> 12) & 0x3F)) .
+                   chr(0x80 | (($code >> 6) & 0x3F)) .
+                   chr(0x80 | ($code & 0x3F));
         }
     }
 
@@ -162,17 +163,24 @@ class Phergie_Plugin_Encoding extends Phergie_Plugin_Abstract
      * @return string String with characters transliterated or the original
      *         string if transliteration was not possible
      */
-    public function transliterate($string, $charsetFrom = 'UTF-8', $charsetTo = 'ISO-8859-1')
-    {
+    public function transliterate($string, $charsetFrom = 'UTF-8',
+        $charsetTo = 'ISO-8859-1'
+    ) {
         // @link http://pecl.php.net/package/translit
         if (function_exists('transliterate')) {
-            $string = transliterate($string, array('han_transliterate', 'diacritical_remove'), $charsetFrom, $charsetTo);
+            $string = transliterate(
+                $string,
+                array('han_transliterate', 'diacritical_remove'),
+                $charsetFrom,
+                $charsetTo
+            );
         } elseif (function_exists('iconv')) {
             $string = iconv($charsetFrom, $charsetTo . '//TRANSLIT', $string);
         } else {
             // @link http://stackoverflow.com/questions/1284535/php-transliteration/1285491#1285491
             $string = preg_replace(
-                '~&([a-z]{1,2})(acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i',
+                '~&([a-z]{1,2})'
+                . '(acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i',
                 '$1',
                 htmlentities($string, ENT_COMPAT, $charsetFrom)
             );

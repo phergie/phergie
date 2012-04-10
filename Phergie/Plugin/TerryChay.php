@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_TerryChay
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_TerryChay
  */
@@ -86,7 +86,7 @@ class Phergie_Plugin_TerryChay extends Phergie_Plugin_Abstract
             '\s*)?.*(terry\s+chay|tychay)}ix';
 
         if (preg_match($pattern, $message)) {
-            if($fact = $this->getChayism()) {
+            if ($fact = $this->getChayism()) {
                 $this->doPrivmsg($source, 'Fact: ' . $fact);
             }
         }

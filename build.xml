@@ -21,8 +21,8 @@
                 <property file="./build.properties" />
             </then>
             <else>
-                <input propertyname="build.srcdir" defaultvalue="./" message="Source directory" /> 
-                <input propertyname="build.dstdir" defaultvalue="./" message="Destination directory" /> 
+                <input propertyname="build.srcdir" defaultvalue="./" message="Source directory" />
+                <input propertyname="build.dstdir" defaultvalue="./" message="Destination directory" />
                 <input propertyname="build.version.release" message="Release version" />
                 <input propertyname="build.version.api" message="API version" />
                 <input propertyname="build.stability.release" defaultvalue="stable" message="Release stability" validArgs="snapshot,devel,alpha,beta,stable" />
@@ -45,9 +45,6 @@
             <include name="Phergie/Connection/Exception.php" />
             <include name="Phergie/Connection/Handler.php" />
             <include name="Phergie/Connection.php" />
-            <include name="Phergie/Db/Exception.php" />
-            <include name="Phergie/Db/Manager.php" />
-            <include name="Phergie/Db/Sqlite.php" />
             <include name="Phergie/Driver/Abstract.php" />
             <include name="Phergie/Driver/Exception.php" />
             <include name="Phergie/Driver/Streams.php" />
@@ -63,6 +60,11 @@
             <include name="Phergie/Plugin/Abstract.php" />
             <include name="Phergie/Plugin/Exception.php" />
             <include name="Phergie/Plugin/Handler.php" />
+            <include name="Phergie/Plugin/Iterator.php" />
+            <include name="Phergie/Process/Abstract.php" />
+            <include name="Phergie/Process/Async.php" />
+            <include name="Phergie/Process/Exception.php" />
+            <include name="Phergie/Process/Standard.php" />
             <include name="Phergie/Ui/Abstract.php" />
             <include name="Phergie/Ui/Console.php" />
         </fileset>
@@ -174,7 +176,7 @@
     </target>
 
     <target name="plugin" depends="input">
-        
+
         <if>
             <equals arg1="${have_properties_file}" arg2="true" />
             <then>
@@ -220,6 +222,7 @@
             <option name="license" value="http://phergie.org/license New BSD License"/>
             <option name="packagetype" value="php"/>
             <option name="notes" value="${build.notes}"/>
+            <role extension="db" role="data"/>
         </phergiepkg>
 
         <phingcall target="build" />
@@ -229,7 +232,7 @@
     </target>
 
     <target name="docs" depends="input">
-        
+
         <property name="build.tmpdir" value="Phergie_Docs-${build.version.release}" />
         <property name="build.tarball" value="${build.dstdir}${build.tmpdir}.tgz" />
 

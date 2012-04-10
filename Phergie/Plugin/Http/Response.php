@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Http
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Http
  */
@@ -136,7 +136,7 @@ class Phergie_Plugin_Http_Response
         $code = $this->code;
 
         if (!isset(self::$codeStrings[$code])) {
-            return 'Unkown HTTP Status';
+            return 'Unknown HTTP Status';
         }
 
         return self::$codeStrings[$code];

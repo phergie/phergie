@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Karma
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Karma
  */
@@ -103,44 +103,44 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
      */
     protected function initializePreparedStatements()
     {
-        $this->fetchKarma = $this->db->prepare('
-            SELECT karma
+        $this->fetchKarma = $this->db->prepare(
+            'SELECT karma
             FROM karmas
             WHERE term = :term
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
 
-        $this->insertKarma = $this->db->prepare('
-            INSERT INTO karmas (term, karma)
-            VALUES (:term, :karma)
-        ');
+        $this->insertKarma = $this->db->prepare(
+            'INSERT INTO karmas (term, karma)
+            VALUES (:term, :karma)'
+        );
 
-        $this->updateKarma = $this->db->prepare('
-            UPDATE karmas
+        $this->updateKarma = $this->db->prepare(
+            'UPDATE karmas
             SET karma = :karma
-            WHERE term = :term
-        ');
+            WHERE term = :term'
+        );
 
-        $this->fetchFixedKarma = $this->db->prepare('
-            SELECT karma
+        $this->fetchFixedKarma = $this->db->prepare(
+            'SELECT karma
             FROM fixed_karmas
             WHERE term = :term
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
 
-        $this->fetchPositiveAnswer = $this->db->prepare('
-            SELECT answer
+        $this->fetchPositiveAnswer = $this->db->prepare(
+            'SELECT answer
             FROM positive_answers
             ORDER BY RANDOM()
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
 
-        $this->fetchNegativeAnswer = $this->db->prepare('
-            SELECT answer
+        $this->fetchNegativeAnswer = $this->db->prepare(
+            'SELECT answer
             FROM negative_answers
             ORDER BY RANDOM()
-            LIMIT 1
-        ');
+            LIMIT 1'
+        );
     }
 
     /**
@@ -152,7 +152,17 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
     public function getDb()
     {
         if (empty($this->db)) {
-            $this->db = new PDO('sqlite:' . dirname(__FILE__) . '/Karma/karma.db');
+            $defaultFileName = $this->findDataFile('karma.db');
+            $fileName = $this->getConfig('karma.sqlite_db', $defaultFileName);
+
+            if (!is_writable($fileName)) {
+                throw new Phergie_Plugin_Exception(
+                    'Cannot open the Karma SQLite DB: ' . $fileName . '. '
+                    . 'Set this option with karma.sqlite_db.'
+                );
+            }
+
+            $this->db = new PDO('sqlite:' . $fileName);
             $this->initializePreparedStatements();
         }
         return $this->db;
@@ -188,14 +198,14 @@ class Phergie_Plugin_Karma extends Phergie_Plugin_Abstract
     {
         $canonicalTerm = strtolower(preg_replace('|\s+|', ' ', trim($term, '()')));
         switch ($canonicalTerm) {
-            case 'me':
-                $canonicalTerm = strtolower($this->event->getNick());
-                break;
-            case 'all':
-            case '*':
-            case 'everything':
-                $canonicalTerm = 'everything';
-                break;
+        case 'me':
+            $canonicalTerm = strtolower($this->event->getNick());
+            break;
+        case 'all':
+        case '*':
+        case 'everything':
+            $canonicalTerm = 'everything';
+            break;
         }
         return $canonicalTerm;
     }
@@ -363,8 +373,8 @@ REGEX;
         $reply = $replies->fetchColumn();
 
         if (max($karma0, $karma1) == $karma1) {
-            list($canonicalTerm0, $canonicalTerm1) =
-                array($canonicalTerm1, $canonicalTerm0);
+            list($canonicalTerm0, $canonicalTerm1)
+                = array($canonicalTerm1, $canonicalTerm0);
         }
 
         $message = str_replace(

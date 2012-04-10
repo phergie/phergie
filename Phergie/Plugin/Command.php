@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Command
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Command
  */
@@ -57,6 +57,19 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
     {
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Message');
+    }
+
+    /**
+     * Returns a list of detected methods for processing commands.
+     *
+     * @return array List of method names
+     */
+    public function getMethods()
+    {
+        if (empty($this->methods)) {
+            $this->populateMethodCache();
+        }
+        return array_keys($this->methods);
     }
 
     /**
@@ -109,7 +122,11 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
 
         // Resolve aliases to their corresponding commands
         $aliases = $this->getConfig('command.aliases', array());
-        $result = preg_grep('/^' . preg_quote($command, '/') . '$/i', array_keys($aliases));
+        $result = preg_grep(
+            '/^' . preg_quote($command, '/')
+            . '$/i', array_keys($aliases)
+        );
+
         if ($result) {
             $command = $aliases[array_shift($result)];
         }
@@ -132,7 +149,28 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
             // If arguments are passed...
 
             // Parse the arguments
-            $args = preg_split('/\s+/', $args, $this->methods[$method]['total']);
+            if ('"' == substr($args, 0, 1)) {
+                preg_match_all('/("[^"]*")|(\S+)/', $args, $args);
+                $argsIn = $args[0];
+                $i = 1;
+                $args = array();
+                $methodArgsTotal = $this->methods[$method]['total'];
+                foreach ($argsIn as $arg) {
+                    if ($i < $methodArgsTotal) {
+                        $args[] = $arg;
+                        $i++;
+                    } else {
+                        if (empty($args[$methodArgsTotal])) {
+                            $args[$methodArgsTotal] = $arg;
+                        } else {
+                            $args[$methodArgsTotal] .= ' '.$arg;
+                        }
+                    }
+                }
+                $args = array_values($args);
+            } else {
+                $args = preg_split('/\s+/', $args, $this->methods[$method]['total']);
+            }
 
             // If the minimum arguments are passed, call the method
             if ($this->methods[$method]['required'] <= count($args)) {
@@ -142,5 +180,6 @@ class Phergie_Plugin_Command extends Phergie_Plugin_Abstract
                 );
             }
         }
+
     }
 }

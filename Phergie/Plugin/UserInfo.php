@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_UserInfo
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_UserInfo
  */
@@ -65,7 +65,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
 
         $chan = trim(strtolower($chan));
         $modes = str_split(trim(strtolower($modes)), 1);
-        $nicks = explode(' ', trim(strtolower($nicks)));
+        $nicks = explode(' ', trim($nicks));
         $operation = array_shift($modes); // + or -
 
         while ($char = array_shift($modes)) {
@@ -91,6 +91,12 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             }
 
             if (!empty($mode)) {
+
+                // Unknow users - temp fix
+                if (!isset($this->store[$chan][$nick])) {
+                    $this->store[$chan][$nick] = self::REGULAR;
+                }
+
                 if ($operation == '+') {
                     $this->store[$chan][$nick] |= $mode;
                 } else if ($operation == '-') {
@@ -107,8 +113,8 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onJoin()
     {
-        $chan = trim(strtolower($this->event->getArgument(0)));
-        $nick = trim(strtolower($this->event->getNick()));
+        $chan = ltrim(trim(strtolower($this->event->getArgument(0))), ":");
+        $nick = trim($this->event->getNick());
 
         $this->store[$chan][$nick] = self::REGULAR;
     }
@@ -121,7 +127,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     public function onPart()
     {
         $chan = trim(strtolower($this->event->getArgument(0)));
-        $nick = trim(strtolower($this->event->getNick()));
+        $nick = trim($this->event->getNick());
 
         if (isset($this->store[$chan][$nick])) {
             unset($this->store[$chan][$nick]);
@@ -135,7 +141,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onQuit()
     {
-        $nick = trim(strtolower($this->event->getNick()));
+        $nick = trim($this->event->getNick());
 
         foreach ($this->store as $chan => $store) {
             if (isset($store[$nick])) {
@@ -151,8 +157,8 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      */
     public function onNick()
     {
-        $nick = trim(strtolower($this->event->getNick()));
-        $newNick = trim(strtolower($this->event->getArgument(0)));
+        $nick = trim($this->event->getNick());
+        $newNick = trim($this->event->getArgument(0));
 
         foreach ($this->store as $chan => $store) {
             if (isset($store[$nick])) {
@@ -173,20 +179,19 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             return;
         }
 
-        $desc = preg_split('/[@*=]\s*/', $this->event->getDescription(), 2);
-        list($chan, $users) = array_pad(explode(' :', trim($desc[1])), 2, null);
-        $users = explode(' ', trim($users));
+        $array = explode(' ', $this->event->getDescription());
+        $chan  = trim(strtolower($array[1]));
+        $count = count($array);
 
-        $chan = trim(strtolower($chan));
+        for ($i = 3; $i < $count; $i++) {
 
-        foreach ($users as $user) {
-            if (empty($user)) {
+            if (empty($array[$i])) {
                 continue;
             }
 
-            $user = trim(strtolower($user));
-            $flag = self::REGULAR;
+            $user = trim($array[$i]);
 
+            $flag = self::REGULAR;
             if ($user[0] == '~') {
                 $flag |= self::OWNER;
             } else if ($user[0] == '&') {
@@ -221,23 +226,39 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
         list($target, $msg) = array_pad($this->event->getArguments(), 2, null);
 
         if (preg_match('#^ishere (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isIn($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isIn($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isowner (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isOwner($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isOwner($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isadmin (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isAdmin($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isAdmin($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isop (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isOp($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isOp($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^ishop (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isHalfop($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isHalfop($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^isvoice (\S+)$#', $msg, $m)) {
-            $this->doPrivmsg($target, $this->isVoice($m[1], $target) ? 'true' : 'false');
+            $this->doPrivmsg(
+                $target, $this->isVoice($m[1], $target) ? 'true' : 'false'
+            );
         } elseif (preg_match('#^channels (\S+)$#', $msg, $m)) {
             $channels = $this->getChannels($m[1]);
-            $this->doPrivmsg($target, $channels ? join(', ', $channels) : 'unable to find nick');
+            $this->doPrivmsg(
+                $target, $channels ? join(', ', $channels) : 'unable to find nick'
+            );
         } elseif (preg_match('#^users (\S+)$#', $msg, $m)) {
             $nicks = $this->getUsers($m[1]);
-            $this->doPrivmsg($target, $nicks ? join(', ', $nicks) : 'unable to find channel');
+            $this->doPrivmsg(
+                $target, $nicks ? join(', ', $nicks) : 'unable to find channel'
+            );
         } elseif (preg_match('#^random (\S+)$#', $msg, $m)) {
             $nick = $this->getrandomuser($m[1]);
             $this->doPrivmsg($target, $nick ? $nick : 'unable to  find channel');
@@ -256,7 +277,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
     public function is($mode, $nick, $chan)
     {
         $chan = trim(strtolower($chan));
-        $nick = trim(strtolower($nick));
+        $nick = trim($nick);
 
         if (!isset($this->store[$chan][$nick])) {
             return false;
@@ -364,17 +385,23 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
      * Returns the nick of a random user present in a given channel or false
      * if the bot is not present in the channel.
      *
-     * @param string $chan The channel name
+     * To exclude the bot's current nick, for example:
+     *     $chan = $this->getEvent()->getSource();
+     * 	   $current_nick = $this->getConnection()->getNick();
+     * 	   $random_user = $this->plugins->getPlugin('UserInfo')
+     *          ->getRandomUser( $chan, array( $current_nick ) );
      *
-     * @return array|bool
+     * @param string $chan   The channel name
+     * @param array  $ignore A list of nicks to ignore in the channel.
+     *                       Useful for excluding the bot itself.
+     *
+     * @return string|bool
      */
-    public function getRandomUser($chan)
+    public function getRandomUser($chan, $ignore = array('chanserv'))
     {
         $chan = trim(strtolower($chan));
 
         if (isset($this->store[$chan])) {
-            $ignore = array('chanserv', 'q', 'l', 's');
-
             do {
                 $nick = array_rand($this->store[$chan], 1);
             } while (in_array($nick, $ignore));
@@ -399,7 +426,7 @@ class Phergie_Plugin_UserInfo extends Phergie_Plugin_Abstract
             $nick = $this->connection->getNick();
         }
 
-        $nick = trim(strtolower($nick));
+        $nick = trim($nick);
         $channels = array();
 
         foreach ($this->store as $chan => $store) {

@@ -14,22 +14,22 @@
  * @category  Phergie
  * @package   Phergie_Plugin_AudioScrobbler
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_AudioScrobbler
  */
 
 /**
- * Provides commands to look up information on tracks played by specific 
+ * Provides commands to look up information on tracks played by specific
  * users on the Last.fm and Libre.fm services.
  *
  * TODO: Make the "nick-binding" use an SQLite database instead of having them
  *       hard-coded in to the config file.
- * 
+ *
  * Configuration settings:
  * "audioscrobbler.lastfm_api_key":  API given by last.fm (string).
  * "audioscrobbler.librefm_api_key": API key given by libre.fm (string).
- * 
+ *
  * @category Phergie
  * @package  Phergie_Plugin_AudioScrobbler
  * @author   Phergie Development Team <team@phergie.org>
@@ -47,14 +47,14 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
      * @var string
      */
     protected $lastfmUrl = 'http://ws.audioscrobbler.com/2.0/';
-    
+
     /**
      * Libre.FM API entry point
      *
      * @var string
      */
     protected $librefmUrl = 'http://alpha.dev.libre.fm/2.0/';
-    
+
     /**
      * Scrobbler query string for user.getRecentTracks
      *
@@ -68,7 +68,7 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
      * @var Phergie_Plugin_Http
      */
     protected $http;
-    
+
     /**
      * Check for dependencies.
      *
@@ -79,15 +79,15 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
         if (!extension_loaded('simplexml')) {
             $this->fail('SimpleXML php extension is required');
         }
-        
+
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Command');
         $this->http = $plugins->getPlugin('Http');
     }
-    
+
     /**
      * Command function to get a user's status on last.fm.
-     * 
+     *
      * @param string $user User identifier
      *
      * @return void
@@ -104,7 +104,7 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
 
     /**
      * Command function to get a user's status on libre.fm.
-     * 
+     *
      * @param string $user User identifier
      *
      * @return void
@@ -120,9 +120,9 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
     }
 
     /**
-     * Simple Scrobbler API function to get a formatted string of the most 
+     * Simple Scrobbler API function to get a formatted string of the most
      * recent track played by a user.
-     * 
+     *
      * @param string $user Username to look up
      * @param string $url  Base URL of the scrobbler service
      * @param string $key  Scrobbler service API key
@@ -139,24 +139,24 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
         if ($response->isError()) {
             $this->doNotice(
                 $event->getNick(),
-                'Can\'t find status for ' . $user . ': HTTP ' . 
+                'Can\'t find status for ' . $user . ': HTTP ' .
                 $response->getCode() . ' ' . $response->getMessage()
             );
-            return false; 
+            return false;
         }
-        
+
         $xml = $response->getContent();
         if ($xml->error) {
             $this->doNotice(
                 $event->getNick(),
                 'Can\'t find status for ' . $user . ': API ' . $xml->error
             );
-            return false; 
+            return false;
         }
-        
+
         $recenttracks = $xml->recenttracks;
         $track = $recenttracks->track[0];
-        
+
         // If the user exists but has not scrobbled anything, the result will
         // be empty.
         if (empty($track->name) && empty($track->artist)) {
@@ -166,7 +166,7 @@ class Phergie_Plugin_AudioScrobbler extends Phergie_Plugin_Abstract
             );
             return false;
         }
-        
+
         if (isset($track['nowplaying'])) {
             $msg = sprintf(
                 '%s is listening to %s by %s',

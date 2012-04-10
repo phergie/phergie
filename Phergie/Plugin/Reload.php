@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Reload
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Reload
  */
@@ -64,7 +64,8 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
         }
 
         if (!$this->plugins->hasPlugin($plugin)) {
-            echo 'DEBUG(Reload): ' . ucfirst($plugin) . ' is not loaded yet, loading', PHP_EOL;
+            echo 'DEBUG(Reload): ' . ucfirst($plugin)
+                . ' is not loaded yet, loading', PHP_EOL;
             try {
                 $this->plugins->getPlugin($plugin);
                 $this->plugins->command->populateMethodCache();
@@ -93,15 +94,31 @@ class Phergie_Plugin_Reload extends Phergie_Plugin_Abstract
 
         if (class_exists($newClass, false)) {
             if ($evalClass == true) {
-                echo 'DEBUG(Reload): Class ', $class, ' has not changed since last reload', PHP_EOL;
+                echo 'DEBUG(Reload): Class ', $class
+                    , ' has not changed since last reload', PHP_EOL;
                 return;
             }
         } else {
-            $contents = preg_replace(
-                array('/^<\?(?:php)?/', '/class\s+' . $class . '/i'),
-                array('', 'class ' . $newClass),
-                $contents
-            );
+            $tokens = token_get_all($contents);
+            $contents = '';
+            while ($token = next($tokens)) {
+                if (is_string($token)) {
+                    $contents .= $token;
+                } else {
+                    if ($token[0] == T_CLASS) {
+                        while (!is_array($token) || $token[0] != T_STRING) {
+                            $contents .= (is_array($token) ? $token[1] : $token);
+                            $token = next($tokens);
+                        }
+                        $token[1] = $newClass;
+                    } elseif ($token[0] == T_FILE) {
+                        $token[1] = '\'' . $info['file'] . '\'';
+                    } elseif (defined('T_DIR') && $token[0] == T_DIR) {
+                        $token[1] = '\'' . dirname($info['file']) . '\'';
+                    }
+                    $contents .= $token[1];
+                }
+            }
             eval($contents);
         }
 

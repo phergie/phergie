@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
@@ -353,6 +353,9 @@ class Phergie_Event_RequestTest extends PHPUnit_Framework_TestCase
     {
         return array(
             array('#channel', true),
+            array('&channel', true),
+            array('+channel', true),
+            array('!channel', true),
             array('nick', false),
         );
     }
@@ -480,6 +483,7 @@ class Phergie_Event_RequestTest extends PHPUnit_Framework_TestCase
      */
     public function testProvidesVirtualGetterMethods($type, array $args)
     {
+        $this->event->setHostmask($this->getMockHostmask());
         $this->event->setType($type);
         $this->event->setArguments(array_keys($args));
         foreach ($args as $name => $position) {

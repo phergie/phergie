@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Censor
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Censor
  */
@@ -69,7 +69,9 @@ class Phergie_Plugin_Censor extends Phergie_Plugin_Abstract
     public function cleanString($string)
     {
         if (empty($this->soap)) {
-            $this->soap = new SoapClient('http://ws.cdyne.com/ProfanityWS/Profanity.asmx?wsdl');
+            $this->soap = new SoapClient(
+                'http://ws.cdyne.com/ProfanityWS/Profanity.asmx?wsdl'
+            );
         }
         $params = array('Text' => $string);
         $attempts = 0;
@@ -101,19 +103,19 @@ class Phergie_Plugin_Censor extends Phergie_Plugin_Abstract
 
         foreach ($events as $event) {
             switch ($event->getType()) {
-                case Phergie_Event_Request::TYPE_PRIVMSG:
-                case Phergie_Event_Request::TYPE_ACTION:
-                case Phergie_Event_Request::TYPE_NOTICE:
-                    $text = $event->getArgument(1);
-                    $clean = $this->cleanString($text);
-                    if ($text != $clean) {
-                        if ($this->config['censor.mode'] == 'censor') {
-                            $event->setArgument(1, $clean);
-                        } else {
-                            $this->events->removeEvent($event);
-                        }
+            case Phergie_Event_Request::TYPE_PRIVMSG:
+            case Phergie_Event_Request::TYPE_ACTION:
+            case Phergie_Event_Request::TYPE_NOTICE:
+                $text = $event->getArgument(1);
+                $clean = $this->cleanString($text);
+                if ($text != $clean) {
+                    if ($this->config['censor.mode'] == 'censor') {
+                        $event->setArgument(1, $clean);
+                    } else {
+                        $this->events->removeEvent($event);
                     }
-                    break;
+                }
+                break;
             }
         }
     }

@@ -1,12 +1,27 @@
 <?php
-
-if (!defined('__DIR__')) {
-    define('__DIR__', dirname(__FILE__));
-}
+/**
+ * Phergie
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie
+ * @package   Phergie
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie
+ */
 
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = __DIR__ . '/caffeine.db';
+$file = dirname(__FILE__) . '/caffeine.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -17,7 +32,7 @@ $insert = $db->prepare('INSERT INTO caffeine (name, link) VALUES (:name, :link)'
 
 // Get raw energyfiend.com data set
 echo 'Downloading energyfiend.com data set', PHP_EOL;
-$file = __DIR__ . '/the-caffeine-database.html';
+$file = dirname(__FILE__) . '/the-caffeine-database.html';
 if (!file_exists($file)) {
     copy('http://www.energyfiend.com/the-caffeine-database', $file);
 }
@@ -36,6 +51,9 @@ $db->beginTransaction();
 foreach ($caffeine as $drink) {
     $name = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $drink->textContent);
     $name = preg_replace('/\s*\v+\s*/', ' ', $name);
+    if (stripos($name, 'decaf') !== false) {
+        continue;
+    }
     if ($drink->firstChild->nodeName == 'a') {
         $link = 'http://energyfiend.com'
               . $drink->firstChild->getAttribute('href');

@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Ideone
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Ideone
  */
@@ -57,7 +57,8 @@ class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
     protected function isError($result)
     {
         if ($result['error'] != 'OK') {
-            $this->doNotice($this->event->getNick(), 'ideone error: ' . $result['error']);
+            $noticemsg = 'ideone error: ' . $result['error'];
+            $this->doNotice($this->event->getNick(), $noticemsg);
             return true;
         }
         return false;
@@ -90,12 +91,12 @@ class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
                 $code = '<?php ' . $code;
             }
             switch (substr($code, -1)) {
-                case '}':
-                case ';':
-                    break;
-                default:
-                    $code .= ';';
-                    break;
+            case '}':
+            case ';':
+                break;
+            default:
+                $code .= ';';
+                break;
             }
         }
 
@@ -158,9 +159,9 @@ class Phergie_Plugin_Ideone extends Phergie_Plugin_Abstract
             $link,
             false, // boolean withSource - FALSE to not return the source code
             false, // boolean withInput - FALSE to not return stdin data
-            true,  // boolean withOutput - TRUE to include output
-            true,  // boolean withStderr - TRUE to return stderr data
-            false  // boolean withCmpinfo - TRUE to return compilation info
+            true, // boolean withOutput - TRUE to include output
+            true, // boolean withStderr - TRUE to return stderr data
+            false // boolean withCmpinfo - TRUE to return compilation info
         );
         if ($this->isError($response)) {
             return;

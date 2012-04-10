@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Weather
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Weather
  */
@@ -32,6 +32,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Weather
  * @link     http://www.weather.com/services/xmloap.html
+ * @uses     Phergie_Plugin_Cache pear.phergie.org
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
  * @uses     Phergie_Plugin_Temperature pear.phergie.org
@@ -40,6 +41,13 @@
 class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
 {
     /**
+     * True if the last fetched location was reliable
+     *
+     * @var bool
+     */
+    protected $isLocationReliable = false;
+
+    /**
      * Checks for dependencies.
      *
      * @return void
@@ -47,13 +55,17 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
     public function onLoad()
     {
         $plugins = $this->getPluginHandler();
+        $plugins->getPlugin('Cache');
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Temperature');
 
         if (empty($this->config['weather.partner_id'])
-            || empty($this->config['weather.license_key'])) {
-            $this->fail('weather.partner_id and weather.license_key must be specified');
+            || empty($this->config['weather.license_key'])
+        ) {
+            $this->fail(
+                'weather.partner_id and weather.license_key must be specified'
+            );
         }
     }
 
@@ -66,84 +78,224 @@ class Phergie_Plugin_Weather extends Phergie_Plugin_Abstract
      */
     public function onCommandWeather($location)
     {
-        $response = $this->plugins->http->get(
-            'http://xoap.weather.com/search/search',
-            array('where' => $location)
-        );
-
-        if ($response->isError()) {
-            $this->doNotice(
-                $this->event->getNick(),
-                'ERROR: ' . $response->getCode() . ' ' . $response->getMessage()
+        try {
+            $this->doPrivmsg(
+                $this->event->getSource(),
+                $this->event->getNick() . ': ' . $this->getWeatherReport($location)
             );
-            return;
+        } catch(Phergie_Exception $e) {
+            $this->doNotice($this->event->getNick(), $e->getMessage());
+        }
+    }
+
+    /**
+     *  Generates a weather report for a specified location
+     *
+     *  @param string $location name of place to retrieve weather report for
+     *
+     *  @return void
+     */
+    protected function getWeatherReport($location)
+    {
+        $conditions = $this->getWeatherData($location);
+
+        $report = 'Weather for ' . $conditions['cityName'] . ' - ';
+
+        $temperature = $this->getPluginHandler()->getPlugin('Temperature');
+        switch ($conditions['tempUnit'])
+        {
+        case 'F':
+            $tempF = $conditions['temp'];
+            $tempC = $temperature->convertFahrenheitToCelsius($tempF);
+            break;
+        case 'C':
+            $tempC = $conditions['temp'];
+            $tempF = $temperature->convertCelsiusToFahrenheit($tempC);
+            break;
+        default:
+            throw new Phergie_Exception('ERROR: No scale information given.');
+            break;
         }
 
-        $nick = $this->event->getNick();
-
-        $xml = $response->getContent();
-        if (count($xml->loc) == 0) {
-            $this->doNotice($nick, 'No results for that location.');
-            return;
-        }
-
-        $where = (string) $xml->loc[0]['id'];
-        $response = $this->plugins->http->get(
-            'http://xoap.weather.com/weather/local/' . $where,
-            array(
-                'cc' => '*',
-                'link' => 'xoap',
-                'prod' => 'xoap',
-                'par' => $this->config['weather.partner_id'],
-                'key' => $this->config['weather.license_key'],
-            )
+        $hiF     = $temperature->getHeatIndex(
+            $tempF, $conditions['relativeHumidity']/100
         );
-
-        if ($response->isError()) {
-            $this->doNotice(
-                $this->event->getNick(),
-                'ERROR: ' . $response->getCode() . ' ' . $response->getMessage()
-            );
-            return;
-        }
-
-        $temperature = $this->plugins->getPlugin('Temperature');
-        $xml = $response->getContent();
-        $weather = 'Weather for ' . (string) $xml->loc->dnam . ' - ';
-        switch ($xml->head->ut) {
-            case 'F':
-                $tempF = $xml->cc->tmp;
-                $tempC = $temperature->convertFahrenheitToCelsius($tempF);
-                break;
-            case 'C':
-                $tempC = $xml->cc->tmp;
-                $tempF = $temperature->convertCelsiusToFahrenheit($tempC);
-                break;
-            default:
-                $this->doNotice(
-                    $this->event->getNick(),
-                    'ERROR: No scale information given.');
-                break;
-        }
-        $r = $xml->cc->hmid;
-        $hiF = $temperature->getHeatIndex($tempF, $r);
-        $hiC = $temperature->convertFahrenheitToCelsius($hiF);
-        $weather .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
-        $weather .= ', Humidity: ' . (string) $xml->cc->hmid . '%';
+        $hiC     = $temperature->convertFahrenheitToCelsius($hiF);
+        $report .= 'Temperature: ' . $tempF . 'F/' . $tempC . 'C';
+        $report .= ', Humidity: ' . $conditions['relativeHumidity'] . '%';
         if ($hiF > $tempF || $hiC > $tempC) {
             $weather .= ', Heat Index: ' . $hiF . 'F/' . $hiC . 'C';
         }
-        $weather .=
-            ', Conditions: ' . (string) $xml->cc->t .
-            ', Updated: ' . (string) $xml->cc->lsup .
+        $report .=
+            ', Conditions: ' . (string) $conditions['weatherDescriptionPhrase'] .
+            ', Updated: ' . (string) $conditions['observationDateTime'] .
             ' [ http://weather.com/weather/today/' .
-            str_replace(
+            $conditions['locationCode'] . ' ]';
+
+        return $report;
+    }
+
+    /**
+     * Retrieve TWCi Content
+     *
+     * @param string $location place to retrieve weather data for
+     *
+     * @throws Phergie_Exception When no location can be returned
+     *                           (unexpected error or location not found)
+     *
+     * @return array weather conditions
+     */
+    public function getWeatherData($location)
+    {
+        $locId = $this->getWeatherLocation($location);
+
+        if ($locId === false) {
+            throw new Phergie_Exception('No results for that location.');
+        }
+
+        // If the location was reliable, maybe also the weather data
+        if ($this->isLocationReliable) {
+            $data = $this->getPluginHandler()->getPlugin('cache')
+                ->fetch('WeatherData_' . $locId);
+
+            if (is_array($data)) {
+                return $data;
+            }
+        }
+
+        $response = $this->getPluginHandler()
+            ->getPlugin('Http')
+            ->get(
+                'http://xoap.weather.com/weather/local/' . $locId,
+                array(
+                    'cc' => '*',
+                    'link' => 'xoap',
+                    'prod' => 'xoap',
+                    'par' => $this->config['weather.partner_id'],
+                    'key' => $this->config['weather.license_key'],
+                )
+            );
+
+        if ($response->isError()) {
+            throw new Phergie_Exception(
+                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
+            );
+        }
+
+        $cache = $this->getPluginHandler()->getPlugin('cache');
+        $data  = $response->getContent();
+
+        // Retrieve the right location data (small hack, but blame the api)
+        if (!$this->isLocationReliable) {
+            $rightLocation = str_replace(
                 array('(', ')', ',', ' '),
                 array('', '', '', '+'),
-                (string) $xml->loc->dnam
-            ) .
-            ' ]';
+                (string) $data->loc->dnam
+            );
 
-        $this->doPrivmsg($this->event->getSource(), $nick . ': ' . $weather);
+            try {
+                $result = $this->getWeatherLocation($rightLocation);
+
+                // Cache the location data, by default for 1 day
+                $expires = 86400;
+                if (isset($this->config['weather.cache_locations'])) {
+                    $expires = $this->config['weather.cache_locations'];
+                }
+
+                if ($result !== false) {
+                    $cache->store('WeatherLocation_' . $locId, $result, $expires);
+                    $locId = $result; // Actually fix the location
+                }
+
+                $cache->store('WeatherLocation_' . $location, $locId, $expires);
+                $cache->store('WeatherLocation_' . $result,   $locId, $expires);
+
+            } catch (Phergie_Exception $e) {
+                // Do nothing when fail
+            }
+        }
+
+        $data = array(
+            'locationCode'=>"{$locId}",
+            'cityName'=>"{$data->loc->dnam}",
+            'observationDateTime'=>"{$data->cc->lsup}",
+            'observationPoint'=>"{$data->cc->obst}",
+            'temp'=>"{$data->cc->tmp}",
+            'feelsLikeTemp'=>"{$data->cc->flik}",
+            'tempUnit'=>"{$data->head->ut}",
+            'weatherDescriptionPhrase'=>"{$data->cc->t}",
+            'barometricPressure'=>"{$data->cc->bar->r}",
+            'barometricTrend'=>"{$data->cc->bar->d}",
+            'windSpeed'=>"{$data->cc->wind->s}",
+            'windGust'=>"{$data->cc->wind->gust}",
+            'windDirection'=>"{$data->cc->wind->d}",
+            'windDirectionPhrase'=>"{$data->cc->wind->t}",
+            'relativeHumidity'=>"{$data->cc->hmid}",
+            'visibility'=>"{$data->cc->vis}",
+            'uvIndex'=>"{$data->cc->uv->i}",
+            'uvIndexDescription'=>"{$data->cc->uv->t}",
+            'dewPoint'=>"{$data->cc->dewp}",
+            'sunrise'=>"{$data->loc->sunr}",
+            'sunset'=>"{$data->loc->suns}",
+            'moonPhaseDescription'=>"{$data->cc->moon->t}",
+        );
+
+        // Cache the weather data, by default for 30 minutes
+        $expires = 1800;
+        if (isset($this->config['weather.cache_data'])) {
+            $expires = $this->config['weather.cache_data'];
+        }
+        $cache->store('WeatherData_' . $locId, $data, $expires);
+
+        return $data;
+    }
+
+    /**
+     * Tries to find the api-readable id of the given location
+     * returns the location if found, false if not found
+     *
+     * It also sets $this->isReliable, which is set to false
+     * when the current location isn't verfied yet
+     *
+     * @param string $location Location to search
+     *
+     * @throws Phergie_Exception When error occurs while fetching data
+     *
+     * @return string|bool
+     */
+    public function getWeatherLocation($location)
+    {
+        // By default, we can't rely anything
+        $this->isLocationReliable = false;
+
+        // Try to get a hit from the cache
+        $cached = $this->getPluginHandler()->getPlugin('cache')
+            ->fetch('WeatherLocation_' . $location);
+
+        if ($cached) {
+            $this->isLocationReliable = true;
+            return $cached;
+        }
+
+        $response = $this->getPluginHandler()
+            ->getPlugin('Http')
+            ->get(
+                'http://xoap.weather.com/search/search',
+                array('where' => $location)
+            );
+
+        if ($response->isError()) {
+            throw new Phergie_Exception(
+                'ERROR: ' . $response->getMessage() . ' ' . $response->getCode()
+            );
+        }
+
+        $xml = $response->getContent();
+
+        if (count($xml->loc) == 0) {
+            return false;
+        }
+
+        return (string) $xml->loc[0]['id'];
     }
 }

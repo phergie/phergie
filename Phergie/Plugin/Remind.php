@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Remind
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Remind
  */
@@ -226,7 +226,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     protected function deliverReminders($channel, $nick)
     {
-        if ($channel[0] != '#') {
+        if (!$this->getEvent()->isInChannel()) {
             // private message, not a channel, so don't check
             return;
         }

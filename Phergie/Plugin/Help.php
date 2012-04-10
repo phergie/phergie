@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Help
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Help
  */
@@ -141,7 +141,6 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
         }
 
         $nick = $this->getEvent()->getNick();
-        $delay = $this->getConfig('help.delay', 2);
 
         // Handle requests for a plugin list
         if (!$query) {
@@ -153,8 +152,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
 
         // Handle requests for plugin information
         $query = strtolower($query);
-        if (isset($this->registry[$query])
-            && empty($this->registry[$query]['cmds'][$query])) {
+        if (isset($this->registry[$query])) {
             $msg = $query . ' - ' . $this->registry[$query]['desc'];
             $this->doPrivmsg($nick, $msg);
 
@@ -169,8 +167,6 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
                     . '" (without quotes) when issued in a public channel.';
                 $this->doPrivmsg($nick, $msg);
             }
-
-            return;
         }
 
         // Handle requests for command information
@@ -205,7 +201,8 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     protected function parseShortDescription($docblock)
     {
         $desc = preg_replace(
-            array('#^\h*\*\h*#m', '#^/\*\*\h*\v+\h*#', '#(?:\r?\n){2,}.*#s', '#\s*\v+\s*#'),
+            array('#^\h*\*\h*#m', '#^/\*\*\h*\v+\h*#'
+                , '#(?:\r?\n){2,}.*#s', '#\s*\v+\s*#'),
             array('', '', '', ' '),
             $docblock
         );
@@ -218,7 +215,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
      *
      * PHPUnit
      *
-     * Copyright (c) 2002-2010, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+     * Copyright (c) 2002-2011, Sebastian Bergmann <sb@sebastian-bergmann.de>.
      * All rights reserved.
      *
      * Redistribution and use in source and binary forms, with or without

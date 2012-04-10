@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Beer
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Beer
  */
@@ -60,7 +60,7 @@ class Phergie_Plugin_Beer extends Phergie_Plugin_Abstract
         );
 
         $this->plugins->getPlugin('Serve')->serve(
-            dirname(__FILE__) . '/Beer/beer.db',
+            $this->findDataFile('beer.db'),
             'beer',
             $format,
             $request

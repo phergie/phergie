@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Lart
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Lart
  */
@@ -84,15 +84,27 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
 
         $this->plugins->getPlugin('Command');
 
-        $dir = dirname(__FILE__) . '/' . $this->getName();
-        $path = $dir . '/lart.db';
-        $exists = file_exists($path);
-        if (!$exists) {
-            mkdir($dir);
+        $defaultDbLocation = dirname(__FILE__) . '/' . $this->getName() . '/lart.db';
+
+        $fileName = $this->getConfig('lart.sqlite_db', $defaultDbLocation);
+        $dirName = dirname($fileName);
+
+        $exists = file_exists($fileName);
+        if (!file_exists($dirName)) {
+            mkdir($dirName);
+        }
+
+        if ((file_exists($fileName) && !is_writable($fileName))
+            || (!file_exists($fileName) && !is_writable($dirName))
+        ) {
+            throw new Phergie_Plugin_Exception(
+                'SQLite file exists and cannot be written or does not exist '
+                . ' and cannot be created: ' . $fileName
+            );
         }
 
         try {
-            $this->db = new PDO('sqlite:' . $path);
+            $this->db = new PDO('sqlite:' . $fileName);
         } catch (PDO_Exception $e) {
             throw new Phergie_Plugin_Exception($e->getMessage());
         }
@@ -100,40 +112,40 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
         $this->db->sqliteCreateFunction('preg_match', 'preg_match');
 
         if (!$exists) {
-            $this->db->exec('
-                CREATE TABLE lart (
+            $this->db->exec(
+                'CREATE TABLE lart (
                     name VARCHAR(255),
                     definition TEXT,
                     hostmask VARCHAR(50),
                     tstamp VARCHAR(19)
-                )
-            ');
-            $this->db->exec('
-                CREATE UNIQUE INDEX lart_name ON lart (name)
-            ');
+                )'
+            );
+            $this->db->exec(
+                'CREATE UNIQUE INDEX lart_name ON lart (name)'
+            );
         }
 
-        $this->save = $this->db->prepare('
-            REPLACE INTO lart (name, definition, hostmask, tstamp)
-            VALUES (:name, :definition, :hostmask, :tstamp)
-        ');
+        $this->save = $this->db->prepare(
+            'REPLACE INTO lart (name, definition, hostmask, tstamp)
+            VALUES (:name, :definition, :hostmask, :tstamp)'
+        );
 
-        $this->process = $this->db->prepare('
-            SELECT *
+        $this->process = $this->db->prepare(
+            'SELECT *
             FROM lart
-            WHERE preg_match(name, :name)
-        ');
+            WHERE preg_match(:name, name)'
+        );
 
-        $this->select = $this->db->prepare('
-            SELECT *
+        $this->select = $this->db->prepare(
+            'SELECT *
             FROM lart
-            WHERE name = :name
-        ');
+            WHERE name = :name'
+        );
 
-        $this->delete = $this->db->prepare('
-            DELETE FROM lart
-            WHERE name = :name
-        ');
+        $this->delete = $this->db->prepare(
+            'DELETE FROM lart
+            WHERE name = :name'
+        );
     }
 
     /**
@@ -146,12 +158,20 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
      */
     protected function getLart($term)
     {
+        $connection = $this->getConnection();
+
+        $term = str_ireplace($connection->getNick(), '$nick', $term);
+        if (substr($term, 0, 1) != '/') {
+            $term = '/^' . preg_quote($term, '/') . '$/i';
+        }
         $this->process->execute(array(':name' => $term));
         $row = $this->process->fetchObject();
         if ($row === false) {
             return false;
         }
-        preg_match($row->name, $term, $match);
+
+        preg_match($term, $row->name, $match);
+
         $definition = preg_replace(
             "/(?:\\\\|\\$)([0-9]+)/e",
             '$match[\1]',
@@ -159,8 +179,8 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
         );
         $event = $this->getEvent();
         $definition = str_replace(
-            array('$source', '$nick'),
-            array($event->getSource(), $event->getNick()),
+            array('"','$source', '$nick'),
+            array('', $event->getSource(), $event->getNick()),
             $definition
         );
         return $definition;
@@ -176,7 +196,7 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
      */
     protected function deleteLart($term)
     {
-        $this->delete->execute(array(':name' => $term));
+        $this->delete->execute(array(':name' => strtolower($term)));
         return ($this->delete->rowCount() > 0);
     }
 
@@ -193,7 +213,7 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
     protected function saveLart($term, $definition)
     {
         $data = array(
-            ':name' => $term,
+            ':name' => strtolower($term),
             ':definition' => $definition,
             ':hostmask' => (string) $this->getEvent()->getHostmask(),
             ':tstamp' => time()
@@ -235,6 +255,9 @@ class Phergie_Plugin_Lart extends Phergie_Plugin_Abstract
      */
     public function onCommandAddlart($term, $definition)
     {
+        if ('"' == substr($term, 0, 1)) {
+            $term = str_replace('"', '', $term);
+        }
         $result = $this->saveLart($term, $definition);
         if ($result) {
             $msg = 'Lart saved successfully';

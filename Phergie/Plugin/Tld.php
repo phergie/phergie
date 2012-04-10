@@ -15,7 +15,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Tld
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Tld
  */
@@ -66,20 +66,20 @@ class Phergie_Plugin_Tld extends Phergie_Plugin_Abstract
             $this->fail('PDO and pdo_sqlite extensions must be installed');
         }
 
-        $dbFile = dirname(__FILE__) . '/Tld/tld.db';
+        $dbFile = $this->findDataFile('tld.db');
         try {
             $this->db = new PDO('sqlite:' . $dbFile);
 
-            $this->select = $this->db->prepare('
-                SELECT type, description
+            $this->select = $this->db->prepare(
+                'SELECT type, description
                 FROM tld
-                WHERE LOWER(tld) = LOWER(:tld)
-            ');
+                WHERE LOWER(tld) = LOWER(:tld)'
+            );
 
-            $this->selectAll = $this->db->prepare('
-                SELECT tld, type, description
-                FROM btld
-            ');
+            $this->selectAll = $this->db->prepare(
+                'SELECT tld, type, description
+                FROM btld'
+            );
         } catch (PDOException $e) {
             $this->getPluginHandler()->removePlugin($this);
         }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,25 +11,33 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Php
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Php
  */
 
 /**
- * Shortens urls via the tr.im service
+ * Shortens urls via the is.gd service
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Url
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Url
  */
-class Phergie_Plugin_Url_Shorten_Trim extends Phergie_Plugin_Url_Shorten_Abstract
+class Phergie_Plugin_Url_Shorten_Isgd extends Phergie_Plugin_Url_Shorten_Abstract
 {
+    /**
+     * is.gd says their URL will most likely never be longer than 18 characters
+     * @link http://is.gd/faq.php#length
+     *
+     * @var integer
+     */
+    protected $minimumLength = 19;
+
     /**
      * Returns an array of request parameters given a url to shorten. The
      * following keys are valid request parameters:
@@ -41,7 +49,7 @@ class Phergie_Plugin_Url_Shorten_Trim extends Phergie_Plugin_Url_Shorten_Abstrac
     protected function getRequestParams($url)
     {
         return array(
-            'uri' => 'http://api.tr.im/v1/trim_simple?url=' . rawurlencode($url),
+            'uri' => 'http://is.gd/api.php?longurl=' . rawurlencode($url),
             'callback' => array($this, 'onComplete')
         );
     }

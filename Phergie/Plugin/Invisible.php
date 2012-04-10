@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,10 +11,10 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Invisible
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Invisible
  */
@@ -22,7 +22,7 @@
 /**
  * Marks the bot as invisible when it connects to the server.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Invisible
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License

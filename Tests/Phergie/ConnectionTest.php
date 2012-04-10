@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
@@ -129,8 +129,9 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
      * @return void
      * @dataProvider dataProviderTestGetHostmaskMissingDataGeneratesException
      */
-    public function testGetHostmaskMissingDataGeneratesException($nick, $username, $host)
-    {
+    public function testGetHostmaskMissingDataGeneratesException(
+        $nick, $username, $host
+    ) {
         $options = array(
             'nick' => $nick,
             'username' => $username,
@@ -165,7 +166,7 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
 
         $connection = new Phergie_Connection($options);
         $hostmask = $connection->getHostmask();
-        $this->assertType('Phergie_Hostmask', $hostmask);
+        $this->assertInstanceOf('Phergie_Hostmask', $hostmask);
     }
 
     /**

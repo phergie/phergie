@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,10 +11,10 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_Php
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Php
  */
@@ -22,7 +22,7 @@
 /**
  * URL shortener abstract class
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_Url
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -32,6 +32,8 @@
 abstract class Phergie_Plugin_Url_Shorten_Abstract
 {
     protected $http;
+
+    protected $minimumLength = 0;
 
     /**
      * Constructor
@@ -67,6 +69,17 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
     protected abstract function getRequestParams($url);
 
     /**
+     * Returns the minimum length that a url must be before it is shortened by
+     * the current service.
+     *
+     * @return integer
+     */
+    public function getMinimumLength()
+    {
+        return $this->minimumLength;
+    }
+
+    /**
      * Shortens a given url.
      *
      * @param string $url the url to shorten
@@ -75,17 +88,28 @@ abstract class Phergie_Plugin_Url_Shorten_Abstract
      */
     public function shorten($url)
     {
+        // Only urls longer than the minimum length should be shortened
+        if (strlen($url) < $this->getMinimumLength()) {
+            return $url;
+        }
+
         $defaults = array('get' => array(), 'post' => array(), 'callback' => null);
         $options = array('timeout' => 2);
         $params = $this->getRequestParams($url) + $defaults;
 
-        // Should some kind of notice be thrown? Maybe just if getRequestParams does not return an array?
+        // Should some kind of notice be thrown?
+        // Maybe just if getRequestParams does not return an array?
         if (!is_array($params) || empty($params['uri'])) {
             return $url;
         }
 
         if (!empty($params['post'])) {
-            $response = $this->http->post($params['uri'], $params['get'], $params['post'], $options);
+            $response = $this->http->post(
+                $params['uri'],
+                $params['get'],
+                $params['post'],
+                $options
+            );
         } else {
             $response = $this->http->get($params['uri'], $params['get'], $options);
         }

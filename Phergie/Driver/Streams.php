@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -55,6 +55,21 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     protected $timeout = 0.1;
 
     /**
+     * Writes data to the socket, separatedly mainly to allow for stubbing
+     * during unit testing.
+     *
+     * @param string $data Data to write to the socket
+     *
+     * @return int Number of bytes successfully written to the socket
+     */
+    protected function write($data)
+    {
+        // @codeCoverageIgnoreStart
+        return (int) fwrite($this->socket, $data);
+        // @codeCoverageIgnoreEnd
+    }
+
+    /**
      * Handles construction of command strings and their transmission to the
      * server.
      *
@@ -70,16 +85,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $connection = $this->getConnection();
         $encoding = $connection->getEncoding();
 
-        // Require an open socket connection to continue
-        if (empty($this->socket)) {
-            throw new Phergie_Driver_Exception(
-                'doConnect() must be called first',
-                Phergie_Driver_Exception::ERR_NO_INITIATED_CONNECTION
-            );
-        }
-
         // Add the command
-        $buffer = strtoupper($command);
+        $buffer = $command;
 
         // Add arguments
         if (!empty($args)) {
@@ -93,16 +100,18 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 $args = ':' . $args;
             }
 
-            $buffer .= ' ' . $args;
+            $buffer .= ' ' . preg_replace('/\v+/u', ' ', $args);
         }
 
         // Transmit the command over the socket connection
         $attempts = $written = 0;
         $temp = $buffer . "\r\n";
-        $is_multibyte = !substr($encoding, 0, 8) === 'ISO-8859' && $encoding !== 'ASCII' && $encoding !== 'CP1252';
+        $is_multibyte = !substr($encoding, 0, 8) === 'ISO-8859'
+                     && $encoding !== 'ASCII'
+                     && $encoding !== 'CP1252';
         $length = ($is_multibyte) ? mb_strlen($buffer, '8bit') : strlen($buffer);
         while (true) {
-            $written += (int) fwrite($this->socket, $temp);
+            $written += $this->write($temp);
             if ($written < $length) {
                 $temp = substr($temp, $written);
                 $attempts++;
@@ -153,12 +162,11 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     public function getActiveReadSockets($sec = 0, $usec = 200000)
     {
         $read = $this->sockets;
-        $write = null;
-        $error = null;
+        $write = $except = null;
         $active = array();
 
         if (count($this->sockets) > 0) {
-            $number = stream_select($read, $write, $error, $sec, $usec);
+            $number = stream_select($read, $write, $except, $sec, $usec);
             if ($number > 0) {
                 foreach ($read as $item) {
                     $active[] = array_search($item, $this->sockets);
@@ -208,7 +216,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     protected function parseArguments($args, $count = -1)
     {
-        return preg_split('/ :?/S', $args, $count);
+        return preg_split('/ :?/S', ltrim($args, ':'), $count);
     }
 
     /**
@@ -219,46 +227,36 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function getEvent()
     {
-        // Check the socket is still active
-        if (feof($this->socket)) {
-            throw new Phergie_Driver_Exception(
-                'EOF detected on socket',
-                Phergie_Driver_Exception::ERR_CONNECTION_READ_FAILED
-            );
-        }
-
         // Check for a new event on the current connection
         $buffer = '';
         do {
             $buffer .= fgets($this->socket, 512);
         } while (!empty($buffer) && !preg_match('/\v+$/', $buffer));
+        $buffer = trim($buffer);
 
         // If no new event was found, return NULL
         if (empty($buffer)) {
             return null;
         }
 
-        // Strip the trailing newline from the buffer
-        $buffer = rtrim($buffer);
+        // If the event has a prefix, extract it
+        $prefix = '';
+        if (substr($buffer, 0, 1) == ':') {
+            $parts = explode(' ', $buffer, 3);
+            $prefix = substr(array_shift($parts), 1);
+            $buffer = implode(' ', $parts);
+        }
 
-        // If the event is from the server...
-        if (substr($buffer, 0, 1) != ':') {
+        // Parse the command and arguments
+        list($cmd, $args) = array_pad(explode(' ', $buffer, 2), 2, null);
 
-            // Parse the command and arguments
-            list($cmd, $args) = array_pad(explode(' ', $buffer, 2), 2, null);
-            $hostmask = new Phergie_Hostmask(null, null, $this->connection->getHost());
-
+        // Parse the server name or hostmask
+        if (strpos($prefix, '@') === false) {
+            $hostmask = new Phergie_Hostmask(
+                null, null, $prefix
+            );
         } else {
-            // If the event could be from the server or a user...
-
-            // Parse the server hostname or user hostmask, command, and arguments
-            list($prefix, $cmd, $args)
-                = array_pad(explode(' ', ltrim($buffer, ':'), 3), 3, null);
-            if (strpos($prefix, '@') !== false) {
-                $hostmask = Phergie_Hostmask::fromString($prefix);
-            } else {
-                $hostmask = new Phergie_Hostmask(null, null, $prefix);
-            }
+            $hostmask = Phergie_Hostmask::fromString($prefix);
         }
 
         // Parse the event arguments depending on the event type
@@ -269,9 +267,9 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         case 'quit':
         case 'ping':
         case 'pong':
-        case 'join':
         case 'error':
-            $args = array(ltrim($args, ':'));
+        case 'part':
+            $args = array_filter(array(ltrim($args, ':')));
             break;
 
         case 'privmsg':
@@ -287,51 +285,36 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
                 case 'version':
                 case 'time':
                 case 'finger':
-                    if ($reply) {
-                        $args = $ctcp;
-                    }
-                    break;
                 case 'ping':
                     if ($reply) {
-                        $cmd .= 'Response';
-                    } else {
-                        $cmd = 'ctcpPing';
+                        $args = array($args);
                     }
                     break;
                 case 'action':
                     $args = array($source, $args);
                     break;
-
-                default:
-                    $cmd = 'ctcp';
-                    if ($reply) {
-                        $cmd .= 'Response';
-                    }
-                    $args = array($source, $args);
-                    break;
                 }
+            }
+            // This fixes the issue that seems to occur, but why does it?
+            if (!is_array($args)) {
+                  $args = array($args);
             }
             break;
 
-        case 'oper':
         case 'topic':
-        case 'mode':
-            $args = $this->parseArguments($args);
-            break;
-
-        case 'part':
-        case 'kill':
         case 'invite':
+        case 'join':
             $args = $this->parseArguments($args, 2);
             break;
 
         case 'kick':
+        case 'mode':
             $args = $this->parseArguments($args, 3);
             break;
 
-        // Remove the target from responses
+        // Remove target and colon preceding description from responses
         default:
-            $args = substr($args, strpos($args, ' ') + 1);
+            $args = substr($args, strpos($args, ' ') + 2);
             break;
         }
 
@@ -346,12 +329,27 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
             $event
                 ->setType($cmd)
                 ->setArguments($args);
-            if (isset($hostmask)) {
-                $event->setHostmask($hostmask);
-            }
+            $event->setHostmask($hostmask);
         }
         $event->setRawData($buffer);
         return $event;
+    }
+
+    /**
+     * Establishes a socket connection, separatedly mainly to allow for
+     * stubbing during unit testing.
+     *
+     * @param string $remote  Address to connect the socket to
+     * @param int    &$errno  System level error number if connection fails
+     * @param string &$errstr System level error message if connection fails
+     *
+     * @return resource Established socket
+     */
+    protected function connect($remote, &$errno, &$errstr)
+    {
+        // @codeCoverageIgnoreStart
+        return @stream_socket_client($remote, $errno, $errstr);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -361,9 +359,6 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function doConnect()
     {
-        // Listen for input indefinitely
-        set_time_limit(0);
-
         // Get connection information
         $connection = $this->getConnection();
         $hostname = $connection->getHost();
@@ -376,7 +371,8 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
 
         // Establish and configure the socket connection
         $remote = $transport . '://' . $hostname . ':' . $port;
-        $this->socket = @stream_socket_client($remote, $errno, $errstr);
+        $errno = $errstr = null;
+        $this->socket = $this->connect($remote, $errno, $errstr);
         if (!$this->socket) {
             throw new Phergie_Driver_Exception(
                 'Unable to connect: socket error ' . $errno . ' ' . $errstr,
@@ -523,15 +519,21 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      *
      * @param string $target Channel name or user nick
      * @param string $mode   New mode to assign (optional)
+     * @param string $param  User limit when $mode is 'l', user hostmask
+     *        when $mode is 'b', or user nick when $mode is 'o'
      *
      * @return void
      */
-    public function doMode($target, $mode = null)
+    public function doMode($target, $mode = null, $param = null)
     {
         $args = array($target);
 
         if (!empty($mode)) {
             $args[] = $mode;
+        }
+
+        if (!empty($param)) {
+            $args[] = $param;
         }
 
         $this->send('MODE', $args);
@@ -601,7 +603,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $args = array($nick, $channel);
 
         if (!empty($reason)) {
-            $args[] = $response;
+            $args[] = $reason;
         }
 
         $this->send('KICK', $args);
@@ -637,22 +639,17 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
     /**
      * Sends a CTCP response to a user.
      *
-     * @param string       $nick    User nick
-     * @param string       $command Command to send
-     * @param string|array $args    String or array of sequential arguments
-     *        (optional)
+     * @param string $nick    User nick
+     * @param string $command Command to send
+     * @param string $args    Sequential arguments (optional)
      *
      * @return void
      */
     protected function doCtcp($nick, $command, $args = null)
     {
-        if (is_array($args)) {
-            $args = implode(' ', $args);
-        }
-
         $buffer = rtrim(strtoupper($command) . ' ' . $args);
 
-        $this->doNotice($nick, chr(1) . $buffer . chr(1));
+        $this->doPrivmsg($nick, chr(1) . $buffer . chr(1));
     }
 
     /**
@@ -728,6 +725,7 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      */
     public function doRaw($command)
     {
-        $this->send('RAW', $command);
+        $this->send($command);
     }
 }
+

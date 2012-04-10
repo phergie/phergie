@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -60,7 +60,7 @@ class Phergie_Event_Handler implements IteratorAggregate, Countable
     public function addEvent(Phergie_Plugin_Abstract $plugin, $type,
         array $args = array()
     ) {
-        if (!defined('Phergie_Event_Command::TYPE_' . strtoupper($type))) {
+        if (!defined('Phergie_Event_Request::TYPE_' . strtoupper($type))) {
             throw new Phergie_Event_Exception(
                 'Unknown event type "' . $type . '"',
                 Phergie_Event_Exception::ERR_UNKNOWN_EVENT_TYPE

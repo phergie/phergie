@@ -1,12 +1,27 @@
 <?php
-
-if (!defined('__DIR__')) {
-    define('__DIR__', dirname(__FILE__));
-}
+/**
+ * Phergie
+ *
+ * PHP version 5
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://phergie.org/license
+ *
+ * @category  Phergie
+ * @package   Phergie
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @license   http://phergie.org/license New BSD License
+ * @link      http://pear.phergie.org/package/Phergie
+ */
 
 // Create database schema
 echo 'Creating database', PHP_EOL;
-$file = __DIR__ . '/cookie.db';
+$file = dirname(__FILE__) . '/cookie.db';
 if (file_exists($file)) {
     unlink($file);
 }
@@ -17,7 +32,7 @@ $insert = $db->prepare('INSERT INTO cookies (name, link) VALUES (:name, :link)')
 
 // Get Cookies list from http://en.wikipedia.org/wiki/List_of_cookies
 echo 'Downloading data from Wikipedia', PHP_EOL;
-$file = __DIR__ . '/cookieslist.txt';
+$file = dirname(__FILE__) . '/cookieslist.txt';
 if (!file_exists($file)) {
     copy('http://en.wikipedia.org/wiki/List_of_cookies', $file);
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,10 +11,10 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -22,7 +22,7 @@
 /**
  * Base class for end-user interfaces.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -35,7 +35,7 @@ abstract class Phergie_Ui_Abstract
      *
      * @param string $host Server hostname
      *
-     * @return void 
+     * @return void
      */
     public function onConnect($host)
     {
@@ -46,7 +46,7 @@ abstract class Phergie_Ui_Abstract
      *
      * @param string $plugin Short name of the plugin
      *
-     * @return void 
+     * @return void
      */
     public function onPluginLoad($plugin)
     {
@@ -58,22 +58,22 @@ abstract class Phergie_Ui_Abstract
      * @param string $plugin  Short name of the plugin
      * @param string $message Message describing the reason for the failure
      *
-     * @return void 
+     * @return void
      */
     public function onPluginFailure($plugin, $message)
     {
     }
 
     /**
-     * Handler for when the bot receives an IRC event. 
+     * Handler for when the bot receives an IRC event.
      *
      * @param Phergie_Event_Abstract $event      Received event
-     * @param Phergie_Connection     $connection Connection on which the event 
+     * @param Phergie_Connection     $connection Connection on which the event
      *        was received
      *
      * @return void
      */
-    public function onEvent(Phergie_Event_Abstract $event, 
+    public function onEvent(Phergie_Event_Abstract $event,
         Phergie_Connection $connection
     ) {
     }
@@ -81,14 +81,14 @@ abstract class Phergie_Ui_Abstract
     /**
      * Handler for when the bot sends a command to a server.
      *
-     * @param Phergie_Event_Command $event      Event representing the command 
+     * @param Phergie_Event_Command $event      Event representing the command
      *        being sent
-     * @param Phergie_Connection    $connection Connection on which the command  
-     *        is being sent 
+     * @param Phergie_Connection    $connection Connection on which the command
+     *        is being sent
      *
      * @return void
      */
-    public function onCommand(Phergie_Event_Command $event, 
+    public function onCommand(Phergie_Event_Command $event,
         Phergie_Connection $connection
     ) {
     }
@@ -96,7 +96,7 @@ abstract class Phergie_Ui_Abstract
     /**
      * Handler for when the bot terminates a connection to a server.
      *
-     * @param Phergie_Connection $connection Terminated connection 
+     * @param Phergie_Connection $connection Terminated connection
      *
      * @return void
      */
@@ -105,7 +105,7 @@ abstract class Phergie_Ui_Abstract
     }
 
     /**
-     * Handler for when the bot shuts down after terminating all server 
+     * Handler for when the bot shuts down after terminating all server
      * connections.
      *
      * @return void

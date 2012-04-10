@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -227,24 +227,24 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
                 $instance = new $class;
             }
 
-            // Store the instance
-            $this->plugins[$index] = $instance;
-            $plugin = $instance;
-
         } elseif ($plugin instanceof Phergie_Plugin_Abstract) {
             // If a plugin instance is specified...
 
             // Add the plugin instance to the list of plugins
-            $this->plugins[strtolower($plugin->getName())] = $plugin;
+            $index = strtolower($plugin->getName());
+            $instance = $plugin;
         }
 
         // Configure and initialize the instance
-        $plugin->setPluginHandler($this);
-        $plugin->setConfig($this->config);
-        $plugin->setEventHandler($this->events);
-        $plugin->onLoad();
+        $instance->setPluginHandler($this);
+        $instance->setConfig($this->config);
+        $instance->setEventHandler($this->events);
+        $instance->onLoad();
 
-        return $plugin;
+        // Store the instance
+        $this->plugins[$index] = $instance;
+
+        return $instance;
     }
 
     /**
@@ -455,7 +455,8 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
             $r = new ReflectionClass($class);
             error_reporting($error_reporting);
             if (!$r->isSubclassOf('FilterIterator')) {
-                $message = 'Class ' . $class . ' is not a subclass of FilterIterator';
+                $message = 'Class ' . $class
+                    . ' is not a subclass of FilterIterator';
                 $valid = false;
             }
         } catch (ReflectionException $e) {

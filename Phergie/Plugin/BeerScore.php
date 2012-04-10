@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,10 +11,10 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie_Plugin_BeerScore
- * @author    Phergie Development Team <team@phergie.org> 
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @author    Phergie Development Team <team@phergie.org>
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_BeerScore
  */
@@ -22,9 +22,9 @@
 /**
  * Handles incoming requests for beer scores.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie_Plugin_BeerScore
- * @author   Phergie Development Team <team@phergie.org> 
+ * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Plugin_BeerScore
  * @uses     Phergie_Plugin_Http pear.phergie.org
@@ -66,7 +66,7 @@ class Phergie_Plugin_BeerScore extends Phergie_Plugin_Abstract
      */
     protected $http;
 
-    /** 
+    /**
      * Checks for dependencies.
      *
      * @return void
@@ -107,8 +107,8 @@ class Phergie_Plugin_BeerScore extends Phergie_Plugin_Abstract
                 } else {
                     $score = $beer->score;
                 }
-                $str 
-                    = "{$target}: rating for {$beer->name}" . 
+                $str
+                    = "{$target}: rating for {$beer->name}" .
                     " = {$score} ({$beer->url})";
                 $this->doPrivmsg($source, $str);
             }
@@ -126,8 +126,8 @@ class Phergie_Plugin_BeerScore extends Phergie_Plugin_Abstract
                     } else {
                         $score = $beer->score;
                     }
-                    $str 
-                        = "{$target}: rating for {$beer->name}" . 
+                    $str
+                        = "{$target}: rating for {$beer->name}" .
                         " = {$score} ({$beer->url})";
                     $this->doPrivmsg($source, $str);
                 } else {

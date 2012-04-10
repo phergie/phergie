@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Google
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Google
  */
@@ -46,7 +46,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
-        $plugins->getPlugin('Weather');
+        $plugins->getPlugin('Temperature');
         $plugins->getPlugin('Encoding');
     }
 
@@ -192,10 +192,12 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         if ($offset !== null) {
             $offset = (int) $offset;
             if ($offset < 0) {
-                $this->doNotice($source, 'Past weather data is not available');
+                $noticemsg = 'Past weather data is not available';
+                $this->doNotice($source, $noticemsg);
                 return;
             } elseif ($offset > 3) {
-                $this->doNotice($source, 'Future weather data is limited to 3 days from today');
+                $noticemsg = 'Future weather data is limited to 3 days from today';
+                $this->doNotice($source, $noticemsg);
                 return;
             }
 
@@ -372,10 +374,10 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
             return;
         }
 
-        $start = strpos($contents, '<h3 class=r>');
+        $start = strpos($contents, '<h2 class=r');
 
         if ($start === false) {
-            $start = strpos($contents, '<h2 class=r');
+            $start = strpos($contents, '<h3 class="r">');
         }
 
         if ($start !== false) {
@@ -391,7 +393,7 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
         if (isset($text)) {
             $encode = $this->getPluginHandler()->getPlugin('Encoding');
             $text = $encode->decodeEntities($text);
-            
+
             $this->doPrivmsg($source, $nick . ': ' . $text);
         } else {
             $this->doNotice($nick, 'Sorry I couldn\'t find an answer.');
@@ -457,12 +459,12 @@ class Phergie_Plugin_Google extends Phergie_Plugin_Abstract
                  . '&hl=' . $lang_code;
             $this->doPrivmsg($source, $msg);
         } else {
-            if ($lang != 'en'){
-               $lang = 'en';
-               $this->onCommandDefine($query);
+            if ($lang != 'en') {
+                $lang = 'en';
+                $this->onCommandDefine($query);
             } else {
-               $msg = $nick . ': No results for this query.';
-               $this->doPrivmsg($source, $msg);
+                $msg = $nick . ': No results for this query.';
+                $this->doPrivmsg($source, $msg);
             }
         }
     }

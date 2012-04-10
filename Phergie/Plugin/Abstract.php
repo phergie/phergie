@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -277,6 +277,35 @@ abstract class Phergie_Plugin_Abstract
             );
         }
         return $this->event;
+    }
+
+    /**
+     * Locates a given data file used by this plugin and returns the path to
+     * it. This is currently used mainly for compatibility with PEAR packaging.
+     *
+     * @param string $filename Name of the file
+     * @return string|null File path or NULL if the file cannot be found 
+     */
+    public function findDataFile($filename)
+    {
+        $class = get_class($this);
+
+        if (class_exists('PEAR_Config')) {
+            $config = new PEAR_Config();
+            $dataDir = $config->get('data_dir');
+            $path = rtrim($dataDir, '\\/') . '/' . $class . '/' . str_replace('_', '/', $class) . '/' . $filename;
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        $r = new ReflectionClass($class);
+        $path = dirname($r->getFilename()) . '/' . $this->getName() . '/' . $filename;
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        return null;
     }
 
     /**

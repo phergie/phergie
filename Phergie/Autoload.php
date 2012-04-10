@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -37,8 +37,7 @@ class Phergie_Autoload
      */
     public function __construct()
     {
-        self::addPath(realpath(dirname(__FILE__) . '/..'));
-
+        self::addPath(dirname(dirname(__FILE__)));
     }
 
     /**
@@ -50,7 +49,27 @@ class Phergie_Autoload
      */
     public function load($class)
     {
-        include str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+        $paths = explode(PATH_SEPARATOR, get_include_path());
+
+        foreach ($paths as $path) {
+            $fileName = $path . DIRECTORY_SEPARATOR
+                . str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+
+            if (file_exists($fileName)) {
+                include $fileName;
+
+                if (class_exists($class, false)
+                    || interface_exists($class, false)
+                ) {
+                    return;
+                }
+
+                throw new Phergie_Exception(
+                    'Expected class ' . $class
+                    . ' in ' .  $fileName . ' not found'
+                );
+            }
+        }
     }
 
     /**

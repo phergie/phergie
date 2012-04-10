@@ -1,6 +1,6 @@
 <?php
 /**
- * Phergie 
+ * Phergie
  *
  * PHP version 5
  *
@@ -11,10 +11,10 @@
  * It is also available through the world-wide-web at this URL:
  * http://phergie.org/license
  *
- * @category  Phergie 
+ * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -23,7 +23,7 @@
  * Base class for drivers which handle issuing client commands to the IRC
  * server and converting responses into usable data objects.
  *
- * @category Phergie 
+ * @category Phergie
  * @package  Phergie
  * @author   Phergie Development Team <team@phergie.org>
  * @license  http://phergie.org/license New BSD License
@@ -98,7 +98,7 @@ abstract class Phergie_Driver_Abstract
     /**
      * Joins a channel.
      *
-     * @param string $channels Comma-delimited list of channels to join 
+     * @param string $channels Comma-delimited list of channels to join
      * @param string $keys     Optional comma-delimited list of channel keys
      *
      * @return void
@@ -109,7 +109,7 @@ abstract class Phergie_Driver_Abstract
     /**
      * Leaves a channel.
      *
-     * @param string $channels Comma-delimited list of channels to leave 
+     * @param string $channels Comma-delimited list of channels to leave
      *
      * @return void
      * @link http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_2
@@ -165,11 +165,13 @@ abstract class Phergie_Driver_Abstract
      *
      * @param string $target Channel name or user nick
      * @param string $mode   New mode to assign (optional)
+     * @param string $param  User limit when $mode is 'l', user hostmask
+     *        when $mode is 'b', or user nick when $mode is 'o'
      *
      * @return void
      * @link http://www.irchelp.org/irchelp/rfc/chapter4.html#c4_2_3
      */
-    public abstract function doMode($target, $mode = null);
+    public abstract function doMode($target, $mode = null, $param = null);
 
     /**
      * Changes the client nick.
@@ -286,7 +288,7 @@ abstract class Phergie_Driver_Abstract
      * @param string $finger Finger string to send for a response
      *
      * @return void
-     * @link http://www.irchelp.org/irchelp/rfc/ctcpspec.html 
+     * @link http://www.irchelp.org/irchelp/rfc/ctcpspec.html
      */
     public abstract function doFinger($nick, $finger = null);
 

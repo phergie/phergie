@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -94,6 +94,66 @@ class Phergie_Event_Request
     const TYPE_PONG = 'pong';
 
     /**
+     * Operator message event type
+     */
+    const TYPE_OPER = 'oper';
+
+    /**
+     * Names message event type
+     */
+    const TYPE_NAMES = 'names';
+
+    /**
+     * List message event type
+     */
+    const TYPE_LIST = 'list';
+
+    /**
+     * Stats message event type
+     */
+    const TYPE_STATS = 'stats';
+
+    /**
+     * Links message event type
+     */
+    const TYPE_LINKS = 'links';
+
+    /**
+     * Connect message event type
+     */
+    const TYPE_CONNECT = 'connect';
+
+    /**
+     * Trace message event type
+     */
+    const TYPE_TRACE = 'trace';
+
+    /**
+     * Admin message event type
+     */
+    const TYPE_ADMIN = 'admin';
+
+    /**
+     * Info message event type
+     */
+    const TYPE_INFO = 'info';
+
+    /**
+     * Who message event type
+     */
+    const TYPE_WHO = 'who';
+
+    /**
+     * Whowas message event type
+     */
+    const TYPE_WHOWAS = 'whowas';
+
+    /**
+     * Kill message event type
+     */
+    const TYPE_KILL = 'kill';
+
+    /**
      * CTCP ACTION command event type
      */
     const TYPE_ACTION = 'action';
@@ -114,7 +174,17 @@ class Phergie_Event_Request
     const TYPE_VERSION = 'version';
 
     /**
-     * RAW message event type
+     * CTCP FINGER command event type
+     */
+    const TYPE_FINGER = 'finger';
+
+    /**
+     * ERROR message type
+     */
+    const TYPE_ERROR = 'error';
+
+    /**
+     * Raw event type
      */
     const TYPE_RAW = 'raw';
 
@@ -130,7 +200,8 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_WHOIS => array(
-            'nickmask' => 0
+            'server'   => 0,
+            'nickmask' => 1
         ),
 
         self::TYPE_QUIT => array(
@@ -138,7 +209,8 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_JOIN => array(
-            'channel' => 0
+            'channel' => 0,
+            'keys'    => 1
         ),
 
         self::TYPE_KICK => array(
@@ -148,8 +220,7 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_PART => array(
-            'channel' => 0,
-            'message' => 1
+            'channel' => 0
         ),
 
         self::TYPE_INVITE => array(
@@ -181,7 +252,8 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_PONG => array(
-            'server' => 0
+            'server'  => 0,
+            'server2' => 1
         ),
 
         self::TYPE_ACTION => array(
@@ -190,12 +262,85 @@ class Phergie_Event_Request
         ),
 
         self::TYPE_PING => array(
+            'nick' => 0,
+            'hash' => 1
+        ),
+
+        self::TYPE_OPER => array(
+            'username' => 0,
+            'password' => 1
+        ),
+
+        self::TYPE_NAMES => array(
+            'channels' => 0
+        ),
+
+        self::TYPE_LIST => array(
+            'channels' => 0
+        ),
+
+        self::TYPE_STATS => array(
+            'query'  => 0,
+            'server' => 1
+        ),
+
+        self::TYPE_LINKS => array(
+            'server' => 0,
+            'mask'   => 1
+        ),
+
+        self::TYPE_CONNECT => array(
+            'target' => 0,
+            'port'   => 1,
+            'remote' => 2
+        ),
+
+        self::TYPE_TRACE => array(
             'server' => 0
         ),
 
-        self::TYPE_TIME => array(),
+        self::TYPE_ADMIN => array(
+            'server' => 0
+        ),
 
-        self::TYPE_VERSION => array(),
+        self::TYPE_INFO => array(
+            'server' => 0
+        ),
+
+        self::TYPE_WHO => array(
+            'name' => 0,
+            'o'    => 1
+        ),
+
+        self::TYPE_WHOWAS => array(
+            'nickname' => 0,
+            'count'    => 1,
+            'server'   => 2
+        ),
+
+        self::TYPE_KILL => array(
+            'nickname' => 0,
+            'comment'  => 1
+        ),
+
+        self::TYPE_ERROR => array(
+            'message' => 0
+        ),
+
+        self::TYPE_TIME => array(
+            'target' => 0,
+            'reply'  => 1
+        ),
+
+        self::TYPE_VERSION => array(
+            'target' => 0,
+            'reply'  => 1
+        ),
+
+        self::TYPE_FINGER => array(
+            'target' => 0,
+            'reply'  => 1
+        ),
 
         self::TYPE_RAW => array(
             'message' => 0
@@ -336,9 +481,11 @@ class Phergie_Event_Request
             }
         }
 
+        $message = 'Argument "' . $argument . '" could not be resolved for' .
+            ' event type "' . $this->type . '"';
+
         throw new Phergie_Event_Exception(
-            'Argument "' . $argument . '" could not be resolved for'
-                . ' event type "' . $this->type . '"',
+            $message,
             Phergie_Event_Exception::ERR_INVALID_ARGUMENT
         );
     }
@@ -394,6 +541,20 @@ class Phergie_Event_Request
     }
 
     /**
+     * Determines whether a given string is a valid IRC channel name.
+     *
+     * @param string $string String to analyze
+     *
+     * @return bool TRUE if $string contains a valid channel name, FALSE
+     *         otherwise
+     */
+    protected function isChannelName($string)
+    {
+        // Per the 2000 RFCs 2811 and 2812, channels may begin with &, #, +, or !
+        return (strspn($string, '#&+!', 0, 1) >= 1);
+    }
+
+    /**
      * Returns the channel name if the event occurred in a channel or the
      * user nick if the event was a private message directed at the bot by a
      * user.
@@ -403,7 +564,8 @@ class Phergie_Event_Request
     public function getSource()
     {
         if (!empty($this->arguments[0])
-            && substr($this->arguments[0], 0, 1) == '#') {
+            && $this->isChannelName($this->arguments[0])
+        ) {
             return $this->arguments[0];
         }
         return $this->getHostmask()->getNick();
@@ -416,7 +578,7 @@ class Phergie_Event_Request
      */
     public function isInChannel()
     {
-        return (substr($this->getSource(), 0, 1) == '#');
+        return $this->isChannelName($this->getSource());
     }
 
     /**

@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2010 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -33,7 +33,7 @@ class Phergie_Bot
     /**
      * Current version of Phergie
      */
-    const VERSION = '2.0.1';
+    const VERSION = '2.0.5';
 
     /**
      * Current driver instance
@@ -135,6 +135,27 @@ class Phergie_Bot
     }
 
     /**
+     * Tries to locate the default configuration file
+     *
+     * @return string|bool Returns false when no file was found
+     */
+    public function getDefaultConfiguration()
+    {
+        $paths = array(
+            dirname(__FILE__) . '/../Settings.php',
+            dirname(__FILE__) . '/Settings.php'
+        );
+
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the entire configuration in use or the value of a specific
      * configuration setting.
      *
@@ -148,9 +169,18 @@ class Phergie_Bot
     public function getConfig($index = null, $default = null)
     {
         if (empty($this->config)) {
+            $config = $this->getDefaultConfiguration();
+            if (false === $config) {
+                throw new Exception(
+                    'Phergie could not locate file Settings.php, '
+                    . 'try "phergie path/to/file/Settings.php"'
+                );
+            }
+
             $this->config = new Phergie_Config;
-            $this->config->read('Settings.php');
+            $this->config->read($config);
         }
+
         if ($index !== null) {
             if (isset($this->config[$index])) {
                 return $this->config[$index];
@@ -255,7 +285,10 @@ class Phergie_Bot
     {
         if (empty($this->ui)) {
             $this->ui = new Phergie_Ui_Console;
+            $this->ui->setEnabled($this->getConfig('ui.enabled'));
+            $this->getConfig('ui.format', false) && $this->ui->setFormat($this->getConfig('ui.format'));
         }
+
         return $this->ui;
     }
 
@@ -316,19 +349,28 @@ class Phergie_Bot
     protected function loadPlugins()
     {
         $config = $this->getConfig();
-        $plugins = $this->getPluginHandler();
-        $ui = $this->getUi();
+        if (!isset($config['plugins'])
+            || !is_array($config['plugins'])
+        ) {
+            return;
+        }
 
-        $plugins->setAutoload($config['plugins.autoload']);
+        if (isset($config['plugins.autoload'])) {
+            $autoload = (bool) $config['plugins.autoload'];
+        } else {
+            $autoload = false;
+        }
+
+        $ui = $this->getUi();
+        $plugins = $this->getPluginHandler();
+        $plugins->setAutoload($autoload);
+
         foreach ($config['plugins'] as $name) {
             try {
                 $plugin = $plugins->addPlugin($name);
                 $ui->onPluginLoad($name);
             } catch (Phergie_Plugin_Exception $e) {
                 $ui->onPluginFailure($name, $e->getMessage());
-                if (!empty($plugin)) {
-                    $plugins->removePlugin($plugin);
-                }
             }
         }
     }
@@ -341,6 +383,12 @@ class Phergie_Bot
     protected function loadConnections()
     {
         $config = $this->getConfig();
+        if (!isset($config['connections'])
+            || !is_array($config['connections'])
+        ) {
+            return;
+        }
+
         $driver = $this->getDriver();
         $connections = $this->getConnectionHandler();
         $plugins = $this->getPluginHandler();
@@ -370,9 +418,6 @@ class Phergie_Bot
         $timezone = $this->getConfig('timezone', 'UTC');
         date_default_timezone_set($timezone);
 
-        $ui = $this->getUi();
-        $ui->setEnabled($this->getConfig('ui.enabled'));
-
         $this->loadPlugins();
         $this->loadConnections();
 
@@ -383,7 +428,7 @@ class Phergie_Bot
             $processor->handleEvents();
         }
 
-        $ui->onShutdown();
+        $this->getUi()->onShutdown();
 
         return $this;
     }
