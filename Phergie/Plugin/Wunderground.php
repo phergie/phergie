@@ -14,9 +14,9 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Wunderground
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Plugin_Weather
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Wunderground
  */
 
 /**
@@ -35,7 +35,6 @@
  * @uses     Phergie_Plugin_Cache pear.phergie.org
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
- * @uses     Phergie_Plugin_Temperature pear.phergie.org
  * @uses     extension SimpleXML
  */
 
@@ -65,7 +64,6 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
             $this->fail("API key must be specified.");
         }
     }
-    
     
     /**
      * Makes call to wunderground's api for conditions at a particular location
@@ -123,10 +121,6 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
     public function parseWeatherInfo($response)
     {
         $xml = $response->getContent();
-        
-//        if (!$xml) {
-//            throw new Phergie_Exception("Error parsing XML content returned.");
-//        }
         
         if (isset($xml->results)) {
             $this->setBogusLocation(true);
