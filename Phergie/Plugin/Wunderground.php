@@ -23,7 +23,7 @@
  * Detects and responds to requests for current weather conditions in a
  * particular location using data from a web service. Requires registering
  * with wunderground.com to obtain an api key, which must be
- * stored in the configuration settings wunderground.api_key for the plugin to 
+ * stored in the configuration settings wunderground.api_key for the plugin to
  * function.
  *
  * @category Phergie
@@ -43,51 +43,51 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
     /**
      * Tracks whether or not a given location is valid
      *
-     * @var bool 
+     * @var bool
      */
     private $bogusLocation = true;
-    
+
     /**
      * Checks for dependencies
-     * 
-     * @return void 
+     *
+     * @return void
      */
-    
+
     public function onLoad()
     {
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Cache');
         $plugins->getPlugin('Command');
         $plugins->getPlugin('Http');
-        
+
         if (empty($this->config['wunderground.api_key'])) {
             $this->fail("API key must be specified.");
         }
     }
-    
+
     /**
      * Makes call to wunderground's api for conditions at a particular location
-     * 
-     * @param string $location 
+     *
+     * @param string $location
      * @return void
      */
-    
+
     public function onCommandWeather($location)
-    {       
+    {
         $response = $this->getPluginHandler()
                 ->getPlugin('Http')
                 ->get(
-                        'http://api.wunderground.com/api/' . 
+                        'http://api.wunderground.com/api/' .
                         $this->getConfig('wunderground.api_key') .
-                        '/conditions/q/' . 
-                        $location . '.xml');
-        
+                        '/conditions/q/' .
+                        urlencode($location) . '.xml');
+
         try {
             $data = $this->parseWeatherInfo($response);
         } catch (Phergie_Exception $pe) {
             $this->doNotice($this->event->getNick(), $pe->getMessage());
         }
-        
+
         $bits = array();
         $bits[] = 'Temperature: ' . $data['tempString'];
         $bits[] = 'Weather: ' . $data['weather'];
@@ -98,44 +98,44 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
         if ('NA' != $data['heat_index_string']) {
             $bits[] = "Heat Index: " . $data['heat_index_string'];
         }
-        
+
         $string = 'Current Conditions: ' . implode(', ', $bits);
-        
+
         $bogosity = $this->getBogusLocation();
-        
+
         if (!$bogosity) {
             $this->doPrivmsg($this->event->getSource(),
                     $this->event->getNick(). ': ' .
                     $string);
         }
     }
-    
+
     /**
      * Chews on reply from wunderground's API and spits out useful information
-     * 
+     *
      * @param Phergie_Plugin_Http_Response $response
      * @return array Array of useful information
-     * @throws Phergie_Exception 
+     * @throws Phergie_Exception
      */
-    
+
     public function parseWeatherInfo($response)
     {
         $xml = $response->getContent();
-        
+
         if (isset($xml->results)) {
             $this->setBogusLocation(true);
             throw new Phergie_Exception("That location is too ambiguous.  Please be more specific.");
         }
-        
+
         if (isset($xml->error)) {
             $this->setBogusLocation(true);
             throw new Phergie_Exception("That location was not found.");
         }
-        
+
         $this->setBogusLocation(false);
-        
+
         $co = $xml->current_observation;
-        
+
         return array(
             'tempString'        => $co->temperature_string,
             'weather'           => $co->weather,
@@ -143,20 +143,20 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
             'wind_chill_string' => $co->windchill_string,
             'heat_index_string' => $co->heat_index_string);
     }
-    
+
     /**
-     * @return bool 
+     * @return bool
      */
-    public function getBogusLocation() 
+    public function getBogusLocation()
     {
         return $this->bogusLocation;
     }
 
     /**
      * @param bool $bogusLocation
-     * @return \Phergie_Plugin_Wunderground 
+     * @return \Phergie_Plugin_Wunderground
      */
-    public function setBogusLocation($bogusLocation) 
+    public function setBogusLocation($bogusLocation)
     {
         $this->bogusLocation = $bogusLocation;
         return $this;
