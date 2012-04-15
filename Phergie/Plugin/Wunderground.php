@@ -24,7 +24,7 @@
  * particular location using data from a web service. Requires registering
  * with wunderground.com to obtain an api key, which must be
  * stored in the configuration settings wunderground.api_key for the plugin to 
- * function.
+ * function.  Get your key at http://api.wunderground.com/weather/api/ .
  *
  * @category Phergie
  * @package  Phergie_Plugin_Wunderground
@@ -35,7 +35,6 @@
  * @uses     Phergie_Plugin_Cache pear.phergie.org
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Http pear.phergie.org
- * @uses     Phergie_Plugin_Temperature pear.phergie.org
  * @uses     extension SimpleXML
  */
 
@@ -62,7 +61,7 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Http');
         
         if (empty($this->config['wunderground.api_key'])) {
-            $this->fail("API key must be specified.");
+            $this->fail("API key must be specified.  Use the settings index 'wunderground.api_key'.");
         }
     }
     
@@ -76,13 +75,17 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
     
     public function onCommandWeather($location)
     {       
-        $response = $this->getPluginHandler()
-                ->getPlugin('Http')
-                ->get(
-                        'http://api.wunderground.com/api/' . 
+        // strip out spaces
+        //$location = preg_replace('|\s|', '', $location);
+        
+        $urlString = 'http://api.wunderground.com/api/' . 
                         $this->getConfig('wunderground.api_key') .
                         '/conditions/q/' . 
-                        $location . '.xml');
+                        rawurlencode($location) . '.xml';
+        
+        $response = $this->getPluginHandler()
+                ->getPlugin('Http')
+                ->get($urlString);
         
         try {
             $data = $this->parseWeatherInfo($response);
@@ -124,10 +127,6 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
     {
         $xml = $response->getContent();
         
-//        if (!$xml) {
-//            throw new Phergie_Exception("Error parsing XML content returned.");
-//        }
-        
         if (isset($xml->results)) {
             $this->setBogusLocation(true);
             throw new Phergie_Exception("That location is too ambiguous.  Please be more specific.");
@@ -147,7 +146,8 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
             'weather'           => $co->weather,
             'wind_string'       => $co->wind_string,
             'wind_chill_string' => $co->windchill_string,
-            'heat_index_string' => $co->heat_index_string);
+            'heat_index_string' => $co->heat_index_string
+                );
     }
     
     /**
