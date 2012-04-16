@@ -22,11 +22,11 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie_Plugin_Twitter
+ * @package   Phergie_Plugin_Php
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Plugin_Twitter
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Php
  */
 
 /**
@@ -45,7 +45,7 @@ class Twitter
      *
      * Do not specify user/password in URL
      */
-    protected $baseUrl = 'https://twitter.com/';
+    protected $baseUrl = 'http://twitter.com/';
 
     /**
      * Full base URL (includes user/pass)
@@ -65,6 +65,13 @@ class Twitter
     protected $pass;
 
     /**
+     * Twitter OAUTH credentials
+     */
+    protected $usertoken, $usersecret;
+    protected $consumerkey, $consumersecret;
+    public $oauth;
+
+    /**
      * Constructor; sets up configuration.
      *
      * @param string $user Twitter user name; null for limited read-only access
@@ -73,8 +80,9 @@ class Twitter
     public function __construct($user=null, $pass=null)
     {
         $this->baseUrlFull = $this->baseUrl;
-        if (null !== $user) {
-            // user is defined, so use it in the URL
+        if (null !== $pass) {
+          // pass is defined, so use it in the URL
+          // Left for legacy
             $this->user = $user;
             $this->pass = $pass;
             $parsed = parse_url($this->baseUrl);
@@ -256,25 +264,39 @@ class Twitter
         if ($limit) {
             $txt = substr($txt, 0, 140); // twitter message size limit
         }
-        $data = 'status=' . urlencode($txt);
+        $data = urlencode($txt);
+        /*
         $params = array(
             'http' => array(
                 'method' => 'POST',
                 'content' => $data,
                 'header' => 'Content-type: application/x-www-form-urlencoded',
             )
-        );
+          );
+         */
+        try{
+          $result = $this->oauth->fetch(
+            'https://api.twitter.com/1/statuses/update.json',
+            array('status' => $txt),
+            OAUTH_HTTP_METHOD_POST
+          );
+        }catch(Exception $e){
+          echo $this->oauth->getLastResponse();
+          echo "\n".$e;
+        }      
+        /*
         $ctx = stream_context_create($params);
         $fp = fopen($this->getUrlTweetPost(), 'rb', false, $ctx);
         if (!$fp) {
             return false;
         }
-        $response = stream_get_contents($fp);
+         */
+        $response = $this->oauth->getLastResponse();
         if ($response === false) {
             return false;
         }
-        $response = json_decode($response);
-        return $response;
+        $response = json_decode($response,1);
+          return $this->getTweetByNum($response['id']);
     }
 
     /**
@@ -332,7 +354,7 @@ class Twitter
      */
     public function getUrlOutputStatus(StdClass $tweet)
     {
-        return $this->baseUrl . '#!/' . urlencode($tweet->user->screen_name)
+        return $this->baseUrl . urlencode($tweet->user->screen_name)
             . '/statuses/' . urlencode($tweet->id_str);
     }
 

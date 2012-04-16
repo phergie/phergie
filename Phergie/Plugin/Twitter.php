@@ -82,13 +82,30 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
             new $twitterClass(
                 $this->config['twitter.user'],
                 $this->config['twitter.password'],
-                $this->config['twitter.url']
-            )
-        );
+                $this->config['twitter.url'],
+                $this->config['twitter.usertoken'],
+                $this->config['twitter.usersecret'],
+                $this->config['twitter.consumerkey'],
+                $this->config['twitter.consumersecret']
+              )
+            );
 
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Time');
+        //Attempt OAUTH negotiation
+        $tw_oauth = new OAuth(
+          $this->getConfig('twitter.consumerkey', 'Twitter'),
+          $this->getConfig('twitter.consumersecret', 'Twitter'),
+           OAUTH_SIG_METHOD_HMACSHA1,
+           OAUTH_AUTH_TYPE_URI
+        );
+          //User-specific credentials
+        $tw_oauth->setToken(
+          $this->getConfig('twitter.usertoken', 'Twitter'),
+          $this->getConfig('twitter.usersecret', 'Twitter')
+        );
+        $this->twitter->oauth = $tw_oauth;
     }
 
     /**
@@ -155,31 +172,39 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         }
     }
 
+    public function onCommandTweet($tweet = null){
+      $source = $this->getEvent()->getSource();
+      $nick =  $this->getEvent()->getHostmask()->getNick();
+      $tweetresponse = $this->twitter->sendTweet($tweet);
+      if($tweetresponse){
+        $this->doPrivmsg($source, $this->formatTweet($tweetresponse, false));
+      }else{
+        $this->doPrivmsg($source, "Sorry, $nick, your tweet failed to send.");
+      }
+    }
+
+
+
+
+
     /**
      * Formats a Tweet into a message suitable for output.
      *
-     * @param object $tweet JSON-decoded tweet object from Twitter
+     * @param object $tweet      JSON-decoded tweet object from Twitter
+     * @param bool   $includeUrl whether or not to include the URL in the
+     *  formatted output
      *
      * @return string
      */
-    protected function formatTweet(StdClass $tweet)
+    protected function formatTweet(StdClass $tweet, $includeUrl = true)
     {
-        $format = $this->getConfig('twitter.format', '<@{screen_name}> {text} - '
-            . '{countdown} ago ({url})');
-
-        $out = str_replace(array(
-            '{screen_name}',
-            '{text}',
-            '{time}',
-            '{countdown}',
-            '{url}',
-        ), array(
-            $tweet->user->screen_name,
-            $tweet->text,
-            $tweet->created_at,
-            $this->plugins->time->getCountDown($tweet->created_at),
-            $this->twitter->getUrlOutputStatus($tweet),
-        ), $format);
+        $ts = $this->plugins->time->getCountDown($tweet->created_at);
+        $out =  '<@' . $tweet->user->screen_name .'> '
+            . preg_replace('/\s+/', ' ', $tweet->text)
+            . ' - ' . $ts . ' ago';
+        if ($includeUrl) {
+            $out .= ' (' . $this->twitter->getUrlOutputStatus($tweet) . ')';
+        }
 
         $encode = $this->getPluginHandler()->getPlugin('Encoding');
 
@@ -207,7 +232,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
 
         if (preg_match('#/status(es)?/([0-9]+)$#', $path, $matches)
         ) {
-            $tweet = $this->twitter->getTweetByNum($matches[3]);
+            $tweet = $this->getTweetByNum($matches[2]);
             if ($tweet) {
                 $this->doPrivmsg($source, $this->formatTweet($tweet, false));
             }

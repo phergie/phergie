@@ -158,6 +158,7 @@ class Phergie_Plugin_Acl extends Phergie_Plugin_Abstract
                 }
             }
             if (!$whitelisted) {
+                    echo $hostmask."\n";
                 foreach ($whitelist as $pattern => $rules) {
                     $this->applyRules($iterator, $rules);
                 }
