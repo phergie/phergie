@@ -28,7 +28,7 @@
  * @license  http://phergie.org/license New BSD License
  * @link     http://pear.phergie.org/package/Phergie_Tests
  */
-class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
+class Phergie_Plugin_HandlerTest extends Phergie_TestCase
 {
     /**
      * Plugin handler instance being tested
@@ -79,12 +79,8 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->config = $this->getMock(
-            'Phergie_Config', array('offsetGet', 'offsetExists')
-        );
-        $this->events = $this->getMock(
-            'Phergie_Event_Handler', array('getIterator')
-        );
+        $this->config = $this->getMockConfig();
+        $this->events = $this->getMockEventHandler();
         $this->handler = new Phergie_Plugin_Handler(
             $this->config,
             $this->events
@@ -849,15 +845,7 @@ class Phergie_Plugin_HandlerTest extends PHPUnit_Framework_TestCase
     {
         $dir = dirname(__FILE__);
         $prefix = 'Phergie_Plugin_';
-        $paths = array($dir => $prefix);
-        $this->config
-            ->expects($this->any())
-            ->method('offsetExists')
-            ->will($this->returnValue(true));
-        $this->config
-            ->expects($this->any())
-            ->method('offsetGet')
-            ->will($this->returnValue($paths));
+        $this->settings['plugins.paths'] = array($dir => $prefix);
 
         // Reinitialize the handler so the configuration change takes effect
         // within the constructor
