@@ -290,6 +290,12 @@ abstract class Phergie_Plugin_Abstract
     {
         $class = get_class($this);
 
+        $r = new ReflectionClass($class);
+        $path = dirname($r->getFilename()) . '/' . $this->getName() . '/' . $filename;
+        if (file_exists($path)) {
+            return $path;
+        }
+
         if (class_exists('PEAR_Config')) {
             $config = new PEAR_Config();
             $dataDir = $config->get('data_dir');
@@ -297,12 +303,6 @@ abstract class Phergie_Plugin_Abstract
             if (file_exists($path)) {
                 return $path;
             }
-        }
-
-        $r = new ReflectionClass($class);
-        $path = dirname($r->getFilename()) . '/' . $this->getName() . '/' . $filename;
-        if (file_exists($path)) {
-            return $path;
         }
 
         return null;
