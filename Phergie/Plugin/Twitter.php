@@ -232,7 +232,7 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
 
         if (preg_match('#/status(es)?/([0-9]+)$#', $path, $matches)
         ) {
-            $tweet = $this->getTweetByNum($matches[2]);
+            $tweet = $this->twitter->getTweetByNum($matches[2]);
             if ($tweet) {
                 $this->doPrivmsg($source, $this->formatTweet($tweet, false));
             }
