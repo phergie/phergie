@@ -133,7 +133,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
     public function feedCheckingCallback()
     {
         $now = time();
-        $idleTime = intval($this->getConfig('FeedTicker.idleTime', 60*60*2));
+        $idleTime = intval($this->getConfig('FeedTicker.idleTime', 7200)); //7200=60*60*2
         $time = $now - $idleTime;
         $feeds = $this->plugins->getPlugin('FeedManager')->getFeedsList();
         $smartReader = (bool) $this->getConfig('FeedTicker.smartReader', false);
@@ -196,7 +196,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
         }
 
         // Check if is time to delivery items
-        $showDelayTime = intval($this->getConfig('FeedTicker.showDelayTime', 60*3));
+        $showDelayTime = intval($this->getConfig('FeedTicker.showDelayTime', 180)); //180=60*3
         if (($this->lastDeliveryTime + $showDelayTime) > time()) {
             return;
         }
@@ -240,7 +240,7 @@ class Phergie_Plugin_FeedTicker extends Phergie_Plugin_Abstract
                     if ($lm < $updated) {
                         return false;
                     }
-                } else if ($etag == $header['etag']) {
+                } else if ( isset($header['etag']) && $etag == $header['etag']) {
                     return false;
                 }
             } else {
