@@ -84,6 +84,8 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
             }
 
             if (!empty($header)) {
+        $this->feed->etag = NULL;
+				if (isset($header['etag']))
                 $this->feed->etag = $header['etag'];
                 if (empty($this->feed->updated)) {
                     // Very dificult to happen,
