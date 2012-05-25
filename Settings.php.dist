@@ -75,6 +75,13 @@ return array(
     // Enables shell output describing bot events via Phergie_Ui_Console
     'ui.enabled' => true,
 
+    // Examples of a prefix for command-based plugins
+    // 'command.prefix' => '!',
+    // If you uncomment the line above, this would invoke onCommandJoin 
+    // in the Join plugin: !join #channel
+    // By default, no prefix is assumed, so the same command would be 
+    // invoked like this: join #channel
+    
     // Examples of supported values for autojoins.channel:
     // 'autojoin.channels' => '#channel1,#channel2',
     // 'autojoin.channels' => array('#channel1', '#channel2'),
