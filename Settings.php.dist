@@ -14,6 +14,7 @@ return array(
             // 'password' => 'password goes here if needed',
             // 'transport' => 'ssl', // uncomment to connect using SSL
             // 'encoding' => 'UTF-8', // uncomment if using UTF-8
+            // 'context' => array('socket' => array('bindto' => '0.0.0.0:0')), // uncomment to force use of IPv4
         )
     ),
 

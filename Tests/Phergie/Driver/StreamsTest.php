@@ -101,7 +101,8 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
             'port'      => 6667,
             'username'  => 'username',
             'realname'  => 'realname',
-            'transport' => 'tcp'
+            'transport' => 'tcp',
+            'context'   => array(),
         );
         $connection = parent::getMockConnection();
         foreach ($options as $key => $value) {

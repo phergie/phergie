@@ -97,6 +97,13 @@ class Phergie_Connection
     protected $hostmask;
 
     /**
+     * Stream context options
+     *
+     * @var array
+     */
+    protected $context = array();
+
+    /**
      * Constructor to initialize instance properties.
      *
      * @param array $options Optional associative array of property values
@@ -383,6 +390,28 @@ class Phergie_Connection
     public function getPassword()
     {
         return $this->password;
+    }
+
+    /**
+     * Sets the stream context options to use.
+     *
+     * @param array $context Context options as they will be passed to stream_context_create()
+     * @return Phergie_Connection_Streams Implements a fluent interface
+     */
+    public function setContext(array $context)
+    {
+        $this->context = $context;
+        return $this;
+    }
+
+    /**
+     * Returns the stream context options in use.
+     *
+     * @return array Context options as they will be passed to stream_context_create()
+     */
+    public function getContext()
+    {
+        return $this->context;
     }
 
     /**

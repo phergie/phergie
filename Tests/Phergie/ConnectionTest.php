@@ -44,6 +44,7 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
         'username' => 'MyUsername',
         'realname' => 'MyRealName',
         'password' => 'MyPassword',
+        'context' => array('socket' => array('bindto' => '0.0.0.0:0')),
     );
 
     /**
@@ -60,11 +61,12 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
             array('encoding', 'ISO-8859-1'),
             array('port', 6667),
             array('password', null),
+            array('context', array()),
         );
     }
 
     /**
-     * Tests that a default values are used for some options.
+     * Tests that default values are used for some options.
      *
      * @param string $option Name of the option with a default value
      * @param mixed  $value  Default value of the option
@@ -76,17 +78,6 @@ class Phergie_ConnectionTest extends PHPUnit_Framework_TestCase
     {
         $connection = new Phergie_Connection;
         $this->assertEquals($value, $connection->{'get' . ucfirst($option)}());
-    }
-
-    /**
-     * Tests that a default encoding is used if one isn't specified.
-     *
-     * @return void
-     */
-    public function testGetEncodingReturnsDefault()
-    {
-        $connection = new Phergie_Connection;
-        $this->assertEquals('ISO-8859-1', $connection->getEncoding());
     }
 
     /**

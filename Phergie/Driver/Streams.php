@@ -342,13 +342,21 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
      * @param string $remote  Address to connect the socket to
      * @param int    &$errno  System level error number if connection fails
      * @param string &$errstr System level error message if connection fails
+     * @param array  $context Optional socket context options
      *
      * @return resource Established socket
      */
-    protected function connect($remote, &$errno, &$errstr)
+    protected function connect($remote, &$errno, &$errstr, array $context = array())
     {
         // @codeCoverageIgnoreStart
-        return @stream_socket_client($remote, $errno, $errstr);
+        return @stream_socket_client(
+            $remote,
+            $errno,
+            $errstr,
+            ini_get('default_socket_timeout'),
+            STREAM_CLIENT_CONNECT,
+            stream_context_create($context)
+        );
         // @codeCoverageIgnoreEnd
     }
 
@@ -368,11 +376,12 @@ class Phergie_Driver_Streams extends Phergie_Driver_Abstract
         $nick = $connection->getNick();
         $realname = $connection->getRealname();
         $transport = $connection->getTransport();
+        $context = $connection->getContext();
 
         // Establish and configure the socket connection
         $remote = $transport . '://' . $hostname . ':' . $port;
         $errno = $errstr = null;
-        $this->socket = $this->connect($remote, $errno, $errstr);
+        $this->socket = $this->connect($remote, $errno, $errstr, $context);
         if (!$this->socket) {
             throw new Phergie_Driver_Exception(
                 'Unable to connect: socket error ' . $errno . ' ' . $errstr,
