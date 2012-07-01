@@ -84,6 +84,8 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
             }
 
             if (!empty($header)) {
+        $this->feed->etag = NULL;
+				if (isset($header['etag']))
                 $this->feed->etag = $header['etag'];
                 if (empty($this->feed->updated)) {
                     // Very dificult to happen,
@@ -127,14 +129,22 @@ class Phergie_Plugin_FeedParser extends Phergie_Plugin_Abstract
             // Try to get the author and updated time from dc namespace
             // (Used on Wordpress and others)
             $namespaces = $item->getNameSpaces(true);
-            $dc = $item->children($namespaces['dc']);
+						$dc = NULL;
+						if (isset($namespaces['dc']))
+              $dc = $item->children($namespaces['dc']);
 
-            $author = empty($item->author) ? $dc->creator : $item->author;
-            if (empty($autor)) {
-                $author = 'Unknown';
-            }
+						$author = 'Unknown';
+						if (isset($item->author))
+						  $author = $item->author;
+						else if (isset($dc->creator))
+						  $author = $dc->creator;
 
-            $pubDate = empty($item->pubDate) ? $dc->date : $item->pubDate;
+						$pubDate = '01.01.1970';
+						if (isset($item->pubDate))
+						  $pubDate = $item->pubDate;
+						if (isset($dc->date))
+						  $pubDate = $dc->date;
+
             $link = (String) $item->link;
 
             $ret[] = array(
