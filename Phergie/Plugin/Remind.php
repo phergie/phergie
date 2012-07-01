@@ -165,12 +165,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
         
-        // The bot shouldn't be the recipient
-        // Fix for issue #211
         $myself = $this->getConnection()->getNick();
         if ($myself == $recipient) {
-          $this->doPrivmsg($source, '<meme>You are doing it wrong</meme>');
-          return;
+            $this->doPrivmsg($source, 'You can\'t send reminders to me.');
+            return;
         }
 
         if (!$this->getEvent()->isInChannel()) {
