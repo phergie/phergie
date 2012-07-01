@@ -51,6 +51,9 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
      */
     public function onVersion()
     {
+        if ($this->getEvent()->getArguments()) {
+            return;
+        }
         $source = $this->getEvent()->getSource();
         $msg = 'Phergie ' . Phergie_Bot::VERSION . ' (http://phergie.org)';
         $this->doVersion($source, $msg);
