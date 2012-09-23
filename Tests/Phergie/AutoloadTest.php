@@ -199,6 +199,23 @@ class Phergie_AutoloadTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests that the autoloader strips off prefixes given to addPath() from class names before trying to find their
+     * corresponding files. If it fails to do that, the class in this test shouldn't be loaded.
+     *
+     * @return void
+     */
+    public function testRemovesPrefixFromClassFileName()
+    {
+        // Fake environment and register autoloader
+        $path = dirname(__FILE__) . '/Autoload/_PrefixRemovedFromClassFileNameTest';
+        Phergie_Autoload::registerAutoloader();
+
+        Phergie_Autoload::addPath($path, 'Phergie_Prefixed_');
+
+        $this->assertTrue(class_exists('Phergie_Prefixed_Class', true));
+    }
+
+    /**
      * Prevents preservation of global state in cases where test methods
      * must be run in separate processes.
      *

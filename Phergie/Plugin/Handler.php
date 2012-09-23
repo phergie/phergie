@@ -101,6 +101,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
         if (!empty($config['plugins.paths'])) {
             foreach ($config['plugins.paths'] as $dir => $prefix) {
                 $this->addPath($dir, $prefix);
+                Phergie_Autoload::addPath($dir, $prefix);
             }
         }
 
