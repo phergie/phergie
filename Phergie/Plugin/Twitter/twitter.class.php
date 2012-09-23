@@ -22,11 +22,11 @@
  * http://phergie.org/license
  *
  * @category  Phergie
- * @package   Phergie_Plugin_Php
+ * @package   Phergie_Plugin_Twitter
  * @author    Phergie Development Team <team@phergie.org>
  * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
- * @link      http://pear.phergie.org/package/Phergie_Plugin_Php
+ * @link      http://pear.phergie.org/package/Phergie_Plugin_Twitter
  */
 
 /**
@@ -265,15 +265,6 @@ class Twitter
             $txt = substr($txt, 0, 140); // twitter message size limit
         }
         $data = urlencode($txt);
-        /*
-        $params = array(
-            'http' => array(
-                'method' => 'POST',
-                'content' => $data,
-                'header' => 'Content-type: application/x-www-form-urlencoded',
-            )
-          );
-         */
         try{
           $result = $this->oauth->fetch(
             'https://api.twitter.com/1/statuses/update.json',
@@ -281,16 +272,8 @@ class Twitter
             OAUTH_HTTP_METHOD_POST
           );
         }catch(Exception $e){
-          echo $this->oauth->getLastResponse();
-          echo "\n".$e;
-        }      
-        /*
-        $ctx = stream_context_create($params);
-        $fp = fopen($this->getUrlTweetPost(), 'rb', false, $ctx);
-        if (!$fp) {
-            return false;
+          echo $this->oauth->getLastResponse(), PHP_EOL, $e->getMessage();
         }
-         */
         $response = $this->oauth->getLastResponse();
         if ($response === false) {
             return false;
