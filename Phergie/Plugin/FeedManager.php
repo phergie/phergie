@@ -438,8 +438,9 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         $sql = 'SELECT rowid, etag, channel, title,
                        link, feed_url, active, delay, updated
                   FROM ft_feeds' . $sqlChannel;
-        $result = $this->db->query($sql);
-        return $result->fetchAll();
+        if($result = $this->db->query($sql)){
+                return $result->fetchAll();
+        }
     }
 
     /**
