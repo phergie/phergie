@@ -45,7 +45,7 @@ class Twitter
      *
      * Do not specify user/password in URL
      */
-    protected $baseUrl = 'http://twitter.com/';
+    protected $baseUrl = 'https://api.twitter.com/1/';
 
     /**
      * Full base URL (includes user/pass)
@@ -267,7 +267,7 @@ class Twitter
         $data = urlencode($txt);
         try{
           $result = $this->oauth->fetch(
-            'https://api.twitter.com/1/statuses/update.json',
+            $this->getUrlApi() . 'statuses/update.json',
             array('status' => $txt),
             OAUTH_HTTP_METHOD_POST
           );
@@ -337,7 +337,7 @@ class Twitter
      */
     public function getUrlOutputStatus(StdClass $tweet)
     {
-        return $this->baseUrl . urlencode($tweet->user->screen_name)
+        return 'https://twitter.com/'. urlencode($tweet->user->screen_name)
             . '/statuses/' . urlencode($tweet->id_str);
     }
 
