@@ -77,6 +77,10 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
+        if (!extension_loaded('oauth')) {
+            $this->fail('PECL oauth extension not installed');
+        }
+
         $twitterClass = $this->getConfig('twitter.class', 'Twitter');
 
         $this->setTwitter(
