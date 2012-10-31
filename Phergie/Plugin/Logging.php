@@ -263,21 +263,6 @@ class Phergie_Plugin_Logging extends Phergie_Plugin_Abstract
     }
 
     /**
-     * onNick
-     *
-     * Handler for when someone changes their nickname.
-     *
-     * @author Eli White <eli@eliw.com>
-     * @return void
-     */
-    public function onNick()
-    {
-        // Push it to the log
-        $event = $this->getEvent();
-        $this->log($event, $event->getNick(), $event->getNickname());
-    }
-
-    /**
      * preDispatch
      *
      * Processes events before they are dispatched and logs appropriate ones.
