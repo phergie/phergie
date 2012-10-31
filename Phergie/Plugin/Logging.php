@@ -179,11 +179,11 @@ class Phergie_Plugin_Logging extends Phergie_Plugin_Abstract
                 $retry = $this->getConfig('logging.retry', 300);
                 if ($immediate || (($retry + $this->failed) < time())) {
                     if ($this->failed = ($this->_connectDB() ? false : time())) {
-                        $this->doPrivmsg($channel,
+                        $this->doPrivmsg($event->getSource(),
                             "WARNING: DB connection for Logging Plugin has failed.  ".
                             "Retrying in {$retry} seconds");
                     } else {
-                        $this->doPrivmsg($channel,
+                        $this->doPrivmsg($event->getSource(),
                           "NOTICE: DB connection for Logging Plugin reestablished.");
                     }
                 }
