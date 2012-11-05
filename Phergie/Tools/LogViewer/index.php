@@ -149,7 +149,7 @@ function show_days(PDO $db, $table)
     $prepared->execute(array($host, $channel));
     foreach ($prepared as $result) {
         list($y, $m, $d) = explode('-', $result->day);
-        $data[$y][$m][$d] = "{$y}-{$m}-{$d}";
+        $data[(int)$y][(int)$m][(int)$d] = "{$y}-{$m}-{$d}";
     }
 
     // For now, just loop over them all and provide a list:
