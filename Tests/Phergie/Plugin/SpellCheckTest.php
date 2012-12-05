@@ -105,7 +105,7 @@ class Phergie_Plugin_SpellCheckTest extends Phergie_Plugin_TestCase
             'receiver' => $this->source,
             'text' => 'spell ' . $word
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent($args);
         $this->plugin->setEvent($event);
     }
 

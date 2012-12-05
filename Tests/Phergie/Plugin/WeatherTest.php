@@ -175,7 +175,7 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
     {
         $config = $this->setUpWeatherResponse($test);
 
-        $event = $this->getMockEvent('weathercommand');
+        $event = $this->getMockEvent();
         $this->plugin->setEvent($event);
 
         $this->assertEmitsEvent(

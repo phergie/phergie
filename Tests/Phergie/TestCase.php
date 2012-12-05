@@ -240,7 +240,7 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
      *
      * @return Phergie_Event_Request
      */
-    protected function getMockEvent($type, array $args = array(),
+    protected function getMockEvent(array $args = array(),
         $nick = null, $source = null
     ) {
         $methods = array('getNick', 'getSource');
