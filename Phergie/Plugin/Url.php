@@ -615,8 +615,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 $title = preg_replace('/[\s\v]+/', ' ', trim($match[1]));
             }
         }
-        $titleLength = $this->getConfig('url.titleLength', 40);
-        $title = $this->decode($title, $titleLength);
 
         if (empty($title)) {
             if ($response->isError() && $this->getConfig('url.showErrors', true)) {
@@ -624,6 +622,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             } else {
                 $title = 'No Title';
             }
+        } else {
+            $titleLength = $this->getConfig('url.titleLength', 40);
+            $title = $this->decode($title, $titleLength);
         }
 
         return $title;
