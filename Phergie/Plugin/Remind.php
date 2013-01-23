@@ -108,7 +108,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
         }
 
         if (isset($this->config['remind.only_targeted_reminders'])) {
-            $this->onlyTargetedReminders = (bool) $this->config['remind.targeted_reminders'];
+            $this->onlyTargetedReminders = (bool) $this->config['remind.only_targeted_reminders'];
         }
 
         try {
