@@ -41,6 +41,13 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     protected $publicReminders = 3;
 
     /**
+     * Send reminders when a user joins the channel or not.
+     *
+     * @var bool
+     */
+    protected $remindOnJoin = false;
+
+    /**
      * PDO resource for a SQLite database containing the reminders.
      *
      * @var resource
@@ -89,6 +96,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
             $this->publicReminders = max($this->publicReminders, 0);
         }
 
+        if (isset($this->config['remind.remind_on_join'])) {
+            $this->remindOnJoin = (bool) $this->config['remind.remind_on_join'];
+        }
+
         try {
             $this->db = new PDO('sqlite:' . $path);
             $this->createTables();
@@ -114,7 +125,9 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     public function onJoin()
     {
-        $this->handleDelivery();
+        if ($this->remindOnJoin) {
+            $this->handleDelivery();
+        }
     }
 
     /**
