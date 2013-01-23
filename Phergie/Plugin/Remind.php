@@ -48,6 +48,13 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     protected $remindOnJoin = false;
 
     /**
+     * Respond *only* to targeted reminders or not.
+     *
+     * @var bool
+     */
+    protected $onlyTargetedReminders = false;
+
+    /**
      * PDO resource for a SQLite database containing the reminders.
      *
      * @var resource
@@ -98,6 +105,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
 
         if (isset($this->config['remind.remind_on_join'])) {
             $this->remindOnJoin = (bool) $this->config['remind.remind_on_join'];
+        }
+
+        if (isset($this->config['remind.only_targeted_reminders'])) {
+            $this->onlyTargetedReminders = (bool) $this->config['remind.targeted_reminders'];
         }
 
         try {
@@ -195,6 +206,11 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     protected function handleRemind($recipient, $message)
     {
+        // Don't do anything if we are only responding to targeted reminders and this isn't a targeted message.
+        if ($this->onlyTargetedReminders && ! $this->plugins->message->isTargetedMessage()) {
+            return;
+        }
+
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
 
