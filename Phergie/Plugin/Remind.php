@@ -104,6 +104,26 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     public function onPrivmsg()
     {
+        $this->handleDelivery();
+    }
+
+    /**
+     * Handler for when a user joins a channel.
+     *
+     * @return void
+     */
+    public function onJoin()
+    {
+        $this->handleDelivery();
+    }
+
+    /**
+     * Deliver reminders to a user.
+     *
+     * @return void
+     */
+    protected function handleDelivery()
+    {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
 
@@ -164,7 +184,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
-        
+
         $myself = $this->getConnection()->getNick();
         if ($myself == $recipient) {
             $this->doPrivmsg($source, 'You can\'t send reminders to me.');
