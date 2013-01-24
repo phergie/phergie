@@ -30,6 +30,7 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Remind
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Time pear.phergie.org
+ * @uses     Phergie_Plugin_Remind pear.phergie.org optional
  * @uses     extension PDO
  * @uses     extension pdo_sqlite
  */
