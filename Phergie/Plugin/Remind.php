@@ -41,6 +41,13 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     protected $publicReminders = 3;
 
     /**
+     * Send reminders when a user joins the channel or not.
+     *
+     * @var bool
+     */
+    protected $remindOnJoin = false;
+
+    /**
      * PDO resource for a SQLite database containing the reminders.
      *
      * @var resource
@@ -89,6 +96,10 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
             $this->publicReminders = max($this->publicReminders, 0);
         }
 
+        if (isset($this->config['remind.remind_on_join'])) {
+            $this->remindOnJoin = (bool) $this->config['remind.remind_on_join'];
+        }
+
         try {
             $this->db = new PDO('sqlite:' . $path);
             $this->createTables();
@@ -103,6 +114,28 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      * @return void
      */
     public function onPrivmsg()
+    {
+        $this->handleDelivery();
+    }
+
+    /**
+     * Handler for when a user joins a channel.
+     *
+     * @return void
+     */
+    public function onJoin()
+    {
+        if ($this->remindOnJoin) {
+            $this->handleDelivery();
+        }
+    }
+
+    /**
+     * Deliver reminders to a user.
+     *
+     * @return void
+     */
+    protected function handleDelivery()
     {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
@@ -164,7 +197,7 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
     {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
-        
+
         $myself = $this->getConnection()->getNick();
         if ($myself == $recipient) {
             $this->doPrivmsg($source, 'You can\'t send reminders to me.');
