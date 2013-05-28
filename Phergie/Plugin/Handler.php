@@ -75,6 +75,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      * @var string
      */
     protected $iteratorClass = 'Phergie_Plugin_Iterator';
+    protected $iteratorCollection = array();
 
     /**
      * Constructor to initialize class properties and add the path for core
@@ -429,11 +430,17 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      *
      * @return ArrayIterator
      */
-    public function getIterator()
+    public function getIterator($new = true)
     {
-        return new $this->iteratorClass(
-            new ArrayIterator($this->plugins)
-        );
+    	if ($new) {
+	    	$iterator = new $this->iteratorClass(
+	    		new ArrayIterator($this->plugins)
+	    	);
+	        $this->iteratorCollection[] = $iterator;
+    	}
+
+       end($this->iteratorCollection);
+       return $this->iteratorCollection[key($this->iteratorCollection)];
     }
 
     /**
@@ -484,9 +491,16 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
      */
     public function __call($name, array $args)
     {
-        foreach ($this->getIterator() as $plugin) {
-            call_user_func_array(array($plugin, $name), $args);
-        }
+    	if (!count($this->iteratorCollection)) {
+    		$this->getIterator();
+    	}
+    	
+    	foreach ($this->iteratorCollection as &$iterator) {
+	        foreach ($iterator as $plugin) {
+	            call_user_func_array(array($plugin, $name), $args);
+	        }
+    	}
+    	
         return true;
     }
 
