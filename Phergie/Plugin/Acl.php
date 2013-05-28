@@ -121,7 +121,7 @@ class Phergie_Plugin_Acl extends Phergie_Plugin_Abstract
         }
 
         // Get the iterator used to filter plugins when processing events
-        $iterator = $this->plugins->getIterator();
+        $iterator = &$this->plugins->getIterator(false);
 
         // Get configuration setting values
         $whitelist = $this->getConfig('acl.whitelist', array());
@@ -181,6 +181,6 @@ class Phergie_Plugin_Acl extends Phergie_Plugin_Abstract
      */
     public function postDispatch()
     {
-        $this->plugins->getIterator()->clearFilters();
+        $this->plugins->getIterator(false)->clearFilters();
     }
 }
