@@ -29,8 +29,10 @@
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Twitter
  */
 
+require_once dirname(__FILE__) . '/twitteroauth/twitteroauth.php';
+
 /**
- * Supporting Twitter client library for the Twitter plugin.
+ * Supporting Twitter client library for the Twitter plugin. Utilizes Abraham Williams's PHP TwitterOAuth Library, with namespaces stripped
  *
  * @category Phergie
  * @package  Phergie_Plugin_Twitter
@@ -41,63 +43,40 @@
 class Twitter
 {
     /**
-     * Base URL for Twitter API
+     * @var TwitterOAuth
+     */
+    protected $api;
+
+    /**
+     * Did the credentials pass a verification check?
      *
-     * Do not specify user/password in URL
+     * @var bool
      */
-    protected $baseUrl = 'https://api.twitter.com/1/';
+    protected $authenticatedAsUser = false;
 
     /**
-     * Full base URL (includes user/pass)
+     * UID of authenticated user (gleaned from OAuth Token and OAuth Token Secret)
      *
-     * (created in Init)
+     * @var string
      */
-    protected $baseUrlFull = null;
+    protected $authenticatedUID;
 
     /**
-     * Twitter API user
+     * @param string $consumerkey Consumer Key provided by Twitter for your application in the developer portal
+     * @param string $consumersecret Consumer Secret provided by Twitter for your application in the developer portal
+     * @param null|string $oauthtoken OAuth Token for specific user received during authentication steps or via developer portal
+     * @param null|string $oauthtokensecret OAuth Token Secret for specific user received during authenitcation steps or via developer portal
      */
-    protected $user;
-
-    /**
-     * Twitter API password
-     */
-    protected $pass;
-
-    /**
-     * Twitter OAUTH credentials
-     */
-    protected $usertoken, $usersecret;
-    protected $consumerkey, $consumersecret;
-    public $oauth;
-
-    /**
-     * Constructor; sets up configuration.
-     *
-     * @param string $user Twitter user name; null for limited read-only access
-     * @param string $pass Twitter password; null for limited read-only access
-     */
-    public function __construct($user=null, $pass=null)
+    public function __construct($consumerkey, $consumersecret, $oauthtoken, $oauthtokensecret)
     {
-        $this->baseUrlFull = $this->baseUrl;
-        if (null !== $pass) {
-          // pass is defined, so use it in the URL
-          // Left for legacy
-            $this->user = $user;
-            $this->pass = $pass;
-            $parsed = parse_url($this->baseUrl);
-            $this->baseUrlFull = $parsed['scheme'] . '://' . $this->user . ':'
-                    . $this->pass . '@' . $parsed['host'];
-            // port (optional)
-            if (isset($parsed['port']) && is_numeric($parsed['port'])) {
-                $this->baseUrlFull .= ':' . $parsed['port'];
-            }
-            // append path (default: /)
-            if (isset($parsed['path'])) {
-                $this->baseUrlFull .= $parsed['path'];
-            } else {
-                $this->baseUrlFull .= '/';
-            }
+        $this->api = new TwitterOAuth($consumerkey, $consumersecret, $oauthtoken, $oauthtokensecret);
+
+        if ($oauthtoken && $oauthtokensecret) {
+            $resp = $this->api->get('account/verify_credentials', array('skip_status' => true));
+            //If OAuth Token is valid, previous response will return 200, otherwise 401
+            if (200 == $this->api->lastStatusCode())
+                $this->authenticatedAsUser = true;
+                $this->authenticatedUID = $resp->id_str;
         }
     }
 
@@ -113,8 +92,13 @@ class Twitter
         if (!is_numeric($num)) {
             return;
         }
-        $tweet = json_decode(file_get_contents($this->getUrlStatus($num)));
-        return $tweet;
+        
+        $resp = $this->api->get('statuses/show/' . urlencode($num));
+
+        if (200 != $this->api->lastStatusCode())
+            return false;
+
+        return $resp;
     }
 
     /**
@@ -127,12 +111,16 @@ class Twitter
      */
     public function getLastTweet($tweeter, $num = 1)
     {
-        $source = json_decode(
-            file_get_contents($this->getUrlUserTimeline($tweeter))
-        );
+        $source = $this->api->get('statuses/user_timeline', array('screen_name' => $tweeter, 'count' => $num));
+
+        if (200 != $this->api->lastStatusCode()) {
+            var_dump($source);die('BOOM');
+        }
+
         if ($num > count($source)) {
             return false;
         }
+
         $tweet = $source[$num - 1];
         if (!isset($tweet->user->screen_name) || !$tweet->user->screen_name) {
             return false;
@@ -150,11 +138,22 @@ class Twitter
      */
     public function getMentions($sinceId=null, $count=20)
     {
-        return json_decode(
-            file_get_contents(
-                $this->getUrlMentions($sinceId, $count)
-            )
+        if (!$this->authenticatedAsUser)
+            return false;
+
+        $opts = array(
+            'count' => $count,
         );
+
+        if ($sinceId)
+            $opts['since_id'] = $sinceId;
+
+        $resp = $this->api->get('statuses/mentions_timeline', $opts);
+
+        if (200 != $this->api->lastStatusCode())
+            return false;
+
+        return $resp;
     }
 
     /**
@@ -166,11 +165,15 @@ class Twitter
      */
     public function getFollowers($cursor=-1)
     {
-        return json_decode(
-            file_get_contents(
-                $this->getUrlFollowers($cursor)
-            )
-        );
+        if (!$this->authenticatedAsUser)
+            return false;
+
+        $resp = $this->api->get('followers/ids', array('user_id' => $this->authenticatedUID, 'cursor' => $cursor));
+
+        if (200 != $this->api->lastStatusCode())
+            return false;
+
+        return $resp;
     }
 
     /**
@@ -182,24 +185,15 @@ class Twitter
      */
     public function follow($userId)
     {
-        $params = array(
-            'http' => array(
-                'method' => 'POST',
-                'content' => array(),
-                'header' => 'Content-type: application/x-www-form-urlencoded',
-            )
-        );
-        $ctx = stream_context_create($params);
-        $fp = fopen($this->getUrlFollow($userId), 'rb', false, $ctx);
-        if (!$fp) {
+        if (!$this->authenticatedAsUser)
             return false;
-        }
-        $response = stream_get_contents($fp);
-        if ($response === false) {
+
+        $resp = $this->api->post('friendships/create', array('user_id' => $userId));
+
+        if (200 != $this->api->lastStatusCode())
             return false;
-        }
-        $response = json_decode($response);
-        return $response;
+
+        return $resp;
     }
 
     /**
@@ -207,15 +201,28 @@ class Twitter
      *
      * @param String $sinceId TODO desc
      * @param Int    $count   TODO desc
-     * @param Int    $page    TODO desc
+     * @param Int    $page    DEPRECATED
      *
      * @return TODO desc
      */
     public function getDMs($sinceId=null, $count=20, $page=1)
     {
-        return json_decode(
-            file_get_contents($this->getUrlDMs($sinceId, $count, $page))
+        if (!$this->authenticatedAsUser)
+            return false;
+
+        $opts = array(
+            'count' => $count,
         );
+
+        if ($sinceId)
+            $opts['since_id'] = $sinceId;
+
+        $resp = $this->api->get('direct_messages', $opts);
+
+        if (200 != $this->api->lastStatusCode())
+            return false;
+
+        return $resp;
     }
 
     /**
@@ -228,104 +235,41 @@ class Twitter
      */
     public function sendDM($screenName, $text)
     {
-        $data = http_build_query(
-            array('screen_name'=>$screenName, 'text'=>$text)
-        );
-        $params = array(
-            'http' => array(
-                'method' => 'POST',
-                'content' => $data,
-                'header' => 'Content-type: application/x-www-form-urlencoded',
-            )
-        );
-        $ctx = stream_context_create($params);
-        $fp = fopen($this->getUrlSendDM(), 'rb', false, $ctx);
-        if (!$fp) {
+        if (!$this->authenticatedAsUser)
             return false;
-        }
-        $response = stream_get_contents($fp);
-        if ($response === false) {
+
+        $opts = array(
+            'screen_name' => $screenName,
+            'text' => $text,
+        );
+
+        $resp = $this->api->post('direct_messages/new', $opts);
+
+        if (200 != $this->api->lastStatusCode())
             return false;
-        }
-        $response = json_decode($response);
-        return $response;
+
+        return $resp;
     }
 
     /**
      * Sends a tweet
      *
      * @param string $txt   the tweet text to send
-     * @param bool   $limit TODO Desc
+     * @param bool   $limit DEPRECATED
      *
      * @return string URL of tweet (or false on failure)
      */
-    public function sendTweet($txt, $limit=true)
+    public function sendTweet($txt, $limit=false)
     {
-        if ($limit) {
-            $txt = substr($txt, 0, 140); // twitter message size limit
-        }
-        $data = urlencode($txt);
-        try{
-          $result = $this->oauth->fetch(
-            $this->getUrlApi() . 'statuses/update.json',
-            array('status' => $txt),
-            OAUTH_HTTP_METHOD_POST
-          );
-        }catch(Exception $e){
-          echo $this->oauth->getLastResponse(), PHP_EOL, $e->getMessage();
-        }
-        $response = $this->oauth->getLastResponse();
-        if ($response === false) {
+        if (!$this->authenticatedAsUser)
             return false;
-        }
-        $response = json_decode($response,1);
-          return $this->getTweetByNum($response['id']);
-    }
 
-    /**
-     * Returns the base API URL
-     *
-     * @return TODO desc
-     */
-    protected function getUrlApi()
-    {
-        return $this->baseUrlFull;
-    }
+        $resp = $this->api->post('statuses/update', array('status' => $txt));
 
-    /**
-     * Returns the status URL
-     *
-     * @param int $num the tweet number
-     *
-     * @return TODO desc
-     */
-    protected function getUrlStatus($num)
-    {
-        return $this->getUrlApi() . 'statuses/show/'
-            . urlencode($num) .'.json';
-    }
+        if (200 != $this->api->lastStatusCode())
+            return false;
 
-    /**
-     * Returns the user timeline URL
-     *
-     * @param String $user the username
-     *
-     * @return TODO desc
-     */
-    protected function getUrlUserTimeline($user)
-    {
-        return $this->getUrlApi() . 'statuses/user_timeline/'
-                . urlencode($user) . '.json';
-    }
-
-    /**
-     * Returns the tweet posting URL
-     *
-     * @return TODO desc
-     */
-    protected function getUrlTweetPost()
-    {
-        return $this->getUrlApi() . 'statuses/update.json';
+        return $resp;
     }
 
     /**
@@ -338,80 +282,6 @@ class Twitter
     public function getUrlOutputStatus(StdClass $tweet)
     {
         return 'https://twitter.com/'. urlencode($tweet->user->screen_name)
-            . '/statuses/' . urlencode($tweet->id_str);
-    }
-
-    /**
-     * Return mentions URL
-     *
-     * @param String $sinceId TODO desc
-     * @param Int    $count   TODO desc
-     *
-     * @return TODO desc
-     */
-    public function getUrlMentions($sinceId=null, $count=20)
-    {
-        $url = $this->baseUrlFull . 'statuses/mentions.json?count='
-            . urlencode($count);
-        if ($sinceId !== null) {
-            $url .= '&since_id=' . urlencode($sinceId);
-        }
-        return $url;
-    }
-
-    /**
-     * Returns the followers URL
-     *
-     * @param int $cursor TODO desc
-     *
-     * @return TODO desc
-     */
-    public function getUrlFollowers($cursor=-1)
-    {
-        return $this->baseUrlFull . 'statuses/followers.json?cursor='
-            . ((int)$cursor);
-    }
-
-    /**
-     * Returns the follow-user URL
-     *
-     * @param int $userid TODO desc
-     *
-     * @return TODO desc
-     */
-    public function getUrlFollow($userid)
-    {
-        return $this->baseUrlFull . 'friendships/create/'
-            . ((int) $userid) . '.json';
-    }
-
-    /**
-     * Returns the get DMs URL
-     *
-     * @param String $sinceId TODO desc
-     * @param Int    $count   TODO desc
-     * @param Int    $page    TODO desc
-     *
-     * @return TODO desc
-     */
-    public function getUrlDMs($sinceId=null, $count=20, $page=1)
-    {
-        $url = $this->baseUrlFull . 'direct_messages.json?';
-        if ($sinceId !== null) {
-            $url .= 'since_id=' . urlencode($sinceId);
-        }
-        $url .= "&page={$page}";
-        $url .= "&count={$count}";
-        return $url;
-    }
-
-    /**
-     * Returns the send DM URL
-     *
-     * @return TODO Desc
-     */
-    public function getURLSendDM()
-    {
-        return $this->baseUrlFull . 'direct_messages/new.json';
+        . '/statuses/' . urlencode($tweet->id_str);
     }
 }
