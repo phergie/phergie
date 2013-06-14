@@ -74,9 +74,10 @@ class Twitter
         if ($oauthtoken && $oauthtokensecret) {
             $resp = $this->api->get('account/verify_credentials', array('skip_status' => true));
             //If OAuth Token is valid, previous response will return 200, otherwise 401
-            if (200 == $this->api->lastStatusCode())
+            if (200 == $this->api->lastStatusCode()) {
                 $this->authenticatedAsUser = true;
                 $this->authenticatedUID = $resp->id_str;
+            }
         }
     }
 
@@ -114,7 +115,8 @@ class Twitter
         $source = $this->api->get('statuses/user_timeline', array('screen_name' => $tweeter, 'count' => $num));
 
         if (200 != $this->api->lastStatusCode()) {
-            var_dump($source);die('BOOM');
+            var_dump($this->api->lastStatusCode(), $source);
+            return false;
         }
 
         if ($num > count($source)) {
