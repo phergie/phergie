@@ -26,7 +26,6 @@
  * @link http://github.com/scoates/simpletweet
  */
 require dirname(__FILE__) . '/Twitter/twitter.class.php';
-// require dirname(__FILE__) . '/Twitter/laconica.class.php';
 
 /**
  * Fetches tweets from Twitter.
@@ -79,12 +78,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        // if (!extension_loaded('oauth')) {
-        //     $this->fail('PECL oauth extension not installed');
-        // }
-
-        // $twitterClass = $this->getConfig('twitter.class', 'Twitter');
-
         $this->setTwitter(
             new Twitter(
                 $this->config['twitter.consumerkey'],
@@ -97,20 +90,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Time');
-
-        // //Attempt OAUTH negotiation
-        // $tw_oauth = new OAuth(
-        //   $this->getConfig('twitter.consumerkey', 'Twitter'),
-        //   $this->getConfig('twitter.consumersecret', 'Twitter'),
-        //    OAUTH_SIG_METHOD_HMACSHA1,
-        //    OAUTH_AUTH_TYPE_URI
-        // );
-        //   //User-specific credentials
-        // $tw_oauth->setToken(
-        //   $this->getConfig('twitter.usertoken', 'Twitter'),
-        //   $this->getConfig('twitter.usersecret', 'Twitter')
-        // );
-        // $this->twitter->oauth = $tw_oauth;
     }
 
     /**
@@ -175,19 +154,15 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     }
 
     public function onCommandTweet($tweet = null){
-      $source = $this->getEvent()->getSource();
-      $nick =  $this->getEvent()->getHostmask()->getNick();
-      $tweetresponse = $this->twitter->sendTweet($tweet);
-      if($tweetresponse){
-        $this->doPrivmsg($source, $this->formatTweet($tweetresponse, false));
-      }else{
-        $this->doPrivmsg($source, "Sorry, $nick, your tweet failed to send.");
-      }
+        $source = $this->getEvent()->getSource();
+        $nick =  $this->getEvent()->getHostmask()->getNick();
+        $tweetresponse = $this->twitter->sendTweet($tweet);
+        if($tweetresponse) {
+            $this->doPrivmsg($source, $this->formatTweet($tweetresponse, false));
+        } else {
+            $this->doPrivmsg($source, "Sorry, $nick, your tweet failed to send.");
+        }
     }
-
-
-
-
 
     /**
      * Formats a Tweet into a message suitable for output.
@@ -200,7 +175,6 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     protected function formatTweet(StdClass $tweet, $includeUrl = true)
     {
-
         $ts = $this->plugins->time->getCountDown($tweet->created_at);
         $out =  '<@' . $tweet->user->screen_name .'> '
             . preg_replace('/\s+/', ' ', $tweet->text)
@@ -233,8 +207,9 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         $source = $this->getEvent()->getSource();
         $path = $parsed['path'];
 
-        if (isset($parsed['fragment']))
+        if (isset($parsed['fragment'])) {
             $path .= $parsed['fragment'];
+        }
 
         if (preg_match('#/status(es)?/([0-9]+)$#', $path, $matches)
         ) {
