@@ -55,7 +55,7 @@ class Phergie_Plugin_DiceTest extends Phergie_Plugin_TestCase
             'receiver' => $this->source,
             'text' => 'roll ' . $roll
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent($args);
         $this->plugin->setEvent($event);
     }
 

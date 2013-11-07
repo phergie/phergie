@@ -46,7 +46,7 @@ class Phergie_Plugin_MessageTest extends Phergie_Plugin_TestCase
             'receiver' => $source,
             'text' => $message
         );
-        $event = $this->getMockEvent('privmsg', $args, $this->nick, $source);
+        $event = $this->getMockEvent($args, $this->nick, $source);
         $this->plugin->setEvent($event);
     }
 

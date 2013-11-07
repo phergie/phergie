@@ -232,7 +232,6 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
     /**
      * Returns a mock event object.
      *
-     * @param string $type   Event type
      * @param array  $args   Optional associative array of event arguments
      * @param string $nick   Optional user nick to associate with the event
      * @param string $source Optional user nick or channel name to associate
@@ -240,7 +239,7 @@ abstract class Phergie_TestCase extends PHPUnit_Framework_TestCase
      *
      * @return Phergie_Event_Request
      */
-    protected function getMockEvent($type, array $args = array(),
+    protected function getMockEvent(array $args = array(),
         $nick = null, $source = null
     ) {
         $methods = array('getNick', 'getSource');

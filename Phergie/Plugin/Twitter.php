@@ -26,7 +26,6 @@
  * @link http://github.com/scoates/simpletweet
  */
 require dirname(__FILE__) . '/Twitter/twitter.class.php';
-require dirname(__FILE__) . '/Twitter/laconica.class.php';
 
 /**
  * Fetches tweets from Twitter.
@@ -54,6 +53,8 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
 {
     /**
      * Twitter object (from Simpletweet)
+     *
+     * @var Twitter
      */
     protected $twitter;
 
@@ -77,40 +78,18 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      */
     public function onLoad()
     {
-        if (!extension_loaded('oauth')) {
-            $this->fail('PECL oauth extension not installed');
-        }
-
-        $twitterClass = $this->getConfig('twitter.class', 'Twitter');
-
         $this->setTwitter(
-            new $twitterClass(
-                $this->config['twitter.user'],
-                $this->config['twitter.password'],
-                $this->config['twitter.url'],
-                $this->config['twitter.usertoken'],
-                $this->config['twitter.usersecret'],
+            new Twitter(
                 $this->config['twitter.consumerkey'],
-                $this->config['twitter.consumersecret']
-              )
-            );
+                $this->config['twitter.consumersecret'],
+                $this->config['twitter.usertoken'],
+                $this->config['twitter.usersecret']
+            )
+        );
 
         $plugins = $this->getPluginHandler();
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Time');
-        //Attempt OAUTH negotiation
-        $tw_oauth = new OAuth(
-          $this->getConfig('twitter.consumerkey', 'Twitter'),
-          $this->getConfig('twitter.consumersecret', 'Twitter'),
-           OAUTH_SIG_METHOD_HMACSHA1,
-           OAUTH_AUTH_TYPE_URI
-        );
-          //User-specific credentials
-        $tw_oauth->setToken(
-          $this->getConfig('twitter.usertoken', 'Twitter'),
-          $this->getConfig('twitter.usersecret', 'Twitter')
-        );
-        $this->twitter->oauth = $tw_oauth;
     }
 
     /**
@@ -147,15 +126,12 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
      *
      * @return void
      */
-    public function onCommandTwitter($tweeter = null, $num = 1)
+    public function onCommandTwitter($tweeter, $num = 1)
     {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getHostmask()->getNick();
         if (is_numeric($tweeter)) {
             $tweet = $this->twitter->getTweetByNum($tweeter);
-
-        } else if (is_null($tweeter) && $this->twitteruser) {
-            $tweet = $this->twitter->getLastTweet($this->twitteruser, 1);
 
         } else if (preg_match('/^https?:\/\/(www\.)?twitter\.com/i', $tweeter)) {
             if (stripos($tweeter, 'status') !== false) {
@@ -178,19 +154,15 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
     }
 
     public function onCommandTweet($tweet = null){
-      $source = $this->getEvent()->getSource();
-      $nick =  $this->getEvent()->getHostmask()->getNick();
-      $tweetresponse = $this->twitter->sendTweet($tweet);
-      if($tweetresponse){
-        $this->doPrivmsg($source, $this->formatTweet($tweetresponse, false));
-      }else{
-        $this->doPrivmsg($source, "Sorry, $nick, your tweet failed to send.");
-      }
+        $source = $this->getEvent()->getSource();
+        $nick =  $this->getEvent()->getHostmask()->getNick();
+        $tweetresponse = $this->twitter->sendTweet($tweet);
+        if($tweetresponse) {
+            $this->doPrivmsg($source, $this->formatTweet($tweetresponse, false));
+        } else {
+            $this->doPrivmsg($source, "Sorry, $nick, your tweet failed to send.");
+        }
     }
-
-
-
-
 
     /**
      * Formats a Tweet into a message suitable for output.
@@ -233,7 +205,11 @@ class Phergie_Plugin_Twitter extends Phergie_Plugin_Abstract
         }
 
         $source = $this->getEvent()->getSource();
-        $path = $parsed['path'] . $parsed['fragment'];
+        $path = $parsed['path'];
+
+        if (isset($parsed['fragment'])) {
+            $path .= $parsed['fragment'];
+        }
 
         if (preg_match('#/status(es)?/([0-9]+)$#', $path, $matches)
         ) {

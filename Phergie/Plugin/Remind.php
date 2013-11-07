@@ -30,6 +30,7 @@
  * @link     http://pear.phergie.org/package/Phergie_Plugin_Remind
  * @uses     Phergie_Plugin_Command pear.phergie.org
  * @uses     Phergie_Plugin_Time pear.phergie.org
+ * @uses     Phergie_Plugin_Remind pear.phergie.org optional
  * @uses     extension PDO
  * @uses     extension pdo_sqlite
  */
@@ -39,6 +40,20 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      * Number of reminders to show in public.
      */
     protected $publicReminders = 3;
+
+    /**
+     * Send reminders when a user joins the channel or not.
+     *
+     * @var bool
+     */
+    protected $remindOnJoin = false;
+
+    /**
+     * Respond *only* to targeted reminders or not.
+     *
+     * @var bool
+     */
+    protected $onlyTargetedReminders = false;
 
     /**
      * PDO resource for a SQLite database containing the reminders.
@@ -89,6 +104,15 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
             $this->publicReminders = max($this->publicReminders, 0);
         }
 
+        if (isset($this->config['remind.remind_on_join'])) {
+            $this->remindOnJoin = (bool) $this->config['remind.remind_on_join'];
+        }
+
+        if (isset($this->config['remind.only_targeted_reminders'])) {
+            $plugins->getPlugin('Message');
+            $this->onlyTargetedReminders = (bool) $this->config['remind.only_targeted_reminders'];
+        }
+
         try {
             $this->db = new PDO('sqlite:' . $path);
             $this->createTables();
@@ -103,6 +127,28 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      * @return void
      */
     public function onPrivmsg()
+    {
+        $this->handleDelivery();
+    }
+
+    /**
+     * Handler for when a user joins a channel.
+     *
+     * @return void
+     */
+    public function onJoin()
+    {
+        if ($this->remindOnJoin) {
+            $this->handleDelivery();
+        }
+    }
+
+    /**
+     * Deliver reminders to a user.
+     *
+     * @return void
+     */
+    protected function handleDelivery()
     {
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
@@ -162,9 +208,14 @@ class Phergie_Plugin_Remind extends Phergie_Plugin_Abstract
      */
     protected function handleRemind($recipient, $message)
     {
+        // Don't do anything if we are only responding to targeted reminders and this isn't a targeted message.
+        if ($this->onlyTargetedReminders && ! $this->plugins->message->isTargetedMessage()) {
+            return;
+        }
+
         $source = $this->getEvent()->getSource();
         $nick = $this->getEvent()->getNick();
-        
+
         $myself = $this->getConnection()->getNick();
         if ($myself == $recipient) {
             $this->doPrivmsg($source, 'You can\'t send reminders to me.');

@@ -360,7 +360,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
          * cache; if expire is disabled, check if the URL is listed
          */
         if ($expire > 0
-            && isset($cache['url'][$source], $cache['shortened'][$source])
+            && isset($cache['url'][$source][$url], $cache['shortened'][$source][$shortenedUrl])
         ) {
             unset($cache, $url, $shortenedUrl, $expire);
             return true;
@@ -382,6 +382,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     {
         $cache = array();
         $source = $this->getEvent()->getSource();
+
+        $cache['urlCache'] = $this->cache->fetch('urlCache');
+        $cache['shortCache'] = $this->cache->fetch('shortCache');
 
         /**
          * Transform URL (+shortened) into HEX CRC32 checksum to prevent
@@ -612,8 +615,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 $title = preg_replace('/[\s\v]+/', ' ', trim($match[1]));
             }
         }
-        $titleLength = $this->getConfig('url.titleLength', 40);
-        $title = $this->decode($title, $titleLength);
 
         if (empty($title)) {
             if ($response->isError() && $this->getConfig('url.showErrors', true)) {
@@ -621,6 +622,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
             } else {
                 $title = 'No Title';
             }
+        } else {
+            $titleLength = $this->getConfig('url.titleLength', 40);
+            $title = $this->decode($title, $titleLength);
         }
 
         return $title;

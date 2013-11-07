@@ -81,7 +81,7 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
             'receiver' => $this->source,
             'text' => 'karma ' . $term
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent($args);
         $this->plugin->setEvent($event);
         return $event;
     }
@@ -186,7 +186,7 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
             'receiver' => $this->source,
             'text' => $term . $operation
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent($args);
         $this->plugin->setEvent($event);
         $this->plugin->onPrivmsg();
         $event = $this->initiateKarmaEvent($term);
@@ -310,7 +310,7 @@ class Phergie_Plugin_KarmaTest extends Phergie_Plugin_TestCase
             'receiver' => $this->source,
             'text' => $term1 . ' ' . $operator . ' ' . $term2
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent($args);
         $this->plugin->setEvent($event);
 
         // Test lack of a response for terms with fixed karma ratings

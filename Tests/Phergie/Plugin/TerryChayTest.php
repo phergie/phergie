@@ -107,7 +107,7 @@ class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
             'receiver' => $this->source,
             'text' => $trigger
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent($args);
         $this->plugin->setEvent($event);
         $this->assertEmitsEvent(
             'privmsg', array($this->source, 'Fact: ' . $this->chayism)
@@ -127,7 +127,7 @@ class Phergie_Plugin_TerryChayTest extends Phergie_Plugin_TestCase
             'receiver' => $this->source,
             'text' => 'foo bar baz'
         );
-        $event = $this->getMockEvent('privmsg', $args);
+        $event = $this->getMockEvent($args);
         $this->plugin->setEvent($event);
         $this->assertDoesNotEmitEvent(
             'privmsg', array($this->source, 'Fact: ' . $this->chayism)

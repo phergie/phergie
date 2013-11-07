@@ -38,7 +38,7 @@ class Phergie_Plugin_PongTest extends Phergie_Plugin_TestCase
     public function testPong()
     {
         $expected = 'irc.freenode.net';
-        $event = $this->getMockEvent('ping', array($expected));
+        $event = $this->getMockEvent(array($expected));
         $this->plugin->setEvent($event);
         $this->assertEmitsEvent('pong', array($expected));
         $this->plugin->onPing();
