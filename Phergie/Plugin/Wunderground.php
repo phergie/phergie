@@ -71,7 +71,7 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
      * @return void
      */
 
-    public function onCommandWeather($location)
+    public function onCommandWeather($location, $foo)
     {
         $urlString = 'http://api.wunderground.com/api/' . 
                         $this->getConfig('wunderground.api_key') .
@@ -89,6 +89,8 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
         }
 
         $bits = array();
+        $bits[] = 'Location: ' . $location;
+        $bits[] = 'Foo: ' . $foo;
         $bits[] = 'Temperature: ' . $data['tempString'];
         $bits[] = 'Weather: ' . $data['weather'];
         $bits[] = 'Wind: ' . $data['wind_string'];
@@ -143,6 +145,76 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
             'wind_chill_string' => $co->windchill_string,
             'heat_index_string' => $co->heat_index_string
         );
+    }
+    
+    public function onCommandForecast($location) 
+    {
+        $urlString = 'http://api.wunderground.com/api/' .
+            $this->getConfig('wunderground.api_key') .
+            '/forecast/q/' .
+            rawurlencode($location) . '.xml';
+        
+        $response = $this->getPluginHandler()
+            ->getPlugin('Http')
+            ->get($urlString);
+        
+        $forecastData = $this->parseForecastInfo($response);
+        
+        $string = $this->assembleForecastString($forecastData);
+        
+        if (!$this->getBogusLocation()) {
+            $this->doPrivmsg($this->event->getSource(),
+                    $this->event->getNick(). ': ' .
+                    $string);
+        }
+    }
+    
+    public function assembleForecastString($forecastData, $time = '24')
+    {
+        $periods = round($time / 12); // number of 12 hour periods
+
+        $string = '';
+        for ($i = 0; $i < $periods; $i++) {
+            $string .= $forecastData[$i]['title'] . ': ' .
+                $forecastData[$i]['forecast_text'] . ' ';
+            echo $i;
+        }
+        return rtrim($string); // get rid of last space.  yes, it's anal retentive.
+    }
+    
+    public function parseForecastInfo($response)
+    {
+        $xml = $response->getContent($response);
+        
+        $this->setBogusLocation(FALSE);
+        
+        if (isset($xml->error)) {
+            $this->setBogusLocation(TRUE);
+            $error_message = $xml->error->description;
+            throw new Phergie_Exception('Wunderground API returned an error: ' 
+                . $error_message);
+        }
+        
+        if (isset($xml->results)) {
+            $this->setBogusLocation(TRUE);
+            throw new Phergie_Exception('That query was too ambiguous, try again.');
+        }
+        
+        $forecastSet = $xml->forecast->txt_forecast->forecastdays;
+        
+        $forecastDays = $forecastSet->children();
+        
+        $forecastData = array();
+        foreach ($forecastDays as $day)
+        {
+            if ('forecastday' == $day->getName()) {
+                $forecastData[] = array(
+                    'title' => $day->title,
+                    'forecast_text' => $day->fcttext,
+                );
+            }
+        }
+        return $forecastData;
     }
 
     /**
