@@ -61,6 +61,7 @@ class Phergie_Plugin_Http_Response
         404 => 'Not Found',
         405 => 'Method Not Allowed',
         406 => 'Not Acceptable',
+        407 => 'Proxy Authentication Required',
         408 => 'Request Timeout',
         410 => 'Gone',
         413 => 'Request Entity Too Large',
