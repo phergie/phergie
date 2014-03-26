@@ -71,7 +71,7 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
      * @return void
      */
 
-    public function onCommandWeather($location, $foo)
+    public function onCommandWeather($location)
     {
         $urlString = 'http://api.wunderground.com/api/' . 
                         $this->getConfig('wunderground.api_key') .
@@ -90,7 +90,6 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
 
         $bits = array();
         $bits[] = 'Location: ' . $location;
-        $bits[] = 'Foo: ' . $foo;
         $bits[] = 'Temperature: ' . $data['tempString'];
         $bits[] = 'Weather: ' . $data['weather'];
         $bits[] = 'Wind: ' . $data['wind_string'];
