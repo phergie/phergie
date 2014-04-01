@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_FeedManager
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_FeedManager
  */
@@ -438,8 +438,9 @@ class Phergie_Plugin_FeedManager extends Phergie_Plugin_Abstract
         $sql = 'SELECT rowid, etag, channel, title,
                        link, feed_url, active, delay, updated
                   FROM ft_feeds' . $sqlChannel;
-        $result = $this->db->query($sql);
-        return $result->fetchAll();
+        if($result = $this->db->query($sql)){
+                return $result->fetchAll();
+        }
     }
 
     /**

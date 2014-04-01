@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -95,6 +95,13 @@ class Phergie_Connection
      * @var Phergie_Hostmask
      */
     protected $hostmask;
+
+    /**
+     * Stream context options
+     *
+     * @var array
+     */
+    protected $context = array();
 
     /**
      * Constructor to initialize instance properties.
@@ -383,6 +390,28 @@ class Phergie_Connection
     public function getPassword()
     {
         return $this->password;
+    }
+
+    /**
+     * Sets the stream context options to use.
+     *
+     * @param array $context Context options as they will be passed to stream_context_create()
+     * @return Phergie_Connection_Streams Implements a fluent interface
+     */
+    public function setContext(array $context)
+    {
+        $this->context = $context;
+        return $this;
+    }
+
+    /**
+     * Returns the stream context options in use.
+     *
+     * @return array Context options as they will be passed to stream_context_create()
+     */
+    public function getContext()
+    {
+        return $this->context;
     }
 
     /**

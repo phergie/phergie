@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Plugin_Ctcp
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Plugin_Ctcp
  */
@@ -51,6 +51,9 @@ class Phergie_Plugin_Ctcp extends Phergie_Plugin_Abstract
      */
     public function onVersion()
     {
+        if ($this->getEvent()->getArguments()) {
+            return;
+        }
         $source = $this->getEvent()->getSource();
         $msg = 'Phergie ' . Phergie_Bot::VERSION . ' (http://phergie.org)';
         $this->doVersion($source, $msg);

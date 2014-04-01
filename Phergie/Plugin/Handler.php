@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -102,6 +102,7 @@ class Phergie_Plugin_Handler implements IteratorAggregate, Countable
         if (!empty($config['plugins.paths'])) {
             foreach ($config['plugins.paths'] as $dir => $prefix) {
                 $this->addPath($dir, $prefix);
+                Phergie_Autoload::addPath($dir, $prefix);
             }
         }
 

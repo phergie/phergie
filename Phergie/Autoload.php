@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie
  */
@@ -30,6 +30,15 @@
  */
 class Phergie_Autoload
 {
+    /**
+     * Prefixes to trim off of class names before trying to load their corresponding files.
+     * Using this, Autoload can support loading class A_B_C from file folder/C.php (using prefix 'A_B_') instead of just
+     * looking for it in the file folder/A/B/C.php.
+     *
+     * @var array
+     */
+     protected static $prefixes;
+
     /**
      * Constructor to add the base Phergie path to the include_path.
      *
@@ -52,11 +61,16 @@ class Phergie_Autoload
         $paths = explode(PATH_SEPARATOR, get_include_path());
 
         foreach ($paths as $path) {
-            $fileName = $path . DIRECTORY_SEPARATOR
-                . str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+            $fileName = "$class.php";
+            if(isset(static::$prefixes[$path])) {
+                $prefix = preg_quote(static::$prefixes[$path]);
+                $fileName = preg_replace("{^$prefix}", '', $fileName);
+            }
+            $fileName = str_replace('_', DIRECTORY_SEPARATOR, $fileName);
 
-            if (file_exists($fileName)) {
-                include $fileName;
+            $filePath = $path . DIRECTORY_SEPARATOR . $fileName;
+            if (file_exists($filePath)) {
+                include $filePath;
 
                 if (class_exists($class, false)
                     || interface_exists($class, false)
@@ -66,7 +80,7 @@ class Phergie_Autoload
 
                 throw new Phergie_Exception(
                     'Expected class ' . $class
-                    . ' in ' .  $fileName . ' not found'
+                    . ' in ' .  $filePath . ' not found'
                 );
             }
         }
@@ -86,15 +100,17 @@ class Phergie_Autoload
      * Add a path to the include path.
      *
      * @param string $path Path to add
+     * @param string $prefix Prefix to trim off of the requested class name before trying to load the corresponding file
      *
      * @return void
      */
-    public static function addPath($path)
+    public static function addPath($path, $prefix = null)
     {
         $includePath = get_include_path();
         $includePathList = explode(PATH_SEPARATOR, $includePath);
         if (!in_array($path, $includePathList)) {
             set_include_path($path . PATH_SEPARATOR . get_include_path());
+            static::$prefixes[$path] = $prefix;
         }
     }
 }

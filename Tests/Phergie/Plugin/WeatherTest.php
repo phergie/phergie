@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
@@ -175,7 +175,7 @@ class Phergie_Plugin_WeatherTest extends Phergie_Plugin_TestCase
     {
         $config = $this->setUpWeatherResponse($test);
 
-        $event = $this->getMockEvent('weathercommand');
+        $event = $this->getMockEvent();
         $this->plugin->setEvent($event);
 
         $this->assertEmitsEvent(

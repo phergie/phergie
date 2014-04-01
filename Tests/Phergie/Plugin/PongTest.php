@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
@@ -38,7 +38,7 @@ class Phergie_Plugin_PongTest extends Phergie_Plugin_TestCase
     public function testPong()
     {
         $expected = 'irc.freenode.net';
-        $event = $this->getMockEvent('ping', array($expected));
+        $event = $this->getMockEvent(array($expected));
         $this->plugin->setEvent($event);
         $this->assertEmitsEvent('pong', array($expected));
         $this->plugin->onPing();

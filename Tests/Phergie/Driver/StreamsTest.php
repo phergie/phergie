@@ -14,7 +14,7 @@
  * @category  Phergie
  * @package   Phergie_Tests
  * @author    Phergie Development Team <team@phergie.org>
- * @copyright 2008-2011 Phergie Development Team (http://phergie.org)
+ * @copyright 2008-2012 Phergie Development Team (http://phergie.org)
  * @license   http://phergie.org/license New BSD License
  * @link      http://pear.phergie.org/package/Phergie_Tests
  */
@@ -101,7 +101,8 @@ class Phergie_Driver_StreamsTest extends Phergie_TestCase
             'port'      => 6667,
             'username'  => 'username',
             'realname'  => 'realname',
-            'transport' => 'tcp'
+            'transport' => 'tcp',
+            'context'   => array(),
         );
         $connection = parent::getMockConnection();
         foreach ($options as $key => $value) {
