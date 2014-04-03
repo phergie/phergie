@@ -396,6 +396,8 @@ REGEX;
      */
     protected function modifyKarma($term, $action)
     {
+        $nick = $this->getEvent()->getNick();
+        $source = $this->getEvent()->getSource();
         $karma = $this->fetchKarma($term);
         if ($karma !== false) {
             $statement = $this->updateKarma;
@@ -409,9 +411,33 @@ REGEX;
             ':term'  => $term,
             ':karma' => $karma
         );
-        $statement->execute($args);
-
-        return $karma;
+        if ($term == $nick) {
+            $message = "You can't give yourself karma";
+            $this->doPrivmsg($source, $message);
+        }else{
+            if ($action == '++'){
+                $message_array = array(
+                    "karma is on the rise",
+                    "is getting more karma",
+                    "karma, karma every where and this one is for you",
+                    "whaaat?!?! karma for you",
+                    "this is karma, you will take it and you will like it",
+                    "loves karma and getting more of it",
+                );
+            }else{
+                $message_array = array(
+                "takes a karma hit",
+                "ouch, losing karma sucks",
+                "that's got to hurt, goodbye karma",
+                );
+            }
+            $phrase_value =  array_rand($message_array);
+            $phrase = $message_array[$phrase_value];
+            $message = "$term " . $phrase;
+            $statement->execute($args);
+            $this->doPrivmsg($source, $message);
+            return $karma;
+        }
     }
 
     /**

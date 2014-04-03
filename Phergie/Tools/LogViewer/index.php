@@ -33,19 +33,34 @@
 // (Change any of these if/as needed for your setup)
 ini_set('default_charset', 'UTF-8');
 date_default_timezone_set('UTC');
-$log = "/PATH/AND/FILENAME/TO/YOUR/LOGFILE/PLEASE.db";
+$settings_file = '/Users/eli/Projects/phergie-eliw/Settings.php';
 
 
 /********** PREPARATION **********/
 
-$db = new PDO('sqlite:' . $log);
+// Attempt to read the phergie settings.
+$dsn = $user = $pass = $table = NULL;
+if (is_readable($settings_file)) {
+    $settings = include $settings_file;
+    if (is_array($settings)) {
+        $dsn = isset($settings['logging.dsn']) ? $settings['logging.dsn'] : NULL;
+        $user = isset($settings['logging.user']) ? $settings['logging.user'] : NULL;
+        $pass = isset($settings['logging.pass']) ? $settings['logging.pass'] : NULL;
+        $table = isset($settings['logging.table']) ? $settings['logging.table'] : NULL;
+    }
+}
+
+// Fail if we don't have a $dsn or $table
+if (!$dsn || !$table) {
+    exit("ERROR: No DSN or Table configuration can be read.");
+}
+
+$db = new PDO($dsn, $user, $pass);
 if (!is_object($db)) {
     // Failure, can't access Phergie Log.
-    // Bail with an error message, not pretty, but works:
-    echo "ERROR: Cannot access Phergie Log File, "
-        . "please check the configuration & access privileges";
-    exit();
+    exit("ERROR: Cannot access log, please check the configuration & access privileges");
 }
+$db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ); 
 
 
 /********** DETECTION **********/
@@ -54,13 +69,13 @@ if (!is_object($db)) {
 $mode = empty($_GET['m']) ? '' : $_GET['m'];
 switch ($mode) {
 case 'channel':
-    show_days($db);
+    show_days($db, $table);
     break;
 case 'day':
-    show_log($db);
+    show_log($db, $table);
     break;
 default:
-    show_channels($db);
+    show_channels($db, $table);
 }
 
 // Exit not really needed here,
@@ -75,29 +90,23 @@ exit();
  * Provide a list of all channel's that we are logging information for:
  *
  * @param PDO $db A PDO object referring to the database
- *
+ * @param string $table The name of the logging table 
  * @return void
  * @author Eli White <eli@eliw.com>
  **/
-function show_channels(PDO $db)
+function show_channels(PDO $db, $table)
 {
     // Begin the HTML page:
     template_header('Channels');
     echo "\nChannels:\n<ul>\n";
 
-    // Loop through the database reading in each channel,
-    // and echoing out a <li> for it.
-    // only grab actual channels that start with # ... also pre-lowercase everything.
-    // this allows us to 'deal' with variable caps in how the channels were logged.
-    $channels = $db->query(
-        "select distinct lower(chan) as c
-        from logs
-        where chan like '#%'"
-    );
-    foreach ($channels as $row) {
-        $html = utf8specialchars($row['c']);
-        $url = urlencode($row['c']);
-        echo "<li><a href=\"?m=channel&w={$url}\">{$html}</a></li>\n";
+    // Loop through the database reading in each server / channel
+    $channels = $db->query("SELECT DISTINCT `host`, `channel` FROM {$table}");
+    foreach ($channels as $c) {
+        $html = utf8specialchars("{$c->channel} ({$c->host})");
+        $h = urlencode($c->host);
+        $c = urlencode($c->channel);
+        echo "<li><a href=\"?m=channel&c={$c}&h={$h}\">{$html}</a></li>\n";
     }
 
     // Finish off the page:
@@ -115,30 +124,32 @@ function show_channels(PDO $db)
  *  before this?  Not to worry about now.
  *
  * @param PDO $db A PDO object referring to the database
- *
+ * @param string $table The name of the logging table 
  * @return void
  * @author Eli White <eli@eliw.com>
  **/
-function show_days(PDO $db)
+function show_days(PDO $db, $table)
 {
-    $channel = $_GET['w'];
-    $url = urlencode($channel);
+    $channel = $_GET['c'];
+    $host = $_GET['h'];
+    $url = 'c=' . urlencode($channel) . '&h=' . urlencode($host);
 
     // Begin the HTML page:
-    template_header('Daily Logs for Channel: ' . utf8specialchars($channel));
+    template_header('Daily Logs for Channel: ' . utf8specialchars($channel) .
+        ' (' . utf8specialchars($host) . ')');
     echo "\n<ul>\n";
 
     // Query the database to discover all days that are available for this channel:
     $data = array();
     $prepared = $db->prepare(
-        "select distinct date(tstamp) as day
-        from logs
-        where lower(chan) = :chan"
+        "SELECT DISTINCT date(`created_on`) AS day 
+         FROM {$table}
+         WHERE `host` = ? AND `channel` = ?"
     );
-    $prepared->execute(array(':chan' => $channel));
-    foreach ($prepared as $row) {
-        list($y, $m, $d) = explode('-', $row['day']);
-        $data[$y][$m][$d] = "{$y}-{$m}-{$d}";
+    $prepared->execute(array($host, $channel));
+    foreach ($prepared as $result) {
+        list($y, $m, $d) = explode('-', $result->day);
+        $data[(int)$y][(int)$m][(int)$d] = "{$y}-{$m}-{$d}";
     }
 
     // For now, just loop over them all and provide a list:
@@ -176,7 +187,7 @@ EOTABLE;
                     echo '&nbsp;';
                 } elseif (isset($days[$d])) {
                     // Make a link to the day's log:
-                    echo "<a href=\"?m=day&w={$url}&d={$days[$d]}\">{$d}</a>";
+                    echo "<a href=\"?m=day&{$url}&d={$days[$d]}\">{$d}</a>";
                 } else {
                     // Just a dead number:
                     echo $d;
@@ -202,13 +213,14 @@ EOTABLE;
  * Actually show the log for this specific day
  *
  * @param PDO $db A PDO object referring to the database
- *
+ * @param string $table The name of the logging table 
  * @return void
  * @author Eli White <eli@eliw.com>
  **/
-function show_log(PDO $db)
+function show_log(PDO $db, $table)
 {
-    $channel = $_GET['w'];
+    $channel = $_GET['c'];
+    $host = $_GET['h'];
     $day = $_GET['d'];
     $parts = explode('-', $day);
     $formatted_date = "{$parts[0]}-{$parts[1]}-{$parts[2]}";
@@ -216,48 +228,45 @@ function show_log(PDO $db)
     // Begin the HTML page:
     template_header(
         'Date: ' . utf8specialchars($formatted_date) .
-        ' - Channel: ' . utf8specialchars($channel)
+        ' - Channel: ' . utf8specialchars($channel) . 
+        ' (' . utf8specialchars($host) . ')'
     );
 
     // Query the database to get all log lines for this date:
     $prepared = $db->prepare(
-        "select time(tstamp) as t, type, nick, message
-        from logs
-        where lower(chan) = :chan and date(tstamp) = :day
-        order by tstamp asc"
+        "SELECT time(`created_on`) AS t, type, nick, message
+         FROM {$table}
+         WHERE `host` = ? AND `channel` = ? AND date(`created_on`) = ?
+         ORDER by `created_on` asc"
     );
-    $prepared->execute(
-        array(
-            ':chan' => $channel,
-            ':day' => $day,
-        )
-    );
+    $prepared->execute(array($host, $channel, $day));
 
     // Loop through each line,
-    foreach ($prepared as $row) {
+    foreach ($prepared as $result) {
         // Prepare some basic details for output:
-        $color = nick_color($row['nick']);
-        $time = utf8specialchars($row['t']);
-        $msg = utf8specialchars($row['message']);
-        $nick = utf8specialchars($row['nick']);
+        $color = nick_color($result->nick);
+        $time = utf8specialchars($result->t);
+        $msg = utf8specialchars($result->message);
+        $nick = utf8specialchars($result->nick);
         $type = false;
 
         // Now change the format of the line based upon the type:
-        switch ($row['type']) {
-        case 4: // PRIVMSG (A Regular Message)
+        switch ($result->type) {
+        case 'privmsg': // PRIVMSG (A Regular Message)
             echo "[$time] <span style=\"color:#{$color};\">"
                 . "&lt;{$nick}&gt;</span> {$msg}<br />\n";
             break;
-        case 5: // ACTION (emote)
+        case 'action': // ACTION (emote)
             echo "[$time] <span style=\"color:#{$color};\">"
                 . "*{$nick} {$msg}</span><br />\n";
             break;
-        case 1: // JOIN
+        case 'join': // JOIN
             echo "[$time] -> {$nick} joined the room.<br />\n";
             break;
-        case 2: // PART (leaves channel)
+        case 'part': // PART (leaves channel)
             echo "[$time] -> {$nick} left the room: {$msg}<br />\n";
             break;
+        /* Not currently logged 
         case 3: // QUIT (quits the server)
             echo "[$time] -> {$nick} left the server: {$msg}<br />\n";
             break;
@@ -272,6 +281,7 @@ function show_log(PDO $db)
         case 9: // TOPIC (changed the topic)
             $type = $type ? $type : 'TOPIC';
             echo "[$time] -> {$nick}: :{$type}: {$msg}<br />\n";
+        */
         }
     }
 
@@ -288,7 +298,7 @@ function show_log(PDO $db)
  *  colors that are close to each other?)
  *
  * @param String $user TODO username to operate on
- *
+ * @param string $table The name of the logging table 
  * @return string A CSS valid hex color string
  * @author Eli White <eli@eliw.com>
  **/
@@ -335,9 +345,7 @@ function template_header($title)
 {
     $css = template_css();
     echo <<<EOHTML
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Phergie LogViewer - {$title}</title>

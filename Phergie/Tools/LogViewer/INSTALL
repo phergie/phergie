@@ -3,7 +3,7 @@
 -----------------------------------------------------------------------------
 
 The purpose of this tool is to make an HTML display of the Logs made by the 
-Logging plugin for Phergie stored in SQLite database.
+Logging plugin for Phergie stored in a database.
 
 -----------------------------------------------------------------------------
 -- Installation
@@ -16,9 +16,18 @@ directory you want this to run under.
 -- Configuration
 -----------------------------------------------------------------------------
 
-The only configuration needed at this point in time is to edit the $database
-variable in the top of the index.php to point to the appropriate Phergie
-log file.
+The only configuration needed at this point in time is to edit the database
+variables in the top of the index.php to be the appropriate values.
+
+Specifically point to the Settings.php you are using, so that this script
+can read in your logging configuration.
+
+NOTE: This is very simple/raw code, it doesn't do as complicated as config
+parsing as Phergie itself does.  Be warned.
+
+NOTE: If you are installing this on a different machine than the one that
+your Phergie install is living on, simply comment out the rough 'reading of
+the configuration file', and manually set the connection variables.
 
 Stuff may get more complicated in the future ;)  But this is meant to be 
 simple for now.
