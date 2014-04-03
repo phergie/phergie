@@ -156,8 +156,12 @@ class Phergie_Plugin_Wunderground extends Phergie_Plugin_Abstract
         $response = $this->getPluginHandler()
             ->getPlugin('Http')
             ->get($urlString);
-        
-        $forecastData = $this->parseForecastInfo($response);
+       
+		try { 
+        	$forecastData = $this->parseForecastInfo($response);
+		} catch (Phergie_Exception $pe) {
+			$this->doNotice($this->event->getNick(), $pe->getMessage());
+		}	
         
         $string = $this->assembleForecastString($forecastData);
         
