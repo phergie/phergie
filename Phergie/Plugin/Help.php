@@ -67,7 +67,7 @@ class Phergie_Plugin_Help extends Phergie_Plugin_Abstract
     {
         $this->registry = array();
 
-        foreach ($this->plugins as $plugin) {
+        foreach ($this->plugins->getIterator(false) as $plugin) {
             $class = new ReflectionClass($plugin);
             $pluginName = strtolower($plugin->getName());
 
