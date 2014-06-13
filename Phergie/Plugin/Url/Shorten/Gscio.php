@@ -48,7 +48,7 @@ class Phergie_Plugin_Url_Shorten_Gscio extends Phergie_Plugin_Url_Shorten_Abstra
     protected function getRequestParams($url)
     {
         return array(
-            'uri' => 'http://gsc.io/u?rl=' . rawurlencode($url),
+            'uri' => 'http://gsc.io/u/?rl=' . rawurlencode($url),
             'callback' => array($this, 'onComplete')
         );
     }
